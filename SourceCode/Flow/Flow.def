@@ -1,0 +1,21 @@
+; Flow.def : Declares the module parameters for the DLL.
+
+LIBRARY "Flow"
+
+EXPORTS
+GetExtInfo @1
+
+APInit  @2
+APInitRun	@3
+APRun   @4
+APEndRun   @5
+APSetup	@6
+APInputVar @7
+APOutputVar @8
+
+;EMInit    @9
+;EMRun   @10
+;EMInitRun     @11
+;EMSetup  @12
+;EMInputVar  @13
+;EMOutputVar  @14

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="Envision">
+</Property><Property Name="Solution File" Value="C:\envision\src\Envision.sln">
+</Property><Property Name="Date" Value="Thursday, June 24, 2010">
+</Property><Property Name="Time" Value="13:49:59 PM">
+</Property></Properties><Event ErrorLevel="0" Project="MinTravelTime" Source="MinTravelTime\MinTravelTime.vcproj" Description="Converting project file 'C:\Envision\src\MinTravelTime\MinTravelTime.vcproj'.">
+</Event><Event ErrorLevel="1" Project="MinTravelTime" Source="MinTravelTime\MinTravelTime.vcproj" Description="VCWebServiceProxyGeneratorTool is no longer supported. The tool has been removed from your project settings.">
+</Event><Event ErrorLevel="1" Project="MinTravelTime" Source="MinTravelTime\MinTravelTime.vcproj" Description="VCConvertEngine could not convert attribute UseUnicodeResponseFiles = false under Tool VCCLCompilerTool.">
+</Event><Event ErrorLevel="0" Project="MinTravelTime" Source="MinTravelTime\MinTravelTime.vcproj" Description="Done converting to new project file 'C:\Envision\src\MinTravelTime\MinTravelTime.vcxproj'.">
+</Event><Event ErrorLevel="3" Project="MinTravelTime" Source="MinTravelTime\MinTravelTime.vcproj" Description="Converted">
+</Event></UpgradeLog>

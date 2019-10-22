@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+ NOTE:  ORDER IS IMPORTANT AND MUST MATCH ID's in the correspondign INI File!
+ 
+ evalType  : specifies how this evaluation is made.  One of the following (required)
+               HIGH - want to maximize the area within the range defined by the bounds (low values indicate scarcity)
+               LOW  - want to minimize the area within the range defined by the bounds (high values indicate scarcity)
+ 
+ method    : specifies how the calcualtion is made.  One of the following (required)
+               AREAWTMEAN - compute an area-weighted mean value
+               
+ lowerBound: the lower bound for this attribute, expressed in total area or percent area, depending on the valueof the "area" attribute (required)
+ upperBound: the upper bound for this attribute, expressed in total area or percent area, depending on the valueof the "area" attribute (required)
+ 
+ 
+ Autonomous Processes
+ 
+   
+   name (required)     name of model
+   id   (required)     id specified in ENVX file
+   col  (optional)     database field name for process to populate
+   value (optional)    computed value to populate into database
+   query (optional)    spatial query limiting scope of computation
+   constraints (optional)
+   useDelta  (optional) instead of iterating through map, iterate though delta array.   In this case
+                        usedelta must contain one or more field=value pairs, separated by semicolons, to look for in the delta array.
+                        If a query is specified, it also must be satisifed for the model to run on an IDU cell.
+-->
+
+<modeler>
+  <!-- first, global variables. The sum type indicates these areas calculate only once at the 
+       beginning of each timestep across the entire map, rather than updated for each IDU -->
+
+  <eval_model name='Songbird' type='raster' cell_size='120' value='baseScore+lfc+diversity+r_age' >
+    <var name='r_lulcb' type='raster' col='LULC_B' cell_size='120' />
+    <var name='r_age' type='raster' cell_size='120' />
+    
+    <lookup name='baseScore' source='r_lulcb' default='0'>
+        <map src='3' score='1' /> 
+        <map src='4' score='1' /> 
+        <map src='11' score='1' />
+        <map src='12' score='1' />
+        <map src='13' score='1' />
+        <map src='14' score='1' />
+        <map src='15' score='1' />
+        <map src='16' score='1' />
+        <map src='17' score='1' />
+        <map src='18' score='1' />
+    </lookup>
+
+    <var name='pct3'  type='pctArea' query='r_lulcb=3'  radius='1' />
+    <var name='pct4'  type='pctArea' query='r_lulcb=4'  radius='1' />
+    <var name='pct11' type='pctArea' query='r_lulcb=11' radius='1' />
+    <var name='pct12' type='pctArea' query='r_lulcb=12' radius='1' />
+
+    <var name='pctForest' source='r_lulcb' type='pctArea' query='LULC=forest' radius='4' />
+
+    <rule name='lfc' default='0'>
+      <condition query="pctForest &gt; 20 and pctForest &lt; 40" value='1' />
+      <condition query='pctForest &gt; 40 and pctForest &lt; 60' value='2' />
+      <condition query='pctForest &gt; 60' value='1' />
+    </rule>
+    <rule name='diversity' default='0'>
+      <!-- rule 4a -->
+      <condition query='r_lulcb=3 and pct4 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct9 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct10 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct11 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct12 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct13 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct14 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct15 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct16 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct17 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=3 and pct18 > 0' value='+[0.5]' />
+      <!-- rule 4b -->
+      <condition query='r_lulcb=4 and pct3 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct9 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct10 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct11 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct12 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct13 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct14 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct15 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct16 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct17 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=4 and pct18 > 0' value='+[0.5]' />
+      <!-- rule 4c -->
+      <condition query='r_lulcb=9 and pct4 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct3 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct10 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct11 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct12 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct13 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct14 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct15 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct16 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct17 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=9 and pct18 > 0' value='+[0.5]' />
+      <!-- rule 4d -->
+      <condition query='r_lulcb=10 and pct3 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct4 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct9 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct11 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct12 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct13 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct14 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct15 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct16 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct17 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=10 and pct18 > 0' value='+[0.5]' />
+      <!-- rule 4e -->
+      <condition query='r_lulcb=11 and pct3 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct4 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct9 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct10 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct12 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct13 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct14 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct15 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct16 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct17 > 0' value='+[0.5]' />
+      <condition query='r_lulcb=11 and pct18 > 0' value='+[0.5]' />
+      <!-- ETC...-->
+    </rule>        
+    
+  </eval_model>
+
+</modeler>
+
+
+
+
+
+
