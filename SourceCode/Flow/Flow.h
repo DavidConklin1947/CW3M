@@ -1699,7 +1699,7 @@ public:
    //int m_colHruAnnualSnow;
    int m_colHruDecadalSnow;
    int m_colStreamReachOutput;
-	//int m_colTempMax;  // not used
+   int m_colReachLOG_Q;
    int m_colReachArea;
 
    int m_colARIDITYNDX;
