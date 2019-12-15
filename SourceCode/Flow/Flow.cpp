@@ -2874,6 +2874,12 @@ bool FlowModel::Init( EnvContext *pContext )
                pGroup->m_pDataObj->SetLabel(2, "months in year");
                pGroup->m_pDataObj->SetLabel(3, "days in year");
                break;
+            case MOI_END_OF_YEAR:
+               pGroup->m_pDataObj->SetLabel(0, "Year index");
+               pGroup->m_pDataObj->SetLabel(1, "year");
+               pGroup->m_pDataObj->SetLabel(2, "month");
+               pGroup->m_pDataObj->SetLabel(3, "day");
+               break;
             case MOI_UNDEFINED:
             default: 
                pGroup->m_pDataObj->SetLabel(0, "time"); 
@@ -11133,6 +11139,8 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
             case 'M': pGroup->m_moInterval = pEnvContext->m_useWaterYears ? MOI_WATERYEAR_MONTHLY : MOI_MONTHLY; break;
             case 'd': // daily, DAILY
             case 'D': pGroup->m_moInterval = pEnvContext->m_useWaterYears ? MOI_WATERYEAR_DAILY : MOI_DAILY; break;
+            case 'e': // end of year, i.e. value on Dec 31
+            case 'E': pGroup->m_moInterval = MOI_END_OF_YEAR; break;
             default:
                {
                pGroup->m_moInterval = MOI_UNDEFINED;
@@ -13150,8 +13158,8 @@ float FlowModel::GetTotalReachLength( void )
    }
 
 
-bool FlowModel::CollectModelOutput(void )
-   {
+bool FlowModel::CollectModelOutput(void)
+{
    clock_t start = clock();
 
    // any outputs to collect?
@@ -13163,27 +13171,27 @@ bool FlowModel::CollectModelOutput(void )
    int moCountLink = 0;
    int moCountNode = 0;
    int moCountSubcatch = 0;
-   int moCountHruIdu =0;
+   int moCountHruIdu = 0;
    int moCountReservoir = 0;
 
-   for ( int j=0; j < (int) m_modelOutputGroupArray.GetSize(); j++ )
-      {
-      ModelOutputGroup *pGroup = m_modelOutputGroupArray[ j ];
+   for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
+   {
+      ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
 
-      for ( int i=0; i < (int) pGroup->GetSize(); i++ )
-         {
-         ModelOutput *pOutput = pGroup->GetAt( i );
+      for (int i = 0; i < (int)pGroup->GetSize(); i++)
+      {
+         ModelOutput* pOutput = pGroup->GetAt(i);
 
          // initialize ModelOutput
          pOutput->m_value = 0;
          pOutput->m_totalQueryArea = 0;
-   
-         if ( pOutput->m_inUse )
-            {
+
+         if (pOutput->m_inUse)
+         {
             moCount++;
 
-            switch( pOutput->m_modelDomain )
-               {
+            switch (pOutput->m_modelDomain)
+            {
                case MOD_IDU:        moCountIdu++;          break;
                case MOD_HRU:        moCountHru++;          break;
                case MOD_XHRU:   moCountXHRU++;     break;
@@ -13193,70 +13201,70 @@ bool FlowModel::CollectModelOutput(void )
                case MOD_SUBCATCH: moCountSubcatch++; break;
                case MOD_HRU_IDU:    moCountHruIdu++;       break;
                case MOD_RESERVOIR:   moCountReservoir++;    break;
-               }
             }
          }
       }
+   }
 
-   if ( moCount == 0 )
+   if (moCount == 0)
       return true;
 
    float totalIDUArea = 0;
-   
+
    // iterate through IDU's to collect output if any of the expressions are IDU-domain
-   if ( moCountIdu > 0 )
-      {
+   if (moCountIdu > 0)
+   {
       int colArea = m_pCatchmentLayer->GetFieldCol("AREA");
 
-      for ( MapLayer::Iterator idu=this->m_pCatchmentLayer->Begin(); idu < m_pCatchmentLayer->End(); idu++ )
-         {
-         if ( m_pQE_IDU )
-            m_pQE_IDU->SetCurrentRecord( idu );
+      for (MapLayer::Iterator idu = this->m_pCatchmentLayer->Begin(); idu < m_pCatchmentLayer->End(); idu++)
+      {
+         if (m_pQE_IDU)
+            m_pQE_IDU->SetCurrentRecord(idu);
 
-         m_pME_IDU->SetCurrentRecord( idu );
+         m_pME_IDU->SetCurrentRecord(idu);
 
          float area = 0;
-         m_pCatchmentLayer->GetData( idu, colArea, area );
+         m_pCatchmentLayer->GetData(idu, colArea, area);
          totalIDUArea += area;
 
-         for ( int j=0; j < (int) m_modelOutputGroupArray.GetSize(); j++ )
+         for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
+         {
+            ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
+
+            for (int i = 0; i < (int)pGroup->GetSize(); i++)
             {
-            ModelOutputGroup *pGroup = m_modelOutputGroupArray[ j ];
+               ModelOutput* pOutput = pGroup->GetAt(i);
 
-            for( int i=0; i < (int) pGroup->GetSize(); i++ )
-               {
-               ModelOutput *pOutput = pGroup->GetAt( i );
-         
-               if ( pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_IDU )
+               if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_IDU)
                   continue;
-         
-               bool passConstraints = true;
-         
-               if ( pOutput->m_pQuery )
-                  {
-                  bool result = false;
-                  bool ok = pOutput->m_pQuery->Run( idu, result );
-               
-                  if ( result == false )
-                     passConstraints = false;
-                  }
 
-               // did we pass the constraints?  If so, evaluate preferences
-               if ( passConstraints )
-                  {
+               bool passConstraints = true;
+
+               if (pOutput->m_pQuery)
+               {
+                  bool result = false;
+                  bool ok = pOutput->m_pQuery->Run(idu, result);
+
+                  if (result == false)
+                     passConstraints = false;
+               }
+
+            // did we pass the constraints?  If so, evaluate preferences
+               if (passConstraints)
+               {
                   pOutput->m_totalQueryArea += area;
                   float value = 0;
 
-                  if ( pOutput->m_pMapExpr != NULL )
-                     {
-                     bool ok = m_pME_IDU->EvaluateExpr( pOutput->m_pMapExpr, pOutput->m_pQuery ? true : false );
-                     if ( ok )
-                        value = (float) pOutput->m_pMapExpr->GetValue();
-                     }
+                  if (pOutput->m_pMapExpr != NULL)
+                  {
+                     bool ok = m_pME_IDU->EvaluateExpr(pOutput->m_pMapExpr, pOutput->m_pQuery ? true : false);
+                     if (ok)
+                        value = (float)pOutput->m_pMapExpr->GetValue();
+                  }
 
-                  // we have a value for this IDU, accumulate it based on the model type
-                  switch( pOutput->m_modelType )
-                     {
+               // we have a value for this IDU, accumulate it based on the model type
+                  switch (pOutput->m_modelType)
+                  {
                      case MOT_SUM:
                         pOutput->m_value += value;
                         break;
@@ -13270,42 +13278,42 @@ bool FlowModel::CollectModelOutput(void )
                         break;
                      //case MO_PCT_CONTRIB_AREA:
                      //   return true;
-                     }
-                  }  // end of: if( passed constraints)
-               }  // end of: for ( each model )
-            }  // end of: for ( each group )
-         }  // end of: for ( each IDU )
-      }  // end of: if ( moCountIdu > 0 )
+                  }
+               }  // end of: if( passed constraints)
+            }  // end of: for ( each model )
+         }  // end of: for ( each group )
+      }  // end of: for ( each IDU )
+   }  // end of: if ( moCountIdu > 0 )
 
-   // Next, do HRU-level variables
+// Next, do HRU-level variables
    float totalHRUarea = 0;
-   if ( moCountHru > 0 )
+   if (moCountHru > 0)
    {
       int colAREA_AC = m_pHRUlayer->GetFieldCol("AREA_AC");
       int colHRU_ID = m_pHRUlayer->GetFieldCol("HRU_ID");
 
       for (MapLayer::Iterator hru = m_pHRUlayer->Begin(); hru < m_pHRUlayer->End(); hru++)
       {
-         if ( m_pQE_HRU )
-            m_pQE_HRU->SetCurrentRecord( hru );
+         if (m_pQE_HRU)
+            m_pQE_HRU->SetCurrentRecord(hru);
 
-         m_pME_HRU->SetCurrentRecord( hru );
+         m_pME_HRU->SetCurrentRecord(hru);
 
          float area_ac = 0;
          m_pHRUlayer->GetData(hru, colAREA_AC, area_ac);
          float area = area_ac * M2_PER_ACRE;
          totalHRUarea += area;
 
-         HRU * pHRU = GetHRU((int)hru);
+         HRU* pHRU = GetHRU((int)hru);
 
          // update static HRU variables
-         HRU::m_mvDepthMelt         = pHRU->m_depthMelt*1000.0f;  // volume of water in snow (converted from m to mm)
-         HRU::m_mvDepthSWE_mm = pHRU->m_depthSWE*1000.0f;   // snow water equivalent, mm (includes both ice and meltwater in the snowpack)
+         HRU::m_mvDepthMelt = pHRU->m_depthMelt * 1000.0f;  // volume of water in snow (converted from m to mm)
+         HRU::m_mvDepthSWE_mm = pHRU->m_depthSWE * 1000.0f;   // snow water equivalent, mm (includes both ice and meltwater in the snowpack)
          double layer2_volumeWater = pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater;
          double layer3_volumeWater = pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater;
-         HRU::m_mvTopSoilH2O_mm = ((layer2_volumeWater + layer3_volumeWater) / pHRU->m_HRUeffArea_m2)*1000.f;
-         HRU::m_mvShallowGW_mm = (pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUeffArea_m2)*1000.f;
-         HRU::m_mvDeepGW_mm = (pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUeffArea_m2)*1000.f;
+         HRU::m_mvTopSoilH2O_mm = ((layer2_volumeWater + layer3_volumeWater) / pHRU->m_HRUeffArea_m2) * 1000.f;
+         HRU::m_mvShallowGW_mm = (pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.f;
+         HRU::m_mvDeepGW_mm = (pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.f;
          HRU::m_mvCurrentPrecip = pHRU->m_currentPrecip;
          HRU::m_mvRainThrufall_mm = pHRU->m_rainThrufall_mm;
          HRU::m_mvRainEvap_mm = pHRU->m_rainEvap_mm;
@@ -13322,62 +13330,62 @@ bool FlowModel::CollectModelOutput(void )
          HRU::m_mvQ2_mm = pHRU->m_Q2_mm;
          HRU::m_mvPercolation_mm = pHRU->m_percolation_mm;
          HRU::m_mvCurrentAirTemp = pHRU->m_currentAirTemp;
-         HRU::m_mvCurrentMinTemp    = pHRU->m_currentMinTemp;
+         HRU::m_mvCurrentMinTemp = pHRU->m_currentMinTemp;
          HRU::m_mvHRU_TO_AQ_mm = pHRU->m_aquifer_recharge_mm;
 
-         HRU::m_mvCurrentRecharge   = pHRU->m_currentGWRecharge;
-         HRU::m_mvCurrentGwFlowOut  = pHRU->m_currentGWFlowOut;
+         HRU::m_mvCurrentRecharge = pHRU->m_currentGWRecharge;
+         HRU::m_mvCurrentGwFlowOut = pHRU->m_currentGWFlowOut;
 
-         HRU::m_mvCurrentET         = pHRU->m_currentET;
-         HRU::m_mvCurrentMaxET      = pHRU->m_currentMaxET;
-         HRU::m_mvCurrentSediment   = pHRU->m_currentSediment;
-         HRU::m_mvCumP              = pHRU->m_precip_yr; 
-         HRU::m_mvCumRunoff         = pHRU->m_runoff_yr;
-         HRU::m_mvCumET             = pHRU->m_et_yr;
-         HRU::m_mvCumMaxET          = pHRU->m_maxET_yr;
-         HRU::m_mvCumRecharge       = pHRU->m_gwRecharge_yr;
-         HRU::m_mvCumGwFlowOut      = pHRU->m_gwFlowOut_yr;
-      
-         HRU::m_mvElws              = pHRU->m_elws;
+         HRU::m_mvCurrentET = pHRU->m_currentET;
+         HRU::m_mvCurrentMaxET = pHRU->m_currentMaxET;
+         HRU::m_mvCurrentSediment = pHRU->m_currentSediment;
+         HRU::m_mvCumP = pHRU->m_precip_yr;
+         HRU::m_mvCumRunoff = pHRU->m_runoff_yr;
+         HRU::m_mvCumET = pHRU->m_et_yr;
+         HRU::m_mvCumMaxET = pHRU->m_maxET_yr;
+         HRU::m_mvCumRecharge = pHRU->m_gwRecharge_yr;
+         HRU::m_mvCumGwFlowOut = pHRU->m_gwFlowOut_yr;
 
-         for ( int j=0; j < (int) m_modelOutputGroupArray.GetSize(); j++ )
+         HRU::m_mvElws = pHRU->m_elws;
+
+         for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
+         {
+            ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
+
+            for (int i = 0; i < (int)pGroup->GetSize(); i++)
             {
-            ModelOutputGroup *pGroup = m_modelOutputGroupArray[ j ];
+               ModelOutput* pOutput = pGroup->GetAt(i);
 
-            for( int i=0; i < (int) pGroup->GetSize(); i++ )
-               {
-               ModelOutput *pOutput = pGroup->GetAt( i );
-         
-               if ( pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_HRU )
+               if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_HRU)
                   continue;
-         
-               bool passConstraints = true;
-         
-               if ( pOutput->m_pQuery )
-                  {
-                  bool result = false;
-                  bool ok = pOutput->m_pQuery->Run( hru, result );
-               
-                  if ( result == false )
-                     passConstraints = false;
-                  }
 
-               // did we pass the constraints?  If so, evaluate preferences
-               if ( passConstraints )
-                  {
+               bool passConstraints = true;
+
+               if (pOutput->m_pQuery)
+               {
+                  bool result = false;
+                  bool ok = pOutput->m_pQuery->Run(hru, result);
+
+                  if (result == false)
+                     passConstraints = false;
+               }
+
+            // did we pass the constraints?  If so, evaluate preferences
+               if (passConstraints)
+               {
                   pOutput->m_totalQueryArea += area;
                   float value = 0;
 
-                  if ( pOutput->m_pMapExpr != NULL )
-                     {
-                     bool ok = m_pME_HRU->EvaluateExpr( pOutput->m_pMapExpr, pOutput->m_pQuery ? true : false );
-                     if ( ok )
-                        value = (float) pOutput->m_pMapExpr->GetValue();
-                     }
+                  if (pOutput->m_pMapExpr != NULL)
+                  {
+                     bool ok = m_pME_HRU->EvaluateExpr(pOutput->m_pMapExpr, pOutput->m_pQuery ? true : false);
+                     if (ok)
+                        value = (float)pOutput->m_pMapExpr->GetValue();
+                  }
 
-                  // we have a value for this IDU, accumulate it based on the model type
-                  switch( pOutput->m_modelType )
-                     {
+               // we have a value for this IDU, accumulate it based on the model type
+                  switch (pOutput->m_modelType)
+                  {
                      case MOT_SUM:
                         pOutput->m_value += value;
                         break;
@@ -13391,18 +13399,18 @@ bool FlowModel::CollectModelOutput(void )
                         break;
                      //case MO_PCT_CONTRIB_AREA:
                      //   return true;
-                     }
-                  }  // end of: if( passed constraints)
-               }  // end of: for ( each model )
-            }  // end of: for ( each output group )
-         }  // end of: for ( each HRU )
-      }  // end of: if ( moCountHru > 0 )
+                  }
+               }  // end of: if( passed constraints)
+            }  // end of: for ( each model )
+         }  // end of: for ( each output group )
+      }  // end of: for ( each HRU )
+   }  // end of: if ( moCountHru > 0 )
 
 
 // Next, do XHRU-level variables
-      float totalXHRUarea = 0;
+   float totalXHRUarea = 0;
 
-   // iterate through rows in HRU layer to collect output if any of the expressions are XHRU-domain
+// iterate through rows in HRU layer to collect output if any of the expressions are XHRU-domain
    if (moCountXHRU > 0)
    {
       //int colAREA = m_pHRUlayer->GetFieldCol("AREA");
@@ -13420,11 +13428,11 @@ bool FlowModel::CollectModelOutput(void )
 
          for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
          {
-            ModelOutputGroup *pGroup = m_modelOutputGroupArray[j];
+            ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
 
             for (int i = 0; i < (int)pGroup->GetSize(); i++)
             {
-               ModelOutput *pOutput = pGroup->GetAt(i);
+               ModelOutput* pOutput = pGroup->GetAt(i);
 
                if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_XHRU)
                   continue;
@@ -13456,19 +13464,19 @@ bool FlowModel::CollectModelOutput(void )
                   // we have a value for this HRUrow, accumulate it based on the model type
                   switch (pOutput->m_modelType)
                   {
-                  case MOT_SUM:
-                     pOutput->m_value += value;
-                     break;
+                     case MOT_SUM:
+                        pOutput->m_value += value;
+                        break;
 
-                  case MOT_AREAWTMEAN:
-                     pOutput->m_value += value * area;
-                     break;
+                     case MOT_AREAWTMEAN:
+                        pOutput->m_value += value * area;
+                        break;
 
-                  case MOT_PCTAREA:
-                     pOutput->m_value += area;
-                     break;
-                     //case MO_PCT_CONTRIB_AREA:
-                     //   return true;
+                     case MOT_PCTAREA:
+                        pOutput->m_value += area;
+                        break;
+                        //case MO_PCT_CONTRIB_AREA:
+                        //   return true;
                   }
                }  // end of: if( passed constraints)
             }  // end of: for ( each model )
@@ -13480,10 +13488,10 @@ bool FlowModel::CollectModelOutput(void )
      // Next, do Reach-level variables
    if (moCountReach > 0)
    {
-      for (int h = 0; h < (int) this->m_reachArray.GetSize(); h++)
+      for (int h = 0; h < (int)this->m_reachArray.GetSize(); h++)
       {
-         Reach *pReach = m_reachArray[h];
-         ReachSubnode *pNode = pReach->GetReachSubnode(0);
+         Reach* pReach = m_reachArray[h];
+         ReachSubnode* pNode = pReach->GetReachSubnode(0);
 
          if (m_pQE_Reach) m_pQE_Reach->SetCurrentRecord(pReach->m_polyIndex);
          m_pME_Reach->SetCurrentRecord(pReach->m_polyIndex);
@@ -13493,23 +13501,23 @@ bool FlowModel::CollectModelOutput(void )
          Reach::m_mvCurrentStreamTemp = pReach->m_currentStreamTemp;
          Reach::m_mvInstreamWaterRightUse = pReach->m_instreamWaterRightUse;
 
-         MapLayer *pStreamLayer = this->m_pStreamLayer;
+         MapLayer* pStreamLayer = this->m_pStreamLayer;
          int streamNdx = pReach->m_polyIndex;
          float q_div_wrq = 0.f; pStreamLayer->GetData(streamNdx, m_colStreamQ_DIV_WRQ, q_div_wrq);
          Reach::m_mvQ_DIV_WRQ = q_div_wrq;
          float instrm_req = 0.f; pStreamLayer->GetData(streamNdx, m_colStreamINSTRM_REQ, instrm_req);
          Reach::m_mvINSTRM_REQ = instrm_req;
 
-         Reservoir * pReservoir = pReach->GetReservoir();
+         Reservoir* pReservoir = pReach->GetReservoir();
          Reach::m_mvRESVR_H2O = pReservoir == NULL ? 0. : pReservoir->m_volume;
 
          for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
          {
-            ModelOutputGroup *pGroup = m_modelOutputGroupArray[j];
+            ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
 
             for (int i = 0; i < (int)pGroup->GetSize(); i++)
             {
-               ModelOutput *pOutput = pGroup->GetAt(i);
+               ModelOutput* pOutput = pGroup->GetAt(i);
 
                if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_REACH)
                   continue;
@@ -13541,12 +13549,12 @@ bool FlowModel::CollectModelOutput(void )
                   // we have a value for this Reach, accumulate it based on the model type
                   switch (pOutput->m_modelType)
                   {
-                  case MOT_SUM:
-                     pOutput->m_value += value;
-                     break;
+                     case MOT_SUM:
+                        pOutput->m_value += value;
+                        break;
 
-                     //case MO_PCT_CONTRIB_AREA:
-                     //   return true;
+                        //case MO_PCT_CONTRIB_AREA:
+                        //   return true;
                   }
                }  // end of: if( passed constraints)
             }  // end of: for ( each model )
@@ -13566,11 +13574,11 @@ bool FlowModel::CollectModelOutput(void )
 
          for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
          {
-            ModelOutputGroup *pGroup = m_modelOutputGroupArray[j];
+            ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
 
             for (int i = 0; i < (int)pGroup->GetSize(); i++)
             {
-               ModelOutput *pOutput = pGroup->GetAt(i);
+               ModelOutput* pOutput = pGroup->GetAt(i);
 
                if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_LINK)
                   continue;
@@ -13601,18 +13609,18 @@ bool FlowModel::CollectModelOutput(void )
                   // we have a value for this row, accumulate it based on the model type
                   switch (pOutput->m_modelType)
                   {
-                  case MOT_SUM:
-                     pOutput->m_value += value;
-                     break;
-                     /*
-                     case MOT_AREAWTMEAN:
-                     pOutput->m_value += value * area;
-                     break;
+                     case MOT_SUM:
+                        pOutput->m_value += value;
+                        break;
+                        /*
+                        case MOT_AREAWTMEAN:
+                        pOutput->m_value += value * area;
+                        break;
 
-                     case MOT_PCTAREA:
-                     pOutput->m_value += area;
-                     break;
-                     */
+                        case MOT_PCTAREA:
+                        pOutput->m_value += area;
+                        break;
+                        */
                   }
                }  // end of: if( passed constraints)
             }  // end of: for ( each model )
@@ -13632,11 +13640,11 @@ bool FlowModel::CollectModelOutput(void )
 
          for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
          {
-            ModelOutputGroup *pGroup = m_modelOutputGroupArray[j];
+            ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
 
             for (int i = 0; i < (int)pGroup->GetSize(); i++)
             {
-               ModelOutput *pOutput = pGroup->GetAt(i);
+               ModelOutput* pOutput = pGroup->GetAt(i);
 
                if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_NODE)
                   continue;
@@ -13667,18 +13675,18 @@ bool FlowModel::CollectModelOutput(void )
                   // we have a value for this row, accumulate it based on the model type
                   switch (pOutput->m_modelType)
                   {
-                  case MOT_SUM:
-                     pOutput->m_value += value;
-                     break;
-                     /*
-                     case MOT_AREAWTMEAN:
-                     pOutput->m_value += value * area;
-                     break;
+                     case MOT_SUM:
+                        pOutput->m_value += value;
+                        break;
+                        /*
+                        case MOT_AREAWTMEAN:
+                        pOutput->m_value += value * area;
+                        break;
 
-                     case MOT_PCTAREA:
-                     pOutput->m_value += area;
-                     break;
-                     */
+                        case MOT_PCTAREA:
+                        pOutput->m_value += area;
+                        break;
+                        */
                   }
                }  // end of: if( passed constraints)
             }  // end of: for ( each model )
@@ -13706,11 +13714,11 @@ bool FlowModel::CollectModelOutput(void )
 
          for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
          {
-            ModelOutputGroup *pGroup = m_modelOutputGroupArray[j];
+            ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
 
             for (int i = 0; i < (int)pGroup->GetSize(); i++)
             {
-               ModelOutput *pOutput = pGroup->GetAt(i);
+               ModelOutput* pOutput = pGroup->GetAt(i);
 
                if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_SUBCATCH)
                   continue;
@@ -13742,19 +13750,19 @@ bool FlowModel::CollectModelOutput(void )
                   // we have a value for this Subcatch, accumulate it based on the model type
                   switch (pOutput->m_modelType)
                   {
-                  case MOT_SUM:
-                     pOutput->m_value += value;
-                     break;
+                     case MOT_SUM:
+                        pOutput->m_value += value;
+                        break;
 
-                  case MOT_AREAWTMEAN:
-                     pOutput->m_value += value * area;
-                     break;
+                     case MOT_AREAWTMEAN:
+                        pOutput->m_value += value * area;
+                        break;
 
-                  case MOT_PCTAREA:
-                     pOutput->m_value += area;
-                     break;
-                     //case MO_PCT_CONTRIB_AREA:
-                     //   return true;
+                     case MOT_PCTAREA:
+                        pOutput->m_value += area;
+                        break;
+                        //case MO_PCT_CONTRIB_AREA:
+                        //   return true;
                   }
                }  // end of: if( passed constraints)
             }  // end of: for ( each model )
@@ -13763,60 +13771,60 @@ bool FlowModel::CollectModelOutput(void )
    }  // end of: if ( moCountSubcatch > 0 )
 
    // next look for Reservoirs
-   if ( moCountReservoir > 0 )
+   if (moCountReservoir > 0)
+   {
+      for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
       {
-      for ( int j=0; j < (int) m_modelOutputGroupArray.GetSize(); j++ )
-         {
-         ModelOutputGroup *pGroup = m_modelOutputGroupArray[ j ];
+         ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
 
-         for( int i=0; i < (int) pGroup->GetSize(); i++ )
-            {
-            ModelOutput *pOutput = pGroup->GetAt( i );
-         
-            if ( pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_RESERVOIR )
+         for (int i = 0; i < (int)pGroup->GetSize(); i++)
+         {
+            ModelOutput* pOutput = pGroup->GetAt(i);
+
+            if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_RESERVOIR)
                continue;
             else
-               {
-               for ( int h=0; h < (int) this->m_reservoirArray.GetSize(); h++ )
-                  {
-                  Reservoir *pRes = m_reservoirArray[ h ];
-                  if (pRes->m_id==pOutput->m_siteNumber)         
-                     pOutput->m_value = pRes->m_elevation;
-                  }
-               }  // end of: for ( each model )
-            }  // end of: for ( each output group )
-         }  // end of: for ( each reach )
-      }  // end of: if ( moCountReach > 0 )
-
-
-  // Last, look for IDU specific values that are only stored in the HRUs.
-  // This should be used if we have IDU specific queries AND model results that are not being written from HRUs to IDUs.
-  // This will occur anytime we do not write to the screen
-   totalIDUArea = 0;
-   if ( moCountHruIdu > 0 )
-      {
-      for ( int h=0; h < (int) this->m_hruArray.GetSize(); h++ )
-         {
-         HRU *pHRU = m_hruArray[ h ];
-         
-         for (int z=0;z<pHRU->m_polyIndexArray.GetSize();z++)
             {
-            int idu = pHRU->m_polyIndexArray[ z ];       // Here evaluate all the polygons - 
+               for (int h = 0; h < (int)this->m_reservoirArray.GetSize(); h++)
+               {
+                  Reservoir* pRes = m_reservoirArray[h];
+                  if (pRes->m_id == pOutput->m_siteNumber)
+                     pOutput->m_value = pRes->m_elevation;
+               }
+            }  // end of: for ( each model )
+         }  // end of: for ( each output group )
+      }  // end of: for ( each reach )
+   }  // end of: if ( moCountReach > 0 )
 
-            if ( m_pQE_IDU )
-               m_pQE_IDU->SetCurrentRecord( idu );
 
-            m_pME_IDU->SetCurrentRecord( idu );
+// Last, look for IDU specific values that are only stored in the HRUs.
+// This should be used if we have IDU specific queries AND model results that are not being written from HRUs to IDUs.
+// This will occur anytime we do not write to the screen
+   totalIDUArea = 0;
+   if (moCountHruIdu > 0)
+   {
+      for (int h = 0; h < (int)this->m_hruArray.GetSize(); h++)
+      {
+         HRU* pHRU = m_hruArray[h];
+
+         for (int z = 0; z < pHRU->m_polyIndexArray.GetSize(); z++)
+         {
+            int idu = pHRU->m_polyIndexArray[z];       // Here evaluate all the polygons - 
+
+            if (m_pQE_IDU)
+               m_pQE_IDU->SetCurrentRecord(idu);
+
+            m_pME_IDU->SetCurrentRecord(idu);
 
             float area = pHRU->m_HRUeffArea_m2;
             totalIDUArea += area;
 
             // update static HRU variables
-            HRU::m_mvDepthMelt         = pHRU->m_depthMelt*1000.0f;  // volume of water in snow (converted from m to mm)
-            HRU::m_mvDepthSWE_mm          = pHRU->m_depthSWE*1000.0f;   // snow water equivalent, mm (includes both ice and meltwater in the snowpack)
-            HRU::m_mvTopSoilH2O_mm = pHRU->m_HRUeffArea_m2 > 0 ? (((pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater + pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater) / pHRU->m_HRUeffArea_m2)*1000.f) : 0.;
-            HRU::m_mvShallowGW_mm = pHRU->m_HRUeffArea_m2 > 0 ? ((pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUeffArea_m2)*1000.f) : 0.;
-            HRU::m_mvDeepGW_mm = pHRU->m_HRUeffArea_m2 > 0 ? ((pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUeffArea_m2)*1000.f) : 0.;
+            HRU::m_mvDepthMelt = pHRU->m_depthMelt * 1000.0f;  // volume of water in snow (converted from m to mm)
+            HRU::m_mvDepthSWE_mm = pHRU->m_depthSWE * 1000.0f;   // snow water equivalent, mm (includes both ice and meltwater in the snowpack)
+            HRU::m_mvTopSoilH2O_mm = pHRU->m_HRUeffArea_m2 > 0 ? (((pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater + pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater) / pHRU->m_HRUeffArea_m2) * 1000.f) : 0.;
+            HRU::m_mvShallowGW_mm = pHRU->m_HRUeffArea_m2 > 0 ? ((pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.f) : 0.;
+            HRU::m_mvDeepGW_mm = pHRU->m_HRUeffArea_m2 > 0 ? ((pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.f) : 0.;
             HRU::m_mvCurrentPrecip = pHRU->m_currentPrecip;
             HRU::m_mvRainThrufall_mm = pHRU->m_rainThrufall_mm;
             HRU::m_mvRainEvap_mm = pHRU->m_rainEvap_mm;
@@ -13833,57 +13841,57 @@ bool FlowModel::CollectModelOutput(void )
             HRU::m_mvQ2_mm = pHRU->m_Q2_mm;
             HRU::m_mvPercolation_mm = pHRU->m_percolation_mm;
             HRU::m_mvCurrentAirTemp = pHRU->m_currentAirTemp;
-            HRU::m_mvCurrentMinTemp    = pHRU->m_currentMinTemp;
-            HRU::m_mvCurrentET         = pHRU->m_currentET;
-            HRU::m_mvCurrentMaxET      = pHRU->m_currentMaxET;
-            HRU::m_mvCurrentRecharge   = pHRU->m_currentGWRecharge;
-            HRU::m_mvCurrentGwFlowOut  = pHRU->m_currentGWFlowOut;
-            HRU::m_mvCumRunoff         = pHRU->m_runoff_yr;
-            HRU::m_mvCumP              = pHRU->m_precip_yr;
-            HRU::m_mvCumET             = pHRU->m_et_yr;
-            HRU::m_mvCumMaxET          = pHRU->m_maxET_yr;
-            HRU::m_mvCumRecharge       = pHRU->m_gwRecharge_yr;
-            HRU::m_mvCumGwFlowOut      = pHRU->m_gwFlowOut_yr;
+            HRU::m_mvCurrentMinTemp = pHRU->m_currentMinTemp;
+            HRU::m_mvCurrentET = pHRU->m_currentET;
+            HRU::m_mvCurrentMaxET = pHRU->m_currentMaxET;
+            HRU::m_mvCurrentRecharge = pHRU->m_currentGWRecharge;
+            HRU::m_mvCurrentGwFlowOut = pHRU->m_currentGWFlowOut;
+            HRU::m_mvCumRunoff = pHRU->m_runoff_yr;
+            HRU::m_mvCumP = pHRU->m_precip_yr;
+            HRU::m_mvCumET = pHRU->m_et_yr;
+            HRU::m_mvCumMaxET = pHRU->m_maxET_yr;
+            HRU::m_mvCumRecharge = pHRU->m_gwRecharge_yr;
+            HRU::m_mvCumGwFlowOut = pHRU->m_gwFlowOut_yr;
             HRU::m_mvHRU_TO_AQ_mm = pHRU->m_aquifer_recharge_mm;
 
-            for ( int j=0; j < (int) m_modelOutputGroupArray.GetSize(); j++ )
+            for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
+            {
+               ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
+
+               for (int i = 0; i < (int)pGroup->GetSize(); i++)
                {
-               ModelOutputGroup *pGroup = m_modelOutputGroupArray[ j ];
+                  ModelOutput* pOutput = pGroup->GetAt(i);
 
-               for( int i=0; i < (int) pGroup->GetSize(); i++ )
-                  {
-                  ModelOutput *pOutput = pGroup->GetAt( i );
-         
-                  if ( pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_HRU_IDU )
+                  if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_HRU_IDU)
                      continue;
-         
-                  bool passConstraints = true;
-         
-                  if ( pOutput->m_pQuery )
-                     {
-                     bool result = false;
-                     bool ok = pOutput->m_pQuery->Run( idu, result );
-               
-                     if ( result == false )
-                        passConstraints = false;
-                     }
 
-                  // did we pass the constraints?  If so, evaluate preferences
-                  if ( passConstraints )
-                     {
+                  bool passConstraints = true;
+
+                  if (pOutput->m_pQuery)
+                  {
+                     bool result = false;
+                     bool ok = pOutput->m_pQuery->Run(idu, result);
+
+                     if (result == false)
+                        passConstraints = false;
+                  }
+
+               // did we pass the constraints?  If so, evaluate preferences
+                  if (passConstraints)
+                  {
                      pOutput->m_totalQueryArea += area;
                      float value = 0;
 
-                     if ( pOutput->m_pMapExpr != NULL )
-                        {
-                        bool ok = m_pME_IDU->EvaluateExpr( pOutput->m_pMapExpr, pOutput->m_pQuery ? true : false );
-                        if ( ok )
-                           value = (float) pOutput->m_pMapExpr->GetValue();
-                        }
+                     if (pOutput->m_pMapExpr != NULL)
+                     {
+                        bool ok = m_pME_IDU->EvaluateExpr(pOutput->m_pMapExpr, pOutput->m_pQuery ? true : false);
+                        if (ok)
+                           value = (float)pOutput->m_pMapExpr->GetValue();
+                     }
 
-                     // we have a value for this IDU, accumulate it based on the model type
-                     switch( pOutput->m_modelType )
-                        {
+                  // we have a value for this IDU, accumulate it based on the model type
+                     switch (pOutput->m_modelType)
+                     {
                         case MOT_SUM:
                            pOutput->m_value += value;
                            break;
@@ -13897,53 +13905,53 @@ bool FlowModel::CollectModelOutput(void )
                            break;
                         //case MO_PCT_CONTRIB_AREA:
                         //   return true;
-                        }
-                     }   
-                  }  // end of: if( passed constraints)
-               }  // end of: for ( each model )
-            }  // end of: for ( each output group )
-         }  // end of: for ( each HRU )
-      }  // end of: if ( moCountHru > 0 )
+                     }
+                  }
+               }  // end of: if( passed constraints)
+            }  // end of: for ( each model )
+         }  // end of: for ( each output group )
+      }  // end of: for ( each HRU )
+   }  // end of: if ( moCountHru > 0 )
 
 
 
-      // do any fixup needed and add to data object for each group
-      int day_index = (int)m_timeInRun;
-      int year_index = m_flowContext.pEnvContext->yearOfRun;
-      int doy0 = (int)(m_timeInRun - m_yearStartTime);
-      bool last_day_of_year = doy0 == (m_flowContext.pEnvContext->daysInCurrentYear - 1);
-      bool last_day_of_run = false;
-      if (last_day_of_year) last_day_of_run = (m_flowContext.pEnvContext->currentYear + 1) >= m_flowContext.pEnvContext->endYear;
-      int moy0 = -1;
-      int days_left = doy0; while (days_left >= 0 && moy0 < 11) { moy0++; days_left -= GetDaysInMonth0(moy0, m_flowContext.pEnvContext->daysInCurrentYear); }
-      int dom0 = m_flowContext.pEnvContext->m_simDate.day - 1;
-      int month_index = 12 * m_flowContext.pEnvContext->yearOfRun + moy0;
-      bool last_day_of_month = days_left == -1;
-      bool last_day_of_water_year = false;
-      if (last_day_of_month && m_flowContext.pEnvContext->m_simDate.month == 9) last_day_of_water_year = true;
-      for ( int j=0; j < (int) m_modelOutputGroupArray.GetSize(); j++ )
-      {
-      ModelOutputGroup *pGroup = m_modelOutputGroupArray[ j ];
+   // do any fixup needed and add to data object for each group
+   int day_index = (int)m_timeInRun;
+   int year_index = m_flowContext.pEnvContext->yearOfRun;
+   int doy0 = (int)(m_timeInRun - m_yearStartTime);
+   bool last_day_of_year = doy0 == (m_flowContext.pEnvContext->daysInCurrentYear - 1);
+   bool last_day_of_run = false;
+   if (last_day_of_year) last_day_of_run = (m_flowContext.pEnvContext->currentYear + 1) >= m_flowContext.pEnvContext->endYear;
+   int moy0 = -1;
+   int days_left = doy0; while (days_left >= 0 && moy0 < 11) { moy0++; days_left -= GetDaysInMonth0(moy0, m_flowContext.pEnvContext->daysInCurrentYear); }
+   int dom0 = m_flowContext.pEnvContext->m_simDate.day - 1;
+   int month_index = 12 * m_flowContext.pEnvContext->yearOfRun + moy0;
+   bool last_day_of_month = days_left == -1;
+   bool last_day_of_water_year = false;
+   if (last_day_of_month && m_flowContext.pEnvContext->m_simDate.month == 9) last_day_of_water_year = true;
+   for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
+   {
+      ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
 
       // any outputs?
       int moCount = 0;
-      for( int i=0; i < (int) pGroup->GetSize(); i++ )
-         {
-         ModelOutput *pOutput = pGroup->GetAt( i );
-         if ( pOutput->m_inUse )
+      for (int i = 0; i < (int)pGroup->GetSize(); i++)
+      {
+         ModelOutput* pOutput = pGroup->GetAt(i);
+         if (pOutput->m_inUse)
             moCount++;
-         if (pOutput->m_pDataObjObs!=NULL) //add 1 column if we have observations for this point.
+         if (pOutput->m_pDataObjObs != NULL) //add 1 column if we have observations for this point.
             moCount++;
-         }
+      }
 
-      if ( moCount == 0 )
+      if (moCount == 0)
          continue;
-      
-      int cols_to_skip = pGroup->m_moInterval == MOI_UNDEFINED ? 1 : 4;      
-      float *outputArray = new float[ moCount + cols_to_skip ];
-      outputArray[ 0 ] = (float) m_timeInRun;
+
+      int cols_to_skip = pGroup->m_moInterval == MOI_UNDEFINED ? 1 : 4;
+      float* outputArray = new float[moCount + cols_to_skip];
+      outputArray[0] = (float)m_timeInRun;
       if (cols_to_skip == 4)
-         {
+      {
          outputArray[1] = (float)GetCurrentYear();
          outputArray[2] = (float)(moy0 + 1);
          outputArray[3] = (float)(((pGroup->m_moInterval == MOI_YEARLY || pGroup->m_moInterval == MOI_WATERYEAR_YEARLY) ? doy0 : dom0) + 1);
@@ -13995,20 +14003,24 @@ bool FlowModel::CollectModelOutput(void )
                   outputArray[2] -= 9;
                }
                break;
-
+            case MOI_END_OF_YEAR:
+               outputArray[2] = 12;
+               outputArray[3] = 31;
+               break;
+            default: ASSERT(0); break;
          } // end of switch(pGroup->m_moInterval)
-         }
+      } // end of if (cols_to_skip == 4)
 
       int index = cols_to_skip;
-  
-      for( int i=0; i < (int) pGroup->GetSize(); i++ )
-         {
-         ModelOutput *pOutput = pGroup->GetAt( i );
 
-         if ( pOutput->m_inUse )
+      for (int i = 0; i < (int)pGroup->GetSize(); i++)
+      {
+         ModelOutput* pOutput = pGroup->GetAt(i);
+
+         if (pOutput->m_inUse)
+         {
+            switch (pOutput->m_modelType)
             {
-            switch( pOutput->m_modelType )
-               {
                case MOT_SUM:
                   break;      // no fixup required
 
@@ -14018,32 +14030,32 @@ bool FlowModel::CollectModelOutput(void )
 
                case MOT_PCTAREA:
                   pOutput->m_value /= totalIDUArea;
-               }
-
-            outputArray[ index++ ] = pOutput->m_value;
             }
+
+            outputArray[index++] = pOutput->m_value;
+         }
          if (pOutput->m_pDataObjObs != NULL)
-            {
+         {
             ASSERT(m_flowContext.pEnvContext->currentYear >= 1900);
             int days_since_1900Jan1 = 0;
             int year = 1900;
             while (year < m_flowContext.pEnvContext->currentYear)
-               {
+            {
                days_since_1900Jan1 += m_flowContext.pEnvContext->m_maxDaysInYear > 365 ? GetDaysInCalendarYear(year) : m_flowContext.pEnvContext->m_maxDaysInYear;
                year++;
-               }
+            }
             days_since_1900Jan1 += m_flowContext.dayOfYear;
             int obs_day_number = pOutput->m_dayNumberOfObsFor1900Jan1 + days_since_1900Jan1;
             outputArray[index++] = pOutput->m_pDataObjObs->IGet((float)obs_day_number);
-            }
          }
+      }
 
-      pGroup->m_pDataObj->AppendRow( outputArray, moCount + cols_to_skip);
+      pGroup->m_pDataObj->AppendRow(outputArray, moCount + cols_to_skip);
 
       int rows_to_aggregate = 1;
       float col0_val = (float)m_timeInRun;
       switch (pGroup->m_moInterval)
-         {
+      {
          case MOI_YEARLY:
             if (last_day_of_year) rows_to_aggregate = m_flowContext.pEnvContext->daysInCurrentYear;
             col0_val = (float)year_index;
@@ -14073,38 +14085,45 @@ bool FlowModel::CollectModelOutput(void )
             col0_val = (float)month_index;
             break;
          default:
-            rows_to_aggregate = 1; 
-            col0_val = (float)m_timeInRun; 
+            rows_to_aggregate = 1;
+            col0_val = (float)m_timeInRun;
             break;
-         }
+      }
 
       if (rows_to_aggregate > 1)
-         { // Go back and aggregate the last n rows to make monthly and yearly outputs
+      { // Go back and aggregate the last n rows to make monthly and yearly outputs
          outputArray[0] = col0_val;
          for (int col_ndx = cols_to_skip; col_ndx < moCount + cols_to_skip; col_ndx++) outputArray[col_ndx] = 0.f;
          int rows_in_DataObj = pGroup->m_pDataObj->GetRowCount();
-         for (int row_ndx = rows_in_DataObj - 1; row_ndx > ((rows_in_DataObj - 1) - rows_to_aggregate); row_ndx--)
-            { 
-            for (int col_ndx = cols_to_skip; col_ndx < moCount + cols_to_skip; col_ndx++) outputArray[col_ndx] += pGroup->m_pDataObj->GetAsFloat(col_ndx, row_ndx);
-            pGroup->m_pDataObj->DeleteRow(row_ndx);
-            }
+         float* final_values = new float[moCount + cols_to_skip];
          for (int col_ndx = cols_to_skip; col_ndx < moCount + cols_to_skip; col_ndx++)
-            outputArray[col_ndx] /= rows_to_aggregate;
-         pGroup->m_pDataObj->AppendRow(outputArray, moCount + cols_to_skip);
-         }
+            final_values[col_ndx] = pGroup->m_pDataObj->GetAsFloat(col_ndx, rows_in_DataObj - 1);
 
-      delete [] outputArray;
-      } // end of for ( int j=0; j < (int) m_modelOutputGroupArray.GetSize(); j++ )
+         for (int row_ndx = rows_in_DataObj - 1; row_ndx > ((rows_in_DataObj - 1) - rows_to_aggregate); row_ndx--)
+         {
+            if (pGroup->m_moInterval != MOI_END_OF_YEAR) for (int col_ndx = cols_to_skip; col_ndx < moCount + cols_to_skip; col_ndx++)
+               outputArray[col_ndx] += pGroup->m_pDataObj->GetAsFloat(col_ndx, row_ndx);
+            pGroup->m_pDataObj->DeleteRow(row_ndx);
+         }
+         for (int col_ndx = cols_to_skip; col_ndx < moCount + cols_to_skip; col_ndx++)
+            if (pGroup->m_moInterval == MOI_END_OF_YEAR) outputArray[col_ndx] = final_values[col_ndx];
+            else outputArray[col_ndx] /= rows_to_aggregate;
+         pGroup->m_pDataObj->AppendRow(outputArray, moCount + cols_to_skip);
+         delete[] final_values;
+      }
+
+      delete[] outputArray;
+   } // end of for ( int j=0; j < (int) m_modelOutputGroupArray.GetSize(); j++ )
 
 
 
    clock_t finish = clock();
 
-   float duration = (float)(finish - start) / CLOCKS_PER_SEC;   
-   gpModel->m_outputDataRunTime += duration;   
+   float duration = (float)(finish - start) / CLOCKS_PER_SEC;
+   gpModel->m_outputDataRunTime += duration;
 
    return true;
-   } // end of CollectModelOutput()
+} // end of CollectModelOutput()
 
 int FlowModel::AddModelVar( LPCTSTR label, LPCTSTR varName, MTDOUBLE *value )
    {

@@ -126,8 +126,9 @@ enum MOINTERVAL {
    MOI_DAILY,
    MOI_WATERYEAR_YEARLY,
    MOI_WATERYEAR_MONTHLY,
-   MOI_WATERYEAR_DAILY
-   };
+   MOI_WATERYEAR_DAILY,
+   MOI_END_OF_YEAR
+};
 
 enum ZONE {      // Dam release zones.  
    ZONE_UNDEFINED        = -1,
