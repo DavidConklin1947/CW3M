@@ -516,13 +516,15 @@ protected:
    //--------------------------------------------
    //---------- GetWeather --------------------
    //--------------------------------------------
-   bool RunGetWeather(EnvContext *pContext);
+   bool InitRunGetWeather(EnvContext* pContext);
+   bool RunGetWeather(EnvContext* pContext);
 
    RandUniform m_WeatherRandomDraw;
    int m_GetWeatherInVarIndex, m_GetWeatherInVarCount;
-   int m_useStationaryClim;
+   bool m_useStationaryClim;
    int m_stationaryClimFirstYear;
    int m_stationaryClimLastYear;
+   float m_stationaryClimSeed;
 
 
    //--------------------------------------------

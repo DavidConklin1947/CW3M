@@ -246,13 +246,22 @@ WW2100AP::WW2100AP()
 , m_colPRCPJUNAVG(-1)
 , m_colPRCPJULAVG(-1)
 , m_colPRCPAUGAVG(-1)
+
+, m_GetWeatherInVarIndex(0)
+, m_GetWeatherInVarCount(0)
+, m_useStationaryClim(false)
+, m_stationaryClimFirstYear(0)
+, m_stationaryClimLastYear(0)
+, m_stationaryClimSeed(0.f)
+
    {
    // Add input vars.
 
    /* 1 */ m_GetWeatherInVarIndex = AddInputVar("UseStationaryClim", m_useStationaryClim, "0=Off, 1=On");
    /* 2 */ AddInputVar("StationaryClimFirstYear", m_stationaryClimFirstYear, "first year of interval");
    /* 3 */ AddInputVar("StationaryClimLastYear", m_stationaryClimLastYear, "last year of interval");
-   m_GetWeatherInVarCount = 3;
+   /* 4 */ AddInputVar("StationaryClimSeed", m_stationaryClimSeed, "random number seed");
+   m_GetWeatherInVarCount = 4;
 
    /* 1 */ m_DGVMvegtypeDataInVarIndex = AddInputVar("Climate Scenario", m_currentClimateScenarioIndex, "0=Ref, 1=LowClim, 2=HiClim, 3=Stationary, 4=Historical, 5=Baseline");
    m_DGVMvegtypeDataInVarCount = 1;
@@ -948,6 +957,7 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
       m_commonInitRunComplete = true;
       }
 
+   if (ID_GETWEATHER == pContext->id) rtnFlag = rtnFlag && InitRunGetWeather(pContext);
    if (m_useDGVMvegtypeData==pContext->id) rtnFlag = rtnFlag && InitRunDGVMvegtypeData( pContext );
    if ( m_idUX==pContext->id ) rtnFlag = rtnFlag && InitRunUX(pContext);
    if ( m_idLandTrans==pContext->id ) rtnFlag = rtnFlag && InitRunLandTrans( pContext );
@@ -964,14 +974,22 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
    } // end of WW2100AP::InitRun()
 
 
+bool WW2100AP::InitRunGetWeather(EnvContext* pContext)
+{
+   if (m_stationaryClimSeed != 0) m_WeatherRandomDraw.SetSeed(m_stationaryClimSeed);
+
+   return(true);
+} // end of WW2100AP::InitRunGetWeather()
+
+
 bool WW2100AP::RunGetWeather(EnvContext *pContext)
    {
    if (m_currentClimateScenarioIndex == STATIONARY_CLIM_SCENARIO_INDEX // For backward compatibility with WW2100
-      || m_useStationaryClim != 0)
+      || m_useStationaryClim)
       {
       if (m_currentClimateScenarioIndex == STATIONARY_CLIM_SCENARIO_INDEX)
          { // For backward compatability with WW2100
-         m_useStationaryClim = 1;
+         m_useStationaryClim = true;
          if (m_stationaryClimFirstYear == 0) m_stationaryClimFirstYear = 1950;
          if (m_stationaryClimLastYear == 0) m_stationaryClimLastYear = 2009;
          }
