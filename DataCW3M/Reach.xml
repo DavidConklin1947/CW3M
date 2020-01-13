@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+==================================================================================
+<field> attributes
+label:  readable field description
+  level:  menu level - 0 = first level menu, 1 = second level menu, 
+   displayFlag:  bin color flags - 
+               BCF_MIXED=0, BCF_RED_INCR=1, BCF_GREEN_INCR=2, BCF_BLUE_INCR=3, 
+               BCF_GRAY_INCR=4, BCF_SINGLECOLOR=5, BCF_TRANSPARENT=6,
+               BCF_BLUEGREEN=7, BCF_BLUERED=8, BCF_REDGREEN=9,
+               BCF_RED_DECR=10, BCF_GREEN_DECR=11, BCF_BLUE_DECR=12, 
+               BCF_GRAY_DECR=13
+       mfiType: 0=quantity bins, 1=category bins
+       binStyle: 0=linear, 1=equal counts
+       min:      minValue of the collection
+       max:      maxValue of the collection
+       results:  1=show map of this attribute in the PostRun results tab,0=don't show
+       decadalMaps:  0=don't include in decadal map out, > 0 = include in decadal outputs
+       useInSiteAttr:  1=include attribute in site attribute editor, 0=don't include
+       useInOutcomes:  1=include attribute in outcome editor, 0=don't include
+==================================================================================
+-->
+
+<fields layer="Streams">
+	<field col="Q"
+		label="Stream Discharge (m3/s)"
+		displayFlag="3"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="0"
+		 max="1e+004"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="0">
+		<description>
+			
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="1e-005" color="(227,227,250)" label="0" />
+			<attr minVal="1e-005" maxVal="0.0001" color="(215,215,248)" label="0.00001 to 0.0001" />
+			<attr minVal="0.0001" maxVal="0.001" color="(204,204,246)" label="0.0001  to 0.001" />
+			<attr minVal="0.001" maxVal="0.01" color="(192,192,244)" label="0.001   to 0.01" />
+			<attr minVal="0.01" maxVal="0.1" color="(181,181,242)" label="0.01    to 0.1" />
+			<attr minVal="0.1" maxVal="1" color="(170,170,240)" label="0.1     to 1" />
+			<attr minVal="1" maxVal="5" color="(158,158,238)" label="1       to 5" />
+			<attr minVal="5" maxVal="10" color="(147,147,236)" label="5       to 10" />
+			<attr minVal="10" maxVal="20" color="(136,136,234)" label="10      to 20" />
+			<attr minVal="20" maxVal="40" color="(124,124,232)" label="20      to 40" />
+			<attr minVal="40" maxVal="80" color="(113,113,230)" label="40      to 80" />
+			<attr minVal="80" maxVal="150" color="(102,102,228)" label="80      to 150" />
+			<attr minVal="150" maxVal="250" color="(90,90,226)" label="150     to 250" />
+			<attr minVal="250" maxVal="500" color="(79,79,224)" label="250     to 500" />
+			<attr minVal="500" maxVal="1e+003" color="(68,68,222)" label="500     to 1000" />
+			<attr minVal="1e+003" maxVal="2e+003" color="(56,56,220)" label="1000    to 2000" />
+			<attr minVal="2e+003" maxVal="4e+003" color="(45,45,218)" label="2000    to 4000" />
+			<attr minVal="4e+003" maxVal="8e+003" color="(34,34,216)" label="4000    to 8000" />
+			<attr minVal="8e+003" maxVal="2e+004" color="(22,22,214)" label="8000    to 20000" />
+			<attr minVal="2e+004" maxVal="1e+007" color="(11,11,212)" label=" &gt; 20000" />
+		</attributes>
+	</field>
+
+	<field col="NCONFLT"
+		label="N days reach in conflict"
+		displayFlag="0"
+		datatype="Long"
+		mfiType="0"
+		binStyle="0"
+		min="0"
+		 max="365"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			N times a reach cannot satisfy requested irrigation
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="-1" maxVal="0" color="(255,255,255)" label="0" />
+			<attr minVal="1" maxVal="2" color="(133,190,254)" label="1 to 2" />
+			<attr minVal="3" maxVal="10" color="(3,111,228)" label="3 to 10" />
+			<attr minVal="11" maxVal="40" color="(128,255,128)" label="11 to 40" />
+			<attr minVal="41" maxVal="80" color="(0,204,0)" label="41 to 80" />
+			<attr minVal="81" maxVal="130" color="(0,128,0)" label="81 to 130" />
+			<attr minVal="131" maxVal="190" color="(255,165,0)" label="131 to 190" />
+			<attr minVal="191" maxVal="365" color="(255,0,0)" label=" &gt; 191" />
+		</attributes>
+	</field>
+
+	<field col="HUC_4"
+		label="HUC_4"
+		displayFlag="0"
+		datatype="Long"
+		mfiType="1"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			USGS HUC4 Basins
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr value="0" color="(227,227,227)" label="" />
+			<attr value="104" color="(196,78,235)" label="McKenzie" />
+			<attr value="111" color="(137,156,215)" label="Middle Fork Willamette" />
+			<attr value="115" color="(78,235,196)" label="Coast Fork Willamette" />
+			<attr value="70" color="(19,58,176)" label="Lower Willamette" />
+			<attr value="79" color="(215,137,156)" label="Tualatin" />
+			<attr value="85" color="(156,215,137)" label="Clackamas" />
+			<attr value="86" color="(98,39,117)" label="Yamhill" />
+			<attr value="87" color="(39,117,98)" label="Molalla-Pudding" />
+			<attr value="90" color="(235,196,78)" label="Middle Wilamette" />
+			<attr value="92" color="(127,127,127)" label="North Santiam" />
+			<attr value="93" color="(117,98,39)" label="South Santiam" />
+			<attr value="98" color="(58,176,19)" label="Upper Willamette" />
+		</attributes>
+	</field>
+
+	<field col="HUC_5"
+		label="HUC_5"
+		displayFlag="0"
+		datatype="Long"
+		mfiType="1"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr value="330" color="(227,227,227)" label="Scappoose Creek" />
+			<attr value="335" color="(244,223,160)" label="Columbia River-Hayden Island" />
+			<attr value="342" color="(234,192,66)" label="Dairy Creek" />
+			<attr value="367" color="(223,160,227)" label="Columbia Slough-Willamette River" />
+			<attr value="377" color="(213,129,132)" label="Gales Creek" />
+			<attr value="383" color="(202,97,38)" label="Scoggins Creek" />
+			<attr value="390" color="(192,66,199)" label="Johnson Creek" />
+			<attr value="397" color="(181,34,104)" label="Rock Creek-Tualatin River" />
+			<attr value="398" color="(171,3,10)" label="Lower Tualatin River" />
+			<attr value="404" color="(160,227,171)" label="North Yamhill River" />
+			<attr value="409" color="(150,195,76)" label="Abernethy Creek" />
+			<attr value="411" color="(139,164,237)" label="Eagle Creek" />
+			<attr value="412" color="(129,132,143)" label="Lower Clackamas River" />
+			<attr value="419" color="(118,101,48)" label="Yamhill River" />
+			<attr value="424" color="(108,69,209)" label="Lower Molalla River" />
+			<attr value="430" color="(97,38,115)" label="Senecal Creek-Mill Creek" />
+			<attr value="437" color="(87,6,20)" label="Upper South Yamhill River" />
+			<attr value="438" color="(76,230,181)" label="Middle Clackamas River" />
+			<attr value="439" color="(66,199,87)" label="Rock Creek-Pudding River" />
+			<attr value="441" color="(55,167,248)" label="Butte Creek-Pudding River" />
+			<attr value="442" color="(45,136,153)" label="Oak Grove Fork Clackamas River" />
+			<attr value="444" color="(34,104,59)" label="Willamina Creek" />
+			<attr value="452" color="(24,73,220)" label="Lower South Yamhill River" />
+			<attr value="458" color="(13,41,125)" label="Upper Clackamas River" />
+			<attr value="459" color="(3,10,31)" label="Abiqua Creek-Pudding River" />
+			<attr value="460" color="(248,234,192)" label="Mill Creek-South Yamhill River" />
+			<attr value="461" color="(237,202,97)" label="Collawash River" />
+			<attr value="464" color="(227,171,3)" label="Upper Molalla River" />
+			<attr value="465" color="(216,139,164)" label="Salt Creek-South Yamhill River" />
+			<attr value="473" color="(206,108,69)" label="Willamette River-Chehalem Creek" />
+			<attr value="477" color="(195,76,230)" label="Rickreall Creek" />
+			<attr value="484" color="(185,45,136)" label="Mill Creek-Willamette River" />
+			<attr value="485" color="(174,13,41)" label="Little North Santiam River" />
+			<attr value="492" color="(164,237,202)" label="Lower North Santiam River" />
+			<attr value="494" color="(153,206,108)" label="Luckiamute River" />
+			<attr value="501" color="(143,174,13)" label="Detroit Reservoir-Blow Out Divide Creek" />
+			<attr value="502" color="(132,143,174)" label="North Fork Breitenbush River" />
+			<attr value="503" color="(122,111,80)" label="Middle North Santiam River" />
+			<attr value="509" color="(111,80,241)" label="Thomas Creek" />
+			<attr value="516" color="(101,48,146)" label="Quartzville Creek" />
+			<attr value="519" color="(90,17,52)" label="Crabtree Creek" />
+			<attr value="522" color="(80,241,213)" label="Oak Creek" />
+			<attr value="533" color="(69,209,118)" label="Middle Santiam River" />
+			<attr value="538" color="(59,178,24)" label="Upper North Santiam River" />
+			<attr value="542" color="(48,146,185)" label="South Santiam River-Hamilton Creek" />
+			<attr value="544" color="(38,115,90)" label="Calapooia River" />
+			<attr value="545" color="(27,83,251)" label="South Santiam River-Foster Reservoir" />
+			<attr value="558" color="(17,52,157)" label="Wiley Creek" />
+			<attr value="561" color="(6,20,62)" label="Upper McKenzie River" />
+			<attr value="564" color="(251,244,223)" label="Marys River" />
+			<attr value="574" color="(241,213,129)" label="South Santiam River" />
+			<attr value="577" color="(230,181,34)" label="Muddy Creek" />
+			<attr value="586" color="(220,150,195)" label="Mohawk River" />
+			<attr value="589" color="(209,118,101)" label="Blue River" />
+			<attr value="606" color="(199,87,6)" label="Long Tom River" />
+			<attr value="608" color="(188,55,167)" label="McKenzie River-Quartz Creek" />
+			<attr value="609" color="(178,24,73)" label="Lower McKenzie River" />
+			<attr value="613" color="(167,248,234)" label="South Fork McKenzie River" />
+			<attr value="614" color="(157,216,139)" label="Horse Creek" />
+			<attr value="624" color="(146,185,45)" label="Little Fall Creek" />
+			<attr value="625" color="(136,153,206)" label="Fall Creek" />
+			<attr value="630" color="(125,122,111)" label="Lower Middle Fork of Willamette River" />
+			<attr value="632" color="(115,90,17)" label="Lower Coast Fork Willamette River" />
+			<attr value="642" color="(104,59,178)" label="North Fork of Middle Fork Willamette River" />
+			<attr value="649" color="(94,27,83)" label="Upper Coast Fork Willamette River" />
+			<attr value="653" color="(83,251,244)" label="Middle Fork Willamette River-Lookout Point Reservoir" />
+			<attr value="660" color="(73,220,150)" label="Salmon Creek" />
+			<attr value="662" color="(62,188,55)" label="Row River" />
+			<attr value="668" color="(52,157,216)" label="Hills Creek" />
+			<attr value="669" color="(41,125,122)" label="Salt Creek-Willamette River" />
+			<attr value="673" color="(127,127,127)" label="Mosby Creek" />
+			<attr value="697" color="(20,62,188)" label="Upper Middle Fork Willamette River" />
+			<attr value="702" color="(10,31,94)" label="Hills Creek Reservoir" />
+		</attributes>
+	</field>
+
+  <field col="TEMP_MAX"
+		label="TEMP_MAX"
+		displayFlag="8"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+    <description>
+      Maximum Stream Temperature
+    </description>
+    <source>
+
+    </source>
+    <attributes>
+      <attr minVal="0" maxVal="2" color="(0,0,210)" label=" &lt;= 2" />
+      <attr minVal="2" maxVal="4" color="(22,22,214)" label="2 to 4" />
+      <attr minVal="4" maxVal="6" color="(45,45,218)" label="4 to 6" />
+      <attr minVal="6" maxVal="8" color="(68,68,222)" label="6 to 8" />
+      <attr minVal="8" maxVal="10" color="(90,90,226)" label="8 to 10" />
+      <attr minVal="10" maxVal="12" color="(113,113,230)" label="10 to 12" />
+      <attr minVal="12" maxVal="14" color="(136,136,234)" label="12 to 14" />
+      <attr minVal="14" maxVal="16" color="(158,158,238)" label="14 to 16" />
+      <attr minVal="16" maxVal="18" color="(181,181,242)" label="16 to 18" />
+      <attr minVal="18" maxVal="20" color="(227,227,227)" label="18 to 20" />
+      <attr minVal="20" maxVal="22" color="(246,204,204)" label="20 to 22" />
+      <attr minVal="22" maxVal="24" color="(242,181,181)" label="22 to 24" />
+      <attr minVal="24" maxVal="26" color="(238,158,158)" label="24 to 26" />
+      <attr minVal="26" maxVal="28" color="(234,136,136)" label="26 to 28" />
+      <attr minVal="28" maxVal="30" color="(230,113,113)" label="28 to 30" />
+      <attr minVal="30" maxVal="32" color="(226,90,90)" label="30 to 32" />
+      <attr minVal="32" maxVal="34" color="(222,68,68)" label="32 to 34" />
+      <attr minVal="34" maxVal="36" color="(218,45,45)" label="34 to 36" />
+      <attr minVal="36" maxVal="38" color="(214,22,22)" label="36 to 38" />
+      <attr minVal="38" maxVal="4e+007" color="(210,0,0)" label=" &gt; 38" />
+    </attributes>
+  </field>
+
+  <field col="INSTRM_WR"
+  label="INSTRM_WR"
+  displayFlag="1"
+  datatype="Long"
+  mfiType="1"
+  binStyle="0"
+  min="0"
+   max="1"
+  results="0"
+  decadalMaps="0"
+  useInSiteAttr="0"
+  useInOutcomes="0">
+    <description>
+      Instream water right
+    </description>
+    <source>
+
+    </source>
+    <attributes>
+      <attr minVal="0" maxVal="0" color="(0,0,255)" label="0" />
+      <attr minVal="1" maxVal="1" color="(255,0,0)" label="1" />
+    </attributes>
+  </field>
+
+  <field col="STRM_ORDER"
+  label="Stream Order"
+  displayFlag="0"
+  datatype="Long"
+  mfiType="1"
+  binStyle="0"
+  min="-1"
+ max="-1"
+  results="1"
+  decadalMaps="1"
+  useInSiteAttr="1"
+  useInOutcomes="1">
+    <description>
+
+    </description>
+    <source>
+
+    </source>
+    <attributes>
+      <attr value="1" color="(255,0,128)" label="order 1 (headwater)" />
+      <attr value="2" color="(0,255,64)" label="order 2" />
+      <attr value="3" color="(0,255,255)" label="order 3" />
+      <attr value="4" color="(255,0,255)" label="order 4" />
+      <attr value="5" color="(255,255,0)" label="order 5" />
+      <attr value="6" color="(255,255,255)" label="order 6" />
+      <attr value="7" color="(0,0,0)" label="order 7 (mainstem)" />
+    </attributes>
+  </field>
+
+</fields>

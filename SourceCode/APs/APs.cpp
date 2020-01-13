@@ -969,8 +969,14 @@ bool WW2100AP::RunGetWeather(EnvContext *pContext)
    if (m_currentClimateScenarioIndex == STATIONARY_CLIM_SCENARIO_INDEX // For backward compatibility with WW2100
       || m_useStationaryClim != 0)
       {
-      double rand_num = m_WeatherRandomDraw.GetUnif01();
-      pContext->weatherYear = (int)(rand_num * (m_stationaryClimLastYear - m_stationaryClimFirstYear) + m_stationaryClimFirstYear);
+      if (m_currentClimateScenarioIndex == STATIONARY_CLIM_SCENARIO_INDEX)
+         { // For backward compatability with WW2100
+         m_useStationaryClim = 1;
+         if (m_stationaryClimFirstYear == 0) m_stationaryClimFirstYear = 1950;
+         if (m_stationaryClimLastYear == 0) m_stationaryClimLastYear = 2009;
+         }
+      float rand_num = (float)m_WeatherRandomDraw.GetUnif01();
+      pContext->weatherYear = (int)(rand_num * (float)(m_stationaryClimLastYear - m_stationaryClimFirstYear) + (float)m_stationaryClimFirstYear);
 
       CString msg;
       msg.Format("RunGetWeather() rand_num = %f, m_stationaryClimFirstYear = %d, m_stationaryClimLastYear = %d, pContext->weatherYear = %d",

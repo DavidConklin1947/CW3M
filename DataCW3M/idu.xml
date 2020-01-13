@@ -1,0 +1,2696 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+==================================================================================
+<field> attributes
+label:  readable field description
+  level:  menu level - 0 = first level menu, 1 = second level menu, 
+   displayFlag:  bin color flags - 
+               BCF_MIXED=0, BCF_RED_INCR=1, BCF_GREEN_INCR=2, BCF_BLUE_INCR=3, 
+               BCF_GRAY_INCR=4, BCF_SINGLECOLOR=5, BCF_TRANSPARENT=6,
+               BCF_BLUEGREEN=7, BCF_BLUERED=8, BCF_REDGREEN=9,
+               BCF_RED_DECR=10, BCF_GREEN_DECR=11, BCF_BLUE_DECR=12, 
+               BCF_GRAY_DECR=13
+       mfiType: 0=quantity bins, 1=category bins
+       binStyle: 0=linear, 1=equal counts
+       min:      minValue of the collection
+       max:      maxValue of the collection
+       results:  1=show map of this attribute in the PostRun results tab,0=don't show
+       decadalMaps:  0=don't include in decadal map out, > 0 = include in decadal outputs
+       useInSiteAttr:  1=include attribute in site attribute editor, 0=don't include
+       useInOutcomes:  1=include attribute in outcome editor, 0=don't include
+==================================================================================
+-->
+
+<fields layer="IDU">
+	<submenu label='Land Use/Land Cover' >
+		<field col="LULC_A"
+			label="LULC (Coarse)"
+			displayFlag="0"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="1"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(255,128,255)" label="Unknown" />
+				<attr value="1" color="(221,0,0)" label="Developed" />
+				<attr value="2" color="(128,64,0)" label="Agriculture" />
+				<attr value="3" color="(255,128,255)" label="Other Vegetation" />
+				<attr value="4" color="(53,204,61)" label="Forest" />
+				<attr value="5" color="(0,0,0)" label="Barren" />
+				<attr value="6" color="(14,207,241)" label="Wetlands" />
+				<attr value="7" color="(0,0,255)" label="Water/Snow/Ice" />
+			</attributes>
+		</field>
+
+		<field col="LULC_B"
+			label="LULC (Medium)"
+			displayFlag="0"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="1"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="10" color="(255,128,255)" label="Unknown" />
+				<attr value="11" color="(221,20,20)" label="High-Intensity Developed" />
+				<attr value="12" color="(225,50,50)" label="Medium-Intensity Developed" />
+				<attr value="13" color="(255,100,100)" label="Low-Intensity Developed" />
+				<attr value="14" color="(221,255,40)" label="Developed Open Space" />
+				<attr value="15" color="(240,155,30)" label="Undifferentiated Developed" />
+				<attr value="21" color="(255,0,0)" label="Orchards vineyards and tree farms" />
+				<attr value="22" color="(127,15,0)" label="Grass seed" />
+				<attr value="23" color="(203,254,1)" label="Pasture" />
+				<attr value="24" color="(0,128,128)" label="Wheat" />
+				<attr value="25" color="(203,254,1)" label="Fallow" />
+				<attr value="26" color="(0,255,255)" label="Corn" />
+				<attr value="27" color="(0,85,170)" label="Clover" />
+				<attr value="28" color="(203,254,1)" label="Hay" />
+				<attr value="29" color="(255,128,0)" label="Other crops" />
+				<attr value="31" color="(225,200,50)" label="Grassland Herbaceous" />
+				<attr value="32" color="(200,180,50)" label="Shrub Scrub" />
+				<attr value="41" color="(175,200,0)" label="Hardwood Forest" />
+				<attr value="421" color="(150,225,150)" label="Conifer 0-20 yrs" />
+				<attr value="422" color="(61,225,61)" label="Conifer closed 21-40" />
+				<attr value="423" color="(21,225,21)" label="Conifer closed 41-60" />
+				<attr value="424" color="(0,225,0)" label="Conifer closed 61-80" />
+				<attr value="425" color="(0,175,0)" label="Conifer closed 81-120" />
+				<attr value="426" color="(0,135,0)" label="Conifer closed 120-200" />
+				<attr value="427" color="(0,100,0)" label="Conifer closed 200+" />
+				<attr value="43" color="(101,175,50)" label="Mixed Forest" />
+				<attr value="44" color="(200,150,125)" label="Savanna" />
+				<attr value="51" color="(175,175,175)" label="Barren" />
+				<attr value="61" color="(0,127,127)" label="Wetlands" />
+				<attr value="71" color="(0,0,127)" label="Open Water" />
+				<attr value="72" color="(255,255,255)" label="Snow and Ice" />
+			</attributes>
+		</field>
+
+		<field col="VEGCLASS"
+			label="VEGCLASS (LULC Fine)"
+			displayFlag="0"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="0"
+		 max="0"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="1" color="(0,255,255)" label="Corn" />
+				<attr value="4" color="(255,128,0)" label="Sorghum" />
+				<attr value="5" color="(255,128,0)" label="Soybeans" />
+				<attr value="12" color="(0,255,255)" label="Sweet Corn" />
+				<attr value="14" color="(255,128,0)" label="Mint" />
+				<attr value="21" color="(0,128,128)" label="Barley" />
+				<attr value="23" color="(0,128,128)" label="Spring Wheat" />
+				<attr value="24" color="(0,128,128)" label="Winter Wheat" />
+				<attr value="27" color="(255,128,0)" label="Rye" />
+				<attr value="28" color="(255,128,0)" label="Oats" />
+				<attr value="30" color="(255,128,0)" label="Speltz" />
+				<attr value="31" color="(255,128,0)" label="Canola" />
+				<attr value="32" color="(255,128,0)" label="Flaxseed" />
+				<attr value="35" color="(255,128,0)" label="Mustard" />
+				<attr value="36" color="(203,254,1)" label="Alfalfa" />
+				<attr value="37" color="(203,254,1)" label="Other Hay/Non Alfalfa" />
+				<attr value="39" color="(255,128,0)" label="Buckwheat" />
+				<attr value="41" color="(255,128,0)" label="Sugarbeets" />
+				<attr value="42" color="(255,128,0)" label="Dry Beans" />
+				<attr value="43" color="(255,128,0)" label="Potatoes" />
+				<attr value="44" color="(255,128,0)" label="Other Crops" />
+				<attr value="47" color="(255,128,0)" label="Misc Vegs and Fruits" />
+				<attr value="49" color="(255,128,0)" label="Onions" />
+				<attr value="52" color="(255,128,0)" label="Lentils" />
+				<attr value="53" color="(255,128,0)" label="Peas" />
+				<attr value="55" color="(255,128,0)" label="Caneberries" />
+				<attr value="56" color="(255,128,0)" label="Hops" />
+				<attr value="57" color="(255,128,0)" label="Herbs" />
+				<attr value="58" color="(0,85,170)" label="Clover/Wildflowers" />
+				<attr value="59" color="(127,15,0)" label="Sod/Grass Seed" />
+				<attr value="61" color="(255,128,255)" label="Fallow/Idle Cropland" />
+				<attr value="66" color="(255,0,0)" label="Cherries" />
+				<attr value="68" color="(255,0,0)" label="Apples" />
+				<attr value="69" color="(255,0,0)" label="Grapes" />
+				<attr value="70" color="(255,0,0)" label="Christmas Trees" />
+				<attr value="71" color="(255,0,0)" label="Other Tree Crops" />
+				<attr value="76" color="(255,0,0)" label="Walnuts" />
+				<attr value="77" color="(255,0,0)" label="Pears" />
+				<attr value="111" color="(0,0,127)" label="Open Water" />
+				<attr value="112" color="(255,255,255)" label="Perennial Ice/Snow" />
+				<attr value="121" color="(221,255,40)" label="Developed Open Space" />
+				<attr value="122" color="(181,120,120)" label="Developed Low-Intensity" />
+				<attr value="123" color="(221,90,90)" label="Developed Medium-Intensity" />
+				<attr value="124" color="(221,60,60)" label="Developed High-Intensity" />
+				<attr value="125" color="(221,100,100)" label="Developed Undifferentiated" />
+				<attr value="131" color="(175,175,175)" label="Barren" />
+				<attr value="141" color="(175,200,0)" label="Deciduous Forest" />
+				<attr value="142" color="(21,225,21)" label="Evergreen Forest" />
+				<attr value="143" color="(101,175,50)" label="Mixed Forest" />
+				<attr value="152" color="(200,180,50)" label="Shrubland" />
+				<attr value="171" color="(225,200,50)" label="Grassland Herbaceous" />
+				<attr value="181" color="(203,254,1)" label="Pasture/Hay" />
+				<attr value="190" color="(0,127,127)" label="Woody Wetlands" />
+				<attr value="195" color="(0,127,127)" label="Herbaceous Wetlands" />
+				<attr value="205" color="(255,128,0)" label="Triticale" />
+				<attr value="208" color="(255,128,0)" label="Garlic" />
+				<attr value="214" color="(255,128,0)" label="Broccoli" />
+				<attr value="216" color="(255,128,0)" label="Peppers" />
+				<attr value="219" color="(255,128,0)" label="Greens" />
+				<attr value="220" color="(255,0,0)" label="Plums" />
+				<attr value="221" color="(255,128,0)" label="Strawberries" />
+				<attr value="222" color="(255,128,0)" label="Squash" />
+				<attr value="224" color="(255,128,0)" label="Vetch" />
+				<attr value="229" color="(255,128,0)" label="Pumpkins" />
+				<attr value="242" color="(255,128,0)" label="Blueberries" />
+				<attr value="243" color="(255,128,0)" label="Cabbage" />
+				<attr value="244" color="(255,128,0)" label="Cauliflower" />
+				<attr value="246" color="(255,128,0)" label="Radishes" />
+				<attr value="247" color="(255,128,0)" label="Turnips" />
+				<attr value="2052000" color="(208,115,90)" label="2052000" />
+				<attr value="2056210" color="(199,87,6)" label="2056210" />
+				<attr value="2057210" color="(189,59,177)" label="2057210" />
+				<attr value="2506210" color="(133,146,183)" label="2506210" />
+				<attr value="2506310" color="(124,118,99)" label="2506310" />
+				<attr value="3005110" color="(77,233,189)" label="3005110 Oa:Po1" />
+				<attr value="3006110" color="(68,205,105)" label="3006110 Oa:So1" />
+				<attr value="3007110" color="(59,177,21)" label="3007110 Oa:Mo1" />
+				<attr value="3008110" color="(49,149,192)" label="3008110 Oa:Lo1" />
+				<attr value="3503300" color="(40,121,108)" label="3503300" />
+				<attr value="3507320" color="(31,93,24)" label="3507320" />
+				<attr value="3552000" color="(21,65,195)" label="3552000 DO:GF" />
+				<attr value="3602000" color="(12,37,111)" label="3602000" />
+				<attr value="4002000" color="(3,9,27)" label="4002000 DF:GF" />
+				<attr value="4002100" color="(3,9,27)" label="4002100 DF:GFp" />
+				<attr value="4004100" color="(248,236,199)" label="4004100 DF:Yo" />
+				<attr value="4005110" color="(239,208,115)" label="4005110 DF:Po1" />
+				<attr value="4005210" color="(230,180,31)" label="4005210 DF:Pm1 " />
+				<attr value="4005310" color="(220,152,202)" label="4005310 DF:Pc1" />
+				<attr value="4006110" color="(211,124,118)" label="4006110 DF:So1" />
+				<attr value="4006210" color="(202,96,34)" label="4006210 DF:Sm1" />
+				<attr value="4006220" color="(192,68,205)" label="4006220 DF:Sm2" />
+				<attr value="4006310" color="(183,40,121)" label="4006310" />
+				<attr value="4006320" color="(174,12,37)" label="4006320 DF:Sc2" />
+				<attr value="4007210" color="(164,239,208)" label="4007210 DF:Mm1" />
+				<attr value="4007220" color="(155,211,124)" label="4007220 DF:Mm2" />
+				<attr value="4007320" color="(146,183,40)" label="4007320 DF:Mc2" />
+				<attr value="4008110" color="(136,155,211)" label="4008110 DF:Lo1" />
+				<attr value="4008210" color="(127,127,127)" label="4008210 DF:Lm1" />
+				<attr value="4008220" color="(118,99,43)" label="4008220 DF:Lm2" />
+				<attr value="4008320" color="(108,71,214)" label="4008320 DF:Lc2" />
+				<attr value="4009110" color="(99,43,130)" label="4009110 DF:Go1" />
+				<attr value="4009210" color="(90,15,46)" label="4009210 DF:Gm1" />
+				<attr value="4009220" color="(80,242,217)" label="4009220 DF:Gm2" />
+				<attr value="4009320" color="(71,214,133)" label="4009320 DF:Gc2" />
+				<attr value="4107110" color="(62,186,49)" label="4107110" />
+				<attr value="4107220" color="(52,158,220)" label="4107220" />
+				<attr value="4108220" color="(43,130,136)" label="4108220" />
+				<attr value="4109220" color="(34,102,52)" label="4109220" />
+				<attr value="4207320" color="(24,74,223)" label="4207320 DG:Mc2" />
+				<attr value="4208320" color="(15,46,139)" label="4208320 DG:Lc2" />
+				<attr value="4209320" color="(6,18,55)" label="4209320 DG:Gc2" />
+				<attr value="4352000" color="(251,245,227)" label="4352000 SFDF:GF" />
+				<attr value="4354100" color="(242,217,143)" label="4354100 SFDF:Yo" />
+				<attr value="4355210" color="(233,189,59)" label="4355210 SFDF:Pm1" />
+				<attr value="4356220" color="(223,161,230)" label="4356220 SFDF:Sm2" />
+				<attr value="4356320" color="(214,133,146)" label="4356320 SFDF:Sc2" />
+				<attr value="4357220" color="(205,105,62)" label="4357220 SFDF:Mm2" />
+				<attr value="4357320" color="(195,77,233)" label="4357320 SFDF:Mc2" />
+				<attr value="4358220" color="(186,49,149)" label="4358220 SFDF:Lm2" />
+				<attr value="4358320" color="(177,21,65)" label="4358320 SFDF:Lc2" />
+				<attr value="4359220" color="(167,248,236)" label="4359220 SFDF:Gm2" />
+				<attr value="4359320" color="(158,220,152)" label="4359320 SFDF:Gc2" />
+				<attr value="4459320" color="(149,192,68)" label="4459320" />
+				<attr value="6052000" color="(139,164,239)" label="6052000 MH:GF" />
+				<attr value="6054100" color="(130,136,155)" label="6054100 MH:Yo" />
+				<attr value="6055210" color="(121,108,71)" label="6055210 MH:Po1" />
+				<attr value="6056220" color="(111,80,242)" label="6056220 MH:Sm2" />
+				<attr value="6056320" color="(102,52,158)" label="6056320" />
+				<attr value="6057110" color="(93,24,74)" label="6057110 MH:Mo1" />
+				<attr value="6057320" color="(83,251,245)" label="6057320" />
+				<attr value="6058320" color="(74,223,161)" label="6058320" />
+				<attr value="6059320" color="(65,195,77)" label="6059320" />
+				<attr value="7054100" color="(55,167,248)" label="7054100 LP:Yo" />
+				<attr value="7055210" color="(46,139,164)" label="7055210 LP:Pm1" />
+				<attr value="7056320" color="(37,111,80)" label="7056320" />
+				<attr value="7057320" color="(127,127,127)" label="7057320" />
+			</attributes>
+		</field>
+
+	</submenu>
+	<submenu label='Human System' >
+		<field col="PopDens"
+			label="Population Density"
+			displayFlag="1"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="0"
+		 max="0.001"
+			results="1"
+			decadalMaps="1"
+			useInSiteAttr="1"
+			useInOutcomes="0">
+			<description>
+				Population Density (#/m2)
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0" color="(255,255,255)" label="0" />
+				<attr minVal="0" maxVal="5e-005" color="(250,227,227)" label=" &gt; 0, &lt; 5e-005" />
+				<attr minVal="5e-005" maxVal="0.001" color="(248,215,215)" label="5e-005 to 0.001" />
+				<attr minVal="0.001" maxVal="0.0015" color="(246,204,204)" label="0.001 to 0.0015" />
+				<attr minVal="0.0015" maxVal="0.002" color="(244,192,192)" label="0.0015 to 0.002" />
+				<attr minVal="0.002" maxVal="0.0025" color="(242,181,181)" label="0.002 to 0.0025" />
+				<attr minVal="0.0025" maxVal="0.003" color="(240,170,170)" label="0.0025 to 0.003" />
+				<attr minVal="0.003" maxVal="0.0035" color="(238,158,158)" label="0.003 to 0.0035" />
+				<attr minVal="0.0035" maxVal="0.004" color="(236,147,147)" label="0.0035 to 0.004" />
+				<attr minVal="0.004" maxVal="0.0045" color="(234,136,136)" label="0.004 to 0.0045" />
+				<attr minVal="0.0045" maxVal="0.005" color="(232,124,124)" label="0.0045 to 0.005" />
+				<attr minVal="0.005" maxVal="0.0055" color="(230,113,113)" label="0.005 to 0.0055" />
+				<attr minVal="0.0055" maxVal="0.006" color="(228,102,102)" label="0.0055 to 0.006" />
+				<attr minVal="0.006" maxVal="0.0065" color="(226,90,90)" label="0.006 to 0.0065" />
+				<attr minVal="0.0065" maxVal="0.007" color="(224,79,79)" label="0.0065 to 0.007" />
+				<attr minVal="0.007" maxVal="0.0075" color="(222,68,68)" label="0.007 to 0.0075" />
+				<attr minVal="0.0075" maxVal="0.008" color="(220,56,56)" label="0.0075 to 0.008" />
+				<attr minVal="0.008" maxVal="0.0085" color="(218,45,45)" label="0.008 to 0.0085" />
+				<attr minVal="0.0085" maxVal="0.009" color="(216,34,34)" label="0.0085 to 0.009" />
+				<attr minVal="0.009" maxVal="0.0095" color="(214,22,22)" label="0.009 to 0.0095" />
+				<attr minVal="0.0095" maxVal="1e+004" color="(212,11,11)" label=" &gt; 0.0095" />
+			</attributes>
+		</field>
+
+		<field col="UGB"
+			label="Urban Growth Boundaries"
+			displayFlag="0"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="0"
+		 max="0"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="Outside UGB" />
+				<attr value="1" color="(244,224,163)" label="Adair Village" />
+				<attr value="2" color="(234,193,71)" label="Albany/Millersburg" />
+				<attr value="3" color="(224,163,234)" label="Amity" />
+				<attr value="4" color="(214,132,142)" label="Aumsville" />
+				<attr value="5" color="(203,101,50)" label="Aurora" />
+				<attr value="6" color="(193,71,214)" label="Banks" />
+				<attr value="7" color="(183,40,122)" label="Barlow" />
+				<attr value="8" color="(173,10,30)" label="Brownsville" />
+				<attr value="9" color="(163,234,193)" label="Canby" />
+				<attr value="10" color="(152,204,102)" label="Carlton" />
+				<attr value="11" color="(142,173,10)" label="Coburg" />
+				<attr value="12" color="(132,142,173)" label="Corvallis/Philomath" />
+				<attr value="13" color="(122,112,81)" label="Cottage Grove" />
+				<attr value="14" color="(112,81,244)" label="Creswell" />
+				<attr value="15" color="(101,51,153)" label="Dallas" />
+				<attr value="16" color="(91,20,61)" label="Dayton" />
+				<attr value="17" color="(81,244,224)" label="Detroit" />
+				<attr value="18" color="(71,214,132)" label="Donald" />
+				<attr value="19" color="(61,183,40)" label="Dundee" />
+				<attr value="20" color="(50,153,204)" label="Estacada" />
+				<attr value="21" color="(40,122,112)" label="unknownLaneCo" />
+				<attr value="22" color="(30,91,20)" label="Eugene/Springfield" />
+				<attr value="23" color="(20,61,183)" label="Falls City" />
+				<attr value="24" color="(10,30,91)" label="Forest Grove" />
+				<attr value="25" color="(0,0,0)" label="Gaston" />
+				<attr value="26" color="(244,224,163)" label="Gates" />
+				<attr value="27" color="(234,193,71)" label="Gervais" />
+				<attr value="28" color="(224,163,234)" label="Halsey" />
+				<attr value="29" color="(214,132,142)" label="Harrisburg" />
+				<attr value="30" color="(204,102,51)" label="Hubbard" />
+				<attr value="31" color="(193,71,214)" label="Idanha" />
+				<attr value="32" color="(183,40,122)" label="Independence" />
+				<attr value="33" color="(173,10,30)" label="Jefferson" />
+				<attr value="34" color="(163,234,193)" label="Junction City" />
+				<attr value="35" color="(153,204,102)" label="Lafayette" />
+				<attr value="36" color="(142,173,10)" label="Lebanon" />
+				<attr value="37" color="(132,142,173)" label="Lowell" />
+				<attr value="38" color="(122,112,81)" label="Lyons" />
+				<attr value="39" color="(112,81,244)" label="McMinnville" />
+				<attr value="40" color="(101,50,152)" label="Metro" />
+				<attr value="41" color="(91,20,61)" label="Mill City" />
+				<attr value="42" color="(81,244,224)" label="Millersburg" />
+				<attr value="43" color="(71,214,132)" label="Molalla" />
+				<attr value="44" color="(61,183,40)" label="Monmouth/Independence" />
+				<attr value="45" color="(50,153,204)" label="Monroe" />
+				<attr value="46" color="(40,122,112)" label="Mt. Angel" />
+				<attr value="47" color="(30,91,20)" label="Newberg" />
+				<attr value="48" color="(20,61,183)" label="North Plains" />
+				<attr value="49" color="(10,30,91)" label="Oakridge" />
+				<attr value="51" color="(244,224,163)" label="Salem/Keizer" />
+				<attr value="52" color="(224,163,234)" label="Sandy" />
+				<attr value="55" color="(204,102,51)" label="Scio" />
+				<attr value="56" color="(193,71,214)" label="Scotts Mills" />
+				<attr value="57" color="(183,40,122)" label="Sheridan" />
+				<attr value="58" color="(163,234,193)" label="Silverton" />
+				<attr value="59" color="(152,204,102)" label="Sodaville" />
+				<attr value="61" color="(132,142,173)" label="St. Paul" />
+				<attr value="62" color="(122,112,81)" label="Stayton/Sublimity" />
+				<attr value="64" color="(102,51,153)" label="Sweet Home" />
+				<attr value="65" color="(91,20,61)" label="Tangent" />
+				<attr value="66" color="(81,244,224)" label="Turner" />
+				<attr value="67" color="(61,183,40)" label="Veneta" />
+				<attr value="68" color="(51,153,204)" label="Waterloo" />
+				<attr value="69" color="(20,61,183)" label="Westfir" />
+				<attr value="70" color="(127,127,127)" label="Willamina" />
+				<attr value="71" color="(40,122,112)" label="Woodburn" />
+				<attr value="72" color="(10,30,91)" label="Yamhill" />
+			</attributes>
+		</field>
+
+		<field col="ZONED_USE"
+			label="Zoning"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="1"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label=" &lt; Null &gt; " />
+				<attr value="1" color="(227,227,227)" label="A/F" />
+				<attr value="2" color="(207,111,79)" label="Ag" />
+				<attr value="3" color="(159,223,159)" label="Airport" />
+				<attr value="4" color="(111,79,239)" label="For" />
+				<attr value="5" color="(63,191,63)" label="Min/Agg" />
+				<attr value="6" color="(15,47,143)" label="Nat Res" />
+				<attr value="7" color="(223,159,223)" label="Park" />
+				<attr value="8" color="(175,15,47)" label="Public" />
+				<attr value="9" color="(127,127,127)" label="RCom" />
+				<attr value="10" color="(79,239,207)" label="Refuge" />
+				<attr value="11" color="(31,95,31)" label="Reserve" />
+				<attr value="12" color="(239,207,111)" label="RInd" />
+				<attr value="13" color="(191,63,191)" label="RR" />
+				<attr value="14" color="(127,127,127)" label="RSC" />
+				<attr value="15" color="(95,31,95)" label="Urban" />
+				<attr value="16" color="(47,143,175)" label="Water" />
+				<attr value="100" color="(147,143,115)" label="URx-Low: 0-4 DU/ac" />
+				<attr value="101" color="(147,143,105)" label="URx-Med: 4-9 DU/ac" />
+				<attr value="102" color="(147,143,95)" label="URx-High: 9-16 DU/ac" />
+				<attr value="103" color="(147,143,75)" label="URx-VHigh: &gt; 16 DU/ac" />
+				<attr value="110" color="(147,143,55)" label="URx_CI: commercial/industrial" />
+				<attr value="120" color="(147,143,35)" label="URx_MU: mixed use" />
+				<attr value="130" color="(147,143,15)" label="RRx-Cl: Cluster Development" />
+			</attributes>
+		</field>
+
+		<field col="OWNER"
+			label="Ownership Type"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(127,127,127)" label="Private, non-industrial" />
+				<attr value="1" color="(63,63,63)" label="Private, industrial" />
+				<attr value="2" color="(101,51,153)" label="Federal" />
+				<attr value="3" color="(50,153,204)" label="State" />
+				<attr value="4" color="(227,227,227)" label="County" />
+				<attr value="5" color="(152,204,102)" label="Undefined" />
+			</attributes>
+		</field>
+
+		<field col="COUNTYID"
+			label="County"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="0">
+			<description>
+				Unique identifier for eac county
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="Unknown" />
+				<attr value="1" color="(207,111,79)" label="Benton" />
+				<attr value="2" color="(159,223,159)" label="Clackamas" />
+				<attr value="3" color="(15,47,143)" label="Douglas" />
+				<attr value="4" color="(223,159,223)" label="Lane" />
+				<attr value="5" color="(175,15,47)" label="Lincoln" />
+				<attr value="6" color="(127,127,127)" label="Linn" />
+				<attr value="7" color="(79,239,207)" label="Marion" />
+				<attr value="8" color="(31,95,31)" label="Multnomah" />
+				<attr value="9" color="(239,207,111)" label="Polk" />
+				<attr value="10" color="(191,63,191)" label="Tillamook" />
+				<attr value="11" color="(95,31,95)" label="Washington" />
+				<attr value="12" color="(47,143,175)" label="Yamhill" />
+				<attr value="-3" color="(111,79,239)" label="Columbia" />
+				<attr value="-4" color="(63,191,63)" label="Deschutes" />
+				<attr value="-13" color="(127,127,127)" label="Wasco" />
+			</attributes>
+		</field>
+
+		<field col="FRMRNT_LR"
+			label="Farm Rent ( Long Term)"
+			displayFlag="0"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="-50" maxVal="0" color="(227,250,227)" label=" &lt; 0" />
+				<attr minVal="0" maxVal="50" color="(189,243,189)" label="0 to 50" />
+				<attr minVal="50" maxVal="100" color="(151,236,151)" label="50 to 100" />
+				<attr minVal="100" maxVal="150" color="(113,230,113)" label="100 to 150" />
+				<attr minVal="150" maxVal="200" color="(75,223,75)" label="150 to 200" />
+				<attr minVal="200" maxVal="2.5e+008" color="(37,216,37)" label=" &gt; 200" />
+			</attributes>
+		</field>
+
+		<field col="FRMRNT_YR"
+			label="Farm Rent (Annual)"
+			displayFlag="2"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="-50" maxVal="0" color="(227,250,227)" label=" &lt; 0" />
+				<attr minVal="0" maxVal="50" color="(189,243,189)" label="0 to 50" />
+				<attr minVal="50" maxVal="100" color="(151,236,151)" label="50 to 100" />
+				<attr minVal="100" maxVal="150" color="(113,230,113)" label="100 to 150" />
+				<attr minVal="150" maxVal="200" color="(75,223,75)" label="150 to 200" />
+				<attr minVal="200" maxVal="2.5e+008" color="(37,216,37)" label=" &gt; 200" />
+			</attributes>
+		</field>
+
+		<field col="IRRH2OCOST"
+			label="IRRH2OCOST"
+			displayFlag="0"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+			</attributes>
+		</field>
+
+		<field col="DEV_VAL"
+			label="Developed Value ($ per acre)"
+			displayFlag="2"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="2.5e+005" color="(227,250,227)" label=" &lt; 250000" />
+				<attr minVal="2.5e+005" maxVal="5e+005" color="(212,247,212)" label="250000 to 500000" />
+				<attr minVal="5e+005" maxVal="7.5e+005" color="(198,245,198)" label="500000 to 750000" />
+				<attr minVal="7.5e+005" maxVal="1e+006" color="(184,242,184)" label="750000 to 1e+006" />
+				<attr minVal="1e+006" maxVal="1.25e+006" color="(170,240,170)" label="1e+006 to 1.25e+006" />
+				<attr minVal="1.25e+006" maxVal="1.5e+006" color="(156,237,156)" label="1.25e+006 to 1.5e+006" />
+				<attr minVal="1.5e+006" maxVal="1.75e+006" color="(141,235,141)" label="1.5e+006 to 1.75e+006" />
+				<attr minVal="1.75e+006" maxVal="2e+006" color="(127,232,127)" label="1.75e+006 to 2e+006" />
+				<attr minVal="2e+006" maxVal="2.25e+006" color="(113,230,113)" label="2e+006 to 2.25e+006" />
+				<attr minVal="2.25e+006" maxVal="2.5e+006" color="(99,227,99)" label="2.25e+006 to 2.5e+006" />
+				<attr minVal="2.5e+006" maxVal="2.75e+006" color="(85,225,85)" label="2.5e+006 to 2.75e+006" />
+				<attr minVal="2.75e+006" maxVal="3e+006" color="(70,222,70)" label="2.75e+006 to 3e+006" />
+				<attr minVal="3e+006" maxVal="3.25e+006" color="(56,220,56)" label="3e+006 to 3.25e+006" />
+				<attr minVal="3.25e+006" maxVal="3.5e+006" color="(42,217,42)" label="3.25e+006 to 3.5e+006" />
+				<attr minVal="3.5e+006" maxVal="3.75e+006" color="(28,215,28)" label="3.5e+006 to 3.75e+006" />
+				<attr minVal="3.75e+006" maxVal="4e+012" color="(14,212,14)" label=" &gt; 3.75e+006" />
+			</attributes>
+		</field>
+
+		<field col="AG_VAL"
+			label="AG_VAL ($ per acre)"
+			displayFlag="0"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="2.5e+005" color="(227,250,227)" label=" &lt; 250000" />
+				<attr minVal="2.5e+005" maxVal="5e+005" color="(212,247,212)" label="250000 to 500000" />
+				<attr minVal="5e+005" maxVal="7.5e+005" color="(198,245,198)" label="500000 to 750000" />
+				<attr minVal="7.5e+005" maxVal="1e+006" color="(184,242,184)" label="750000 to 1e+006" />
+				<attr minVal="1e+006" maxVal="1.25e+006" color="(170,240,170)" label="1e+006 to 1.25e+006" />
+				<attr minVal="1.25e+006" maxVal="1.5e+006" color="(156,237,156)" label="1.25e+006 to 1.5e+006" />
+				<attr minVal="1.5e+006" maxVal="1.75e+006" color="(141,235,141)" label="1.5e+006 to 1.75e+006" />
+				<attr minVal="1.75e+006" maxVal="2e+006" color="(127,232,127)" label="1.75e+006 to 2e+006" />
+				<attr minVal="2e+006" maxVal="2.25e+006" color="(113,230,113)" label="2e+006 to 2.25e+006" />
+				<attr minVal="2.25e+006" maxVal="2.5e+006" color="(99,227,99)" label="2.25e+006 to 2.5e+006" />
+				<attr minVal="2.5e+006" maxVal="2.75e+006" color="(85,225,85)" label="2.5e+006 to 2.75e+006" />
+				<attr minVal="2.75e+006" maxVal="3e+006" color="(70,222,70)" label="2.75e+006 to 3e+006" />
+				<attr minVal="3e+006" maxVal="3.25e+006" color="(56,220,56)" label="3e+006 to 3.25e+006" />
+				<attr minVal="3.25e+006" maxVal="3.5e+006" color="(42,217,42)" label="3.25e+006 to 3.5e+006" />
+				<attr minVal="3.5e+006" maxVal="3.75e+006" color="(28,215,28)" label="3.5e+006 to 3.75e+006" />
+				<attr minVal="3.75e+006" maxVal="4e+012" color="(14,212,14)" label=" &gt; 3.75e+006" />
+			</attributes>
+		</field>
+
+		<field col="FOR_VAL"
+			label="FOR_VAL ($ per acre)"
+			displayFlag="0"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="2.5e+005" color="(227,250,227)" label=" &lt; 250000" />
+				<attr minVal="2.5e+005" maxVal="5e+005" color="(212,247,212)" label="250000 to 500000" />
+				<attr minVal="5e+005" maxVal="7.5e+005" color="(198,245,198)" label="500000 to 750000" />
+				<attr minVal="7.5e+005" maxVal="1e+006" color="(184,242,184)" label="750000 to 1e+006" />
+				<attr minVal="1e+006" maxVal="1.25e+006" color="(170,240,170)" label="1e+006 to 1.25e+006" />
+				<attr minVal="1.25e+006" maxVal="1.5e+006" color="(156,237,156)" label="1.25e+006 to 1.5e+006" />
+				<attr minVal="1.5e+006" maxVal="1.75e+006" color="(141,235,141)" label="1.5e+006 to 1.75e+006" />
+				<attr minVal="1.75e+006" maxVal="2e+006" color="(127,232,127)" label="1.75e+006 to 2e+006" />
+				<attr minVal="2e+006" maxVal="2.25e+006" color="(113,230,113)" label="2e+006 to 2.25e+006" />
+				<attr minVal="2.25e+006" maxVal="2.5e+006" color="(99,227,99)" label="2.25e+006 to 2.5e+006" />
+				<attr minVal="2.5e+006" maxVal="2.75e+006" color="(85,225,85)" label="2.5e+006 to 2.75e+006" />
+				<attr minVal="2.75e+006" maxVal="3e+006" color="(70,222,70)" label="2.75e+006 to 3e+006" />
+				<attr minVal="3e+006" maxVal="3.25e+006" color="(56,220,56)" label="3e+006 to 3.25e+006" />
+				<attr minVal="3.25e+006" maxVal="3.5e+006" color="(42,217,42)" label="3.25e+006 to 3.5e+006" />
+				<attr minVal="3.5e+006" maxVal="3.75e+006" color="(28,215,28)" label="3.5e+006 to 3.75e+006" />
+				<attr minVal="3.75e+006" maxVal="4e+012" color="(14,212,14)" label=" &gt; 3.75e+006" />
+			</attributes>
+		</field>
+
+		<field col="PLANTDATE"
+			label="Planting Date"
+			displayFlag="2"
+			datatype="Long"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				EvapTrans
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="28" color="(227,250,227)" label=" &lt;= 28" />
+				<attr minVal="29" maxVal="56" color="(209,246,209)" label="29 to 56" />
+				<attr minVal="57" maxVal="84" color="(192,243,192)" label="57 to 84" />
+				<attr minVal="85" maxVal="112" color="(174,240,174)" label="85 to 112" />
+				<attr minVal="113" maxVal="140" color="(157,237,157)" label="113 to 140" />
+				<attr minVal="141" maxVal="168" color="(139,234,139)" label="141 to 168" />
+				<attr minVal="169" maxVal="196" color="(122,231,122)" label="169 to 196" />
+				<attr minVal="197" maxVal="224" color="(104,228,104)" label="197 to 224" />
+				<attr minVal="225" maxVal="252" color="(87,225,87)" label="225 to 252" />
+				<attr minVal="253" maxVal="280" color="(69,222,69)" label="253 to 280" />
+				<attr minVal="281" maxVal="308" color="(52,219,52)" label="281 to 308" />
+				<attr minVal="309" maxVal="336" color="(34,216,34)" label="309 to 336" />
+				<attr minVal="337" maxVal="364" color="(17,213,17)" label="337 to 364" />
+				<attr minVal="365" maxVal="999" color="(64,0,64)" label="Not Planted" />
+			</attributes>
+		</field>
+
+		<field col="HARVDATE"
+			label="Harvest Date"
+			displayFlag="1"
+			datatype="Long"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				EvapTrans
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="28" color="(250,227,227)" label="0 to 28" />
+				<attr minVal="29" maxVal="56" color="(246,209,209)" label="29 to 56" />
+				<attr minVal="57" maxVal="84" color="(243,192,192)" label="57 to 84" />
+				<attr minVal="85" maxVal="112" color="(240,174,174)" label="85 to 112" />
+				<attr minVal="113" maxVal="140" color="(237,157,157)" label="113 to 140" />
+				<attr minVal="141" maxVal="168" color="(234,139,139)" label="141 to 168" />
+				<attr minVal="169" maxVal="196" color="(231,122,122)" label="169 to 196" />
+				<attr minVal="197" maxVal="224" color="(228,104,104)" label="197 to 224" />
+				<attr minVal="225" maxVal="252" color="(225,87,87)" label="225 to 252" />
+				<attr minVal="253" maxVal="280" color="(222,69,69)" label="253 to 280" />
+				<attr minVal="281" maxVal="308" color="(219,52,52)" label="281 to 308" />
+				<attr minVal="309" maxVal="336" color="(216,34,34)" label="309 to 336" />
+				<attr minVal="337" maxVal="364" color="(213,17,17)" label="337 to 364" />
+				<attr minVal="-999" maxVal="-1" color="(64,0,64)" label="Not Harvested" />
+			</attributes>
+		</field>
+
+		<field col="METRO_RSRV"
+			label="Metro Reserves"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(127,127,127)" label="Not in any reserve" />
+				<attr value="1" color="(63,63,63)" label="Urban reserve" />
+				<attr value="2" color="(101,51,153)" label="Rural reserve" />
+			</attributes>
+		</field>
+
+	</submenu>
+	<submenu label='Hydro System' >
+		<field col="SWC"
+			label="SWC"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="0.05"
+		 max="0.45"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="1" color="(227,227,250)" label=" &lt; 1" />
+				<attr minVal="1" maxVal="2" color="(204,204,246)" label="1 to 2" />
+				<attr minVal="2" maxVal="3" color="(181,181,242)" label="2 to 3" />
+				<attr minVal="3" maxVal="4" color="(158,158,238)" label="3 to 4" />
+				<attr minVal="4" maxVal="5" color="(136,136,234)" label="4 to 5" />
+				<attr minVal="5" maxVal="6" color="(113,113,230)" label="5 to 6" />
+				<attr minVal="6" maxVal="7" color="(90,90,226)" label="6 to 7" />
+				<attr minVal="7" maxVal="8" color="(68,68,222)" label="7 to 8" />
+				<attr minVal="8" maxVal="9" color="(45,45,218)" label="8 to 9" />
+				<attr minVal="9" maxVal="1e+003" color="(22,22,214)" label=" &gt; 9" />
+			</attributes>
+		</field>
+
+		<field col="TEMP"
+			label="TEMP"
+			displayFlag="1"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="-50" maxVal="-3.33" color="(250,227,227)" label=" &lt; -3.33333" />
+				<attr minVal="-3.33" maxVal="-1.67" color="(247,211,211)" label="-3.33333 to -1.66667" />
+				<attr minVal="-1.67" maxVal="0" color="(244,196,196)" label="-1.66667 to 0" />
+				<attr minVal="0" maxVal="1.67" color="(242,181,181)" label="0 to 1.66667" />
+				<attr minVal="1.67" maxVal="3.33" color="(239,166,166)" label="1.66667 to 3.33333" />
+				<attr minVal="3.33" maxVal="5" color="(236,151,151)" label="3.33333 to 5" />
+				<attr minVal="5" maxVal="6.67" color="(234,136,136)" label="5 to 6.66667" />
+				<attr minVal="6.67" maxVal="8.33" color="(231,121,121)" label="6.66667 to 8.33333" />
+				<attr minVal="8.33" maxVal="10" color="(228,105,105)" label="8.33333 to 10" />
+				<attr minVal="10" maxVal="11.7" color="(226,90,90)" label="10 to 11.6667" />
+				<attr minVal="11.7" maxVal="13.3" color="(223,75,75)" label="11.6667 to 13.3333" />
+				<attr minVal="13.3" maxVal="15" color="(220,60,60)" label="13.3333 to 15" />
+				<attr minVal="15" maxVal="16.7" color="(218,45,45)" label="15 to 16.6667" />
+				<attr minVal="16.7" maxVal="18.3" color="(215,30,30)" label="16.6667 to 18.3333" />
+				<attr minVal="18.3" maxVal="60" color="(212,15,15)" label=" &gt; 18.3333" />
+			</attributes>
+		</field>
+
+		<field col="PRECIP"
+			label="PRECIP (mm/d)"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="2" color="(255,255,255)" label=" &lt; 2" />
+				<attr minVal="2" maxVal="4" color="(204,204,246)" label="2 to 4" />
+				<attr minVal="4" maxVal="6" color="(181,181,242)" label="4 to 6" />
+				<attr minVal="6" maxVal="8" color="(158,158,238)" label="6 to 8" />
+				<attr minVal="8" maxVal="10" color="(136,136,234)" label="8 to 10" />
+				<attr minVal="10" maxVal="12" color="(113,113,230)" label="10 to 12" />
+				<attr minVal="12" maxVal="14" color="(90,90,226)" label="12 to 14" />
+				<attr minVal="14" maxVal="16" color="(68,68,222)" label="14 to 16" />
+				<attr minVal="16" maxVal="18" color="(45,45,218)" label="16 to 18" />
+				<attr minVal="18" maxVal="5e+003" color="(22,22,214)" label=" &gt; 18" />
+			</attributes>
+		</field>
+
+		<field col="SNOW_APR10"
+			label="Snow - April 1 (20yr Moving Avg - mm SWE)"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="50" color="(255,255,255)" label=" &lt; 50" />
+				<attr minVal="50" maxVal="100" color="(204,204,246)" label="50 to 100" />
+				<attr minVal="100" maxVal="150" color="(181,181,242)" label="100 to 150" />
+				<attr minVal="150" maxVal="200" color="(158,158,238)" label="150 to 200" />
+				<attr minVal="200" maxVal="250" color="(136,136,234)" label="200 to 250" />
+				<attr minVal="250" maxVal="300" color="(113,113,230)" label="250 to 300" />
+				<attr minVal="300" maxVal="350" color="(90,90,226)" label="300 to 350" />
+				<attr minVal="350" maxVal="400" color="(68,68,222)" label="350 to 400" />
+				<attr minVal="400" maxVal="450" color="(45,45,218)" label="400 to 450" />
+				<attr minVal="450" maxVal="5e+003" color="(22,22,214)" label=" &gt; 450" />
+			</attributes>
+		</field>
+
+		<field col="ET_DAY"
+			label="Daily Avg Actual ET (mm/day)"
+			displayFlag="8"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0.3" color="(0,0,210)" label=" &lt; 0.3" />
+				<attr minVal="0.3" maxVal="0.6" color="(22,22,214)" label="0.3 to 0.6" />
+				<attr minVal="0.6" maxVal="0.9" color="(45,45,218)" label="0.6 to 0.9" />
+				<attr minVal="0.9" maxVal="1.2" color="(68,68,222)" label="0.9 to 1.2" />
+				<attr minVal="1.2" maxVal="1.5" color="(90,90,226)" label="1.2 to 1.5" />
+				<attr minVal="1.5" maxVal="1.8" color="(113,113,230)" label="1.5 to 1.8" />
+				<attr minVal="1.8" maxVal="2.1" color="(136,136,234)" label="1.8 to 2.1" />
+				<attr minVal="2.1" maxVal="2.4" color="(158,158,238)" label="2.1 to 2.4" />
+				<attr minVal="2.4" maxVal="2.7" color="(181,181,242)" label="2.4 to 2.7" />
+				<attr minVal="2.7" maxVal="3" color="(227,227,227)" label="2.7 to 3" />
+				<attr minVal="3" maxVal="3.3" color="(246,204,204)" label="3 to 3.3" />
+				<attr minVal="3.3" maxVal="3.6" color="(242,181,181)" label="3.3 to 3.6" />
+				<attr minVal="3.6" maxVal="3.9" color="(238,158,158)" label="3.6 to 3.9" />
+				<attr minVal="3.9" maxVal="4.2" color="(234,136,136)" label="3.9 to 4.2" />
+				<attr minVal="4.2" maxVal="4.5" color="(230,113,113)" label="4.2 to 4.5" />
+				<attr minVal="4.5" maxVal="4.8" color="(226,90,90)" label="4.5 to 4.8" />
+				<attr minVal="4.8" maxVal="5.1" color="(222,68,68)" label="4.8 to 5.1" />
+				<attr minVal="5.1" maxVal="5.4" color="(218,45,45)" label="5.1 to 5.4" />
+				<attr minVal="5.4" maxVal="5.7" color="(214,22,22)" label="5.4 to 5.7" />
+				<attr minVal="5.7" maxVal="6e+006" color="(210,0,0)" label=" &gt; 5.7" />
+			</attributes>
+		</field>
+
+		<field col="MAX_ET_DAY"
+			label="Daily Avg Maximum ET (mm/day)"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0.5" color="(227,227,250)" label=" &lt; 0.5" />
+				<attr minVal="0.5" maxVal="1" color="(215,215,248)" label="0.5 to 1" />
+				<attr minVal="1" maxVal="1.5" color="(204,204,246)" label="1 to 1.5" />
+				<attr minVal="1.5" maxVal="2" color="(192,192,244)" label="1.5 to 2" />
+				<attr minVal="2" maxVal="2.5" color="(181,181,242)" label="2 to 2.5" />
+				<attr minVal="2.5" maxVal="3" color="(170,170,240)" label="2.5 to 3" />
+				<attr minVal="3" maxVal="3.5" color="(158,158,238)" label="3 to 3.5" />
+				<attr minVal="3.5" maxVal="4" color="(147,147,236)" label="3.5 to 4" />
+				<attr minVal="4" maxVal="4.5" color="(136,136,234)" label="4 to 4.5" />
+				<attr minVal="4.5" maxVal="5" color="(124,124,232)" label="4.5 to 5" />
+				<attr minVal="5" maxVal="5.5" color="(113,113,230)" label="5 to 5.5" />
+				<attr minVal="5.5" maxVal="6" color="(102,102,228)" label="5.5 to 6" />
+				<attr minVal="6" maxVal="6.5" color="(90,90,226)" label="6 to 6.5" />
+				<attr minVal="6.5" maxVal="7" color="(79,79,224)" label="6.5 to 7" />
+				<attr minVal="7" maxVal="7.5" color="(68,68,222)" label="7 to 7.5" />
+				<attr minVal="7.5" maxVal="8" color="(56,56,220)" label="7.5 to 8" />
+				<attr minVal="8" maxVal="8.5" color="(45,45,218)" label="8 to 8.5" />
+				<attr minVal="8.5" maxVal="9" color="(34,34,216)" label="8.5 to 9" />
+				<attr minVal="9" maxVal="9.5" color="(22,22,214)" label="9 to 9.5" />
+				<attr minVal="9.5" maxVal="1e+007" color="(11,11,212)" label=" &gt; 9.5" />
+			</attributes>
+		</field>
+
+		<field col="SnowIndex"
+			label="SnowIndex"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0.1" color="(227,227,250)" label=" &lt; 0.1" />
+				<attr minVal="0.1" maxVal="0.2" color="(215,215,248)" label="0.1 to 0.2" />
+				<attr minVal="0.2" maxVal="0.3" color="(204,204,246)" label="0.2 to 0.3" />
+				<attr minVal="0.3" maxVal="0.4" color="(192,192,244)" label="0.3 to 0.4" />
+				<attr minVal="0.4" maxVal="0.5" color="(181,181,242)" label="0.4 to 0.5" />
+				<attr minVal="0.5" maxVal="0.6" color="(170,170,240)" label="0.5 to 0.6" />
+				<attr minVal="0.6" maxVal="0.7" color="(158,158,238)" label="0.6 to 0.7" />
+				<attr minVal="0.7" maxVal="0.8" color="(147,147,236)" label="0.7 to 0.8" />
+				<attr minVal="0.8" maxVal="0.9" color="(136,136,234)" label="0.8 to 0.9" />
+				<attr minVal="0.9" maxVal="1" color="(124,124,232)" label="0.9 to 1" />
+				<attr minVal="1" maxVal="1.1" color="(113,113,230)" label="1 to 1.1" />
+				<attr minVal="1.1" maxVal="1.2" color="(102,102,228)" label="1.1 to 1.2" />
+				<attr minVal="1.2" maxVal="1.3" color="(90,90,226)" label="1.2 to 1.3" />
+				<attr minVal="1.3" maxVal="1.4" color="(79,79,224)" label="1.3 to 1.4" />
+				<attr minVal="1.4" maxVal="1.5" color="(68,68,222)" label="1.4 to 1.5" />
+				<attr minVal="1.5" maxVal="1.6" color="(56,56,220)" label="1.5 to 1.6" />
+				<attr minVal="1.6" maxVal="1.7" color="(45,45,218)" label="1.6 to 1.7" />
+				<attr minVal="1.7" maxVal="1.8" color="(34,34,216)" label="1.7 to 1.8" />
+				<attr minVal="1.8" maxVal="1.9" color="(22,22,214)" label="1.8 to 1.9" />
+				<attr minVal="1.9" maxVal="20" color="(11,11,212)" label=" &gt; 1.9" />
+			</attributes>
+		</field>
+
+		<field col="SnowRefere"
+			label="5 year Snow Reference"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="250" color="(227,227,250)" label=" &lt; 250" />
+				<attr minVal="250" maxVal="500" color="(215,215,248)" label="250 to 500" />
+				<attr minVal="500" maxVal="750" color="(204,204,246)" label="500 to 750" />
+				<attr minVal="750" maxVal="1e+003" color="(192,192,244)" label="750 to 1000" />
+				<attr minVal="1e+003" maxVal="1.25e+003" color="(181,181,242)" label="1000 to 1250" />
+				<attr minVal="1.25e+003" maxVal="1.5e+003" color="(170,170,240)" label="1250 to 1500" />
+				<attr minVal="1.5e+003" maxVal="1.75e+003" color="(158,158,238)" label="1500 to 1750" />
+				<attr minVal="1.75e+003" maxVal="2e+003" color="(147,147,236)" label="1750 to 2000" />
+				<attr minVal="2e+003" maxVal="2.25e+003" color="(136,136,234)" label="2000 to 2250" />
+				<attr minVal="2.25e+003" maxVal="2.5e+003" color="(124,124,232)" label="2250 to 2500" />
+				<attr minVal="2.5e+003" maxVal="2.75e+003" color="(113,113,230)" label="2500 to 2750" />
+				<attr minVal="2.75e+003" maxVal="3e+003" color="(102,102,228)" label="2750 to 3000" />
+				<attr minVal="3e+003" maxVal="3.25e+003" color="(90,90,226)" label="3000 to 3250" />
+				<attr minVal="3.25e+003" maxVal="3.5e+003" color="(79,79,224)" label="3250 to 3500" />
+				<attr minVal="3.5e+003" maxVal="3.75e+003" color="(68,68,222)" label="3500 to 3750" />
+				<attr minVal="3.75e+003" maxVal="4e+003" color="(56,56,220)" label="3750 to 4000" />
+				<attr minVal="4e+003" maxVal="4.25e+003" color="(45,45,218)" label="4000 to 4250" />
+				<attr minVal="4.25e+003" maxVal="4.5e+003" color="(34,34,216)" label="4250 to 4500" />
+				<attr minVal="4.5e+003" maxVal="4.75e+003" color="(22,22,214)" label="4500 to 4750" />
+				<attr minVal="4.75e+003" maxVal="1e+004" color="(11,11,212)" label=" &gt; 4750" />
+			</attributes>
+		</field>
+
+		<field col="HUC_4"
+			label="HUC_4"
+			displayFlag="0"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				USGS HUC4 Basins
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="" />
+				<attr value="104" color="(196,78,235)" label="McKenzie" />
+				<attr value="111" color="(137,156,215)" label="Middle Fork Willamette" />
+				<attr value="115" color="(78,235,196)" label="Coast Fork Willamette" />
+				<attr value="70" color="(19,58,176)" label="Lower Willamette" />
+				<attr value="79" color="(215,137,156)" label="Tualatin" />
+				<attr value="85" color="(156,215,137)" label="Clackamas" />
+				<attr value="86" color="(98,39,117)" label="Yamhill" />
+				<attr value="87" color="(39,117,98)" label="Molalla-Pudding" />
+				<attr value="90" color="(235,196,78)" label="Middle Wilamette" />
+				<attr value="92" color="(127,127,127)" label="North Santiam" />
+				<attr value="93" color="(117,98,39)" label="South Santiam" />
+				<attr value="98" color="(58,176,19)" label="Upper Willamette" />
+			</attributes>
+		</field>
+
+		<field col="MAX_ET_YR"
+			label="Annual Avg Maximum ET (mm/year)"
+			displayFlag="1"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="500" maxVal="575" color="(250,227,227)" label=" &lt; 575" />
+				<attr minVal="575" maxVal="650" color="(248,215,215)" label="575 to 650" />
+				<attr minVal="650" maxVal="725" color="(246,204,204)" label="650 to 725" />
+				<attr minVal="725" maxVal="800" color="(244,192,192)" label="725 to 800" />
+				<attr minVal="800" maxVal="875" color="(242,181,181)" label="800 to 875" />
+				<attr minVal="875" maxVal="950" color="(240,170,170)" label="875 to 950" />
+				<attr minVal="950" maxVal="1.03e+003" color="(238,158,158)" label="950 to 1025" />
+				<attr minVal="1.03e+003" maxVal="1.1e+003" color="(236,147,147)" label="1025 to 1100" />
+				<attr minVal="1.1e+003" maxVal="1.18e+003" color="(234,136,136)" label="1100 to 1175" />
+				<attr minVal="1.18e+003" maxVal="1.25e+003" color="(232,124,124)" label="1175 to 1250" />
+				<attr minVal="1.25e+003" maxVal="1.33e+003" color="(230,113,113)" label="1250 to 1325" />
+				<attr minVal="1.33e+003" maxVal="1.4e+003" color="(228,102,102)" label="1325 to 1400" />
+				<attr minVal="1.4e+003" maxVal="1.48e+003" color="(226,90,90)" label="1400 to 1475" />
+				<attr minVal="1.48e+003" maxVal="1.55e+003" color="(224,79,79)" label="1475 to 1550" />
+				<attr minVal="1.55e+003" maxVal="1.63e+003" color="(222,68,68)" label="1550 to 1625" />
+				<attr minVal="1.63e+003" maxVal="1.7e+003" color="(220,56,56)" label="1625 to 1700" />
+				<attr minVal="1.7e+003" maxVal="1.78e+003" color="(218,45,45)" label="1700 to 1775" />
+				<attr minVal="1.78e+003" maxVal="1.85e+003" color="(216,34,34)" label="1775 to 1850" />
+				<attr minVal="1.85e+003" maxVal="1.93e+003" color="(214,22,22)" label="1850 to 1925" />
+				<attr minVal="1.93e+003" maxVal="2e+009" color="(212,11,11)" label=" &gt; 1925" />
+			</attributes>
+		</field>
+
+		<field col="ET_yr"
+			label="Annual Avg Actual ET (mm/year)"
+			displayFlag="1"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="500" maxVal="575" color="(250,227,227)" label=" &lt; 575" />
+				<attr minVal="575" maxVal="650" color="(248,215,215)" label="575 to 650" />
+				<attr minVal="650" maxVal="725" color="(246,204,204)" label="650 to 725" />
+				<attr minVal="725" maxVal="800" color="(244,192,192)" label="725 to 800" />
+				<attr minVal="800" maxVal="875" color="(242,181,181)" label="800 to 875" />
+				<attr minVal="875" maxVal="950" color="(240,170,170)" label="875 to 950" />
+				<attr minVal="950" maxVal="1.03e+003" color="(238,158,158)" label="950 to 1025" />
+				<attr minVal="1.03e+003" maxVal="1.1e+003" color="(236,147,147)" label="1025 to 1100" />
+				<attr minVal="1.1e+003" maxVal="1.18e+003" color="(234,136,136)" label="1100 to 1175" />
+				<attr minVal="1.18e+003" maxVal="1.25e+003" color="(232,124,124)" label="1175 to 1250" />
+				<attr minVal="1.25e+003" maxVal="1.33e+003" color="(230,113,113)" label="1250 to 1325" />
+				<attr minVal="1.33e+003" maxVal="1.4e+003" color="(228,102,102)" label="1325 to 1400" />
+				<attr minVal="1.4e+003" maxVal="1.48e+003" color="(226,90,90)" label="1400 to 1475" />
+				<attr minVal="1.48e+003" maxVal="1.55e+003" color="(224,79,79)" label="1475 to 1550" />
+				<attr minVal="1.55e+003" maxVal="1.63e+003" color="(222,68,68)" label="1550 to 1625" />
+				<attr minVal="1.63e+003" maxVal="1.7e+003" color="(220,56,56)" label="1625 to 1700" />
+				<attr minVal="1.7e+003" maxVal="1.78e+003" color="(218,45,45)" label="1700 to 1775" />
+				<attr minVal="1.78e+003" maxVal="1.85e+003" color="(216,34,34)" label="1775 to 1850" />
+				<attr minVal="1.85e+003" maxVal="1.93e+003" color="(214,22,22)" label="1850 to 1925" />
+				<attr minVal="1.93e+003" maxVal="2e+009" color="(212,11,11)" label=" &gt; 1925" />
+			</attributes>
+		</field>
+
+		<field col="AridityInd"
+			label="Aridity Index"
+			displayFlag="8"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="0">
+			<description>
+				Annual Max ET / Annual Precip
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="-1" maxVal="0.05" color="(0,0,210)" label=" &lt;= 0.05" />
+				<attr minVal="0.05" maxVal="0.1" color="(22,22,214)" label="0.05 to 0.1" />
+				<attr minVal="0.1" maxVal="0.15" color="(45,45,218)" label="0.1 to 0.15" />
+				<attr minVal="0.15" maxVal="0.2" color="(68,68,222)" label="0.15 to 0.2" />
+				<attr minVal="0.2" maxVal="0.25" color="(90,90,226)" label="0.2 to 0.25" />
+				<attr minVal="0.25" maxVal="0.3" color="(113,113,230)" label="0.25 to 0.3" />
+				<attr minVal="0.3" maxVal="0.35" color="(136,136,234)" label="0.3 to 0.35" />
+				<attr minVal="0.35" maxVal="0.4" color="(158,158,238)" label="0.35 to 0.4" />
+				<attr minVal="0.4" maxVal="0.45" color="(181,181,242)" label="0.4 to 0.45" />
+				<attr minVal="0.45" maxVal="0.5" color="(227,227,227)" label="0.45 to 0.5" />
+				<attr minVal="0.5" maxVal="0.55" color="(246,204,204)" label="0.5 to 0.55" />
+				<attr minVal="0.55" maxVal="0.6" color="(242,181,181)" label="0.55 to 0.6" />
+				<attr minVal="0.6" maxVal="0.65" color="(238,158,158)" label="0.6 to 0.65" />
+				<attr minVal="0.65" maxVal="0.7" color="(234,136,136)" label="0.65 to 0.7" />
+				<attr minVal="0.7" maxVal="0.75" color="(230,113,113)" label="0.7 to 0.75" />
+				<attr minVal="0.75" maxVal="0.8" color="(226,90,90)" label="0.75 to 0.8" />
+				<attr minVal="0.8" maxVal="0.85" color="(222,68,68)" label="0.8 to 0.85" />
+				<attr minVal="0.85" maxVal="0.9" color="(218,45,45)" label="0.85 to 0.9" />
+				<attr minVal="0.9" maxVal="0.95" color="(214,22,22)" label="0.9 to 0.95" />
+				<attr minVal="0.95" maxVal="1e+006" color="(210,0,0)" label=" &gt; 0.95" />
+			</attributes>
+		</field>
+
+		<field col="SUB_AREA"
+			label="Basin"
+			displayFlag="0"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				Large Subbasins
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="Willamette" />
+				<attr value="1" color="(255,128,128)" label="Mckenzie" />
+				<attr value="2" color="(128,255,128)" label="Pudding" />
+				<attr value="3" color="(128,255,255)" label="Clackamas" />
+				<attr value="4" color="(255,128,192)" label="Longtom" />
+				<attr value="5" color="(128,64,64)" label="Marys" />
+				<attr value="6" color="(255,128,64)" label="North Santiam" />
+				<attr value="7" color="(128,0,255)" label="South Santiam" />
+				<attr value="8" color="(127,127,127)" label="Tualatin" />
+				<attr value="9" color="(63,191,63)" label="Coast Fork Willamette" />
+        <attr value="10" color="(255,255,128)" label="Middle Fork Willamette" />
+        <attr value="11" color="(63,191,63)" label="Yamhill" />
+        <attr value="12" color="(128,255,255)" label="Upper Willamette mainstem" />
+        <attr value="13" color="(128,255,128)" label="Lower Santiam" />
+      </attributes>
+		</field>
+
+		<field col="Sub_Area_C"
+			label="Sub_Area_C"
+			displayFlag="0"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				Smaller Subbasins
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="0" />
+				<attr value="10" color="(216,140,165)" label="Marys" />
+				<attr value="11" color="(178,25,76)" label="Lookout" />
+				<attr value="12" color="(140,165,242)" label="Lower Longtom" />
+				<attr value="120" color="(101,51,153)" label="Coyote Crow" />
+				<attr value="121" color="(63,191,63)" label="Longtom Noti" />
+				<attr value="13" color="(25,76,229)" label="Johnson Sycamore" />
+				<attr value="14" color="(242,216,140)" label="Gales" />
+				<attr value="15" color="(204,102,51)" label="Fanno Durham" />
+				<attr value="16" color="(165,242,216)" label="Coast Fork London" />
+				<attr value="17" color="(127,127,127)" label="Blowout Detoit" />
+				<attr value="18" color="(89,12,38)" label="Yamhill McMinville" />
+				<attr value="2" color="(50,153,204)" label="Thomas Scio" />
+				<attr value="3" color="(12,38,114)" label="Wiley Foster" />
+				<attr value="4" color="(229,178,25)" label="Quartzville" />
+				<attr value="5" color="(191,63,191)" label="N Santiam Boulder" />
+				<attr value="6" color="(152,204,102)" label="Molalla Wilhoit" />
+				<attr value="7" color="(127,127,127)" label="Mohawk" />
+				<attr value="8" color="(76,229,178)" label="Mckenzie Belknap" />
+				<attr value="9" color="(38,114,89)" label="Mckenzie Cougar" />
+			</attributes>
+		</field>
+
+		<field col="SM_DAY"
+			label="SM_DAY"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="20" color="(227,227,250)" label=" &lt;= 20" />
+				<attr minVal="20" maxVal="40" color="(206,206,246)" label="20 to 40" />
+				<attr minVal="40" maxVal="60" color="(185,185,242)" label="40 to 60" />
+				<attr minVal="60" maxVal="80" color="(165,165,239)" label="60 to 80" />
+				<attr minVal="80" maxVal="100" color="(144,144,235)" label="80 to 100" />
+				<attr minVal="100" maxVal="120" color="(123,123,231)" label="100 to 120" />
+				<attr minVal="120" maxVal="140" color="(103,103,228)" label="120 to 140" />
+				<attr minVal="140" maxVal="160" color="(82,82,224)" label="140 to 160" />
+				<attr minVal="160" maxVal="180" color="(61,61,220)" label="160 to 180" />
+				<attr minVal="180" maxVal="210" color="(41,41,217)" label="180 to 210" />
+				<attr minVal="200" maxVal="2.2e+008" color="(0,0,0)" label=" &gt; 210" />
+			</attributes>
+		</field>
+
+	</submenu>
+	<submenu label='Terrestrial System' >
+		<field col="AGECLASS"
+			label="AGECLASS"
+			displayFlag="2"
+			datatype="Long"
+			mfiType="0"
+			binStyle="0"
+			min="0"
+		 max="320"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="20" color="(227,250,227)" label=" &lt; 20" />
+				<attr minVal="20" maxVal="40" color="(212,247,212)" label="20 to 40" />
+				<attr minVal="40" maxVal="60" color="(198,245,198)" label="40 to 60" />
+				<attr minVal="60" maxVal="80" color="(184,242,184)" label="60 to 80" />
+				<attr minVal="80" maxVal="100" color="(170,240,170)" label="80 to 100" />
+				<attr minVal="100" maxVal="120" color="(156,237,156)" label="100 to 120" />
+				<attr minVal="120" maxVal="140" color="(141,235,141)" label="120 to 140" />
+				<attr minVal="140" maxVal="160" color="(127,232,127)" label="140 to 160" />
+				<attr minVal="160" maxVal="180" color="(113,230,113)" label="160 to 180" />
+				<attr minVal="180" maxVal="200" color="(99,227,99)" label="180 to 200" />
+				<attr minVal="200" maxVal="220" color="(85,225,85)" label="200 to 220" />
+				<attr minVal="220" maxVal="240" color="(70,222,70)" label="220 to 240" />
+				<attr minVal="240" maxVal="260" color="(56,220,56)" label="240 to 260" />
+				<attr minVal="260" maxVal="280" color="(42,217,42)" label="260 to 280" />
+				<attr minVal="280" maxVal="300" color="(28,215,28)" label="280 to 300" />
+				<attr minVal="300" maxVal="3.2e+003" color="(14,212,14)" label=" &gt; 300" />
+			</attributes>
+		</field>
+
+		<field col="PVT"
+			label="vegetation cover type"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="1"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="1" color="(63,127,0)" label="temperate warm mixed forest (fdw)" />
+				<attr value="2" color="(0,197,255)" label="subalpine forest (fmh)" />
+				<attr value="3" color="(0,168,132)" label="moist temperate needleleaf forest (fsi)" />
+				<attr value="4" color="(255,127,127)" label="C3 shrubland (fto)" />
+				<attr value="5" color="(0,98,0)" label="cool mixed forest (fvg)" />
+				<attr value="6" color="(0,115,76)" label="maritime needleleaf forest (fwi)" />
+				<attr value="7" color="(255,170,0)" label="temperate needleleaf woodland (fuc)" />
+				<attr value="8" color="(127,255,0)" label="subtropical mixed forest (ftm)" />
+				<attr value="9" color="(76,230,0)" label="temperate needleleaf forest (fdd)" />
+			</attributes>
+		</field>
+
+		<field col="REGION"
+			label="Modeling Region"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="" />
+				<attr value="1" color="(24,73,221)" label="Mega_model" />
+			</attributes>
+		</field>
+
+		<field col="ELEV_MEAN"
+			label="Elevation (m)"
+			displayFlag="12"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="200" color="(28,28,5)" label=" &lt; 200" />
+				<attr minVal="200" maxVal="400" color="(43,43,8)" label="200 to 400" />
+				<attr minVal="400" maxVal="600" color="(57,57,10)" label="400 to 600" />
+				<attr minVal="600" maxVal="800" color="(71,71,13)" label="600 to 800" />
+				<attr minVal="800" maxVal="1e+003" color="(85,85,15)" label="800 to 1000" />
+				<attr minVal="1e+003" maxVal="1.2e+003" color="(99,99,18)" label="1000 to 1200" />
+				<attr minVal="1.2e+003" maxVal="1.4e+003" color="(114,114,20)" label="1200 to 1400" />
+				<attr minVal="1.4e+003" maxVal="1.6e+003" color="(128,128,23)" label="1400 to 1600" />
+				<attr minVal="1.6e+003" maxVal="1.8e+003" color="(142,142,25)" label="1600 to 1800" />
+				<attr minVal="1.8e+003" maxVal="2e+003" color="(156,156,28)" label="1800 to 2000" />
+				<attr minVal="2e+003" maxVal="2.2e+003" color="(170,170,30)" label="2000 to 2200" />
+				<attr minVal="2.2e+003" maxVal="2.4e+003" color="(185,185,33)" label="2200 to 2400" />
+				<attr minVal="2.4e+003" maxVal="2.6e+003" color="(199,199,35)" label="2400 to 2600" />
+				<attr minVal="2.6e+003" maxVal="2.8e+003" color="(213,213,38)" label="2600 to 2800" />
+				<attr minVal="2.8e+003" maxVal="3e+003" color="(227,227,40)" label="2800 to 3000" />
+				<attr minVal="3e+003" maxVal="3.2e+003" color="(241,241,43)" label=" &gt; 3000" />
+			</attributes>
+		</field>
+
+	</submenu>
+	<submenu label='Water Use' >
+		<field col="WREXISTS"
+			label="Encoded Water Right Info"
+			displayFlag="0"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+			</attributes>
+		</field>
+
+		<field col="IRRALLO_Y"
+			label="Water Allocated for Irrigation (mm/year)"
+			displayFlag="0"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				mm/year
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="1e-005" color="(227,227,227)" label=" &lt; 1e-005" />
+				<attr minVal="1e-005" maxVal="99" color="(178,25,76)" label="1e-005 to 99" />
+				<attr minVal="100" maxVal="199" color="(101,51,153)" label="100 to 199" />
+				<attr minVal="200" maxVal="299" color="(25,76,229)" label="200 to 299" />
+				<attr minVal="300" maxVal="399" color="(204,102,51)" label="300 to 399" />
+				<attr minVal="400" maxVal="499" color="(127,127,127)" label="400 to 499" />
+				<attr minVal="500" maxVal="599" color="(50,153,204)" label="500 to 599" />
+				<attr minVal="600" maxVal="699" color="(127,127,127)" label="600 to 699" />
+				<attr minVal="700" maxVal="799" color="(152,204,102)" label="700 to 799" />
+				<attr minVal="800" maxVal="1e+004" color="(76,229,178)" label=" &gt; 800" />
+			</attributes>
+		</field>
+
+		<field col="MAXIRR_D"
+			label="Maximum total daily applied irrigation water (acre-ft)"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="2" color="(255,255,255)" label=" &lt; 1" />
+				<attr minVal="1" maxVal="2" color="(204,204,246)" label="1 to 2" />
+				<attr minVal="3" maxVal="4" color="(181,181,242)" label="3 to 4" />
+				<attr minVal="5" maxVal="6" color="(158,158,238)" label="5 to 6" />
+				<attr minVal="7" maxVal="8" color="(136,136,234)" label="7 to 8" />
+				<attr minVal="9" maxVal="5e+003" color="(22,22,214)" label=" &gt; 9" />
+			</attributes>
+		</field>
+
+		<field col="AVEIRR_D"
+			label="Average total daily applied irrigation water (acre-ft)"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0.1" color="(255,255,255)" label=" &lt; .1" />
+				<attr minVal="0.1" maxVal="0.3" color="(204,204,246)" label=".1 to .3" />
+				<attr minVal="0.4" maxVal="0.6" color="(181,181,242)" label=".4 to .6" />
+				<attr minVal="0.7" maxVal="1" color="(158,158,238)" label=".7 to 1.0" />
+				<attr minVal="1.1" maxVal="1.3" color="(136,136,234)" label="1.1 to 1.3" />
+				<attr minVal="1.4" maxVal="1.6" color="(136,136,234)" label="1.4 to 1.6" />
+				<attr minVal="1.7" maxVal="2" color="(136,136,234)" label="1.7 to 2.0" />
+				<attr minVal="2" maxVal="50" color="(22,22,214)" label=" &gt; 2.0" />
+			</attributes>
+		</field>
+
+		<field col="MUNIALLO_Y"
+			label="Water Allocated for municipality (m3/sec)"
+			displayFlag="0"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				m3/sec
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="1e-005" color="(227,227,227)" label=" &lt; 1e-005" />
+				<attr minVal="1e-005" maxVal="2e-005" color="(178,25,76)" label="1e-005 to 2e-005" />
+				<attr minVal="2e-005" maxVal="3e-005" color="(101,51,153)" label="2e-005 to 3e-005" />
+				<attr minVal="3e-005" maxVal="4e-005" color="(25,76,229)" label="3e-005 to 4e-005" />
+				<attr minVal="4e-005" maxVal="5e-005" color="(204,102,51)" label="4e-005 to 5e-005" />
+				<attr minVal="5e-005" maxVal="6e-005" color="(127,127,127)" label="5e-005 to 6e-005" />
+				<attr minVal="6e-005" maxVal="7e-005" color="(50,153,204)" label="6e-005 to 7e-005" />
+				<attr minVal="7e-005" maxVal="8e-005" color="(127,127,127)" label="7e-005 to 8e-005" />
+				<attr minVal="8e-005" maxVal="9e-005" color="(152,204,102)" label="8e-005 to 9e-005" />
+				<attr minVal="9e-005" maxVal="100" color="(76,229,178)" label=" &gt; 9e-005" />
+			</attributes>
+		</field>
+
+		<field col="UNALLOCWR"
+			label="Un-allocated water  (m3/sec)"
+			displayFlag="0"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				If Available Stream Flow is greater than demand - Un-allocated water = Available Stream Flow – demand (m3/sec)
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="100" color="(227,227,227)" label=" &lt; 100" />
+				<attr minVal="100" maxVal="200" color="(178,25,76)" label="100 to 200" />
+				<attr minVal="200" maxVal="300" color="(101,51,153)" label="200 to 300" />
+				<attr minVal="300" maxVal="400" color="(25,76,229)" label="300 to 400" />
+				<attr minVal="400" maxVal="500" color="(204,102,51)" label="400 to 500" />
+				<attr minVal="500" maxVal="600" color="(127,127,127)" label="500 to 600" />
+				<attr minVal="600" maxVal="700" color="(50,153,204)" label="600 to 700" />
+				<attr minVal="700" maxVal="800" color="(127,127,127)" label="700 to 800" />
+				<attr minVal="800" maxVal="900" color="(152,204,102)" label="800 to 900" />
+				<attr minVal="900" maxVal="1e+009" color="(76,229,178)" label=" &gt; 900" />
+			</attributes>
+		</field>
+
+		<field col="DEFICIT"
+			label="Water Deficit (mm/d)"
+			displayFlag="8"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0" color="(227,227,227)" label="0" />
+				<attr minVal="1" maxVal="1.9" color="(250,227,227)" label=" &lt;= 1.9" />
+				<attr minVal="1.9" maxVal="2.8" color="(246,204,204)" label="1.9 to 2.8" />
+				<attr minVal="2.8" maxVal="3.7" color="(242,181,181)" label="2.8 to 3.7" />
+				<attr minVal="3.7" maxVal="4.6" color="(238,158,158)" label="3.7 to 4.6" />
+				<attr minVal="4.6" maxVal="5.5" color="(234,136,136)" label="4.6 to 5.5" />
+				<attr minVal="5.5" maxVal="6.4" color="(230,113,113)" label="5.5 to 6.4" />
+				<attr minVal="6.4" maxVal="7.3" color="(226,90,90)" label="6.4 to 7.3" />
+				<attr minVal="7.3" maxVal="8.2" color="(222,68,68)" label="7.3 to 8.2" />
+				<attr minVal="8.2" maxVal="9.1" color="(218,45,45)" label="8.2 to 9.1" />
+				<attr minVal="9.1" maxVal="1e+007" color="(214,22,22)" label=" &gt; 9.1" />
+			</attributes>
+		</field>
+
+		<field col="GWIRR_DY"
+			label="Daily Applied Ground Water Irrigation (mm/day)"
+			displayFlag="9"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				ground water irrigation applied
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0.25" color="(192,192,192)" label=" &lt; 0.25" />
+				<attr minVal="0.25" maxVal="0.5" color="(214,22,22)" label="0.25 to 0.5" />
+				<attr minVal="0.5" maxVal="0.75" color="(218,45,45)" label="0.5 to 0.75" />
+				<attr minVal="0.75" maxVal="1" color="(222,68,68)" label="0.75 to 1" />
+				<attr minVal="1" maxVal="1.25" color="(226,90,90)" label="1 to 1.25" />
+				<attr minVal="1.25" maxVal="1.5" color="(230,113,113)" label="1.25 to 1.5" />
+				<attr minVal="1.5" maxVal="1.75" color="(234,136,136)" label="1.5 to 1.75" />
+				<attr minVal="1.75" maxVal="2" color="(238,158,158)" label="1.75 to 2" />
+				<attr minVal="2" maxVal="2.25" color="(242,181,181)" label="2 to 2.25" />
+				<attr minVal="2.25" maxVal="2.5" color="(227,227,227)" label="2.25 to 2.5" />
+				<attr minVal="2.5" maxVal="2.75" color="(204,246,204)" label="2.5 to 2.75" />
+				<attr minVal="2.75" maxVal="3" color="(181,242,181)" label="2.75 to 3" />
+				<attr minVal="3" maxVal="3.25" color="(158,238,158)" label="3 to 3.25" />
+				<attr minVal="3.25" maxVal="3.5" color="(136,234,136)" label="3.25 to 3.5" />
+				<attr minVal="3.5" maxVal="3.75" color="(113,230,113)" label="3.5 to 3.75" />
+				<attr minVal="3.75" maxVal="4" color="(90,226,90)" label="3.75 to 4" />
+				<attr minVal="4" maxVal="4.25" color="(68,222,68)" label="4 to 4.25" />
+				<attr minVal="4.25" maxVal="4.5" color="(45,218,45)" label="4.25 to 4.5" />
+				<attr minVal="4.5" maxVal="4.75" color="(22,214,22)" label="4.5 to 4.75" />
+				<attr minVal="4.75" maxVal="5e+006" color="(0,210,0)" label=" &gt; 4.75" />
+			</attributes>
+		</field>
+
+		<field col="SWIRR_DY"
+			label="Daily Applied Surface Water Irrigation (mm/day)"
+			displayFlag="9"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				Surface water irrigation applied
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0.25" color="(192,192,192)" label=" &lt; 0.25" />
+				<attr minVal="0.25" maxVal="0.5" color="(214,22,22)" label="0.25 to 0.5" />
+				<attr minVal="0.5" maxVal="0.75" color="(218,45,45)" label="0.5 to 0.75" />
+				<attr minVal="0.75" maxVal="1" color="(222,68,68)" label="0.75 to 1" />
+				<attr minVal="1" maxVal="1.25" color="(226,90,90)" label="1 to 1.25" />
+				<attr minVal="1.25" maxVal="1.5" color="(230,113,113)" label="1.25 to 1.5" />
+				<attr minVal="1.5" maxVal="1.75" color="(234,136,136)" label="1.5 to 1.75" />
+				<attr minVal="1.75" maxVal="2" color="(238,158,158)" label="1.75 to 2" />
+				<attr minVal="2" maxVal="2.25" color="(242,181,181)" label="2 to 2.25" />
+				<attr minVal="2.25" maxVal="2.5" color="(227,227,227)" label="2.25 to 2.5" />
+				<attr minVal="2.5" maxVal="2.75" color="(204,246,204)" label="2.5 to 2.75" />
+				<attr minVal="2.75" maxVal="3" color="(181,242,181)" label="2.75 to 3" />
+				<attr minVal="3" maxVal="3.25" color="(158,238,158)" label="3 to 3.25" />
+				<attr minVal="3.25" maxVal="3.5" color="(136,234,136)" label="3.25 to 3.5" />
+				<attr minVal="3.5" maxVal="3.75" color="(113,230,113)" label="3.5 to 3.75" />
+				<attr minVal="3.75" maxVal="4" color="(90,226,90)" label="3.75 to 4" />
+				<attr minVal="4" maxVal="4.25" color="(68,222,68)" label="4 to 4.25" />
+				<attr minVal="4.25" maxVal="4.5" color="(45,218,45)" label="4.25 to 4.5" />
+				<attr minVal="4.5" maxVal="4.75" color="(22,214,22)" label="4.5 to 4.75" />
+				<attr minVal="4.75" maxVal="5e+006" color="(0,210,0)" label=" &gt; 4.75" />
+			</attributes>
+		</field>
+
+		<field col="UDMAND_DY"
+			label="Daily Urban Water Demand (m3/sec)"
+			displayFlag="9"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				Daily Urban Water Demand
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0" color="(192,192,192)" label=" &lt; 0" />
+				<attr minVal="1e-007" maxVal="1e-006" color="(234,136,136)" label="1e-007 to 1e-006" />
+				<attr minVal="1e-006" maxVal="1e-005" color="(230,113,113)" label="1e-006 to 1e-005" />
+				<attr minVal="1e-005" maxVal="0.0001" color="(226,90,90)" label="1e-005 to 1e-004" />
+				<attr minVal="0.0001" maxVal="0.001" color="(222,68,68)" label="1e-004 to 1e-003" />
+				<attr minVal="0.001" maxVal="0.01" color="(218,45,45)" label="1e-003 to 1e-002" />
+				<attr minVal="0.01" maxVal="10" color="(214,22,22)" label="1e-002 to 10" />
+			</attributes>
+		</field>
+
+		<field col="IRRRQST_D"
+			label="Daily Irrigation Request (acre-ft)"
+			displayFlag="8"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="0"
+		 max="0"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="0" maxVal="0.682" color="(0,0,210)" label=" &lt;= 0.681818" />
+				<attr minVal="0.682" maxVal="1.36" color="(45,45,218)" label="0.681818 to 1.36364" />
+				<attr minVal="1.36" maxVal="2.05" color="(90,90,226)" label="1.36364 to 2.04545" />
+				<attr minVal="2.05" maxVal="2.73" color="(136,136,234)" label="2.04545 to 2.72727" />
+				<attr minVal="2.73" maxVal="3.41" color="(181,181,242)" label="2.72727 to 3.40909" />
+				<attr minVal="3.41" maxVal="4.09" color="(227,227,227)" label="3.40909 to 4.09091" />
+				<attr minVal="4.09" maxVal="4.77" color="(242,181,181)" label="4.09091 to 4.77273" />
+				<attr minVal="4.77" maxVal="5.45" color="(234,136,136)" label="4.77273 to 5.45455" />
+				<attr minVal="5.45" maxVal="6.14" color="(226,90,90)" label="5.45455 to 6.13636" />
+				<attr minVal="6.14" maxVal="6.82" color="(218,45,45)" label="6.13636 to 6.81818" />
+				<attr minVal="6.82" maxVal="7.5e+006" color="(210,0,0)" label=" &gt; 6.81818" />
+			</attributes>
+		</field>
+
+		<field col="IRRWRCANCL"
+			label="Irrigation water right status"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="Active" />
+				<attr value="1" color="(255,0,0)" label="Canceled" />
+			</attributes>
+		</field>
+
+		<field col="MUNWRCANCL"
+			label="Municipal water right status"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="Active" />
+				<attr value="1" color="(255,0,0)" label="Canceled" />
+			</attributes>
+		</field>
+
+		<field col="WR_SHORTG"
+			label="Unsatisfied irrigation request level "
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="No unsatisfied irrigation request" />
+				<attr value="1" color="(0,0,255)" label="Level 1" />
+				<attr value="2" color="(255,0,0)" label="Level 2" />
+			</attributes>
+		</field>
+
+		<field col="WR_JRNOTES"
+			label="Notes about up-stream Juniors in times of shortage"
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="Notes" />
+				<attr value="1" color="(0,0,255)" label="Level 1" />
+				<attr value="2" color="(255,0,0)" label="Level 2" />
+			</attributes>
+		</field>
+    
+		<field col="SHUTOFFMUN"
+			label="Unsatisfied municipal demand level "
+			displayFlag="0"
+			datatype="Integer"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="1"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="1">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(227,227,227)" label="No unsatisfied municipal demand" />
+				<attr value="1" color="(0,0,255)" label="Level 1" />
+				<attr value="2" color="(255,0,0)" label="Level 2" />
+			</attributes>
+		</field>
+
+		<field col="DemandFrac"
+			label="Fraction of Demand"
+			displayFlag="3"
+			datatype="Double"
+			mfiType="0"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="0"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr minVal="1.01" maxVal="1e+004" color="(128,0,64)" label="Demand Excess" />
+				<attr minVal="-1" maxVal="-1" color="(0,128,0)" label="No Demand" />
+				<attr minVal="0" maxVal="0" color="(0,255,255)" label="Not Irrigated" />
+				<attr minVal="1" maxVal="1" color="(0,0,255)" label="Demand Met" />
+				<attr minVal="0.01" maxVal="1" color="(255,128,0)" label="Demand Deficit" />
+			</attributes>
+		</field>
+
+	</submenu>
+	<submenu label='Slices' >
+		<field col="ELEV500"
+			label="ELEV500"
+			displayFlag="1"
+			datatype="Long"
+			mfiType="1"
+			binStyle="0"
+			min="-1"
+		 max="-1"
+			results="0"
+			decadalMaps="0"
+			useInSiteAttr="1"
+			useInOutcomes="0">
+			<description>
+				
+			</description>
+			<source>
+				
+			</source>
+			<attributes>
+				<attr value="0" color="(250,227,227)" label="0" />
+				<attr value="1" color="(244,194,194)" label="1" />
+				<attr value="2" color="(238,162,162)" label="2" />
+				<attr value="3" color="(232,129,129)" label="3" />
+				<attr value="4" color="(227,97,97)" label="4" />
+				<attr value="5" color="(221,64,64)" label="5" />
+				<attr value="6" color="(215,32,32)" label="6" />
+			</attributes>
+		</field>
+
+	</submenu>
+	<field col="POLICY"
+		label="Policy applied to this cell"
+		displayFlag="0"
+		datatype="Long"
+		mfiType="1"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+		</attributes>
+	</field>
+
+	<field col="POLICYAPPS"
+		label="Total Policys applied to this cell"
+		displayFlag="0"
+		datatype="Long"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+		</attributes>
+	</field>
+
+	<field col="CONSERVE"
+		label="Conservation Status"
+		displayFlag="0"
+		datatype="Long"
+		mfiType="1"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+		<description>
+			Conservation lands
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr value="0" color="(227,227,227)" label="Private or unprotected public" />
+			<attr value="1" color="(0,215,0)" label="Protected public" />
+		</attributes>
+	</field>
+
+	<field col="DISTURB"
+		label="Disturbance"
+		displayFlag="0"
+		datatype="Integer"
+		mfiType="1"
+		binStyle="0"
+		min="0"
+		 max="0"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+		<description>
+			Disturbance type
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr value="0" color="(255,255,255)" label="No Disturbance" />
+			<attr value="1" color="(128,64,0)" label="Harvest" />
+			<attr value="2" color="(180,138,131)" label="Thinning" />
+			<attr value="3" color="(180,138,131)" label="Partial Harvest" />
+			<attr value="11" color="(250,55,55)" label="Developed to Mixed" />
+			<attr value="12" color="(190,255,10)" label="Developed to Woodland" />
+			<attr value="13" color="(255,255,255)" label="Developed to Savanna" />
+			<attr value="20" color="(195,80,80)" label="Surface Fire" />
+			<attr value="21" color="(215,60,60)" label="Mixed Severity Low Burn " />
+			<attr value="22" color="(235,40,40)" label="Mixed Severity High Burn" />
+			<attr value="23" color="(255,20,20)" label="Stand Replacing Fire" />
+			<attr value="29" color="(185,215,215)" label="Prescribed Burn" />
+			<attr value="1000" color="(200,200,200)" label="Abandonment" />
+			<attr value="1010" color="(0,255,0)" label="AREC transition to CROP" />
+			<attr value="1011" color="(255,170,0)" label="AREC transition to PASTURE" />
+			<attr value="1012" color="(63,127,0)" label="AREC transition to FOREST" />
+			<attr value="1013" color="(50,50,50)" label="AREC transition to URBAN" />
+			<attr value="131" color="(63,127,0)" label="FSI2FDW" />
+			<attr value="151" color="(63,127,0)" label="FVG2FDW" />
+			<attr value="161" color="(63,127,0)" label="FWI2FDW" />
+			<attr value="181" color="(63,127,0)" label="FTM2FDW" />
+			<attr value="191" color="(63,127,0)" label="FDD2FDW" />
+			<attr value="132" color="(0,197,255)" label="FSI2FMH" />
+			<attr value="162" color="(0,197,255)" label="FWI2FMH" />
+			<attr value="192" color="(0,197,255)" label="FDD2FMH" />
+			<attr value="123" color="(0,168,132)" label="FMH2FSI" />
+			<attr value="153" color="(0,168,132)" label="FVG2FSI" />
+			<attr value="163" color="(0,168,132)" label="FWI2FSI" />
+			<attr value="173" color="(0,168,132)" label="FUC2FSI" />
+			<attr value="193" color="(0,168,132)" label="FDD2FSI" />
+			<attr value="124" color="(255,127,127)" label="FMH2FTO" />
+			<attr value="134" color="(255,127,127)" label="FSI2FTO" />
+			<attr value="154" color="(255,127,127)" label="FVG2FTO" />
+			<attr value="164" color="(255,127,127)" label="FWI2FTO" />
+			<attr value="194" color="(255,127,127)" label="FDD2FTO" />
+			<attr value="115" color="(7,248,146)" label="FDW2FVG" />
+			<attr value="125" color="(7,248,146)" label="FMH2FVG" />
+			<attr value="135" color="(7,248,146)" label="FSI2FVG" />
+			<attr value="145" color="(7,248,146)" label="FTO2FVG" />
+			<attr value="165" color="(7,248,146)" label="FWI2FVG" />
+			<attr value="175" color="(7,248,146)" label="FUC2FVG" />
+			<attr value="195" color="(7,248,146)" label="FDD2FVG" />
+			<attr value="116" color="(0,115,76)" label="FDW2FWI" />
+			<attr value="126" color="(0,115,76)" label="FMH2FWI" />
+			<attr value="136" color="(0,115,76)" label="FSI2FWI" />
+			<attr value="146" color="(0,115,76)" label="FTO2FWI" />
+			<attr value="156" color="(0,115,76)" label="FVG2FWI" />
+			<attr value="176" color="(0,115,76)" label="FUC2FWI" />
+			<attr value="196" color="(0,115,76)" label="FDD2FWI" />
+			<attr value="127" color="(255,170,0)" label="FMH2FUC" />
+			<attr value="137" color="(255,170,0)" label="FSI2FUC" />
+			<attr value="147" color="(255,170,0)" label="FTO2FUC" />
+			<attr value="157" color="(255,170,0)" label="FVG2FUC" />
+			<attr value="167" color="(255,170,0)" label="FWI2FUC" />
+			<attr value="197" color="(255,170,0)" label="FDD2FUC" />
+			<attr value="118" color="(184,209,1)" label="FDW2FTM" />
+			<attr value="138" color="(184,209,1)" label="FSI2FTM" />
+			<attr value="158" color="(184,209,1)" label="FVG2FTM" />
+			<attr value="168" color="(184,209,1)" label="FWI2FTM" />
+			<attr value="198" color="(184,209,1)" label="FDD2FTM" />
+			<attr value="129" color="(76,230,0)" label="FMH2FDD" />
+			<attr value="139" color="(76,230,0)" label="FSI2FDD" />
+			<attr value="149" color="(76,230,0)" label="FTO2FDD" />
+			<attr value="159" color="(76,230,0)" label="FVG2FDD" />
+			<attr value="169" color="(76,230,0)" label="FWI2FDD" />
+			<attr value="179" color="(76,230,0)" label="FUC2FDD" />
+		</attributes>
+	</field>
+
+	<field col="DGVMvegtyp"
+		label="DGVMvegtyp"
+		displayFlag="0"
+		datatype="Integer"
+		mfiType="1"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+		<description>
+			Dynamic global vegetation model MC2 vegetation type
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr value="-2147483648" color="(192,192,192)" label="no data in netCDF file" />
+			<attr value="0" color="(192,192,192)" label="no data" />
+			<attr value="6" color="(0,197,255)" label="6 subalpine forest" />
+			<attr value="7" color="(0,115,76)" label="7 maritime needleleaf forest" />
+			<attr value="8" color="(76,230,0)" label="8 temperate needleleaf forest" />
+			<attr value="10" color="(0,98,0)" label="10 cool mixed forest" />
+			<attr value="11" color="(63,127,0)" label="11 temperate warm mixed forest" />
+			<attr value="12" color="(255,170,0)" label="12 temperate needleleaf woodland" />
+			<attr value="16" color="(255,127,127)" label="16 C3 shrubland" />
+			<attr value="22" color="(127,255,0)" label="22 subtropical mixed forest" />
+			<attr value="36" color="(0,168,132)" label="36 cool needleleaf forest" />
+		</attributes>
+	</field>
+
+	<field col="LAI"
+		label="LAI"
+		displayFlag="2"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+		<description>
+			leaf area index
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="1" color="(227,250,227)" label=" &lt; 1" />
+			<attr minVal="1" maxVal="2" color="(204,246,204)" label="1 to 2" />
+			<attr minVal="2" maxVal="3" color="(181,242,181)" label="2 to 3" />
+			<attr minVal="3" maxVal="4" color="(158,238,158)" label="3 to 4" />
+			<attr minVal="4" maxVal="5" color="(136,234,136)" label="4 to 5" />
+			<attr minVal="5" maxVal="6" color="(113,230,113)" label="5 to 6" />
+			<attr minVal="6" maxVal="7" color="(90,226,90)" label="6 to 7" />
+			<attr minVal="7" maxVal="8" color="(68,222,68)" label="7 to 8" />
+			<attr minVal="8" maxVal="9" color="(45,218,45)" label="8 to 9" />
+			<attr minVal="9" maxVal="10" color="(22,214,22)" label=" &gt; 9" />
+		</attributes>
+	</field>
+
+	<field col="H2ORESIDNT"
+		label="residential water demand, ccf/day"
+		displayFlag="2"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+		<description>
+			residential water demand from Urban Water model
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="0.001" color="(227,250,227)" label=" &lt; 0.001" />
+			<attr minVal="0.001" maxVal="0.01" color="(158,238,158)" label="0.001 to 0.01" />
+			<attr minVal="0.01" maxVal="0.1" color="(113,230,113)" label="0.01 to 0.1" />
+			<attr minVal="0.1" maxVal="1" color="(68,222,68)" label="0.1 to 1.0" />
+			<attr minVal="1" maxVal="1e+006" color="(22,214,22)" label="1.0 to 1e6." />
+		</attributes>
+	</field>
+
+	<field col="H2OINDCOMM"
+		label="industrial and commercial water demand, ccf/day"
+		displayFlag="2"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+		<description>
+			industrial and commercial water demand from Urban Water model
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="0.001" color="(227,250,227)" label=" &lt; 0.001" />
+			<attr minVal="0.001" maxVal="0.01" color="(158,238,158)" label="0.001 to 0.01" />
+			<attr minVal="0.01" maxVal="0.1" color="(113,230,113)" label="0.01 to 0.1" />
+			<attr minVal="0.1" maxVal="1" color="(68,222,68)" label="0.1 to 1.0" />
+			<attr minVal="1" maxVal="1e+006" color="(22,214,22)" label="1.0 to 1e6." />
+		</attributes>
+	</field>
+
+	<field col="PROBUSECHG"
+		label="probability of land use change"
+		displayFlag="2"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+		<description>
+			from land-use transition model
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="0.0001" color="(227,250,227)" label=" &lt; 0.0001" />
+			<attr minVal="0.0001" maxVal="0.001" color="(158,238,158)" label="0.0001 to 0.001" />
+			<attr minVal="0.001" maxVal="0.01" color="(113,230,113)" label="0.001 to 0.01" />
+			<attr minVal="0.01" maxVal="0.1" color="(68,222,68)" label="0.01 to 0.1" />
+			<attr minVal="0.1" maxVal="1" color="(22,214,22)" label="0.1 to 1.0" />
+		</attributes>
+	</field>
+
+	<field col="PROB_DEV"
+		label="probability of being developed"
+		displayFlag="2"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+		<description>
+			from land-use transition model
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="0.0001" color="(227,250,227)" label=" &lt; 0.0001" />
+			<attr minVal="0.0001" maxVal="0.001" color="(158,238,158)" label="0.0001 to 0.001" />
+			<attr minVal="0.001" maxVal="0.01" color="(113,230,113)" label="0.001 to 0.01" />
+			<attr minVal="0.01" maxVal="0.1" color="(68,222,68)" label="0.01 to 0.1" />
+			<attr minVal="0.1" maxVal="1" color="(22,214,22)" label="0.1 to 1.0" />
+		</attributes>
+	</field>
+
+	<field col="PVTCode"
+		label="PVTCode"
+		displayFlag="0"
+		datatype="String"
+		mfiType="1"
+		binStyle="0"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr value="na" color="(227,227,227)" label="na" />
+			<attr value="OCR_fcw" color="(230,180,32)" label="OCR_fcw" />
+			<attr value="OCR_fdm" color="(205,106,65)" label="OCR_fdm" />
+			<attr value="OCR_fdw" color="(180,32,98)" label="OCR_fdw" />
+			<attr value="OCR_fhc" color="(156,213,131)" label="OCR_fhc" />
+			<attr value="OCR_fiw" color="(131,139,164)" label="OCR_fiw" />
+			<attr value="OCR_fsi" color="(106,65,197)" label="OCR_fsi" />
+			<attr value="OCR_fss" color="(82,246,230)" label="OCR_fss" />
+			<attr value="OCR_fsw" color="(57,172,8)" label="OCR_fsw" />
+			<attr value="OCR_fvg" color="(32,98,41)" label="OCR_fvg" />
+			<attr value="OCR_fwi" color="(8,24,74)" label="OCR_fwi" />
+			<attr value="OCR_fwn" color="(238,205,106)" label="OCR_fwn" />
+			<attr value="OCR_fww" color="(213,131,139)" label="OCR_fww" />
+			<attr value="OCR_fwx" color="(189,57,172)" label="OCR_fwx" />
+			<attr value="OWC_fal" color="(164,238,205)" label="OWC_fal" />
+			<attr value="OWC_fcw" color="(139,164,238)" label="OWC_fcw" />
+			<attr value="OWC_fdm" color="(115,90,16)" label="OWC_fdm" />
+			<attr value="OWC_fdw" color="(90,16,49)" label="OWC_fdw" />
+			<attr value="OWC_fdx" color="(65,197,82)" label="OWC_fdx" />
+			<attr value="OWC_fiw" color="(41,123,115)" label="OWC_fiw" />
+			<attr value="OWC_fmc" color="(16,49,148)" label="OWC_fmc" />
+			<attr value="OWC_fmh" color="(246,230,180)" label="OWC_fmh" />
+			<attr value="OWC_fmi" color="(222,156,213)" label="OWC_fmi" />
+			<attr value="OWC_fsi" color="(197,82,246)" label="OWC_fsi" />
+			<attr value="OWC_fsw" color="(172,8,24)" label="OWC_fsw" />
+			<attr value="OWC_fvg" color="(148,189,57)" label="OWC_fvg" />
+			<attr value="OWC_fwc" color="(123,115,90)" label="OWC_fwc" />
+			<attr value="OWC_fwi" color="(98,41,123)" label="OWC_fwi" />
+			<attr value="OWC_fwm" color="(127,127,127)" label="OWC_fwm" />
+			<attr value="OWC_fww" color="(49,148,189)" label="OWC_fww" />
+			<attr value="OWC_fwx" color="(24,74,222)" label="OWC_fwx" />
+		</attributes>
+	</field>
+
+	<field col="StateAbbre"
+		label="StateAbbre"
+		displayFlag="0"
+		datatype="String"
+		mfiType="1"
+		binStyle="0"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr value="" color="(227,227,227)" label="" />
+			<attr value="Al:Pc1" color="(244,223,160)" label="Al:Pc1" />
+			<attr value="Al:Sc1" color="(234,192,66)" label="Al:Sc1" />
+			<attr value="Al:Sho" color="(223,160,227)" label="Al:Sho" />
+			<attr value="Al:Sm1" color="(213,129,132)" label="Al:Sm1" />
+			<attr value="Al:So1" color="(202,97,38)" label="Al:So1" />
+			<attr value="Al:Yo" color="(192,66,199)" label="Al:Yo" />
+			<attr value="DF:Gc2" color="(181,34,104)" label="DF:Gc2" />
+			<attr value="DF:GF" color="(171,3,10)" label="DF:GF" />
+			<attr value="DF:Gm1" color="(160,227,171)" label="DF:Gm1" />
+			<attr value="DF:Gm2" color="(150,195,76)" label="DF:Gm2" />
+			<attr value="DF:Go1" color="(139,164,237)" label="DF:Go1" />
+			<attr value="DF:Lc2" color="(129,132,143)" label="DF:Lc2" />
+			<attr value="DF:Lm1" color="(118,101,48)" label="DF:Lm1" />
+			<attr value="DF:Lm2" color="(108,69,209)" label="DF:Lm2" />
+			<attr value="DF:Lo1" color="(97,38,115)" label="DF:Lo1" />
+			<attr value="DF:Mc1" color="(87,6,20)" label="DF:Mc1" />
+			<attr value="DF:Mc2" color="(76,230,181)" label="DF:Mc2" />
+			<attr value="DF:Mm2" color="(66,199,87)" label="DF:Mm2" />
+			<attr value="DF:Pc1" color="(55,167,248)" label="DF:Pc1" />
+			<attr value="DF:Pm1" color="(45,136,153)" label="DF:Pm1" />
+			<attr value="DF:Po1" color="(34,104,59)" label="DF:Po1" />
+			<attr value="DF:Sc1" color="(24,73,220)" label="DF:Sc1" />
+			<attr value="DF:Sc2" color="(13,41,125)" label="DF:Sc2" />
+			<attr value="DF:Sm1" color="(3,10,31)" label="DF:Sm1" />
+			<attr value="DF:Sm2" color="(248,234,192)" label="DF:Sm2" />
+			<attr value="DF:So1" color="(237,202,97)" label="DF:So1" />
+			<attr value="DF:Yo" color="(227,171,3)" label="DF:Yo" />
+			<attr value="DFal:Gm2" color="(216,139,164)" label="DFal:Gm2" />
+			<attr value="DFal:Mc2" color="(206,108,69)" label="DFal:Mc2" />
+			<attr value="DFal:Sc2" color="(195,76,230)" label="DFal:Sc2" />
+			<attr value="DFal:SHc" color="(185,45,136)" label="DFal:SHc" />
+			<attr value="DFmx:Lc2" color="(174,13,41)" label="DFmx:Lc2" />
+			<attr value="DFmx:Pc1" color="(164,237,202)" label="DFmx:Pc1" />
+			<attr value="DFmx:Sc2" color="(153,206,108)" label="DFmx:Sc2" />
+			<attr value="DFWF:Gm2" color="(143,174,13)" label="DFWF:Gm2" />
+			<attr value="DFWF:Lm2" color="(132,143,174)" label="DFWF:Lm2" />
+			<attr value="DFWF:Mm2" color="(122,111,80)" label="DFWF:Mm2" />
+			<attr value="DFWF:Mo1" color="(111,80,241)" label="DFWF:Mo1" />
+			<attr value="DG:Gc2" color="(101,48,146)" label="DG:Gc2" />
+			<attr value="DG:Lc2" color="(90,17,52)" label="DG:Lc2" />
+			<attr value="DG:Mc2" color="(80,241,213)" label="DG:Mc2" />
+			<attr value="DO:GF" color="(69,209,118)" label="DO:GF" />
+			<attr value="LP:Mc2" color="(59,178,24)" label="LP:Mc2" />
+			<attr value="LP:Pm1" color="(48,146,185)" label="LP:Pm1" />
+			<attr value="LP:Sc2" color="(38,115,90)" label="LP:Sc2" />
+			<attr value="LP:Yo" color="(27,83,251)" label="LP:Yo" />
+			<attr value="MH:Gc2" color="(17,52,157)" label="MH:Gc2" />
+			<attr value="MH:GF" color="(6,20,62)" label="MH:GF" />
+			<attr value="MH:Lc2" color="(251,244,223)" label="MH:Lc2" />
+			<attr value="MH:Mc2" color="(241,213,129)" label="MH:Mc2" />
+			<attr value="MH:Mo1" color="(230,181,34)" label="MH:Mo1" />
+			<attr value="MH:Pm1" color="(220,150,195)" label="MH:Pm1" />
+			<attr value="MH:Sc2" color="(209,118,101)" label="MH:Sc2" />
+			<attr value="MH:Sm2" color="(199,87,6)" label="MH:Sm2" />
+			<attr value="MH:Yo" color="(188,55,167)" label="MH:Yo" />
+			<attr value="Oa:Mo1" color="(178,24,73)" label="Oa:Mo1" />
+			<attr value="PK:GF" color="(167,248,234)" label="PK:GF" />
+			<attr value="PK:Mm1" color="(157,216,139)" label="PK:Mm1" />
+			<attr value="PK:Pm1" color="(146,185,45)" label="PK:Pm1" />
+			<attr value="PK:Sm1" color="(136,153,206)" label="PK:Sm1" />
+			<attr value="SFDF:Gc2" color="(125,122,111)" label="SFDF:Gc2" />
+			<attr value="SFDF:GF" color="(115,90,17)" label="SFDF:GF" />
+			<attr value="SFDF:Gm2" color="(104,59,178)" label="SFDF:Gm2" />
+			<attr value="SFDF:Lc2" color="(94,27,83)" label="SFDF:Lc2" />
+			<attr value="SFDF:Lm2" color="(83,251,244)" label="SFDF:Lm2" />
+			<attr value="SFDF:Mc2" color="(73,220,150)" label="SFDF:Mc2" />
+			<attr value="SFDF:Mm2" color="(62,188,55)" label="SFDF:Mm2" />
+			<attr value="SFDF:Pm1" color="(52,157,216)" label="SFDF:Pm1" />
+			<attr value="SFDF:Sc2" color="(41,125,122)" label="SFDF:Sc2" />
+			<attr value="SFDF:Sm2" color="(127,127,127)" label="SFDF:Sm2" />
+			<attr value="SFDF:Yo" color="(20,62,188)" label="SFDF:Yo" />
+			<attr value="WH:Gc2" color="(10,31,94)" label="WH:Gc2" />
+		</attributes>
+	</field>
+
+	<field col="UNSATIRQ_D"
+		label="Unsatisfied irrigation demand (mm/day)"
+		displayFlag="8"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			if Demand (D) > Available stream flow (ASF), then D-ASF (mm/day)
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="0.682" color="(0,0,210)" label=" &lt;= 0.681818" />
+			<attr minVal="0.682" maxVal="1.36" color="(45,45,218)" label="0.681818 to 1.36364" />
+			<attr minVal="1.36" maxVal="2.05" color="(90,90,226)" label="1.36364 to 2.04545" />
+			<attr minVal="2.05" maxVal="2.73" color="(136,136,234)" label="2.04545 to 2.72727" />
+			<attr minVal="2.73" maxVal="3.41" color="(181,181,242)" label="2.72727 to 3.40909" />
+			<attr minVal="3.41" maxVal="4.09" color="(227,227,227)" label="3.40909 to 4.09091" />
+			<attr minVal="4.09" maxVal="4.77" color="(242,181,181)" label="4.09091 to 4.77273" />
+			<attr minVal="4.77" maxVal="5.45" color="(234,136,136)" label="4.77273 to 5.45455" />
+			<attr minVal="5.45" maxVal="6.14" color="(226,90,90)" label="5.45455 to 6.13636" />
+			<attr minVal="6.14" maxVal="6.82" color="(218,45,45)" label="6.13636 to 6.81818" />
+			<attr minVal="6.82" maxVal="7.5e+006" color="(210,0,0)" label=" &gt; 6.81818" />
+		</attributes>
+	</field>
+
+	<field col="IRRALLO_D"
+		label="Allocated irrigation water (mm/day)"
+		displayFlag="8"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			mm/day
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="0.682" color="(0,0,210)" label=" &lt;= 0.681818" />
+			<attr minVal="0.682" maxVal="1.36" color="(45,45,218)" label="0.681818 to 1.36364" />
+			<attr minVal="1.36" maxVal="2.05" color="(90,90,226)" label="1.36364 to 2.04545" />
+			<attr minVal="2.05" maxVal="2.73" color="(136,136,234)" label="2.04545 to 2.72727" />
+			<attr minVal="2.73" maxVal="3.41" color="(181,181,242)" label="2.72727 to 3.40909" />
+			<attr minVal="3.41" maxVal="4.09" color="(227,227,227)" label="3.40909 to 4.09091" />
+			<attr minVal="4.09" maxVal="4.77" color="(242,181,181)" label="4.09091 to 4.77273" />
+			<attr minVal="4.77" maxVal="5.45" color="(234,136,136)" label="4.77273 to 5.45455" />
+			<attr minVal="5.45" maxVal="6.14" color="(226,90,90)" label="5.45455 to 6.13636" />
+			<attr minVal="6.14" maxVal="6.82" color="(218,45,45)" label="6.13636 to 6.81818" />
+			<attr minVal="6.82" maxVal="7.5e+006" color="(210,0,0)" label=" &gt; 6.81818" />
+		</attributes>
+	</field>
+
+	<field col="IRRACRQ_D"
+		label="Actual irrigation request (mm/day)"
+		displayFlag="8"
+		datatype="Double"
+		mfiType="0"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+		<description>
+			When IRRIGATION decision and appropriation date are yes (mm/day)
+		</description>
+		<source>
+			
+		</source>
+		<attributes>
+			<attr minVal="0" maxVal="0.682" color="(0,0,210)" label=" &lt;= 0.681818" />
+			<attr minVal="0.682" maxVal="1.36" color="(45,45,218)" label="0.681818 to 1.36364" />
+			<attr minVal="1.36" maxVal="2.05" color="(90,90,226)" label="1.36364 to 2.04545" />
+			<attr minVal="2.05" maxVal="2.73" color="(136,136,234)" label="2.04545 to 2.72727" />
+			<attr minVal="2.73" maxVal="3.41" color="(181,181,242)" label="2.72727 to 3.40909" />
+			<attr minVal="3.41" maxVal="4.09" color="(227,227,227)" label="3.40909 to 4.09091" />
+			<attr minVal="4.09" maxVal="4.77" color="(242,181,181)" label="4.09091 to 4.77273" />
+			<attr minVal="4.77" maxVal="5.45" color="(234,136,136)" label="4.77273 to 5.45455" />
+			<attr minVal="5.45" maxVal="6.14" color="(226,90,90)" label="5.45455 to 6.13636" />
+			<attr minVal="6.14" maxVal="6.82" color="(218,45,45)" label="6.13636 to 6.81818" />
+			<attr minVal="6.82" maxVal="7.5e+006" color="(210,0,0)" label=" &gt; 6.81818" />
+		</attributes>
+	</field>
+
+  <field col="KUCHLER"
+		label="KUCHLER"
+		displayFlag="0"
+		datatype="Integer"
+		mfiType="1"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="1"
+		decadalMaps="0"
+		useInSiteAttr="1"
+		useInOutcomes="1">
+    <description>
+      Kuchler vegetation class
+    </description>
+    <source>
+
+    </source>
+    <attributes>
+      <attr value="unclassified" color="(192,192,192)" label="unclassified" />
+      <attr value="2" color="(0,115,76)" label="2 Cedar/Hemlock/Douglas-fir" />
+      <attr value="3" color="(0,168,132)" label="3 Silver fir/Douglas-fir" />
+      <attr value="4" color="(0,197,255)" label="4 Fir/Hemlock" />
+      <attr value="25" color="(0,98,0)" label="25 Alder/Ash" />
+      <attr value="28" color="(63,127,0)" label="28 Mosaic of #2 and #26" />
+    </attributes>
+  </field>
+
+  <field col="HBVCALIB"
+		label="HBVCALIB"
+		displayFlag="0"
+		datatype="Long"
+		mfiType="1"
+		binStyle="0"
+		min="-1"
+		 max="-1"
+		results="0"
+		decadalMaps="0"
+		useInSiteAttr="0"
+		useInOutcomes="0">
+    <description>
+
+    </description>
+    <source>
+
+    </source>
+    <attributes>
+      <attr value="0" color="(227,227,227)" label="0 Willamette mainstem" />
+      <attr value="1" color="(220,150,197)" label="1 Hill Creek Reservoir drainage" />
+      <attr value="4" color="(23,69,208)" label="4 Fall Creek Reservoir drainage" />
+      <attr value="5" color="(173,11,34)" label="5 Dorena Reservoir drainage" />
+      <attr value="6" color="(139,162,231)" label="6 Cottage Grove Reservoir drainage" />
+      <attr value="7" color="(127,127,127)" label="7 Fern Ridge Reservoir drainage" />
+      <attr value="8" color="(69,208,115)" label="8 Cougar Reservoir drainage" />
+      <attr value="9" color="(34,104,57)" label="9 Blue River Reservoir drainage" />
+      <attr value="10" color="(150,197,81)" label="10 Green Peter Reservoir drainage" />
+      <attr value="12" color="(115,92,23)" label="12 Detroit Reservoir drainage" />
+      <attr value="13" color="(255,0,0)" label="13 Chicken Creek watershed" />
+      <attr value="23" color="(220,150,197)" label="23 Marys River basin" />
+      <attr value="27" color="(81,243,220)" label="27 Johnson Creek watershed" />
+      <attr value="28" color="(46,139,162)" label="28 Clackamas above River Mill" />
+      <attr value="29" color="(11,34,104)" label="29 Willamette above Salem" />
+      <attr value="34" color="(231,185,46)" label="34 McKenzie above Walterville" />
+      <attr value="35" color="(197,81,243)" label="35 Long Tom above Monroe" />
+      <attr value="36" color="(162,231,185)" label="36 S Santiam above Waterloo" />
+      <attr value="37" color="(127,127,127)" label="37 N Santiam above Mehama" />
+      <attr value="38" color="(92,23,69)" label="38 Middle Fork above Jasper" />
+      <attr value="39" color="(57,173,11)" label="39 Coast Fork above Goshen" />
+      <attr value="41" color="(243,220,150)" label="41 Tualatin above West Linn" />
+      <attr value="42" color="(208,115,92)" label="42 Yamhill above McMinnville" />
+    </attributes>
+  </field>
+
+</fields>

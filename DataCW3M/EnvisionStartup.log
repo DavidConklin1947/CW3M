@@ -1,0 +1,208 @@
+Loading layer C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\IDU_ChickenCreek.shp
+Loaded layer C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\IDU_ChickenCreek.shp
+Loading map layer: ChickenCreek\IDU_ChickenCreek.shp
+Loading layer C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\HRU_ChickenCreek.shp
+Loaded layer C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\HRU_ChickenCreek.shp
+Loading map layer: ChickenCreek\HRU_ChickenCreek.shp
+Loading layer C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\Reach_ChickenCreek.shp
+Loaded layer C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\Reach_ChickenCreek.shp
+Loading map layer: ChickenCreek\Reach_ChickenCreek.shp
+Loading LULC Tree information
+Finished Checking IDU fields
+Loading ResetIRRIGATION(Modeler.dll)
+Loaded Autonomous Process ResetIRRIGATION (Modeler.dll)
+Loading ResetFireDISTURB(Modeler.dll)
+Loaded Autonomous Process ResetFireDISTURB (Modeler.dll)
+Loading ResetCCdisturb(Modeler.dll)
+Loaded Autonomous Process ResetCCdisturb (Modeler.dll)
+Loading ResetHarvestDISTURB(Modeler.dll)
+Loaded Autonomous Process ResetHarvestDISTURB (Modeler.dll)
+Loading ResetVEGTRNTYPE(Modeler.dll)
+Loaded Autonomous Process ResetVEGTRNTYPE (Modeler.dll)
+Loading ResetCropChoice(Modeler.dll)
+Loaded Autonomous Process ResetCropChoice (Modeler.dll)
+Loading GetWeather(APs.dll)
+Loaded Autonomous Process GetWeather (APs.dll)
+Loading PopGrowth(APs.dll)
+Loaded Autonomous Process PopGrowth (APs.dll)
+Loading IrrigationDecision(APs.dll)
+Loaded Autonomous Process IrrigationDecision (APs.dll)
+Loading CropChoice(APs.dll)
+Loaded Autonomous Process CropChoice (APs.dll)
+Loading UrbanWater(APs.dll)
+Loaded Autonomous Process UrbanWater (APs.dll)
+Loading Flow(Flow.dll)
+Loaded Autonomous Process Flow (Flow.dll)
+Loading PVTdisturb(Modeler.dll)
+Loaded Autonomous Process PVTdisturb (Modeler.dll)
+Loading StandDisturbance(SpatialAllocator.dll)
+Loaded Autonomous Process StandDisturbance (SpatialAllocator.dll)
+Loading VegSTMengine(VegSTM.dll)
+Loaded Autonomous Process VegSTMengine (VegSTM.dll)
+Loading FarmlandRent(APs.dll)
+Loaded Autonomous Process FarmlandRent (APs.dll)
+Loading LandUseTransitions(APs.dll)
+Loaded Autonomous Process LandUseTransitions (APs.dll)
+Loading UGAexpansion(APs.dll)
+Loaded Autonomous Process UGAexpansion (APs.dll)
+Loading FishModel(APs.dll)
+Loaded Autonomous Process FishModel (APs.dll)
+Loading YearlyReports(Reporter.dll)
+Loaded Autonomous Process YearlyReports (Reporter.dll)
+Finished loading Field Information - Reconciling data types...
+Loading Policies...
+Loaded 0 policies from C:\Users\Dave\Box\CW3M\DataCW3M\CW3M_ChickenCreek.envx
+Loading Actors...
+Loaded 1 actors from C:\Users\Dave\Box\CW3M\DataCW3M\CW3M_ChickenCreek.envx
+Setting up map layer bins...
+Initializing Models and Processes...
+Initializing ResetIRRIGATION
+Initializing ResetIRRIGATION
+Initialization completed for ResetIRRIGATION
+Initializing ResetFireDISTURB
+Initializing ResetFireDISTURB
+Initialization completed for ResetFireDISTURB
+Initializing ResetCCdisturb
+Initializing ResetCCdisturb
+Initialization completed for ResetCCdisturb
+Initializing ResetHarvestDISTURB
+Initializing ResetHarvestDISTURB
+Initialization completed for ResetHarvestDISTURB
+Initializing ResetVEGTRNTYPE
+Initializing ResetVEGTRNTYPE
+Initialization completed for ResetVEGTRNTYPE
+Initializing ResetCropChoice
+Initializing ResetCropChoice
+Initialization completed for ResetCropChoice
+Initializing GetWeather
+Initializing GetWeather
+Initialization completed for GetWeather
+Initializing PopGrowth
+Initializing PopGrowth
+Initialization completed for PopGrowth
+Initializing IrrigationDecision
+Initializing IrrigationDecision
+Initialization completed for IrrigationDecision
+Initializing CropChoice
+Initializing CropChoice
+Initialization completed for CropChoice
+Initializing UrbanWater
+Initializing UrbanWater
+Initialization completed for UrbanWater
+Initializing Flow
+Initializing Flow
+EvapTrans::LoadXml() loaded 12 crop entries from file C:\Users\Dave\Box\CW3M\DataCW3M\Crops.csv.
+FlowProcess::LoadXml() environment variable CLIMATE_DRIVE = D: Only the first letter matters.
+Flow: Unable to locate Link layer '' - this layer is required for running SWMM.
+Flow: Initializing reaches/catchments/reservoirs/control points
+Success building reach topology for Reach. 24 Nodes (1 roots, 0 phantom)
+*** InitReaches(): Starting to populate the connection attributes now...
+Flow: 24 Catchments, 24 HRUs loaded from 360 polygons
+Flow: Loaded 0 reservoirs (0 were disconnected from the reach network and ignored)
+Flow: Building topology
+AssignReachesToHRUs() starting now...
+AssignReachesToHRUs() ending now.  missed_reaches = 0
+*** SetHRUAttributes() area_below_500m = 42033143.710938, area_500to1200m = 0.000000, area_at_or_above_1200m = 0.000000
+FlowModel::ReadState() Initial Conditions file C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\Flow_ChickenCreek2010.ic successfully read. modelStateVarCount = 252 
+tot_HRU_natural_vol, tot_HRU_other_vol, totReachVol, totReservoirVol = 17319521.845764 0.000000 31783.825635, 0.000000
+FlowModel::ReadState() modelStateVarCount = 252, hruCount = 24, hruLayerCount = 6, reachCount = 24, reservoirCount = 0, numNonzeroReservoirs = 0
+FlowModel::ReadState() CalcTotH2OinReaches() = 31783.825635, CalcTotH2OinReservoirs() = 0.000000, CalcTotH2OinHRUs = 17319521.845764, CalcTotH2O() = 17351305.671399, m_totArea = 0.000000
+Initializing AltWaterMaster
+AltWM::LoadWRDatabase() numPOCDs = 60
+*** LoadWRDatabase() num_pocds_outside_basin = 60, while expected_num_pocds_outside_basin = 1.  This could be due to simulating only a portion of the study area.
+AltWaterMaster::LoadWRDatabase() There were 20162 records in wr_pods.csv for which the reach ComID was not found in the stream layer.
+AltWM::LoadWRDatabase() nIDUs = 359
+length of podArray = 239
+
+*** AltWaterMaster::Init() CalcTotH2OinReaches() = 31783.825635, CalcTotH2OinReservoirs() = 0.000000, CalcTotH2OinHRUs = 17319521.845764, CalcTotH2O() = 17351305.671399
+Flow: Total Area     42.0 km2.  Average catchment area      1.8 km2, Average HRU area      1.8 km2, number of polygons 360
+Flow: Single Run.  3 years. Scenario settings may override. Verify by checking Scenario variables 
+Flow: Processors available=8, Max Processors specified=32, Processors used=7
+Initialization completed for Flow
+Initializing PVTdisturb
+Initializing PVTdisturb
+Initialization completed for PVTdisturb
+Initializing StandDisturbance
+Initializing StandDisturbance
+Spatial Allocator: Loading input file C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\SpatialAllocator_ChickenCreek.xml
+Initialization completed for StandDisturbance
+Initializing VegSTMengine
+Initializing VegSTMengine
+Dynamic Veg:   Loaded 1148 records from 'C:\Users\Dave\Box\CW3M\DataCW3M\probability_transition_lookup.csv'
+VegSTM:   iterating through input table
+VegSTM: Loaded Probability CSV file 'C:\Users\Dave\Box\CW3M\DataCW3M\probability_transition_lookup.csv' (0.03 seconds)
+VegSTM: Loaded Deterministic Transition CSV file 'C:\Users\Dave\Box\CW3M\DataCW3M\deterministic_transition_lookup.csv' (0.01 seconds)
+Initialization completed for VegSTMengine
+Initializing FarmlandRent
+Initializing FarmlandRent
+Initialization completed for FarmlandRent
+Initializing LandUseTransitions
+Initializing LandUseTransitions
+Initialization completed for LandUseTransitions
+Initializing UGAexpansion
+Initializing UGAexpansion
+Initialization completed for UGAexpansion
+Initializing FishModel
+Initializing FishModel
+Initialization completed for FishModel
+Initializing YearlyReports
+Initializing YearlyReports
+Reporter: Loaded 16 ungrouped outputs
+Reporter: Loaded Output Group 'REP Population Analysis' (20 outputs)
+Reporter: Loaded Output Group 'REP test data for climate means' (15 outputs)
+Reporter: Loaded Output Group 'REP NSantiam urban water demand (gal/yr)' (9 outputs)
+Reporter: Loaded Output Group 'REP NSantiam urban water price ($/Kgal)' (9 outputs)
+Reporter: Loaded Output Group 'REP NSantiam municipal water use (gal per year)' (8 outputs)
+Reporter: Loaded Output Group 'REP NSantiam urban water average cost ($/Kgal)' (8 outputs)
+Reporter: Loaded Output Group 'REP NSantiam urban water long term average cost ($/Kgal)' (8 outputs)
+Reporter: Loaded Output Group 'REP NSantiam population' (10 outputs)
+Reporter: Loaded Output Group 'REP Urban Water Total Demand' (4 outputs)
+Reporter: Loaded Output Group 'REP Urban Water Price' (9 outputs)
+Reporter: Loaded Output Group 'REP Urban Water Cost' (10 outputs)
+Reporter: Loaded Output Group 'REP Quick Check (mm H2O)' (14 outputs)
+Reporter: Loaded Output Group 'REP Quick Check (inches H2O ave over irrigated area)' (4 outputs)
+Reporter: Loaded Output Group 'REP Quick Check (ac-ft H2O)' (5 outputs)
+Reporter: Loaded Output Group 'REP Quick Check (ccf H2O per day)' (5 outputs)
+Reporter: Loaded Output Group 'REP Irrigation (number of IDUs)' (6 outputs)
+Reporter: Loaded Output Group 'REP WRB Population' (21 outputs)
+Reporter: Loaded Output Group 'REP Rural Residential Population' (9 outputs)
+Reporter: Loaded Output Group 'REP Forest Harvest-Fire-Disequilibrium (ac)' (12 outputs)
+Reporter: Loaded Output Group 'REP Mean annual temperature (deg C)' (2 outputs)
+Reporter: Loaded Output Group 'REP Forest ET and Precip (mm H2O)' (8 outputs)
+Reporter: Loaded Output Group 'REP Forest ET in N Santiam basin' (28 outputs)
+Reporter: Loaded Output Group 'REP Irrigable Ag Land (ac)' (37 outputs)
+Reporter: Loaded Output Group 'REP Irrigation requested (ac-ft)' (37 outputs)
+Reporter: Loaded Output Group 'REP Irrigation allocated (ac-ft)' (37 outputs)
+Reporter: Loaded Output Group 'REP Unexercised water rights (ac)' (25 outputs)
+Reporter: Loaded Output Group 'REP Instream Water Right Available Water Metric (frac of regulatory demand of most junior WR)' (14 outputs)
+Reporter: Loaded Output Group 'REP Urban Areas' (8 outputs)
+Reporter: Loaded Output Group 'REP New Irrigation Water Rights' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Rent Premium Metrics' (26 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Marys (63911)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Pudding (125531)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Main (95352)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Main (42361)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Main (47847)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Main (53318)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Main (46864)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Pudding (110434)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Pudding (102929)' (8 outputs)
+Reporter: Loaded Output Group 'REP Irrigation Pudding (107345)' (8 outputs)
+Reporter: Loaded Output Group 'Land Areas by Crop (acres)' (11 outputs)
+Reporter: Loaded Output Group 'Land Areas by Potentially Irrigated Crop (acres)' (10 outputs)
+Reporter: Loaded Output Group 'Annual Basin Maximum ET and Actual ET by Crop (mm)' (20 outputs)
+Reporter: Loaded Output Group 'Annual Basin Maximum ET and Actual ET by Irrigated Crop (mm)' (20 outputs)
+Reporter: Loaded Output Group 'REP Crop planting and harvest dates (Julian day, Jan 1 = 1)' (18 outputs)
+Reporter: Loaded Output Group 'REP Study Area Snowpack and Corvallis precip' (9 outputs)
+Reporter: Loaded Output Group 'REP SNOTEL site Apr 1 SWE (mm)' (7 outputs)
+Reporter: Loaded Output Group 'REP Hypsometric mean elev of HRUs with SNOTEL sites (ft)' (15 outputs)
+Reporter: Loaded Output Group 'REP ET and area by LULC_A' (33 outputs)
+Initialization completed for YearlyReports
+
+
+Loading Scenarios...
+Loading Scenarios
+Loaded 7 scenarios from C:\Users\Dave\Box\CW3M\DataCW3M\ChickenCreek\Scenarios_ChickenCreek.xml
+Compiling Policies
+Compiling Policies
+Done loading C:\Users\Dave\Box\CW3M\DataCW3M\CW3M_ChickenCreek.envx

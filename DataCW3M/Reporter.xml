@@ -1,0 +1,896 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<reporter>
+  <const name='m2perAcre' value='4046.86' />
+  <const name="ac_per_m2" value="0.000247105" />
+  <const name="mPermm" value="0.001" />
+  <const name="m3PerAcreFt" value ="1233.48" />
+  <const name="sec_per_day" value="86400" />
+  <const name="ccf_per_m3" value="0.35315" />
+  <const name="gal_per_ccf" value="748.052" />
+  <const name="inches_per_mm" value="0.039370" />
+  <const name="ft_per_m" value="3.28084" />
+
+  <output_group name="REP Population Analysis" >
+    <output name="Total population POP" query="1" value="POP" type="sum" />
+    <output name="Population in UGAs" query="UGB>0" value="POP" type="sum" />
+    <output name="Population in RPAs" query="RPA>0" value="POP" type="sum" />
+    <output name="Population outside the UGAs and RPAs" query="RPA&lt;=0 and UGB&lt;=0" value="POP" type="sum" />
+    <output name="Number of IDUs with population outside the UGAs and RPAs" query="RPA&lt;=0 and UGB&lt;=0 and POP!=0" value="1" type="sum" />
+    <output name="BentonCo pop" query="COUNTYID=1" value="POP" type="sum" />
+    <output name="ClackamasCo pop" query="COUNTYID=2" value="POP" type="sum" />
+    <output name="ColumbiaCo pop" query="COUNTYID=-3" value="POP" type="sum" />
+    <output name="DeschutesCo pop" query="COUNTYID=-4" value="POP" type="sum" />
+    <output name="DouglasCo pop" query="COUNTYID=3" value="POP" type="sum" />
+    <output name="LaneCo pop" query="COUNTYID=4" value="POP" type="sum" />
+    <output name="LincolnCo pop" query="COUNTYID=5" value="POP" type="sum" />
+    <output name="LinnCo pop" query="COUNTYID=6" value="POP" type="sum" />
+    <output name="MarionCo pop" query="COUNTYID=7" value="POP" type="sum" />
+    <output name="MultnomahCo pop" query="COUNTYID=8" value="POP" type="sum" />
+    <output name="PolkCo pop" query="COUNTYID=9" value="POP" type="sum" />
+    <output name="TillamookCo pop" query="COUNTYID=10" value="POP" type="sum" />
+    <output name="WascoCo pop" query="COUNTYID=-13" value="POP" type="sum" />
+    <output name="WashingtonCo pop" query="COUNTYID=11" value="POP" type="sum" />
+    <output name="YamhillCo pop" query="COUNTYID=12" value="POP" type="sum" />
+  </output_group>
+  
+  <output_group name="REP test data for climate means" >
+    <output name="Number of Ag IDUs" query="LULC_A=2" value="1" type="sum" />
+    <output name="Total area of Ag IDUs (ac)" query="LULC_A=2" value="AREA/4046.86" type="sum" />
+    <output name="Number of AgBasin IDUs " query="TMIN_GROW&gt;-96" value="1" type="sum" />
+    <output name="Total area of AgBasin IDUs " query="TMIN_GROW&gt;-96" value="AREA/4046.86" type="sum" />
+    <output name="TMINGROAVG" query="TMIN_GROW&gt;-96" value="TMINGROAVG" type="areaWtMean" />
+    <output name="PRCPGROAVG" query="TMIN_GROW&gt;-96" value="PRCPGROAVG" type="areaWtMean" />
+    <output name="PRCPJUNAVG" query="TMIN_GROW&gt;-96" value="PRCPJUNAVG" type="areaWtMean" />
+    <output name="PRCPJULAVG" query="TMIN_GROW&gt;-96" value="PRCPJULAVG" type="areaWtMean" />
+    <output name="PRCPAUGAVG" query="TMIN_GROW&gt;-96" value="PRCPAUGAVG" type="areaWtMean" />
+    <output name="PRCPWINTER" query="TMIN_GROW&gt;-96" value="PRCPWINTER" type="areaWtMean" />
+    <output name="PRCPSPRING" query="TMIN_GROW&gt;-96" value="PRCPSPRING" type="areaWtMean" />
+    <output name="PRCP_GROW" query="TMIN_GROW&gt;-96" value="PRCP_GROW" type="areaWtMean" />
+    <output name="PRCP_JUN" query="TMIN_GROW&gt;-96" value="PRCP_JUN" type="areaWtMean" />
+    <output name="PRCP_JUL" query="TMIN_GROW&gt;-96" value="PRCP_JUL" type="areaWtMean" />
+    <output name="PRCP_AUG" query="TMIN_GROW&gt;-96" value="PRCP_AUG" type="areaWtMean" />
+  </output_group>
+
+  <output_group name="REP NSantiam urban water demand (gal/yr)" >
+    <output name="Stayton (gal/yr)" query="UGB=62" value="H2ORESIDNT*365*gal_per_ccf" type="sum" />
+    <output name="Lyons (gal/yr)" query="UGB=38" value="H2ORESIDNT*365*gal_per_ccf" type="sum" />
+    <output name="Mill City (gal/yr)" query="UGB=41" value="H2ORESIDNT*365*gal_per_ccf" type="sum" />
+    <output name="Gates (gal/yr)" query="UGB=26" value="H2ORESIDNT*365*gal_per_ccf" type="sum" />
+    <output name="Detroit (gal/yr)" query="UGB=17" value="H2ORESIDNT*365*gal_per_ccf" type="sum" />
+    <output name="Idanha (gal/yr)" query="UGB=31" value="H2ORESIDNT*365*gal_per_ccf" type="sum" />
+    <output name="Salem-Keiser residential (gal/yr)" query="UGB=51" value="H2ORESIDNT*365*gal_per_ccf" type="sum" />
+    <output name="Salem-Keiser commercial-industrial (gal/yr)" query="UGB=51" value="H2OINDCOMM*365*gal_per_ccf" type="sum" />
+    <output name="Turner (gal/yr)" query="UGB=66" value="H2ORESIDNT*365*gal_per_ccf" type="sum" />
+  </output_group>
+
+  <output_group name="REP NSantiam urban water price ($/Kgal)" >
+    <output name="Stayton ($/Kgal)" query="UGB=62" value="H2OPRICRES*1000/gal_per_ccf" type="AREAWTMEAN" />
+    <output name="Lyons ($/Kgal)" query="UGB=38" value="H2OPRICRES*1000/gal_per_ccf" type="AREAWTMEAN" />
+    <output name="Mill City ($/Kgal)" query="UGB=41" value="H2OPRICRES*1000/gal_per_ccf" type="AREAWTMEAN" />
+    <output name="Gates ($/Kgal)" query="UGB=26" value="H2OPRICRES*1000/gal_per_ccf" type="AREAWTMEAN" />
+    <output name="Detroit ($/Kgal)" query="UGB=17" value="H2OPRICRES*1000/gal_per_ccf" type="AREAWTMEAN" />
+    <output name="Idanha ($/Kgal)" query="UGB=31" value="H2OPRICRES*1000/gal_per_ccf" type="AREAWTMEAN" />
+    <output name="Salem-Keiser residential ($/Kgal)" query="UGB=51" value="H2OPRICRES*1000/gal_per_ccf" type="AREAWTMEAN" />
+    <output name="Salem-Keiser industrial ($/Kgal)" query="UGB=51" value="H2OPRICIND*1000/gal_per_ccf" type="AREAWTMEAN" />
+    <output name="Turner ($/Kgal)" query="UGB=66" value="H2OPRICRES*1000/gal_per_ccf" type="AREAWTMEAN" />
+  </output_group>
+
+  <output_group name="REP NSantiam municipal water use (gal per year)" >
+    <output name="Stayton (gal/year)" query="UGB=62" value="GAL_CAP_DY*POP*365" type="sum" />
+    <output name="Lyons (gal/year)" query="UGB=38" value="GAL_CAP_DY*POP*365" type="sum" />
+    <output name="Mill City (gal/year)" query="UGB=41" value="GAL_CAP_DY*POP*365" type="sum" />
+    <output name="Gates (gal/year)" query="UGB=26" value="GAL_CAP_DY*POP*365" type="sum" />
+    <output name="Detroit (gal/year)" query="UGB=17" value="GAL_CAP_DY*POP*365" type="sum" />
+    <output name="Idanha (gal/year)" query="UGB=31" value="GAL_CAP_DY*POP*365" type="sum" />
+    <output name="Salem-Keiser (gal/year)" query="UGB=51" value="GAL_CAP_DY*POP*365" type="sum"  />
+    <output name="Turner (gal/year)" query="UGB=66" value="GAL_CAP_DY*POP*365" type="sum" />
+  </output_group>
+
+  <output_group name="REP NSantiam urban water average cost ($/Kgal)" >
+    <output name="Stayton ($/Kgal)" query="UGB=62" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Lyons ($/Kgal)" query="UGB=38" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Mill City ($/Kgal)" query="UGB=41" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Gates ($/Kgal)" query="UGB=26" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Detroit ($/Kgal)" query="UGB=17" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Idanha ($/Kgal)" query="UGB=31" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Salem-Keiser ($/Kgal)" query="UGB=51" value="UW_AC" type="AREAWTMEAN"  />
+    <output name="Turner ($/Kgal)" query="UGB=66" value="UW_AC" type="AREAWTMEAN" />
+  </output_group>
+
+  <output_group name="REP NSantiam urban water long term average cost ($/Kgal)" >
+    <output name="Stayton ($/Kgal)" query="UGB=62" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Lyons ($/Kgal)" query="UGB=38" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Mill City ($/Kgal)" query="UGB=41" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Gates ($/Kgal)" query="UGB=26" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Detroit ($/Kgal)" query="UGB=17" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Idanha ($/Kgal)" query="UGB=31" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Salem-Keiser ($/Kgal)" query="UGB=51" value="UW_LRAC" type="AREAWTMEAN"  />
+    <output name="Turner ($/Kgal)" query="UGB=66" value="UW_LRAC" type="AREAWTMEAN" />
+  </output_group>
+
+  <output_group name="REP NSantiam population" >
+    <output name="Jefferson" query="UGB=33" value="POP" type="SUM" />
+    <output name="Stayton" query="UGB=62" value="POP" type="SUM" />
+    <output name="Lyons" query="UGB=38" value="POP" type="SUM" />
+    <output name="Mill City" query="UGB=41" value="POP" type="SUM" />
+    <output name="Gates" query="UGB=26" value="POP" type="SUM" />
+    <output name="Detroit" query="UGB=17" value="POP" type="SUM" />
+    <output name="Idanha" query="UGB=31" value="POP" type="SUM" />
+    <output name="Salem-Keiser" query="UGB=51" value="POP" type="SUM"  />
+    <output name="Turner" query="UGB=66" value="POP" type="SUM" />
+    <output name="Albany-Millersburg" query="UGB=2" value="POP" type="SUM" />
+  </output_group>
+
+  <output_group name="REP Urban Water Total Demand" >
+    <output name="Total urban residential demand (ccf/day)" query="UGB>0" value="H2ORESIDNT" type="sum" />
+    <output name="Total industrial/commercial demand (ccf/day)" query="UGB=40 {Metro} or UGB=12 {Corvallis} or UGB=22 {Eugene/Springfield} or UGB=51 {Salem/Keiser}" value="H2OINDCOMM" type="sum" />
+    <output name="Total rural residential demand (ccf/day)" query="UGB=0" value="H2ORESIDNT" type="sum" />
+    <output name="Total Water Demand (ccf/day)" query="Area &gt; 0" value="H2ORESIDNT+H2OINDCOMM" type="sum" />
+  </output_group>
+
+  <output_group name="REP Urban Water Price" >
+    <output name="Metro priceRes ($/ccf)" query="UGB=40 {Metro}" value="H2OPRICRES" type="AREAWTMEAN" />
+    <output name="Eugene-Springfield priceRes ($/ccf)" query="UGB=22 {Eugene/Springfield}" value="H2OPRICRES" type="AREAWTMEAN" />
+    <output name="Salem-Keizer priceRes ($/ccf)" query="UGB=51 {Salem-Keizer}" value="H2OPRICRES" type="AREAWTMEAN" />
+    <output name="Corvallis priceRes ($/ccf)" query="UGB=12 {Corvallis}" value="H2OPRICRES" type="AREAWTMEAN" />
+    <output name="Albany priceRes ($/ccf)" query="UGB=2 {Albany}" value="H2OPRICRES" type="AREAWTMEAN" />
+    <output name="Metro priceNonRes ($/ccf)" query="UGB=40 {Metro}" value="H2OPRICIND" type="AREAWTMEAN" />
+    <output name="Eugene-Springfield priceNonRes ($/ccf)" query="UGB=22 {Eugene/Springfield}" value="H2OPRICIND" type="AREAWTMEAN" />
+    <output name="Salem-Keizer priceNonRes ($/ccf)" query="UGB=51 {Salem-Keizer}" value="H2OPRICIND" type="AREAWTMEAN" />
+    <output name="Corvallis priceNonRes ($/ccf)" query="UGB=12 {Corvallis}" value="H2OPRICIND" type="AREAWTMEAN" />
+  </output_group>
+
+  <output_group name="REP Urban Water Cost" >
+    <output name="Metro LRAC ($/ccf)" query="UGB=40 {Metro}" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Eugene-Springfield LRAC ($/ccf)" query="UGB=22 {Eugene-Springfield}" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Salem-Keizer LRAC ($/ccf)" query="UGB=51 {Salem-Keizer}" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Corvallis LRAC ($/ccf)" query="UGB=12 {Corvallis}" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Albany LRAC ($/ccf)" query="UGB=2 {Albany}" value="UW_LRAC" type="AREAWTMEAN" />
+    <output name="Metro AC ($/ccf)" query="UGB=40 {Metro}" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Eugene-Springfield AC ($/ccf)" query="UGB=22 {Eugene-Springfield}" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Salem-Keizer AC ($/ccf)" query="UGB=51 {Salem-Keizer}" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Corvallis AC ($/ccf)" query="UGB=12 {Corvallis}" value="UW_AC" type="AREAWTMEAN" />
+    <output name="Albany AC ($/ccf)" query="UGB=2 {Albany}" value="UW_AC" type="AREAWTMEAN" />
+  </output_group>
+
+
+  <output_group name="REP Quick Check (mm H2O)">
+    <output name="Precip (mm H2O)" query="1" value ="PRECIP_YR" type="areaWtMean"/>
+    <output name="GW pumping (mm H2O)"  query="1" value="((IRGWAF_Y*m3PerAcreFt+GWMUNALL_Y)/AREA)*1000." type="areaWtMean"  />
+    <output name="AET (mm H2O)" query="1" value="ET_YR" type="areaWtMean" />
+    <output name="SNOWEVAP_Y (mm H2O)" query="1" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="RAINEVAP_Y (mm H2O)" query="1" value="RAINEVAP_Y" type="areaWtMean" />
+    <output name="Runoff as Precip plus GW minus AET minus RAINEVAP minus SNOWEVAP (mm H2O)"  query="1" value="PRECIP_YR + ((IRGWAF_Y*m3PerAcreFt + GWMUNALL_Y)/AREA)*1000. - ET_YR - SNOWEVAP_Y - RAINEVAP_Y" type="areaWtMean"  />
+    <output name="ET_YR in forest (mm H2O)" query="LULC_A=4 and PVT>0" value="ET_YR" type="areaWtMean" />
+    <output name="SNOWEVAP_Y in forest (mm H2O)" query="LULC_A=4 and PVT>0" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="RAINEVAP_Y in forest (mm H2O)" query="LULC_A=4 and PVT>0" value="RAINEVAP_Y" type="areaWtMean" />
+    <output name="ET_YR in ag (mm H2O)" query="LULC_A=2" value="ET_YR" type="areaWtMean" />
+    <output name="SNOWEVAP_Y in ag (mm H2O)" query="LULC_A=2" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="RAINEVAP_Y in ag (mm H2O)" query="LULC_A=2" value="RAINEVAP_Y" type="areaWtMean" />
+    <output name="MAX_ET_YR in forest (mm H2O)" query="LULC_A=4 and PVT>0" value="MAX_ET_YR" type="areaWtMean" />
+    <output name="MAX_ET_YR in ag (mm H2O)" query="LULC_A=2" value="MAX_ET_YR" type="areaWtMean" />
+  </output_group>
+  
+  <output_group name="REP Quick Check (inches H2O ave over irrigated area)">
+    <output name="AET (inches H2O ave over irrigated area)" query="IRRIGATION=1" value="ET_YR*inches_per_mm" type="areaWtMean" />
+    <output name="Precip (inches H2O ave over irrigated area)" query="IRRIGATION=1" value ="PRECIP_YR*inches_per_mm" type="areaWtMean"/>
+    <output  name="Irrigation (inches H2O ave over irrigated area)"  query="IRRIGATION=1" value="(IRRALAF_Y*m3PerAcreFt/AREA)*1000.*inches_per_mm" type="areaWtMean"  />
+    <output  name="Irrigation from GW (inches H2O ave over irrigated area)"  query="IRRIGATION=1" value="(IRGWAF_Y*m3PerAcreFt/AREA)*1000.*inches_per_mm" type="areaWtMean"  />
+  </output_group>
+
+  <output_group name="REP Quick Check (ac-ft H2O)">
+    <output  name="Irrigation (ac-ft H2O)"  query="1" value="IRRALAF_Y" type="sum"  />
+    <output  name="Irrigation from SW (ac-ft H2O)"  query="1" value="IRSWAF_Y" type="sum"  />
+    <output  name="Irrigation from GW (ac-ft H2O)"  query="1" value="IRGWAF_Y" type="sum"  />
+    <output  name="Urban water from SW (ac-ft H2O)"  query="1" value="SWMUNALL_Y/m3PerAcreFt" type="sum"  />
+    <output  name="Urban water from GW (ac-ft H2O)"  query="1" value="GWMUNALL_Y/m3PerAcreFt" type="sum"  />
+  </output_group>
+  
+  <output_group name="REP Quick Check (ccf H2O per day)">
+    <output name="H2ORESIDNT demand (ccf H2O per day)" query="1" value="H2ORESIDNT" type="sum" />
+    <output name="H2OINDCOMM demand (ccf H2O per day)" query="1" value="H2OINDCOMM" type="sum" />
+    <output  name="GAL_CAP_DYxPOP (ccf H2O per day)"  query="1" value="GAL_CAP_DY*POP/gal_per_ccf" type="sum"  />
+    <output  name="Rural domestic H2O demand without WR (ccf H2O per day)"  query="POP>0 and UGB=0 and WR_MUNI=0" value="H2ORESIDNT" type="sum"  />
+    <output name="Rural domestic H2O supplied without WR (ccf H2O per day)" query="POP>0 and UGB=0 and WR_MUNI=0" value="GAL_CAP_DY*POP/gal_per_ccf" type="sum" />
+  </output_group>
+
+  <output_group name="REP Irrigation (number of IDUs)">
+    <output  name="Groundwater irrigation water rights WR_IRRIG_G=1 (number of IDUs)"  query="WR_IRRIG_G=1" value="WR_IRRIG_G" type="sum"  />
+    <output  name="Surface water irrigation water rights WR_IRRIG_S=1 (number of IDUs)"  query="WR_IRRIG_S=1" value="WR_IRRIG_S" type="sum"  />
+    <output  name="Decision to irrigate IRRIGATION=1 (number of IDUs)"  query="IRRIGATION=1" value="IRRIGATION" type="sum"  />
+    <output  name="Transient irrigation water shortages WR_SHORTG=1 (number of IDUs)"  query="WR_SHORTG=1" value="WR_SHORTG" type="sum"  />
+    <output  name="Persistent irrigation water shortages WR_SHORTG=2 (number of IDUs)"  query="WR_SHORTG=2" value="WR_SHORTG/2" type="sum"  />
+    <output  name="Water right shutoffs WR_SHUTOFF=1 (number of IDUs)"  query="1" value="WR_SHUTOFF" type="sum"  />
+  </output_group>
+
+  <output_group name="REP WRB Population" >
+    <output name="Population in UGAs" query="UGB>0" value="POP" type="sum" />
+    <output name="Rural population in RPAs" query="UGB&lt;=0 and RPA>0" value="POP" type="sum" />
+    <output name="Rural population outside of RPAs" query="UGB&lt;=0 and RPA&lt;=0" value="POP" type="sum" />
+    <output name="Total population" query="1" value="POP" type="sum" />
+    <output name="Metro UGB pop" query="UGB=40" value="POP" type="sum" />
+    <output name="Eugene-Springfield UGB pop" query="UGB=22" value="POP" type="sum" />
+    <output name="Salem UGB pop" query="UGB=51" value="POP" type="sum" />
+    <output name="Corvallis UGB pop" query="UGB=12" value="POP" type="sum" />
+    <output name="Albany UGB pop" query="UGB=2" value="POP" type="sum" />
+    <output name="McMinnville UGB pop" query="UGB=39" value="POP" type="sum" />
+    <output name="Newberg UGB pop" query="UGB=47" value="POP" type="sum" />
+    <output name="Woodburn UGB pop" query="UGB=71" value="POP" type="sum" />
+    <output name="BentonCo pop" query="COUNTYID=1" value="POP" type="sum" />
+    <output name="ClackamasCo pop" query="COUNTYID=2" value="POP" type="sum" />
+    <output name="LaneCo pop" query="COUNTYID=4" value="POP" type="sum" />
+    <output name="LinnCo pop" query="COUNTYID=6" value="POP" type="sum" />
+    <output name="MarionCo pop" query="COUNTYID=7" value="POP" type="sum" />
+    <output name="MultnomahCo pop" query="COUNTYID=8" value="POP" type="sum" />
+    <output name="PolkCo pop" query="COUNTYID=9" value="POP" type="sum" />
+    <output name="WashingtonCo pop" query="COUNTYID=11" value="POP" type="sum" />
+    <output name="YamhillCo pop" query="COUNTYID=12" value="POP" type="sum" />
+  </output_group>
+<!--
+  <output_group name="REP RPA Population" >
+    <output name="BentonCo RPApop" query="COUNTYID=1 AND RPA>0" value="POP" type="sum" />
+    <output name="ClackamasCo RPApop" query="COUNTYID=2 AND RPA>0" value="POP" type="sum" />
+    <output name="LaneCo RPApop" query="COUNTYID=4 AND RPA>0" value="POP" type="sum" />
+    <output name="LinnCo RPApop" query="COUNTYID=6 AND RPA>0" value="POP" type="sum" />
+    <output name="MarionCo RPApop" query="COUNTYID=7 AND RPA>0" value="POP" type="sum" />
+    <output name="MultnomahCo RPApop" query="COUNTYID=8 AND RPA>0" value="POP" type="sum" />
+    <output name="PolkCo RPApop" query="COUNTYID=9 AND RPA>0" value="POP" type="sum" />
+    <output name="WashingtonCo RPApop" query="COUNTYID=11 AND RPA>0" value="POP" type="sum" />
+    <output name="YamhillCo RPApop" query="COUNTYID=12 AND RPA>0" value="POP" type="sum" />
+  </output_group>
+-->
+
+  <output_group name="REP Rural Residential Population" >
+    <output name="BentonCo RRpop (persons)" query="COUNTYID=1 AND UGB=0" value="POP" type="sum" />
+    <output name="ClackamasCo RRpop (persons)" query="COUNTYID=2 AND UGB=0" value="POP" type="sum" />
+    <output name="LaneCo RRpop (persons)" query="COUNTYID=4 AND UGB=0" value="POP" type="sum" />
+    <output name="LinnCo RRpop (persons)" query="COUNTYID=6 AND UGB=0" value="POP" type="sum" />
+    <output name="MarionCo RRpop (persons)" query="COUNTYID=7 AND UGB=0" value="POP" type="sum" />
+    <output name="MultnomahCo RRpop (persons)" query="COUNTYID=8 AND UGB=0" value="POP" type="sum" />
+    <output name="PolkCo RRpop (persons)" query="COUNTYID=9 AND UGB=0" value="POP" type="sum" />
+    <output name="WashingtonCo RRpop (persons)" query="COUNTYID=11 AND UGB=0" value="POP" type="sum" />
+    <output name="YamhillCo RRpop (persons)" query="COUNTYID=12 AND UGB=0" value="POP" type="sum" />
+  </output_group>
+
+  <output_group name="REP Forest Harvest-Fire-Disequilibrium (ac)">
+    <output name="Wildfire (ac)" query="DISTURB=23 {Stand-replacing wildfire}" value="AREA/m2perAcre" type="sum" />
+    <output name="Timber harvest (ac)" query="DISTURB=1 {Harvest} and LULC_A=4 and PVT>0" value="AREA/m2perAcre" type="sum" />
+    <output name="Timber harvest from all public lands (ac)" query="DISTURB=1 {Harvest} and LULC_A=4 and PVT>0 and (OWNER=2 {Federal} or OWNER=3 {State} or OWNER=4 {County})" value="AREA/m2perAcre" type="sum" />
+    <output name="Timber harvest from protected public lands (ac)" query="DISTURB=1 {Harvest} and LULC_A=4 and PVT>0 and (OWNER=2 {Federal} or OWNER=3 {State} or OWNER=4 {County}) and CONSERVE>0" value="AREA/m2perAcre" type="sum" />
+    <output name="Timber harvest from unprotected public lands (ac)" query="DISTURB=1 {Harvest} and LULC_A=4 and PVT>0 and (OWNER=2 {Federal} or OWNER=3 {State} or OWNER=4 {County}) and CONSERVE=0" value="AREA/m2perAcre" type="sum" />
+    <output name="Timber harvest from private lands (ac)" query="DISTURB=1 {Harvest} and LULC_A=4 and PVT>0 and (OWNER=0 {private, non-industrial} or OWNER=1 {private industrial forest})" value="AREA/m2perAcre" type="sum" />
+    <output name="Private timber >= 40 yrs (ac)" query="AGECLASS >= 40 and LULC_A=4 and PVT>0 and (OWNER=0 {private, non-industrial} or OWNER=1 {private industrial forest})" value="AREA/m2perAcre" type="sum" />
+    <output name="All public timber >= 40 and &lt;= 80 yrs (ac)" query="AGECLASS >= 40 and AGECLASS &lt;= 80 and LULC_A=4 and PVT>0 and (OWNER=2 {federal} or OWNER=3 {state} or OWNER=4 {county})" value="AREA/m2perAcre" type="sum" />
+    <output name="Protected public timber >= 40 and &lt;= 80 yrs (ac)" query="AGECLASS >= 40 and AGECLASS &lt;= 80 and LULC_A=4 and PVT>0 and (OWNER=2 {federal} or OWNER=3 {state} or OWNER=4 {county}) and CONSERVE>0" value="AREA/m2perAcre" type="sum" />
+    <output name="Unprotected public timber >= 40 and &lt;= 80 yrs (ac)" query="AGECLASS >= 40 and AGECLASS &lt;= 80 and LULC_A=4  and PVT>0 and (OWNER=2 {federal} or OWNER=3 {state} or OWNER=4 {county}) and CONSERVE=0" value="AREA/m2perAcre" type="sum" />
+    <output name="Unprotected public timber >= 40 ayrs (ac)" query="AGECLASS >= 40 and LULC_A=4 and PVT>0 and (OWNER=2 {federal} or OWNER=3 {state} or OWNER=4 {county}) and CONSERVE=0" value="AREA/m2perAcre" type="sum" />
+    <output name="Forest disequilibrium with climate (ac)" query="LULC_A=4 and PVT>0 and DISTURB>100 and DISTURB&lt;200" value="AREA/m2perAcre" type="sum" />
+  </output_group>
+
+  <!-- Dave Turner's forest water flux outputs -->
+  <output_group name="REP Mean annual temperature (deg C)">
+    <output name="Mean annual temperature of whole WRB (TEMP_YR deg C)" query="1" value="TEMP_YR" type="AREAWTMEAN" />
+    <output name="Mean annual temperature of forests (TEMP_YR deg C)" query="LULC_A=4 and PVT>0" value="TEMP_YR" type="AREAWTMEAN" />
+  </output_group>
+  <output_group name="REP Forest ET and Precip (mm H2O)">
+    <output name="AET (mm)" query="LULC_A=4 and PVT>0" value="ET_yr" type="AREAWTMEAN" />
+    <output name="Maximum ET (mm)" query="LULC_A=4 and PVT>0" value="MAX_ET_yr" type="AREAWTMEAN" />
+    <output name="Precip (mm)" query="LULC_A=4 and PVT>0" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="RAINTHRU_Y (mm H2O)" query="LULC_A=4 and PVT>0" value="RAINTHRU_Y" type="areaWtMean" />
+    <output name="RAINEVAP_Y (mm H2O)" query="LULC_A=4 and PVT>0" value="RAINEVAP_Y" type="areaWtMean" />
+    <output name="SNOWTHRU_Y (mm H2O)" query="LULC_A=4 and PVT>0" value="SNOWTHRU_Y" type="areaWtMean" />
+    <output name="SNOWEVAP_Y (mm H2O)" query="LULC_A=4 and PVT>0" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="TET (mm H2O)" query="LULC_A=4 and PVT>0" value="ET_yr + RAINEVAP_Y + SNOWEVAP_Y" type="areaWtMean" />
+  </output_group>
+
+  <output_group name="REP Forest ET in N Santiam basin">
+    <output name="All AET in HBVCALIB=12 37 44 (mm)" query="HBVCALIB=12 or HBVCALIB=37 or HBVCALIB=44" value="ET_yr" type="AREAWTMEAN" />
+    <output name="All AET in HBVCALIB=44 (mm)" query="HBVCALIB=44" value="ET_yr" type="AREAWTMEAN" />
+    <output name="All AET in HBVCALIB=37 (mm)" query="HBVCALIB=37" value="ET_yr" type="AREAWTMEAN" />
+    <output name="All AET in HBVCALIB=12 (mm)" query="HBVCALIB=12" value="ET_yr" type="AREAWTMEAN" />
+    <output name="Forest AET in HBVCALIB=12 37 44 (mm)" query="LULC_A=4 and (HBVCALIB=12 or HBVCALIB=37 or HBVCALIB=44)" value="ET_yr" type="AREAWTMEAN" />
+    <output name="Forest AET in HBVCALIB=44 (mm)" query="LULC_A=4 and HBVCALIB=44" value="ET_yr" type="AREAWTMEAN" />
+    <output name="Forest AET in HBVCALIB=37 (mm)" query="LULC_A=4 and HBVCALIB=37" value="ET_yr" type="AREAWTMEAN" />
+    <output name="Forest AET in HBVCALIB=12 (mm)" query="LULC_A=4 and HBVCALIB=12" value="ET_yr" type="AREAWTMEAN" />
+    <output name="Precip in HBVCALIB=12 37 44 (mm)" query="HBVCALIB=12 or HBVCALIB=37 or HBVCALIB=44" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="Precip in HBVCALIB=44 (mm)" query="HBVCALIB=44" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="Precip in HBVCALIB=37 (mm)" query="HBVCALIB=37" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="Precip in HBVCALIB=12 (mm)" query="HBVCALIB=12" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="Precip on forests in HBVCALIB=12 37 44 (mm)" query="LULC_A=4 and (HBVCALIB=12 or HBVCALIB=37 or HBVCALIB=44)" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="Precip on forests in HBVCALIB=44 (mm)" query="LULC_A=4 and HBVCALIB=44" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="Precip on forests in HBVCALIB=37 (mm)" query="LULC_A=4 and HBVCALIB=37" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="Precip on forests in HBVCALIB=12 (mm)" query="LULC_A=4 and HBVCALIB=12" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="SNOWEVAP_Y in HBVCALIB=12 37 44 (mm H2O)" query="HBVCALIB=12 or HBVCALIB=37 or HBVCALIB=44" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="SNOWEVAP_Y in HBVCALIB=44 (mm H2O)" query="HBVCALIB=44" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="SNOWEVAP_Y in HBVCALIB=37 (mm H2O)" query="HBVCALIB=37" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="SNOWEVAP_Y in HBVCALIB=12 (mm H2O)" query="HBVCALIB=12" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="Forest SNOWEVAP_Y in HBVCALIB=12 37 44 (mm H2O)" query="LULC_A=4 and (HBVCALIB=12 or HBVCALIB=37 or HBVCALIB=44)" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="Forest SNOWEVAP_Y in HBVCALIB=44 (mm H2O)" query="LULC_A=4 and HBVCALIB=44" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="Forest SNOWEVAP_Y in HBVCALIB=37 (mm H2O)" query="LULC_A=4 and HBVCALIB=37" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="Forest SNOWEVAP_Y in HBVCALIB=12 (mm H2O)" query="LULC_A=4 and HBVCALIB=12" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="Forest LAI in HBVCALIB=12 37 44" query="LULC_A=4 and (HBVCALIB=12 or HBVCALIB=37 or HBVCALIB=44)" value="LAI" type="AREAWTMEAN" />
+    <output name="Forest LAI in HBVCALIB=44" query="LULC_A=4 and HBVCALIB=44" value="LAI" type="AREAWTMEAN" />
+    <output name="Forest LAI in HBVCALIB=37" query="LULC_A=4 and HBVCALIB=37" value="LAI" type="AREAWTMEAN" />
+    <output name="Forest LAI in HBVCALIB=12" query="LULC_A=4 and HBVCALIB=12" value="LAI" type="AREAWTMEAN" />
+  </output_group>
+<!-- 
+  <output_group name="REP McKenzie Basin Forest Snow etc (mm H2O)">
+    <output name="AET (mm)" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="ET_yr" type="AREAWTMEAN" />
+    <output name="Maximum ET (mm)" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="MAX_ET_yr" type="AREAWTMEAN" />
+    <output name="Precip (mm)" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="RAINTHRU_Y (mm H2O)" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="RAINTHRU_Y" type="areaWtMean" />
+    <output name="RAINEVAP_Y (mm H2O)" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="RAINEVAP_Y" type="areaWtMean" />
+    <output name="SNOWTHRU_Y (mm H2O)" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="SNOWTHRU_Y" type="areaWtMean" />
+    <output name="SNOWEVAP_Y (mm H2O)" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="Apr 1 SWE (mm)" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="SNOW_APR" type="AREAWTMEAN" />
+    <output name="LAI" query="LULC_A=4 and PVT>0 and SUB_AREA=1" value="LAI" type="AREAWTMEAN" />
+  </output_group>
+  
+  <output_group name="REP LAI (m2/m2)">
+   <output name="LAI" query="LULC_A=4 and PVT>0" value="LAI" type="AREAWTMEAN" />
+    <output name="LAI on public  lands" query="LULC_A=4 and PVT>0 and (OWNER=2 {Federal} or OWNER=3 {State} or OWNER=4 {County})" value="LAI" type="AREAWTMEAN" />
+    <output name="LAI on private lands" query="LULC_A=4 and PVT>0 and (OWNER=0 {private, non-industrial} or OWNER=1 {private industrial forest})" value="LAI" type="AREAWTMEAN" />    
+  </output_group>
+-->
+  <!-- Bill Jaeger's Econ metrics -->
+  <output_group name="REP Irrigable Ag Land (ac)">
+    <output name="WRB all ag land (ac)" query="LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Willamette mainstem all ag land (ac)" query="SUB_AREA=0 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Mckenzie all ag land (ac)" query="SUB_AREA=1 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Pudding all ag land (ac)" query="SUB_AREA=2 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Clackamas all ag land (ac)" query="SUB_AREA=3 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Longtom all ag land (ac)" query="SUB_AREA=4 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Marys all ag land (ac)" query="SUB_AREA=5 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="North Santiam all ag land (ac)" query="SUB_AREA=6 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="South Santiam all ag land (ac)" query="SUB_AREA=7 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Tualatin all ag land (ac)" query="SUB_AREA=8 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Coast Fork Willamette all ag land (ac)" query="SUB_AREA=9 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Middle Fork Willamette all ag land (ac)" query="SUB_AREA=10 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Yamhill all ag land (ac)" query="SUB_AREA=11 and LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+    <output name="WRB ag land irrigable from surface water" query="LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Mckenzie ag land irrigable from surface water (ac)" query="SUB_AREA=1 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Pudding ag land irrigable from surface water (ac)" query="SUB_AREA=2 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Clackamas ag land irrigable from surface water (ac)" query="SUB_AREA=3 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Longtom ag land irrigable from surface water (ac)" query="SUB_AREA=4 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Marys ag land irrigable from surface water (ac)" query="SUB_AREA=5 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="North Santiam ag land irrigable from surface water (ac)" query="SUB_AREA=6 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="South Santiam ag land irrigable from surface water (ac)" query="SUB_AREA=7 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Tualatin ag land irrigable from surface water (ac)" query="SUB_AREA=8 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Coast Fork Willamette ag land irrigable from surface water (ac)" query="SUB_AREA=9 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Middle Fork Willamette ag land irrigable from surface water (ac)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Yamhill ag land irrigable from surface water (ac)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_S=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="WRB ag land irrigable from ground water" query="LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Mckenzie ag land irrigable from ground water (ac)" query="SUB_AREA=1 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Pudding ag land irrigable from ground water (ac)" query="SUB_AREA=2 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Clackamas ag land irrigable from ground water (ac)" query="SUB_AREA=3 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Longtom ag land irrigable from ground water (ac)" query="SUB_AREA=4 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Marys ag land irrigable from ground water (ac)" query="SUB_AREA=5 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="North Santiam ag land irrigable from ground water (ac)" query="SUB_AREA=6 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="South Santiam ag land irrigable from ground water (ac)" query="SUB_AREA=7 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Tualatin ag land irrigable from ground water (ac)" query="SUB_AREA=8 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Coast Fork Willamette ag land irrigable from ground water (ac)" query="SUB_AREA=9 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Middle Fork Willamette ag land irrigable from ground water (ac)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Yamhill ag land irrigable from ground water (ac)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_G=1" value="AREA*ac_per_m2" type="SUM" />
+  </output_group>
+  <output_group name="REP Irrigation requested (ac-ft)">
+    <output name="WRB ag land irrigation requested from surface water (ac-ft)" query="LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Willamette mainstem ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=0 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Mckenzie ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=1 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Pudding ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=2 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Clackamas ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=3 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Longtom ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=4 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Marys ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=5 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="North Santiam ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=6 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="South Santiam ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=7 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Tualatin ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=8 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Coast Fork Willamette ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=9 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Middle Fork Willamette ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Yamhill ag land irrigation requested from surface water (ac-ft)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="WRB ag land irrigation requested from ground water (ac-ft)" query="LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Mckenzie ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=1 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Pudding ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=2 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Clackamas ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=3 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Longtom ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=4 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Marys ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=5 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="North Santiam ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=6 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="South Santiam ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=7 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Tualatin ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=8 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Coast Fork Willamette ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=9 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Middle Fork Willamette ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Yamhill ag land irrigation requested from ground water (ac-ft)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Metro UGB_MAXPER irrigation requested from surface water (ac-ft)" query="UGB_MAXPER=1 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="McMinnville UGB_MAXPER irrigation requested from surface water (ac-ft)" query="UGB_MAXPER=2 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Salem UGB_MAXPER irrigation requested from surface water (ac-ft)" query="UGB_MAXPER=3 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Albany UGB_MAXPER irrigation requested from surface water (ac-ft)" query="UGB_MAXPER=4 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Corvallis UGB_MAXPER irrigation requested from surface water (ac-ft)" query="UGB_MAXPER=5 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Eugene UGB_MAXPER irrigation requested from surface water (ac-ft)" query="UGB_MAXPER=6 and LULC_A=2 and WR_IRRIG_S=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Metro UGB_MAXPER irrigation requested from groundwater (ac-ft)" query="UGB_MAXPER=1 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="McMinnville UGB_MAXPER irrigation requested from groundwater (ac-ft)" query="UGB_MAXPER=2 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Salem UGB_MAXPER irrigation requested from groundwater (ac-ft)" query="UGB_MAXPER=3 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Albany UGB_MAXPER irrigation requested from groundwater (ac-ft)" query="UGB_MAXPER=4 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Corvallis UGB_MAXPER irrigation requested from groundwater (ac-ft)" query="UGB_MAXPER=5 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+    <output name="Eugene UGB_MAXPER irrigation requested from groundwater (ac-ft)" query="UGB_MAXPER=6 and LULC_A=2 and WR_IRRIG_G=1" value="IRRRQST_Y" type="SUM" />
+  </output_group>
+  <output_group name="REP Irrigation allocated (ac-ft)">
+    <output name="WRB ag land irrigation allocated from surface water (ac-ft)" query="LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Willamette mainstem ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=0 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Mckenzie ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=1 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Pudding ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=2 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Clackamas ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=3 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Longtom ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=4 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Marys ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=5 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="North Santiam ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=6 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="South Santiam ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=7 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Tualatin ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=8 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Coast Fork Willamette ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=9 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Middle Fork Willamette ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Yamhill ag land irrigation allocated from surface water (ac-ft)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="WRB ag land irrigation allocated from ground water (ac-ft)" query="LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Mckenzie ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=1 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Pudding ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=2 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Clackamas ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=3 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Longtom ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=4 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Marys ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=5 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="North Santiam ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=6 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="South Santiam ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=7 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Tualatin ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=8 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Coast Fork Willamette ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=9 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Middle Fork Willamette ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Yamhill ag land irrigation allocated from ground water (ac-ft)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Metro UGB_MAXPER irrigation allocated from surface water (ac-ft)" query="UGB_MAXPER=1 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="McMinnville UGB_MAXPER irrigation allocated from surface water (ac-ft)" query="UGB_MAXPER=2 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Salem UGB_MAXPER irrigation allocated from surface water (ac-ft)" query="UGB_MAXPER=3 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Albany UGB_MAXPER irrigation allocated from surface water (ac-ft)" query="UGB_MAXPER=4 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Corvallis UGB_MAXPER irrigation allocated from surface water (ac-ft)" query="UGB_MAXPER=5 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Eugene UGB_MAXPER irrigation allocated from surface water (ac-ft)" query="UGB_MAXPER=6 and LULC_A=2 and WR_IRRIG_S=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Metro UGB_MAXPER irrigation allocated from groundwater (ac-ft)" query="UGB_MAXPER=1 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="McMinnville UGB_MAXPER irrigation allocated from groundwater (ac-ft)" query="UGB_MAXPER=2 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Salem UGB_MAXPER irrigation allocated from groundwater (ac-ft)" query="UGB_MAXPER=3 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Albany UGB_MAXPER irrigation allocated from groundwater (ac-ft)" query="UGB_MAXPER=4 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Corvallis UGB_MAXPER irrigation allocated from groundwater (ac-ft)" query="UGB_MAXPER=5 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+    <output name="Eugene UGB_MAXPER irrigation allocated from groundwater (ac-ft)" query="UGB_MAXPER=6 and LULC_A=2 and WR_IRRIG_G=1" value="IRRALAF_Y" type="SUM" />
+  </output_group>
+  <output_group name="REP Unexercised water rights (ac)">
+    <output name="WRB ag land unexercised surface water rights (ac)" query="LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Willamette mainstem ag land unexercised surface water rights (ac)" query="SUB_AREA=0 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Mckenzie ag land unexercised surface water rights (ac)" query="SUB_AREA=1 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Pudding ag land unexercised surface water rights (ac)" query="SUB_AREA=2 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Clackamas ag land unexercised surface water rights (ac)" query="SUB_AREA=3 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Longtom ag land unexercised surface water rights (ac)" query="SUB_AREA=4 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Marys ag land unexercised surface water rights (ac)" query="SUB_AREA=5 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="North Santiam ag land unexercised surface water rights (ac)" query="SUB_AREA=6 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="South Santiam ag land unexercised surface water rights (ac)" query="SUB_AREA=7 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Tualatin ag land unexercised surface water rights (ac)" query="SUB_AREA=8 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Coast Fork Willamette ag land unexercised surface water rights (ac)" query="SUB_AREA=9 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Middle Fork Willamette ag land unexercised surface water rights (ac)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Upper Yamhill ag land unexercised surface water rights (ac)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_S=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="WRB ag land unexercised groundwater rights (ac)" query="LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Mckenzie ag land unexercised groundwater rights (ac)" query="SUB_AREA=1 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Pudding ag land unexercised groundwater rights (ac)" query="SUB_AREA=2 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Clackamas ag land unexercised groundwater rights (ac)" query="SUB_AREA=3 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Longtom ag land unexercised groundwater rights (ac)" query="SUB_AREA=4 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Marys ag land unexercised groundwater rights (ac)" query="SUB_AREA=5 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="North Santiam ag land unexercised groundwater rights (ac)" query="SUB_AREA=6 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="South Santiam ag land unexercised groundwater rights (ac)" query="SUB_AREA=7 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Tualatin ag land unexercised groundwater rights (ac)" query="SUB_AREA=8 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Coast Fork Willamette ag land unexercised groundwater rights (ac)" query="SUB_AREA=9 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Middle Fork Willamette ag land unexercised groundwater rights (ac)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+    <output name="Yamhill ag land unexercised groundwater rights (ac)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
+  </output_group>
+<!-- upstream  end
+  <output_group name="REP Instream Water Right Available Water Metric (frac of regulatory demand of most junior WR)">
+    <output name="Available water on Coast Fork Willamette at IDU 17319 (minimum frac)" query="IDU_INDEX=17319" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Middle Fork Willamette at IDU 29023 (minimum frac)" query="IDU_INDEX=29023" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water at jct of Coast and Middle Forks of the Willamette at IDU 28843 (minimum frac)" query="IDU_INDEX=28843" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on McKenzie at IDU 36307 (minimum frac)" query="IDU_INDEX=36307" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Long Tom at IDU 51826 (minimum frac)" query="IDU_INDEX=51826" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Marys at IDU 71675 (minimum frac)" query="IDU_INDEX=71675" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on S. Santiam at IDU 65255 (minimum frac)" query="IDU_INDEX=65255" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on N. Santiam at IDU 82273 (minimum frac)" query="IDU_INDEX=82273" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Santiam at IDU 86904 (minimum frac)" query="IDU_INDEX=86904" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Yamhill at IDU 138005 (minimum frac)" query="IDU_INDEX=138005" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Molalla at IDU 139851 (minimum frac)" query="IDU_INDEX=139851" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Tualatin at IDU 148526 (minimum frac)" query="IDU_INDEX=148526" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Clackamas at IDU 127403 (minimum frac)" query="IDU_INDEX=127403" value="MIN_Q_WRQ" type="SUM" />
+
+    <output name="Available water on Pudding at IDU 140000 (minimum frac)" query="IDU_INDEX=140000" value="MIN_Q_WRQ" type="SUM" />
+  </output_group>
+-->
+  <!-- downstream end -->
+  <output_group name="REP Instream Water Right Available Water Metric (frac of regulatory demand of most junior WR)">
+    <output name="Available water on Coast Fork Willamette at IDU 28621 (minimum frac)" query="IDU_INDEX=28621" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Middle Fork Willamette at IDU 29023 (minimum frac)" query="IDU_INDEX=29023" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water at jct of Coast and Middle Forks of the Willamette at IDU 37242 (minimum frac)" query="IDU_INDEX=37242" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on McKenzie at IDU 37310 (minimum frac)" query="IDU_INDEX=37310" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Long Tom at IDU 51826 (minimum frac)" query="IDU_INDEX=51826" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Marys at IDU 66370 (minimum frac)" query="IDU_INDEX=66370" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on S. Santiam at IDU 80814 (minimum frac)" query="IDU_INDEX=80814" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on N. Santiam at IDU 81292 (minimum frac)" query="IDU_INDEX=81292" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Santiam at IDU 86904 (minimum frac)" query="IDU_INDEX=86904" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Yamhill at IDU 138445 (minimum frac)" query="IDU_INDEX=138445" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Molalla at IDU 144552 (minimum frac)" query="IDU_INDEX=144552" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Tualatin at IDU 147442 (minimum frac)" query="IDU_INDEX=147442" value="MIN_Q_WRQ" type="SUM" />
+    <output name="Available water on Clackamas at IDU 149774 (minimum frac)" query="IDU_INDEX=149774" value="MIN_Q_WRQ" type="SUM" />
+
+    <output name="Available water on Pudding at IDU 140000 (minimum frac)" query="IDU_INDEX=140000" value="MIN_Q_WRQ" type="SUM" />
+  </output_group>
+
+  <output name="REP subbasin tot ac of ag land" query="(LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0)" stratify_by="SUB_AREA" value="AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot ac of irrigable ag land SW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 2 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot ac of irrigable ag land GW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 4 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot SR farm rent" query="(LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0)" stratify_by="SUB_AREA" value="FRMRNT_YR*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot SR farm rent irrigable SW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 2 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="FRMRNT_YR*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot SR farm rent irrigable GW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 4 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="FRMRNT_YR*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot LR farm rent" query="(LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0)" stratify_by="SUB_AREA" value="FRMRNT_LR*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot LR farm rent irrigable SW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 2 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="FRMRNT_LR*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot LR farm rent irrigable GW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 4 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="FRMRNT_LR*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot ag land values" query="(LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0)" stratify_by="SUB_AREA" value="AG_VAL*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot ag land values irrigable SW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 2 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="AG_VAL*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot ag land values irrigable GW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 4 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="AG_VAL*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot ac of forest land" query="LULC_A=4 {For}" stratify_by="SUB_AREA" value="AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot forest land values" query="LULC_A=4 {For}" stratify_by="SUB_AREA" value="FOR_VAL*AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot ac of developed land" query="LULC_A=1 {Dev}" stratify_by="SUB_AREA" value="AREA*ac_per_m2" type="sum" />
+   <output name="REP subbasin tot dev land values" query="LULC_A=1 {Dev}" stratify_by="SUB_AREA" value="DEV_VAL*AREA*ac_per_m2" type="sum" />
+
+     <output_group name="REP Urban Areas" >
+    <output name="Metro UGB area (ac)" query="UGB=40 {Metro}" value="AREA/m2perAcre" type="sum" />
+    <output name="Eugene/Springfield UGB Area (acres)"  query="UGB=22" value="AREA/m2perAcre" type="sum" />
+    <output name="Salem UGB Area (acres)"               query="UGB=51" value="AREA/m2perAcre" type="sum" />
+    <output name="Corvallis UGB Area (acres)"           query="UGB=12" value="AREA/m2perAcre" type="sum" />
+    <output name="Albany UGB Area (acres)"              query="UGB=2"  value="AREA/m2perAcre" type="sum" />
+    <output name="McMinnville UGB Area (acres)"         query="UGB=39" value="AREA/m2perAcre" type="sum" />
+    <output name="Newberg UGB Area (acres)"             query="UGB=47" value="AREA/m2perAcre" type="sum" />
+    <output name="Woodburn UGB Area (acres)"            query="UGB=71" value="AREA/m2perAcre" type="sum" />
+  </output_group>
+
+  <output_group name="REP New Irrigation Water Rights" >
+    <output name="Cumulative count of new water rights" query="WR_PROB &lt; 0" value="1" type="sum" />
+    <output name="Approx average WR_PROB of new water rights" query="WR_PROB &lt; 0" value="-WR_PROB" type="AREAWTMEAN" />
+    <output name="Approx average IRP of new water rights ($ per ac)" query="WR_PROB &lt; 0" value="IRP" type="AREAWTMEAN" />
+    <output name="Approx average ECC of new water rights ($ per ac)" query="WR_PROB &lt; 0" value="ECC" type="AREAWTMEAN" />
+    <output name="Area of new water rights (ac)" query="WR_PROB &lt; 0" value="AREA/m2perAcre" type="sum" />
+    <output name="Count of remaining potential new water rights" query="WR_PROB &gt; 0" value="1" type="sum" />
+    <output name="Approx average WR_PROB of potential water rights" query="WR_PROB &gt; 0" value="WR_PROB" type="AREAWTMEAN" />
+    <output name="Area of potential water rights (ac)" query="WR_PROB &gt; 0" value="AREA/m2perAcre" type="sum" />
+  </output_group>
+
+     <output_group name="REP Irrigation Rent Premium Metrics" >
+       <output name="IRP for WRB ag lands ($)" query="LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for WRB ag lands ($)" query="LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Willamette mainstem basin ($)" query="SUB_AREA=0 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Willamette mainstem basin ($)" query="SUB_AREA=0 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for McKenzie basin ($)" query="SUB_AREA=1 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for McKenzie basin ($)" query="SUB_AREA=1 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Pudding basin ($)" query="SUB_AREA=2 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Pudding basin ($)" query="SUB_AREA=2 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Clackamas basin ($)" query="SUB_AREA=3 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Clackamas basin ($)" query="SUB_AREA=3 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Long Tom basin ($)" query="SUB_AREA=4 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Long Tom basin ($)" query="SUB_AREA=4 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Marys basin ($)" query="SUB_AREA=5 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Marys basin ($)" query="SUB_AREA=5 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for NSantiam basin ($)" query="SUB_AREA=6 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for NSantiam basin ($)" query="SUB_AREA=6 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for SSantiam basin ($)" query="SUB_AREA=7 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for SSantiam basin ($)" query="SUB_AREA=7 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Tualatin basin ($)" query="SUB_AREA=8 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Tualatin basin ($)" query="SUB_AREA=8 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Coast Fork basin ($)" query="SUB_AREA=9 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Coast Fork basin ($)" query="SUB_AREA=9 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Middle Fork basin ($)" query="SUB_AREA=10 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Middle Fork basin ($)" query="SUB_AREA=10 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP for Yamhill basin ($)" query="SUB_AREA=11 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
+       <output name="IRP loss due to WR shutoffs for Yamhill basin ($)" query="SUB_AREA=11 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
+     </output_group>
+     <!-- Metrics for irrigation analysis -->
+<!--
+    <output_group name="REP IDU 90470 Irrigation requested and allocated (ac-ft)">
+      <output name="IDU 90470 irrigation requested from surface water (ac-ft)" query="LULC_A=2 and WR_IRRIG_S=1 and IDU_INDEX=90470" value="IRRRQST_Y" type="SUM" />
+      <output name="IDU 90470 irrigation requested from ground water (ac-ft)" query="LULC_A=2 and WR_IRRIG_G=1 and IDU_INDEX=90470" value="IRRRQST_Y" type="SUM" />
+      <output name="IDU 90470 irrigation allocated from surface water (ac-ft)" query="LULC_A=2 and WR_IRRIG_S=1 and IDU_INDEX=90470" value="IRRRQST_Y" type="SUM" />
+      <output name="IDU 90470 irrigation allocated from ground water (ac-ft)" query="LULC_A=2 and WR_IRRIG_G=1 and IDU_INDEX=90470" value="IRRRQST_Y" type="SUM" />
+    </output_group>
+  <output_group name="REP IDU 90470 ET and Precip (mm H2O)">
+    <output name="AET (mm)" query="IDU_INDEX=90470" value="ET_yr" type="AREAWTMEAN" />
+    <output name="Maximum ET (mm)" query="IDU_INDEX=90470" value="MAX_ET_yr" type="AREAWTMEAN" />
+    <output name="Precip (mm)" query="IDU_INDEX=90470" value="Precip_yr" type="AREAWTMEAN" />
+    <output name="RAINTHRU_Y (mm H2O)" query="IDU_INDEX=90470" value="RAINTHRU_Y" type="areaWtMean" />
+    <output name="RAINEVAP_Y (mm H2O)" query="IDU_INDEX=90470" value="RAINEVAP_Y" type="areaWtMean" />
+    <output name="SNOWTHRU_Y (mm H2O)" query="IDU_INDEX=90470" value="SNOWTHRU_Y" type="areaWtMean" />
+    <output name="SNOWEVAP_Y (mm H2O)" query="IDU_INDEX=90470" value="SNOWEVAP_Y" type="areaWtMean" />
+    <output name="TET (mm H2O)" query="IDU_INDEX=90470" value="ET_yr + RAINEVAP_Y + SNOWEVAP_Y" type="areaWtMean" />
+  </output_group>
+-->
+     <output_group name="REP Irrigation Marys (63911)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=63911" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=63911" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=63911" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=63911" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=63911" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=63911" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=63911" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=63911" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Pudding (125531)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=125531" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=125531" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=125531" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=125531" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=125531" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=125531" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=125531" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=125531" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Main (95352)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=95352" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=95352" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=95352" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=95352" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=95352" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=95352" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=95352" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=95352" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Main (42361)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=42361" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=42361" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=42361" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=42361" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=42361" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=42361" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=42361" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=42361" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Main (47847)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=47847" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=47847" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=47847" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=47847" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=47847" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=47847" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=47847" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=47847" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Main (53318)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=53318" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=53318" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=53318" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=53318" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=53318" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=53318" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=53318" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=53318" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Main (46864)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=46864" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=46864" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=46864" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=46864" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=46864" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=46864" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=46864" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=46864" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Pudding (110434)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=110434" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=110434" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=110434" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=110434" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=110434" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=110434" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=110434" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=110434" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Pudding (102929)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=102929" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=102929" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=102929" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=102929" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=102929" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=102929" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=102929" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=102929" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+     <output_group name="REP Irrigation Pudding (107345)">
+       <output name="Planting Date (DOY)" query="IDU_INDEX=107345" value="PLANTDATE" type="sum" />
+       <output name="WR shutoff day (DOY)" query="IDU_INDEX=107345" value="WR_SH_DAY" type="sum"  />
+       <output name="Harvest Date (DOY)" query="IDU_INDEX=107345" value="HARVDATE" type="sum" />
+       <output name="LULC_B" query="IDU_INDEX=107345" value="LULC_B" type="sum" />
+       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=107345" value="IRRIGATION" type="sum" />
+       <output name="WR SHORTG" query="IDU_INDEX=107345" value="WR_SHORTG" type="sum"  />
+       <output name="WR shutoff" query="IDU_INDEX=107345" value="WR_SHUTOFF" type="sum"  />
+       <output name="WR shutoff index" query="IDU_INDEX=107345" value="WR_SH_NDX" type="sum"  />
+     </output_group>
+
+     <output_group name="Land Areas by Crop (acres)">
+       <output name="Total Ag (ac)" query="LULC_A=2" value="AREA*ac_per_m2" type="sum" />
+       <output name="Total Forest (ac)" query="LULC_A=4" value="AREA*ac_per_m2" type="sum" />
+       <output name="Corn (ac)" query="LULC_B=26" value="AREA*ac_per_m2" type="sum" />
+       <output name="Clover (ac)" query="LULC_B=27" value="AREA*ac_per_m2" type="sum" />
+       <output name="Fallow (ac)" query="LULC_B=25" value="AREA*ac_per_m2" type="sum" />
+       <output name="Grass seed (ac)" query="LULC_B=22" value="AREA*ac_per_m2" type="sum" />
+       <output name="Hay (ac)" query="LULC_B=28" value="AREA*ac_per_m2" type="sum" />
+       <output name="Orchards vineyards and tree farms (ac)" query="LULC_B=21" value="AREA*ac_per_m2" type="sum" />
+       <output name="Other crops (ac)" query="LULC_B=29" value="AREA*ac_per_m2" type="sum" />
+       <output name="Pasture (ac)" query="LULC_B=23" value="AREA*ac_per_m2" type="sum" />
+       <output name="Wheat (ac)" query="LULC_B=24" value="AREA*ac_per_m2" type="sum" />
+     </output_group>
+
+     <output_group name="Land Areas by Potentially Irrigated Crop (acres)">
+       <output name="Total Potentially Irrigated Ag (acres)" query="LULC_A=2 and IRRIGATION=1" value="AREA*ac_per_m2" type="sum" />
+       <output name="Corn Potentially Irrigated (acres)" query="LULC_B=26 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+       <output name="Clover Potentially Irrigated (acres)" query="LULC_B=27 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+       <output name="Fallow Potentially Irrigated (acres)" query="LULC_B=25 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+       <output name="Grass Potentially Irrigated (acres)" query="LULC_B=22 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+       <output name="Hay Potentially Irrigated (acres)" query="LULC_B=28 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+       <output name="Orchards_Vineyards_Tree Farms Potentially Irrigated (acres)" query="LULC_B=21 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+       <output name="Other Crops Potentially Irrigated (acres)" query="LULC_B=29 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+       <output name="Pasture Potentially Irrigated (acres)" query="LULC_B=23 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+       <output name="Wheat Potentially Irrigated (acres)" query="LULC_B=24 and IRRIGATION=1" value="AREA*ac_per_m2" type='sum' />
+     </output_group>
+
+     <output_group name="Annual Basin Maximum ET and Actual ET by Crop (mm)">
+       <output name="Basin ET (mm)" query="LULC_A=2" value="ET_YR" type='areaWtMean' />
+       <output name="Basin Maximum ET (Crop Demand) (mm)" query="LULC_A=2" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Corn ET (mm)" query="LULC_B=26" value="ET_YR" type='areaWtMean' />
+       <output name="Corn Maximum ET  (Crop Demand) (mm)" query="LULC_B=26" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Clover ET (mm)" query="LULC_B=27" value="ET_YR" type='areaWtMean' />
+       <output name="Clover Maximum ET (Crop Demand) (mm)" query="LULC_B=27" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Fallow ET (mm)" query="LULC_B=25" value="ET_YR" type='areaWtMean' />
+       <output name="Fallow Maximum ET (Crop Demand) (mm)" query="LULC_B=25" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Grass ET (mm)" query="LULC_B=22" value="ET_YR" type='areaWtMean' />
+       <output name="Grass Maximum ET (Crop Demand) (mm)" query="LULC_B=22" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Hay ET (mm)" query="LULC_B=28" value="ET_YR" type='areaWtMean' />
+       <output name="Hay Maximum ET (Crop Demand) (mm)" query="LULC_B=28" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Orchards_Vineyards_Tree Farms ET (mm)" query="LULC_B=21" value="ET_YR" type='areaWtMean' />
+       <output name="Orchards_Vineyards_Tree Farms Maximum ET (Crop Demand) (mm)" query="LULC_B=21" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Other Crops ET (mm)" query="LULC_B=29" value="ET_YR" type='areaWtMean' />
+       <output name="Other Crops Maximum ET (Crop Demand) (mm)" query="LULC_B=29" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Pasture ET (mm)" query="LULC_B=23" value="ET_YR" type='areaWtMean' />
+       <output name="Pasture Maximum ET (Crop Demand) (mm)" query="LULC_B=23" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Wheat ET (mm)" query="LULC_B=24" value="ET_YR" type='areaWtMean' />
+       <output name="Wheat Maximum ET (Crop Demand) (mm)" query="LULC_B=24" value="MAX_ET_YR" type='areaWtMean' />
+     </output_group>
+
+     <output_group name="Annual Basin Maximum ET and Actual ET by Irrigated Crop (mm)">
+       <output name="Basin Irrigated ET (mm)" query="IRRIGATION=1 and LULC_A=2 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Basin Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_A=2 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Corn Irrigated ET (mm)" query="IRRIGATION=1 and LULC_B=26 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Corn Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=26 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Clover Irrigated ET (mm)" query="IRRIGATION=1 and LULC_B=27 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Clover Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=27 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Fallow IrrigatedET (mm)" query="IRRIGATION=1 and LULC_B=2 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Fallow Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=2 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Grass Irrigated ET (mm)" query="IRRIGATION=1 and LULC_B=22 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Grass Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=22 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Hay Irrigated ET (mm)" query="IRRIGATION=1 and LULC_B=28 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Hay Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=28 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Orchards_Vineyards_Tree Farms Irrigated ET (mm)" query="IRRIGATION=1 and LULC_B=21 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Orchards_Vineyards_Tree Farms IrrigatedMaximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=21 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Other Crops Irrigated ET (mm)" query="IRRIGATION=1 and LULC_B=29 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Other Crops Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=29 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Pasture Irrigated ET (mm)" query="IRRIGATION=1 and LULC_B=23 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Pasture Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=2 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+       <output name="Wheat Irrigated ET (mm)" query="IRRIGATION=1 and LULC_B=24 and PLANTDATE != 999 and HARVDATE != -999" value="ET_YR" type='areaWtMean' />
+       <output name="Wheat Irrigated Maximum ET (Crop Demand) (mm)" query="IRRIGATION=1 and LULC_B=24 and PLANTDATE != 999 and HARVDATE != -999" value="MAX_ET_YR" type='areaWtMean' />
+     </output_group>
+
+     <output_group name="REP Crop planting and harvest dates (Julian day, Jan 1 = 1)">
+       <output name="Corn planting day" query="IRRIGATION=1 and LULC_B=26 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Corn harvest day" query="IRRIGATION=1 and LULC_B=26 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+
+       <output name="Clover planting day" query="IRRIGATION=1 and LULC_B=27 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Clover harvest day" query="IRRIGATION=1 and LULC_B=27 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+       <output name="Fallow planting day" query="IRRIGATION=1 and LULC_B=2 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Fallow harvest day" query="IRRIGATION=1 and LULC_B=2 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+       <output name="Grass planting day" query="IRRIGATION=1 and LULC_B=22 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Grass harvest day" query="IRRIGATION=1 and LULC_B=22 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+       <output name="Hay planting day" query="IRRIGATION=1 and LULC_B=28 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Hay harvest day" query="IRRIGATION=1 and LULC_B=28 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+       <output name="Orchards_Vineyards_Tree Farms planting day)" query="IRRIGATION=1 and LULC_B=21 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Orchards_Vineyards_Tree Farms harvest day" query="IRRIGATION=1 and LULC_B=21 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+       <output name="Other Crops planting day" query="IRRIGATION=1 and LULC_B=29 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Other Crops harvest day" query="IRRIGATION=1 and LULC_B=29 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+       <output name="Pasture planting day" query="IRRIGATION=1 and LULC_B=23 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Pasture harvest day" query="IRRIGATION=1 and LULC_B=2 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+       <output name="Wheat planting day" query="IRRIGATION=1 and LULC_B=24 and PLANTDATE != 999 and HARVDATE != -999" value="PLANTDATE" type='areaWtMean' />
+       <output name="Wheat harvest day" query="IRRIGATION=1 and LULC_B=24 and PLANTDATE != 999 and HARVDATE != -999" value="HARVDATE" type='areaWtMean' />
+
+     </output_group>
+
+     <!-- end of metrics for irrigation analysis -->
+
+      <output_group name='REP Study Area Snowpack and Corvallis precip' >
+        <output name='Whole study area SNOW_APR (mm SWE)' query='1' value='SNOW_APR' type='AREAWTMEAN' />
+        <output name='Whole study area MAXSNOW (mm SWE)' query='1' value='MAXSNOW' type='AREAWTMEAN' />
+        <output name='Whole study area SNOW_APR10 (mm SWE)' query='1' value='SNOW_APR10' type='AREAWTMEAN' />
+        <output name='Corvallis-Philomath UGA PRECIP_YR (mm)' query='UGB=12' value='PRECIP_YR' type='AREAWTMEAN' />
+        <output name='Corvallis-Philomath UGA PRECIP_YR (in)' query='UGB=12' value='PRECIP_YR*inches_per_mm' type='AREAWTMEAN' />
+        <output name='South Corvallis IDU_ID 66854 PRECIP_YR (mm)' query='IDU_ID=66854' value='PRECIP_YR' type='AREAWTMEAN' />
+        <output name='South Corvallis IDU_ID 66854 PRECIP_YR (in)' query='IDU_ID=66854' value='PRECIP_YR*inches_per_mm' type='AREAWTMEAN' />
+        <output name='Hyslop Farm IDU_ID 75947 PRECIP_YR (mm)' query='IDU_ID=75947' value='PRECIP_YR' type='AREAWTMEAN' />
+        <output name='Hyslop Farm IDU_ID 75947 PRECIP_YR (in)' query='IDU_ID=75947' value='PRECIP_YR*inches_per_mm' type='AREAWTMEAN' />
+      </output_group>
+
+     <!-- SNOTEL site snowpack-->
+     <output_group name="REP SNOTEL site Apr 1 SWE (mm)">
+       <output name="SNOTEL Clackamas Lake idu 125100" query="IDU_INDEX=125100" value="SNOW_APR" type="AREAWTMEAN" />
+       <output name="SNOTEL Daly Lake idu 65965" query="IDU_INDEX=65965" value="SNOW_APR" type="AREAWTMEAN" />
+       <output name="SNOTEL Hogg Pass idu 58776" query="IDU_INDEX=58776" value="SNOW_APR" type="AREAWTMEAN" />
+       <output name="SNOTEL Jump Off Joe idu 50203" query="IDU_INDEX=50203" value="SNOW_APR" type="AREAWTMEAN" />
+       <output name="SNOTEL McKenzie idu 45154" query="IDU_INDEX=45154" value="SNOW_APR" type="AREAWTMEAN" />
+       <output name="SNOTEL Roaring River idu 21368" query="IDU_INDEX=21368" value="SNOW_APR" type="AREAWTMEAN" />
+       <output name="SNOTEL Santiam Jct idu 60196" query="IDU_INDEX=60196" value="SNOW_APR" type="AREAWTMEAN" />
+     </output_group>
+     <!-- SNOTEL site HRU hypsometric mean elevation -->
+     <output_group name="REP Hypsometric mean elev of HRUs with SNOTEL sites (ft)">
+       <output name="SNOTEL Clackamas Lake HRU 6955" query="HRU_ID=6955" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Daly Lake HRU 3576" query="HRU_ID=3576" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Hogg Pass and Santiam Jct HRU 3251" query="HRU_ID=3251" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Jump Off Joe HRU 2904" query="HRU_ID=2904" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL McKenzie HRU 2511" query="HRU_ID=2511" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Roaring River HRU 1317" query="HRU_ID=1317" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Clackamas Lake idu 125100" query="IDU_INDEX=125100" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Daly Lake idu 65965" query="IDU_INDEX=65965" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Hogg Pass idu 58776" query="IDU_INDEX=58776" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Jump Off Joe idu 50203" query="IDU_INDEX=50203" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL McKenzie idu 45154" query="IDU_INDEX=45154" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Roaring River idu 21368" query="IDU_INDEX=21368" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="SNOTEL Santiam Jct idu 60196" query="IDU_INDEX=60196" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="elev of ECOREGIONs 8 9 and 10" query="ECOREGION=8 or ECOREGION=9 or ECOREGION=10" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+       <output name="elev of ECOREGIONs 11 and 12" query="ECOREGION=11 or ECOREGION=12" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+     </output_group>
+
+     <output_group name="REP ET and area by LULC_A">
+       <output name ="ET over LULC_A=1 Developed (mm)" query="LULC_A=1" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over LULC_A=2 Ag (mm)" query="LULC_A=2" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over LULC_A=3 Other Vegetation (mm)" query="LULC_A=3" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over LULC_A=4 Forest (mm)" query="LULC_A=4" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over LULC_A=5 Barren (mm)" query="LULC_A=5" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over LULC_A=6 Wetlands (mm)" query="LULC_A=6" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over LULC_A=7 Water-Snow-Ice (mm)" query="LULC_A=7" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over LULC_A&lt;1 or >7 unknown (mm)" query="LULC_A&lt;1 or LULC_A&gt;7" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over LULC_A=1 Developed (af)" query="LULC_A=1" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="ET over LULC_A=2 Ag (af)" query="LULC_A=2" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="ET over LULC_A=3 Other Vegetation (af)" query="LULC_A=3" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="ET over LULC_A=4 Forest (af)" query="LULC_A=4" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="ET over LULC_A=5 Barren (af)" query="LULC_A=5" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="ET over LULC_A=6 Wetlands (af)" query="LULC_A=6" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="ET over LULC_A=7 Water-Snow-Ice (af)" query="LULC_A=7" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="ET over LULC_A&lt;1 or >7 unknown (af)" query="LULC_A&lt;1 or LULC_A&gt;7" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="area of LULC_A=1 Developed (ac)" query="LULC_A=1" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="area of LULC_A=2 Ag (ac)" query="LULC_A=2" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="area of LULC_A=3 Other Vegetation (ac)" query="LULC_A=3" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="area of LULC_A=4 Forest (ac)" query="LULC_A=4" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="area of LULC_A=5 Barren (ac)" query="LULC_A=5" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="area of LULC_A=6 Wetlands (ac)" query="LULC_A=6" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="area of LULC_A=7 Water-Snow-Ice (ac)" query="LULC_A=7" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="area of LULC_A&lt;1 or >7 unknown (ac)" query="LULC_A&lt;1 or LULC_A&gt;7" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="LAI over all Forest " query="LULC_A=4" value="LAI" type="AREAWTMEAN" />
+       <output name ="LAI over Forest in STM " query="LULC_A=4 and PVT&gt;=1 and PVT&lt;=9" value="LAI" type="AREAWTMEAN" />
+       <output name ="ET over Forest in STM (mm)" query="LULC_A=4 and PVT&gt;=1 and PVT&lt;=9" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over Forest in STM (af)" query="LULC_A=4 and PVT&gt;=1 and PVT&lt;=9" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="area of Forest in STM (ac)" query="LULC_A=4 and PVT&gt;=1 and PVT&lt;=9" value="AREA*ac_per_m2" type="SUM" />
+       <output name ="LAI over Forest not in STM " query="LULC_A=4 and PVT&lt;1 or PVT&gt;9" value="LAI" type="AREAWTMEAN" />
+       <output name ="ET over Forest not in STM (mm)" query="LULC_A=4 and PVT&lt;1 or PVT&gt;9" value="ET_YR" type="AREAWTMEAN" />
+       <output name ="ET over Forest not in STM (af)" query="LULC_A=4 and PVT&lt;1 or PVT&gt;9" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
+       <output name ="area of Forest not in STM (ac)" query="LULC_A=4 and PVT&lt;1 or PVT&gt;9" value="AREA*ac_per_m2" type="SUM" />
+     </output_group>
+     <!-- Outtake from REP ET by LULC_A
+     <output name ="LAI over LULC_A=1 Developed " query="LULC_A=1" value="LAI" type="AREAWTMEAN" />
+     <output name ="LAI over LULC_A=2 Ag " query="LULC_A=2" value="LAI" type="AREAWTMEAN" />
+     <output name ="LAI over LULC_A=3 Other Vegetation " query="LULC_A=3" value="LAI" type="AREAWTMEAN" />
+     <output name ="LAI over LULC_A=4 Forest " query="LULC_A=4" value="LAI" type="AREAWTMEAN" />
+     <output name ="LAI over LULC_A=5 Barren " query="LULC_A=5" value="LAI" type="AREAWTMEAN" />
+     <output name ="LAI over LULC_A=6 Wetlands " query="LULC_A=6" value="LAI" type="AREAWTMEAN" />
+     <output name ="LAI over LULC_A=7 Water-Snow-Ice " query="LULC_A=7" value="LAI" type="AREAWTMEAN" />
+     <output name ="LAI over LULC_A&lt;1 or >7 unknown " query="LULC_A&lt;1 or LULC_A&gt;7" value="LAI" type="AREAWTMEAN" />
+     -->
+     <!-- these don't work.  I don't know why.  DRC 6/9/16
+     <output name="REP elev by ECOREGION (ft)" query="1" stratify_by="ECOREGION" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+     <output name="REP elev by HBVCALIB (ft)" query="1" stratify_by="HBVCALIB" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
+     -->
+
+   </reporter>

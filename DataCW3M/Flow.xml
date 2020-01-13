@@ -1,0 +1,1058 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- <flow_model> defines a model
+        Attributes include:
+        name:      Name of the model. (optional)
+        time_step: Time step at which all modeled components are synchronized.  This should be at least as large
+                   as the largest component time step specfified in the component tags below. (required)
+        init_catchment_cols:  flag indicating how Flow should build catchments:
+        ..build_catchments_method:  flag indicating how Flow should build catchments:
+                   0 = build catchments based on a field specified in the <catchment> 'catchID_col' attribute.
+                   1 = build catchments from the aggregate queries defined in the <catchment> 'catch_agg_cols' attribute
+                       and populate the catchmentID_col with unique catchment IDs,
+                   (optional, default is "1" )
+                   
+        join_col:  catchment coverage column name containing the join information for connecting catchments and reaches.
+                   (required, typically COMID)
+        update_display: Update the map with Results from the Hydrology model?  0: no update, 1: update each year, 2: update each flow timestep
+                   (optional, default="2"
+       
+       TO DISABLE SIMPLIFICATION
+           1) Set 'catchment_join_col' to COMID
+           2) Set 'stream_join_col' to COMID
+           3) Set 'catchment_agg_cols' to COMID
+           4) remove any 'simplify_xxx' attributes from <flow_model>
+           
+       TO BUILD A SIMPLIFIED REPRESENTATION
+           1) disable simplication as per instructions above
+           2) Copy the COMID values to FLOWID for both the IDU and Stream coverage (Note - use Arc, Envision appears buggy for this)
+           3) SAVE both coverages.
+           4) Set 'catchment_join_col' to FLOWID
+           5) Set 'stream_join_col' to FLOWID
+           6) Set 'catchment_agg_cols' to FLOWID
+           7) Add any 'simplify_xxx' attributes to <flow_model>
+           8) Launch Envision.  After flow initializes, save the IDU and Stream coverages.  THe FLOWID field will be modified in both coverages.
+           
+       TO USE THE SIMPLIFIED REPRESENTATION
+           1) Set 'catchment_join_col' to FLOWID
+           2) Set 'stream_join_col' to FLOWID
+           3) Set 'catchment_agg_cols' to FLOWID
+           4) remove any 'simplify_xxx' attributes from <flow_model>
+
+
+       To turn off simplification, remove the <streams> 'query' etc attributes.
+            simplify_query="ORDER > 1" 
+            simplify_min_area="1000000000" 
+            simplify_max_area="10000000000"
+-->
+<!--
+               initial_conditions="flow.ic"
+-->
+<flow_model name="flow"
+             time_step="1"
+             build_catchments_method="1"
+             catchment_join_col ="COMID"
+             stream_join_col="COMID"
+             check_mass_balance="0"
+             integrator="euler"
+             max_processors="32"
+             update_display="0"
+             daily_idu_output="0"
+             annual_idu_output="0"
+             daily_reach_output="0"
+             annual_reach_output="0"
+             initial_conditions="Flow_WRB_31yr_spinup_2010.ic"
+              >
+
+  <!-- <catchment> specifies how to construct catchment structures for the model.
+        Attributes include:
+        layer:     Name of the layer used to construct catchments from (in the envx file).
+                   This is generally the IDU layer. (optional, defaults to first layer)
+        query:     Subset of the layer used to create catchments.  If empty or not present,
+                   the entire layer is used. (optional)
+        area_col:  column name containing the area of the polygon. (optional, defaults to "AREA")
+        catchmentID_col:  column name containing the catchmentID identifying unique catchments, generated
+                   during the aggregation process. This column will be added to the layer if it doesn't
+                   already exist.  (optional - defaults to CATCH_ID)
+        hruID_col: column name containing the hruID identifying unique catchments, generated during the
+                   aggregation process. This column will be added to the layer if it doesn't
+                   already exist. (optional - defaults to HRU_ID)
+        catch_agg_cols:  Comma-separated list of column names used to identify unique combinations of attribute values
+                   during the catchment aggregation process.  (required)
+        hru_agg_cols:  Comma-separated list of column names used to identify unique combinations of attribute values
+                   during the hru aggregation process.  (required)
+        soil_layers: integer identifying number of HRU soil layers to use (optional, defaults to 1)
+        snow_layers: integer identifying number of HRU snow layers to use (optional, defaults to 0)
+        veg_layers:  integer identifying number of HRU vegetation layers to use (optional, defaults to 0)
+        layer_names: colon-separated list of layer names used to describe HRU layers for plotting purposes.
+                    the sum of soil_layers+snow_layers+veg_layers should be equal to the number of names (optional)
+        init_water_content:  initial soil water content (m3/m3) - (optional, defaults to 0.5)        
+  -->
+
+  <macros>
+    <macro name="ScenarioName" default="">
+      <!--
+      <scenario name="StressedResources" value="LateRefill\" />
+      <scenario name="IntegratedWater" value="LateRefill\" />
+      -->
+    </macro>
+  </macros>
+
+  <catchments layer="IDU"
+            query=""
+            area_col="AREA"
+            catchmentID_col="CATCHID"
+            hruID_col="HRU_ID"
+            catchment_agg_cols="COMID"
+            hru_agg_cols="ONE_VAL"
+            soil_layers="6" snow_layers="0" veg_layers="0"
+            layer_names="SnowPack:Melt:UnirrigatedSoil:IrrigatedSoil:ShallowGround:DeepGround"
+            init_water_content="0.1"/>
+
+
+  <!-- <stream>
+      Attributes include:
+      layer:        Name of the layer used to construct catchments from (in the envx file). (required)
+      query:        Subset of the layer used to create reaches.  If empty or not present, the entire layer is used. (optional)
+      order_col:    Column name to populate with stream order info.  If the column doesn't exist in the stream coverage, it will
+                    be added. (optional - defaults to nothing, no stream oreder info is generated.)      
+      subnodeLength: max length between subnodes (length units corresponding to the coverage) (optional, defaults to 0, which
+                    allocates one subnode per reach.
+      wd_ratio:     default value for width/depth ratio for reach segments. (optional, defaults to 
+      method:       solution method, euler, rk4, rkf, kinematic, external.  Note external implies fluxes are
+                    processed by the plugin, not the framework.  (optional, defaults to 10)
+      stepsize:     timestep used to solve the instream routing equations. (optional, defaults to 1 day)
+ -->
+  <!--  <streams layer="Streams" subnode_length="1000" order_col="ORDER"  /> -->
+  <streams layer="Reach"
+           subnode_length="1000"  />
+
+  <!-- <global_methods>
+    Attributes include:
+    reach_routing:         reach routing solution method, one of 'euler', 'rk4', 'rkf', 'kinematic', or an 
+                           externally defined method. Externally defined methods should be of the form:
+                           'path:entrypointname'. Note external implies fluxes are processed by the plugin, 
+                           not the framework. (optional, defaults to "kinematic")
+    horizontal_exchange:   solution method for lateral exchange between reaches and corresponding HRU Layers; internal options 
+                           include 'linear_reservoir'.  Externally defined methods should be of the form:
+                           'path:entrypointname'. (optional, defaults to "linear_reservoir")
+    hru_vertical_exchange: solution method for vertical movement of water between HRULayers; internal options 
+                           include 'brooks_corey'.  Externally defined methods should be of the form:
+                           'path:entrypointname'. (optional, defaults to "brooks_corey") 
+  -->
+  <!--
+  <global_methods reach_routing="kinematic" horizontal_exchange="fn=HBV.dll:HBV_HorizontalwSnow" hru_vertical_exchange="none" />
+-->
+
+
+  <global_methods >
+    <reach_routing name="Reach Routing" method="kinematic" query=""/>
+    <lateral_exchange name="Lateral Exchange" method="none" query=""/>
+    <hru_vertical_exchange name="Vertical Exchange" method="none" query="" />
+
+    <!--
+    enum // Global Method Timing flags
+    {
+    GMT_INIT = 1,       // called during Init();
+    GMT_INITRUN = 2,       // called during InitRun();
+    GMT_START_YEAR = 4,       // called at the beginning of a Envision timestep (beginning of each year of run)  (PreRun)
+    GMT_START_STEP = 8,       // called at the beginning of a Flow timestep PreRun)
+    GMT_CATCHMENT = 16,      // called during GetCatchmentDerivatives()
+    GMT_REACH = 32,      // called during GetReachDerivatives()
+    GMT_RESERVOIR = 64,      // called during GetReservoirDerivatives()
+    GMT_END_STEP = 128,     // called at the beginning of a Flow timestep PreRun)
+    GMT_END_YEAR = 256,     // called at the end of a Envision timestep (beginning of each year of run) (PostRun)
+    GMT_ENDRUN = 512,      // called during EndRun()
+    };
+-->
+    
+    <external name="HBV"   method="fn=hbv.dll:HBV_IrrigatedSoil" use="1" timing="1+16"/> 
+
+    <!--The layers tag will remove water from the layer distribution matching the query first and then remove the unmatched idus 
+      using the second layer distribution tag in the percentages indicated -->
+    <!--The ratio = 1 flag will remove water from the indicated layers in proportion to the amount of water in the layers
+     even though the percentages are indicated as 0.  The calculation of the percentages removed are done at run time
+     For example: "(2,1), (4, 0), (5,0)" ratio="1"  will remove water out of all three layers: 2, 4, and 5, in proportion, removing the higher 
+     percentage out of the layer with the highest percentage of the total amount in all 3 layers-->
+
+    <evap_trans name="ForestET" method="PM" use="1"
+     query="LULC_A!=2"
+     lulc_col="LULC_B"
+     soil_col="HBVCALIB"
+     soil_table="HBV.csv"
+     bulkStomatalResistance="150"
+     latitude="45"
+     longitude="123">
+      <layers>
+        <layer layer_distributions="(2,1)" />
+      </layers>
+    </evap_trans>
+
+    <evap_trans
+          name="AgET" method="fao56" use="1"
+          query="LULC_A=2 {Ag}"
+          lulc_col="LULC_B"
+          soil_col="HBVCALIB"
+          crop_table="Crops.csv"
+          soil_table="HBV.csv"
+          irrig_loss_factor="0.20"
+          latitude="45"
+          longitude="123">
+      <layers>
+        <layer layer_distributions="(3,1)" query="IRRIGATION=1" />
+        <layer layer_distributions="(2,1)" />
+      </layers>
+    </evap_trans>
+
+    <urban_water_demand name="UrbanWaterDemand"
+        method="Daily"
+        use="1"
+            />
+
+    <allocation name="WaterRights"
+               method="WaterRights"
+               use="1"
+               pod_table="wr_pods.csv"
+               pou_table="wr_pous.csv"
+               n_years_WR_not_used_limit="5"
+               n_days_WR_shortage_1 = "1"
+               n_days_WR_shortage_2 = "7"
+               max_duty_halt  ="1"
+               Water_RightExist_BitWise_col_name ="WREXISTS"
+               irrigate_or_not_col_name = "IRRIGATION"
+               default_irrigation_begin_dayofyear = "60"
+               default_irrigation_end_dayofyear = "304"
+               export_distance_POD_COMID = "0"
+               debug = "0"
+               dynamic_WR_table="wv_dynamic_WaterRights.csv"
+               dynamicWRRadius ="10000"
+               max_days_in_shortage ="7"
+               reach_recursive_depth_shortage ="2"
+               percent_IDU_POU_intersection ="15.0"
+               DynamicWR_Appropriation_Date ="-1"
+            />
+
+    <flux name="Blue River Reservoir drainage additional GW" use="1"
+    source_domain="reach"
+    source_query="HBVCALIB=9"
+    value_domain="source"
+    value="-579"
+    dynamic="0"
+       />
+    <flux name="Cougar Reservoir Drainage additional GW" use="1"
+    source_domain="reach"
+    source_query="HBVCALIB=8"
+    value_domain="source"
+    value="-1908"
+    dynamic="0"
+       />
+    <flux name="Walterville gage additional GW" use="1"
+source_domain="reach"
+source_query="HBVCALIB=34"
+value_domain="source"
+value="-4939"
+dynamic="0"
+       />
+    <flux name="Clackamas High Cascades Groundwater contribution" use="1"
+            source_domain="reach"
+            source_query="(ECO = 9 or ECO = 10) and SUB_AREA =3"
+            value_domain="source"
+            value="-7743.0"
+            dynamic="0"
+       />
+    <flux name="Detroit Reservoir Drainage HC GW contribution" use="1"
+     source_domain="reach"
+     source_query="HBVCALIB=12"
+     value_domain="source"
+     value="-2097"
+     dynamic="0"
+       />
+    <flux name="Hills Creek Reservoir Drainage additional GW" use="1"
+   source_domain="reach"
+   source_query="HBVCALIB=1"
+   value_domain="source"
+   value="-1546"
+   dynamic="0"
+       />
+    <flux name="Fall Creek Reservoir Drainage additional GW" use="1"
+    source_domain="reach"
+    source_query="HBVCALIB=4"
+    value_domain="source"
+    value="-155"
+    dynamic="0"
+       />
+    <flux name="Middle Fork at Jasper additional GW" use="1"
+    source_domain="reach"
+    source_query="HBVCALIB=38"
+    value_domain="source"
+    value="-814"
+    dynamic="0"
+       />
+
+<!--    
+    <external name="StreamTemperature"  method="fn=hbv.dll:StreamTempReg" use="1" timing="1+32"/>
+    
+    <external name="StreamTemperature"  method="fn=StreamTemp.dll:StreamTempEntry" use="1" timing="1+32"/>
+    
+    <StreamTemp_model
+      query=""
+      latitude="" longitude=""
+      deltaTGMT=""
+      start_TOD=""
+      sun_positions=""
+      start_DOY="" end_DOY=""
+      initSurfaceWaterTemp="" initGroundWaterTemp="" >
+      <topo_shading 
+        start_TOD=""
+        sun_positions=""
+        max_distance=""
+        query=""
+        table="topo_shading.csv"
+      />
+     </StreamTemp_model>
+-->    
+  </global_methods>
+
+  <!-- <climate> tag attributes note for single year NetCDF files:
+        1) The path should include the base name for the NETCDF files, but FLOW will add
+           "_YEAR.nc" to each.  ELEMENT must be either "prcp" or "temp". Each file must 
+           have a separate band for each day of the year it represents.
+           Units:  precipitation in mm/d, temperature degrees C
+        2) Paths which begin with a backslash will have the system environment variable CLIMATE_DRIVE prepended.
+  -->
+  <climate_scenarios default="7">
+
+    <!-- "MIROC" aka "WW2100 Reference" gridded climate data prepared by OCCRI for WW2100 from CMIP5 RCP 8.5 MIROC GCM data downscaled
+    by John Abatzaglou's group at the University of Idaho using the MACA method -->
+    <climate_scenario name="MIROC" id="0" maxDaysInClimateYear="365" >
+      <climate type="precip"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_pr"     var_name="pr"      />
+      <climate type="tmax"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmax" var_name="tasmax"  />
+      <climate type="tmin"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmin" var_name="tasmin"  />
+      <climate type="humidity" path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_huss"    var_name="huss"   />
+      <climate type="solrad"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_rsds"   var_name="rsds"    />
+      <climate type="windspd"  path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_was"    var_name="was"     />
+      <climate type="tavg"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tavg"   var_name="tavg"    />
+    </climate_scenario>
+
+    <!-- "GFDL" aka "WW2100 LowClim" (low climate change) gridded climate data prepared by OCCRI for WW2100 from CMIP5 RCP 4.5 GFDL GCM data downscaled
+    by John Abatzaglou's group at the University of Idaho using the MACA method -->
+    <climate_scenario name="GFDL" id="1" maxDaysInClimateYear="365" >
+      <climate type="precip"   path="\ClimateSvn\trunk\daily\willamette_GFDL_pr"     var_name="pr"      />
+      <climate type="tmax"     path="\ClimateSvn\trunk\daily\willamette_GFDL_tasmax" var_name="tasmax"  />
+      <climate type="tmin"     path="\ClimateSvn\trunk\daily\willamette_GFDL_tasmin" var_name="tasmin"  />
+      <climate type="humidity" path="\ClimateSvn\trunk\daily\willamette_GFDL_huss"    var_name="huss"     />
+      <climate type="solrad"   path="\ClimateSvn\trunk\daily\willamette_GFDL_rsds"   var_name="rsds"    />
+      <climate type="windspd"  path="\ClimateSvn\trunk\daily\willamette_GFDL_was"    var_name="was"     />
+      <climate type="tavg"     path="\ClimateSvn\trunk\daily\willamette_GFDL_tavg"   var_name="tavg"    />
+    </climate_scenario>
+
+    <!-- "HadGEM" aka "WW2100 HighClim" (high climate change) gridded climate data prepared by OCCRI for WW2100 from CMIP5 8.5 HadGEM GCM data downscaled
+    by John Abatzaglou's group at the University of Idaho using the MACA method -->
+    <climate_scenario name="HadGEM" id="2" maxDaysInClimateYear="365" >
+      <climate type="precip"   path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_pr_365"     var_name="pr"      />
+      <climate type="tmax"     path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_tasmax_365" var_name="tasmax"  />
+      <climate type="tmin"     path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_tasmin_365" var_name="tasmin"  />
+      <climate type="humidity" path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_huss_365"    var_name="huss"     />
+      <climate type="solrad"   path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_rsds_365"   var_name="rsds"    />
+      <climate type="windspd"  path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_was_365"    var_name="was"     />
+      <climate type="tavg"     path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_tavg_365"   var_name="tavg"    />
+    </climate_scenario>
+
+    <!-- MIROC climate data was used for the StationaryClim climate_scenario in WW2100-->
+    <climate_scenario name="WW2100StationaryClimate" id="3" maxDaysInClimateYear="365" >
+      <climate type="precip"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_pr"     var_name="pr"      />
+      <climate type="tmax"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmax" var_name="tasmax"  />
+      <climate type="tmin"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmin" var_name="tasmin"  />
+      <climate type="humidity" path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_huss"    var_name="huss"   />
+      <climate type="solrad"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_rsds"   var_name="rsds"    />
+      <climate type="windspd"  path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_was"    var_name="was"     />
+      <climate type="tavg"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tavg"   var_name="tavg"    />
+    </climate_scenario>
+
+    <!-- "MACA training data" - these are gridded, run from 1979 thru 2011, and were prepared by OCCRI for WW2100 -->
+    <climate_scenario name="MACAtrainingData" id="4" maxDaysInClimateYear="365" >
+      <climate type="precip"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_pr"     var_name="pr"      />
+      <climate type="tmax"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tasmax" var_name="tasmax"  />
+      <climate type="tmin"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tasmin" var_name="tasmin"  />
+      <climate type="humidity" path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_sph"    var_name="sph"     />
+      <climate type="solrad"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_rsds"   var_name="rsds"    />
+      <climate type="windspd"  path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_vas"    var_name="vas"     />
+      <climate type="tavg"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tavg"   var_name="tavg"    />
+    </climate_scenario>
+
+    <!-- these are gridded, run from 2000 thru 2017, and were prepared by John Dalrymple for the model skill assessment work -->
+    <climate_scenario name="BaselineGrid" id="5" maxDaysInClimateYear="365" >
+      <climate type="precip"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_pr"     var_name="pr"      />
+      <climate type="tmax"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_tasmax" var_name="tasmax"  />
+      <climate type="tmin"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_tasmin" var_name="tasmin"  />
+      <climate type="humidity" path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_sph"    var_name="sph"     />
+      <climate type="solrad"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_rsds"   var_name="rsds"    />
+      <climate type="windspd"  path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_vas"    var_name="vas"     />
+    </climate_scenario>
+
+    <!-- these are idu-centric ones, run from 2000 thru 2017, and were prepared by Steve Drake for INFEWS -->
+    <climate_scenario name="BaselinePoly" id="6" maxDaysInClimateYear="365" >
+      <climate type="precip"   path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_pr"     var_name="pr"      />
+      <climate type="tmax"     path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_tasmax" var_name="tasmax"  />
+      <climate type="tmin"     path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_tasmin" var_name="tasmin"  />
+      <climate type="humidity" path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_sph"    var_name="sph"     />
+      <climate type="solrad"   path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_rsds"   var_name="rsds"    />
+      <climate type="windspd"  path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_vas"    var_name="vas"     />
+    </climate_scenario>
+
+    <!-- Gridded recent actual weather used for demos - 2010-17 -->
+    <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="365" >
+      <climate type="precip"   path="GriddedRecentWeather\uofimet_willamette_pr"     var_name="pr"      />
+      <climate type="tmax"     path="GriddedRecentWeather\uofimet_willamette_tasmax" var_name="tasmax"  />
+      <climate type="tmin"     path="GriddedRecentWeather\uofimet_willamette_tasmin" var_name="tasmin"  />
+      <climate type="humidity" path="GriddedRecentWeather\uofimet_willamette_sph"    var_name="sph"     />
+      <climate type="solrad"   path="GriddedRecentWeather\uofimet_willamette_rsds"   var_name="rsds"    />
+      <climate type="windspd"  path="GriddedRecentWeather\uofimet_willamette_vas"    var_name="vas"     />
+    </climate_scenario>
+
+    <!-- These are gridded and run from 1979 through the latest year available. The data includes leapdays. The data for all the years is combined in a single,
+    separate file for each field.  The set was seeded for 1979-2018 by downloading from the MACA website at the University of Idaho in March, 2018.
+    John Dalrymple obtained the files from the MACA website. -->
+    <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
+               var_name="precipitation_amount" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_max_air_temperature_1979-2018.nc"
+               var_name="max_air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_min_air_temperature_1979-2018.nc"
+               var_name="min_air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_specific_humidity_1979-2018.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_1979-2018.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
+      <climate type="windspd"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2018.nc"
+               var_name="wind_speed" units="m/s" />
+    </climate_scenario>
+
+    <!-- MACAv2-METDATA MIROC5 historical daily dataset -->
+    <climate_scenario name="MIROC5_macav2" id="9" maxDaysInClimateYear="366" firstYear="1950" lastYear="2005" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_pr_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="precipitation" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_tasmax_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_tasmin_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_huss_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="rhmin"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmin_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="relative_humidity" units="%" />
+      <climate type="rhmax"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmax_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="relative_humidity" units="%"  />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rsds_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
+      <climate type="uas"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_uas_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="eastward_wind" units="m/s" />
+      <climate type="vas"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_vas_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="northward_wind" units="m/s" />
+    </climate_scenario>
+
+    <!-- MACAv2-METDATA MIROC5 RCP 8.5 2006-99 daily dataset -->
+    <climate_scenario name="MIROC5_rcp85" id="10" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_pr_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="precipitation" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmax_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmin_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_huss_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="rhmin"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmin_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="relative_humidity" units="%" />
+      <climate type="rhmax"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmax_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="relative_humidity" units="%"  />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rsds_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
+      <climate type="uas"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_uas_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="eastward_wind" units="m/s" />
+      <climate type="vas"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_vas_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="northward_wind" units="m/s" />
+    </climate_scenario>
+
+    <!-- MACAv2-METDATA HadGEM2-ES historical daily dataset -->
+    <climate_scenario name="HadGEM2-ES_macav2" id="11" maxDaysInClimateYear="366" firstYear="1950" lastYear="2005" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_pr_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="precipitation" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_tasmax_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_tasmin_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_huss_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="rhmin"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmin_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="relative_humidity" units="%" />
+      <climate type="rhmax"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmax_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="relative_humidity" units="%"  />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rsds_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
+      <climate type="uas"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_uas_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="eastward_wind" units="m/s" />
+      <climate type="vas"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_vas_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="northward_wind" units="m/s" />
+    </climate_scenario>
+
+    <!-- MACAv2-METDATA HadGEM2-ES RCP 8.5 2006-99 daily dataset -->
+    <climate_scenario name="HadGEM2-ES_rcp85" id="12" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_pr_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="precipitation" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmax_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmin_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_huss_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="rhmin"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmin_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="relative_humidity" units="%" />
+      <climate type="rhmax"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmax_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="relative_humidity" units="%"  />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rsds_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
+      <climate type="uas"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_uas_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="eastward_wind" units="m/s" />
+      <climate type="vas"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_vas_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="northward_wind" units="m/s" />
+    </climate_scenario>
+
+  </climate_scenarios>
+
+  <controlPoints>
+    <controlPoint id="1"      name="Min flow at Salem"                path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_flow_at_Salem_23791083.csv"               reservoirs="1,2,4,5,6,8,9,10"
+      location="23791083"/>
+
+    <controlPoint id="2"      name="Max_bankfull_flow_at_Salem"       path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Salem_23791083.csv"                    reservoirs="10,11,12"
+      location ="23791083" />
+
+    <controlPoint id="3"      name="Min_Flow_at_Albany"               path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_Flow_at_Albany_23762845.csv"              reservoirs="1,2,4,5,6,8,9"
+      location ="23762845" />
+
+    <controlPoint id="4"      name="Max_Bankfull_Flow_at_Jefferson"   path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Jefferson_23780423.csv"                reservoirs="10,11,12"
+      location ="23780423" />
+
+    <controlPoint id="5"      name="Max_bankfull_flow_at_Mehama"      path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Mehama_23780481.csv"                   reservoirs="12"
+      location ="23780481" />
+
+    <controlPoint id="6"      name="Max_Harrisburg_42500_cfs"         path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_HB_42500_cfs_23763337.csv"                reservoirs="2,4,5,6"
+      location ="23763337" />
+
+    <controlPoint id="7"      name="Max_Harrisburg_51000_cfs"         path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_HB_51000_cfs_23763337.csv"                reservoirs="2,4,5,6"
+      location ="23763337" />
+
+    <controlPoint id="8"      name="Max_Harrisburg_70500_cfs"         path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_HB_70500_cfs_23763337.csv"                reservoirs="2"
+      location ="23763337" />
+
+    <controlPoint id="9"      name="Max_Vida_Flood"                   path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Vida_Flood_23772903.csv"                  reservoirs="8,9"
+      location ="23772903" />
+
+    <controlPoint id="10"     name="Max_Jasper_Bankfull"              path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Jasper_Bankfull_23751778.csv"             reservoirs="2,4"
+      location ="23751778" />
+
+    <controlPoint id="11"     name="Max_Bankfull_Flow_at_Goshen"      path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Goshen_23759228.csv"                   reservoirs="5,6"
+      location ="23759228" />
+
+    <controlPoint id="12"     name="Max_Bankfull_Flow_at_Waterloo"    path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Waterloo_23785687.csv"                 reservoirs="10,11"
+      location ="23785687" />
+
+    <controlPoint id="13"     name="Max_Reg_Goal_Long_Tom_Monroe"     path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Reg_Monroe_23763073.csv"                  reservoirs="7"
+      location ="23763073" />
+
+    <controlPoint id="14"     name="Min_Flow_at_Monroe"               path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_Flow_at_Monroe_23763073.csv"              reservoirs="7"
+      location ="23763073" />
+
+    <controlPoint id="15"     name="Max_Flood_Flow_Winter_Ops_Mehama" path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Winter_Ops_Mehama_23780481.csv"           reservoirs="12"
+      location ="23780481" />
+
+    <controlPoint id="16"     name="Max_Flood_Flow_Winter_Ops_Salem"  path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Winter_Ops_Salem_23791083.csv"            reservoirs="12"
+      location ="23791083" />
+
+    <controlPoint id="17"     name="Max_10K_into_Foster"              path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_10K_into_Foster_23787257.csv"             reservoirs="10"
+      location ="23787257" />
+
+    <controlPoint id="18"     name="Max_12K_into_Foster"              path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_12K_into_Foster_23787257.csv"             reservoirs="10"
+      location ="23787257" />
+
+    <controlPoint id="19"     name="Min_BiOp_MaxD_at_FOS"             path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_BiOp_MaxD_at_FOS_23785773.csv"            reservoirs="10"
+      location ="23785773" />
+
+    <controlPoint id="20"     name="Min_Con_Flow_from_Foster"         path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_Con_Flow_from_Foster_23785773.csv"        reservoirs="10"
+      location ="23785773" />
+
+    <controlPoint id="21"     name="Min_Buffer_Flow_from_Foster"      path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_Buffer_Flow_from_Foster_23785773.csv"     reservoirs="10"
+      location ="23785773" />
+
+  </controlPoints>
+
+
+  <reservoirs col="RES_ID">
+    <reservoir id="1"   name="Hills Creek Reservoir (USACE)"      path="Reservoirs\"                                  initVolume="209709507"
+               area_vol_curve="hills_creek_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="11"
+               rule_curve="hills_creek_rule_curve.csv"            rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="461075511"
+               composite_rc="HC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="42.5"
+               RO_rc="HC_RO_capacity.csv"                         spillway_rc="HC_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="hills_creek_rule_priorities.csv"  rp_dir="Rules_HC\"                                  tailwater_elev="391.0"
+               turbine_efficiency="0.9"                           td_elev="472.0"                                     fc1_elev="470.0"
+               buffer_zone="HC_buffer.csv"                        ressim_output_f="HC_ressim_flow_1935_2008.csv"      ressim_output_r="HC_ressim_rule_1935_2008.csv"
+               inactive_elev="441.046"                            reservoir_type="FloodControl"/>
+
+    <reservoir id="2"   name="Lookout Point Reservoir (USACE)"    path="Reservoirs\"                                  initVolume="143948194"
+               area_vol_curve="lookout_point_area_capacity.csv"   av_dir="Area_Capacity_Curves\"                      minOutflow="34"
+               rule_curve="lookout_point_rule_curve.csv"          rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="622295321"
+               composite_rc="LO_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="203.9"
+               RO_rc="LO_composite_rc.csv"                        spillway_rc="LO_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="lookout_rule_priorities.csv"      rp_dir="Rules_Lookout\"                             tailwater_elev="216"
+               turbine_efficiency="0.9"                           td_elev="287.0"                                     fc1_elev="285.0"
+               fc3_elev="283.0"                                   fc2_elev="261.0"                                    buffer_zone="LO_buffer.csv"
+               ressim_output_f="LO_ressim_flow_1935_2008.csv"     ressim_output_r="LO_ressim_rule_1935_2008.csv"      inactive_elev="251.46"
+               reservoir_type="FloodControl"/>
+
+    <reservoir id="3"  name="Dexter Reservoir (USACE - re-regulating)"      path="Reservoirs\"                        initVolume="28863475"
+               area_vol_curve="dexter_area_capacity.csv"          av_dir="Area_Capacity_Curves\"                      minOutflow="34"
+               composite_rc="Dexter_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="118.9"
+               RO_rc="Dexter_RO_capacity.csv"                     spillway_rc="Dexter_Spillway_capacity.csv"          tailwater_elev="198"
+               turbine_efficiency="0.9"                           inactive_elev="194.24"                              reservoir_type="RiverRun" />
+
+    <reservoir id="4"   name="Fall Creek Reservoir (USACE)"       path="Reservoirs\"                                  initVolume="7252080"
+               area_vol_curve="fall_creek_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1"
+               rule_curve="fall_creek_rule_curve.csv"             rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="168741328"
+               composite_rc="FC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="FC_RO_capacity.csv"                         spillway_rc="FC_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="fall_creek_rule_priorities.csv"   rp_dir="Rules_FC\"                                  td_elev="256.0"
+               fc1_elev="254.0"                                   fc2_elev="243.0"                                    buffer_zone="FC_buffer.csv"
+               ressim_output_f="FC_ressim_flow_1935_2008.csv"     ressim_output_r="FC_ressim_rule_1935_2008.csv"      inactive_elev="217.32"
+               reservoir_type="FloodControl" />
+
+    <reservoir id="5"   name="Dorena Reservoir (USACE)"           path="Reservoirs\"                                  initVolume="9072259"
+               area_vol_curve="dorena_area_capacity.csv"          av_dir="Area_Capacity_Curves\"                      minOutflow="2.8"
+               rule_curve="dorena_rule_curve.csv"                 rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="178855940"
+               composite_rc="Dorena_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="Dorena_RO_capacity.csv"                     spillway_rc="Dorena_spillway_capacity.csv"          cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="dorena_rule_priorities.csv"       rp_dir="Rules_Dorena\"                              td_elev="264.0"
+               fc1_elev="255.0"                                   fc2_elev="247.0"                                    buffer_zone="Dorena_buffer.csv"
+               ressim_output_f="Dorena_ressim_flow_1935_2008.csv" ressim_output_r="Dorena_ressim_rule_1935_2008.csv"  inactive_elev="235.0"
+               reservoir_type="FloodControl" />
+
+    <reservoir id="6"   name="Cottage Grove Reservoir (USACE)"    path="Reservoirs\"                                  initVolume="4647760"
+               area_vol_curve="cottage_grove_area_capacity.csv"   av_dir="Area_Capacity_Curves\"                      minOutflow="1.4"
+               rule_curve="cottage_grove_rule_curve.csv"          rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="68014597"
+               composite_rc="CG_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="CG_RO_capacity.csv"                         spillway_rc="CG_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="cottage_grove_rule_priorities.csv" rp_dir="Rules_CG\"                                 td_elev="246.0"
+               fc1_elev="241.0"                                   fc2_elev="237.0"                                    buffer_zone="CG_buffer.csv"
+               ressim_output_f="CG_ressim_flow_1935_2008.csv"     ressim_output_r="CG_ressim_rule_1935_2008.csv"      inactive_elev="228.6"
+               reservoir_type="FloodControl" />
+
+    <reservoir id="7"   name="Fern Ridge Reservoir (USACE)"       path="Reservoirs\"      initVolume="6472079"
+               area_vol_curve="fern_ridge_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1"
+               rule_curve="fern_ridge_rule_curve.csv"             rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="211850506"
+               composite_rc="FR_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="FR_RO_capacity.csv"                         spillway_rc="FR_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="fern_ridge_rule_priorities.csv"   rp_dir="Rules_FR\"                                  td_elev="116.0"
+               fc1_elev="114.0"                                   buffer_zone="FR_buffer.csv"                         ressim_output_f="FR_ressim_flow_1935_2008.csv"
+               ressim_output_r="FR_ressim_rule_1935_2008.csv"     inactive_elev="107.60"                              reservoir_type="FloodControl"/>
+
+    <reservoir id="8"   name="Cougar Reservoir (USACE)"           path="Reservoirs\"     initVolume="69087752"
+               area_vol_curve="cougar_area_capacity.csv"          av_dir="Area_Capacity_Curves\"                      minOutflow="11"
+               rule_curve="cougar_rule_curve.csv"                 rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="246696368"
+               composite_rc="Cougar_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="25.8"
+               RO_rc="Cougar_RO_capacity.csv"                     spillway_rc="Cougar_spillway_capacity.csv"          cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="cougar_rule_priorities.csv"       rp_dir="Rules_Cougar\"                              tailwater_elev="408"
+               turbine_efficiency="0.9"                           td_elev="520.0"                                     fc1_elev="518.0"
+               buffer_zone="Cougar_buffer.csv"                    ressim_output_f="Cougar_ressim_flow_1935_2008.csv"  ressim_output_r="Cougar_ressim_rule_1935_2008.csv"
+               inactive_elev="466.65"                             reservoir_type="FloodControl"/>
+
+    <reservoir id="9"   name="Blue River Reservoir (USACE)"       path="Reservoirs\"     initVolume="5063443"
+               area_vol_curve="blue_river_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1.417"
+               rule_curve="blue_river_rule_curve.csv"             rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="168123574"
+               composite_rc="BR_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="BR_RO_capacity.csv"                         spillway_rc="BR_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="blue_river_rule_priorities.csv"   rp_dir="Rules_BR\"                                  td_elev="415.0"
+               fc1_elev="414.0"                                   buffer_zone="BR_buffer.csv"                         ressim_output_f="BR_ressim_flow_1935_2008.csv"
+               ressim_output_r="BR_ressim_rule_1935_2008.csv"     inactive_elev="359.66"                              reservoir_type="FloodControl" />
+
+    <reservoir id="10"  name="Green Peter Reservoir (USACE)"      path="Reservoirs\"     initVolume="197233746"
+               area_vol_curve="green_peter_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="22.6"
+               rule_curve="green_peter_rule_curve.csv"            rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="551246341"
+               composite_rc="GP_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="101.9"
+               RO_rc="GP_RO_capacity.csv"                         spillway_rc="GP_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="green_peter_rule_priorities.csv"  rp_dir="Rules_GP\"                                  tailwater_elev="220"
+               turbine_efficiency="0.9"                           td_elev="311.0"                                     fc1_elev="309.0"
+               buffer_zone="GP_buffer.csv"                        ressim_output_f="GP_ressim_flow_1935_2008.csv"      ressim_output_r="GP_ressim_rule_1935_2008.csv"
+               inactive_elev="281.03"                             reservoir_type="FloodControl" />
+
+    <reservoir id="11"  name="Foster Reservoir (USACE)"           path="Reservoirs\"     initVolume="39471419"
+               area_vol_curve="foster_area_capacity.csv"          av_dir="Area_Capacity_Curves\"                      minOutflow="22.6"
+               rule_curve="foster_rule_curve.csv"                 rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="90167522"
+               composite_rc="Foster_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="75.3"
+               RO_rc="Foster_RO_capacity.csv"                     spillway_rc="Foster_spillway_capacity.csv"          cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="foster_rule_priorities.csv"       rp_dir="Rules_Foster\"                              tailwater_elev="165"
+               turbine_efficiency="0.9"                           td_elev="197.0"                                     fc1_elev="195.0"
+               buffer_zone="Foster_buffer.csv"                    ressim_output_f="Foster_ressim_flow_1935_2008.csv"  ressim_output_r="Foster_ressim_rule_1935_2008.csv"
+               inactive_elev="186.84"                             reservoir_type="FloodControl"/>
+
+    <reservoir id="12"  name="Detroit Reservoir (USACE)"          path="Reservoirs\"     initVolume="203449596"
+               area_vol_curve="detroit_area_capacity.csv"         av_dir="Area_Capacity_Curves\"                      minOutflow="34"
+               rule_curve="detroit_rule_curve.csv"                rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="606873064"
+               composite_rc="Detroit_composite_rc.csv"            re_dir="Rel_Cap\"                                   maxPowerFlow="110.4"
+               RO_rc="Detroit_RO_capacity.csv"                    spillway_rc="Detroit_Spillway_capacity.csv"         cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="detroit_rule_priorities.csv"      rp_dir="Rules_Detroit\"                             tailwater_elev="375"
+               turbine_efficiency="0.9"                           td_elev="481.0"                                     fc1_elev="480.0"
+               buffer_zone="Detroit_buffer.csv"                   ressim_output_f="DET_ressim_flow_1935_2008.csv"     ressim_output_r="DET_ressim_rule_1935_2008.csv"
+               inactive_elev="441.96"                             reservoir_type="FloodControl" />
+
+    <reservoir id="13"  name="Big Cliff Reservoir (USACE - re-regulating)"  path="Reservoirs\"     initVolume="3885468"
+               area_vol_curve="Big_Cliff_area_capacity.csv"       av_dir="Area_Capacity_Curves\"                      minOutflow="34"
+               composite_rc="BC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="79.6"
+               RO_rc="BC_RO_capacity.csv"                         spillway_rc="BC_spillway_capacity.csv"              tailwater_elev="342"
+               turbine_efficiency="0.9"                           inactive_elev="353.99"                              reservoir_type="RiverRun"/>
+  </reservoirs>
+
+  <fluxes>
+
+
+  </fluxes>
+
+  <!--
+    specifies table inputs.
+      name:   name for table, this MUST correspond to a field in the IDU coverage
+      source: path to  csv file containing values and label headers
+      type:   'float' - all values are real, 'int' - all values are integer, 'var' - variable type (only float currently supported)
+    -->
+
+  <tables>
+    <table name="HBV" description="HBV Parameters" col="HBVCALIB" source="HBV.csv" type="float" />
+  </tables>
+
+  <!--
+    specifies parameter estimation techniques.
+     <parameterEstimation>
+      estimateParameters:  This is actually an exposed variable.  To set it to false, change in the Envision-Scenarios dialog
+      numberOfRuns:  Flow will run this number of simulations prior to ending
+      numberOfYears: The number of years in each model run
+      saveResultsEvery: The model will write results to the disk after this many runs.  
+      
+      <parameter>
+      table:   name for table, this MUST correspond to a field in the IDU coverage
+      name:    name of the parameter. This MUST correspond to a parameter name outlined in the referenced table.
+      distributeSpatially:  true if the parameter varies in space (a multiplier will be sampled) otherwise, the parameter value will be sample
+    -->
+  <parameterEstimation estimateParameters="false" numberOfRuns="5000" numberOfYears="3" saveResultsEvery="10">
+    <parameter table="HBV" name="TT"    value="0.01"  minValue="0" maxValue="2"   distributeSpatially="false" />
+    <parameter table="HBV" name="CFMAX" value="0.01"  minValue="2" maxValue="6"   distributeSpatially="false" />
+  </parameterEstimation>
+
+
+
+  <!-- 
+    name:     name assigned to variable
+    query:    query constraining calculations
+    value:    expression to be evaulated.  Can be any mathematical expression using IDU field names or
+               internally defined variables, including:
+                "hruVolMelt"     - HRU Melt Volume
+                "hruVolSwe"      - HRU SWE Volume
+                "hruPrecip"      - HRU Total Precip
+                "hruRainThrufall"    - HRU Rain thrufall
+                "hruSnowThrufall"    - HRU Snow thrufall
+                "hruAirTemp"     - HRU Air Temp (C)
+                "hruET"          - HRU ET
+                "hruCumMaxET"      - HRU Cumulutive Maximum ET
+                "hruCumET"       - HRU Cumulutive ET
+                "hruCumP"        - HRU Cumulutive P
+                
+                "obs"            - 
+    type:    calculation type, one of "sum", "areaWtMean" or "pctArea".  For pctArea, the "value" expression is ignored.
+    domain:  target of calculation, one of "idu", "hru", "layer", "reach"    
+    -->
+
+  <outputs>
+    <output_group name="FLOW NSantiam Reach Exchanges Daily (cms positive out of reach, negative into reach)" interval ="daily" >
+      <output in_use="1" name="Total OUT_IRRIG (cms)" query="SUB_AREA=6" value="OUT_IRRIG" type="sum" domain="reach" />
+      <output in_use="1" name="Total OUT_MUNI (cms)" query="SUB_AREA=6" value="OUT_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="SUB_AREA=6" value="-IN_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total XFLUX_D (cms)" query="SUB_AREA=6" value="XFLUX_D" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW NSantiam Reach Exchanges Yearly (cms positive out of reach, negative into reach)" interval ="yearly" >
+      <output in_use="1" name="Total OUT_IRRIG (cms)" query="SUB_AREA=6" value="OUT_IRRIG" type="sum" domain="reach" />
+      <output in_use="1" name="Total OUT_MUNI (cms)" query="SUB_AREA=6" value="OUT_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="SUB_AREA=6" value="-IN_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total XFLUX_D (cms)" query="SUB_AREA=6" value="XFLUX_D" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW Reach Exchanges Daily (cms positive out of reach, negative into reach)" interval ="daily" >
+      <output in_use="1" name="Total OUT_IRRIG (cms)" query="1" value="OUT_IRRIG" type="sum" domain="reach" />
+      <output in_use="1" name="Total OUT_MUNI (cms)" query="1" value="OUT_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="1" value="-IN_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total XFLUX_D (cms)" query="1" value="XFLUX_D" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW Reach Exchanges Yearly (cms positive out of reach, negative into reach)" interval ="yearly" >
+      <output in_use="1" name="Total OUT_IRRIG (cms)" query="1" value="OUT_IRRIG" type="sum" domain="reach" />
+      <output in_use="1" name="Total OUT_MUNI (cms)" query="1" value="OUT_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="1" value="-IN_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total XFLUX_D (cms)" query="1" value="XFLUX_D" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW NSantiam monthly flows with Obs (cfs)" interval="monthly" >
+      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14178000.csv" format="E" />
+      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14179000.csv" format="E" />
+      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14180300.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14181500.csv" format="E" />
+      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14182500.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14183000.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14184100.csv" format="E" />
+    </output_group>
+
+    <output_group name="FLOW NSantiam daily flows with Obs (cfs)" interval="daily" >
+      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14178000.csv" format="E" />
+      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14179000.csv" format="E" />
+      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14180300.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14181500.csv" format="E" />
+      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14182500.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14183000.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14184100.csv" format="E" />
+    </output_group>
+
+    <output_group name="FLOW HBVCALIB daily outflows" >
+      <output in_use="1" name="HBVCALIB=44 outflow 23780877 lower NSantiam (cfs)" query="COMID=23780877" value="Q*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="HBVCALIB=37 outflow 23780481 MEHO NSantiam at Mehama (cfs)" query="COMID=23780481" value="Q*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="HBVCALIB=12 outflow 23780525 Detroit Reservoir (cfs)" query="COMID=23780525" value="Q*35.3146667" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW HBVCALIB yearly outflows" interval="yearly" >
+      <output in_use="1" name="HBVCALIB=44 outflow 23780877 lower NSantiam (cfs)" query="COMID=23780877" value="Q*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="HBVCALIB=37 outflow 23780481 MEHO NSantiam at Mehama (cfs)" query="COMID=23780481" value="Q*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="HBVCALIB=12 outflow 23780525 Detroit Reservoir (cfs)" query="COMID=23780525" value="Q*35.3146667" type="sum" domain="reach" />
+    </output_group>
+    <!--
+    <output_group name="FLOW HRU 23780997" interval="daily" >
+      <output in_use="1" name="SNOW (mm SWE) in IDUs with HRU_ID=3880" query="HRU_ID=3880" value="SNOW" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="SNOWPACK (mm SWE) in HRU 3880" query="HRU_ID=3880" value="SNOWPACK" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="ADDEDVOLM3 (m3 H2O) in HRU 3880" query="HRU_ID=3880" value="ADDEDVOLM3" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="PRECIP (mm H2O) in HRU 3880" query="HRU_ID=3880" value="PRECIP" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="TEMP (deg C) in HRU 3880" query="HRU_ID=3880" value="TEMP" type="areaWtMean" domain="hru" />
+    </output_group>
+
+    <output_group name="FLOW Reservoir Inflows and Outflows (cfs)">
+      <output in_use="1" name="res_id 12 Detroit inflow 23780525 (cfs)" query="COMID = 23780525" value="reachOutflow*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="res_id 12 Detroit outflow 23780523 (cfs)" query="COMID = 23780523" value="reachOutflow*35.3146667" type="sum" domain="reach" />
+    </output_group>
+
+-->
+
+    <output_group name="FLOW big list WRB flows with Obs and leapdays" interval="monthly" >
+      <output in_use="1" name="MF WILLAMETTE RIVER ABV SALT CRK NEAR OAKRIDGE 23751940" query="COMID = 23751940" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14145500.csv" format="E" />
+      <output in_use="1" name="MF WILLAMETTE RIVER BLW N FORK NR OAKRIDGE 23751880" query="COMID = 23751880" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14148000.csv" format="E" />
+      <output in_use="1" name="MIDDLE FORK WILLAMETTE RIVER NEAR DEXTER 23751830" query="COMID = 23751830" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14150000.csv" format="E" />
+      <output in_use="1" name="WINBERRY CREEK NEAR LOWELL 23752606" query="COMID = 23752606" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14150800.csv" format="E" />
+      <output in_use="1" name="FALL CREEK BLW WINBERRY CREEK NEAR FALL CREEK 23752598" query="COMID = 23752598" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14151000.csv" format="E" />
+      <output in_use="1" name="MIDDLE FORK WILLAMETTE RIVER AT JASPER 23751778" query="COMID = 23751778" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14152000.csv" format="E" />
+      <output in_use="1" name="COAST FORK WILLAMETTE R BLW COTTAGE GROVE DAM 23759308" query="COMID = 23759308" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14153500.csv" format="E" />
+      <output in_use="1" name="ROW RIVER ABOVE PITCHER CREEK NEAR DORENA 23759452" query="COMID = 23759452" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14154500.csv" format="E" />
+      <output in_use="1" name="ROW RIVER NEAR COTTAGE GROVE 23759440" query="COMID = 23759440" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14155500.csv" format="E" />
+      <output in_use="1" name="COAST FORK WILLAMETTE RIVER NEAR GOSHEN 23759228" query="COMID = 23759228" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14157500.csv" format="E" />
+      <output in_use="1" name="MCKENZIE RIVER AT OUTLET OF CLEAR LAKE 23773373" query="COMID = 23773373" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14158500.csv" format="E" />
+      <output in_use="1" name="SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRNGS 23773393" query="COMID = 23773393" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14158790.csv" format="E" />
+      <output in_use="1" name="MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS 23773359" query="COMID = 23773359" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14158850.csv" format="E" />
+      <output in_use="1" name="SO FK MCKENZIE RIVER ABV COUGAR LAKE NR RAINBOW 23773037" query="COMID = 23773037" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14159200.csv" format="E" />
+      <output in_use="1" name="SOUTH FORK MCKENZIE RIVER NEAR RAINBOW 23773009" query="COMID = 23773009" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14159500.csv" format="E" />
+      <output in_use="1" name="LOOKOUT CREEK NEAR BLUE RIVER 23773411" query="COMID = 23773411" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14161500.csv" format="E" />
+      <output in_use="1" name="BLUE RIVER AT BLUE RIVER 23773405" query="COMID = 23773405" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14162200.csv" format="E" />
+      <output in_use="1" name="MCKENZIE RIVER NEAR VIDA 23772909" query="COMID = 23772909" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14162500.csv" format="E" />
+      <output in_use="1" name="CEDAR CREEK AT SPRINGFIELD 23774369" query="COMID = 23774369" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14164700.csv" format="E" />
+      <output in_use="1" name="McKENZIE RIVER ABV HAYDEN BR AT SPRINGFIELD 23772751" query="COMID = 23772751" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14164900.csv" format="E" />
+      <output in_use="1" name="MOHAWK RIVER NEAR SPRINGFIELD 23773513" query="COMID = 23773513" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14165000.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT HARRISBURG 23763337" query="COMID = 23763337" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14166000.csv" format="E" />
+      <output in_use="1" name="LONG TOM RIVER NEAR NOTI 23763161" query="COMID = 23763161" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14166500.csv" format="E" />
+      <output in_use="1" name="LONG TOM RIVER NEAR ALVADORE 23763139" query="COMID = 23763139" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14169000.csv" format="E" />
+      <output in_use="1" name="LONG TOM RIVER AT MONROE 23763075" query="COMID = 23763075" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14170000.csv" format="E" />
+      <output in_use="1" name="MARYS RIVER NEAR PHILOMATH 23762895" query="COMID = 23762895" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14171000.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT CORVALLIS 23762877" query="COMID = 23762877" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14171600.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT ALBANY 23762845" query="COMID = 23762845" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14174000.csv" format="E" />
+      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14178000.csv" format="E" />
+      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14179000.csv" format="E" />
+      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14180300.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14181500.csv" format="E" />
+      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14182500.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14183000.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14184100.csv" format="E" />
+      <output in_use="1" name="SOUTH SANTIAM RIVER BELOW CASCADIA 23785793" query="COMID = 23785793" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14185000.csv" format="E" />
+      <output in_use="1" name="QUARTZVILLE CREEK NEAR CASCADIA 23786019" query="COMID = 23786019" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14185900.csv" format="E" />
+      <output in_use="1" name="WILEY CREEK NEAR FOSTER 23785721" query="COMID = 23785721" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14187000.csv" format="E" />
+      <output in_use="1" name="SOUTH SANTIAM RIVER NEAR FOSTER 23785717" query="COMID = 23785717" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14187200.csv" format="E" />
+      <output in_use="1" name="SOUTH SANTIAM RIVER AT WATERLOO 23785687" query="COMID = 23785687" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14187500.csv" format="E" />
+      <output in_use="1" name="SCHAFER CREEK NEAR LACOMB 23786665" query="COMID = 23786665" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14188610.csv" format="E" />
+      <output in_use="1" name="THOMAS CREEK NEAR SCIO 23786251" query="COMID = 23786251" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14188800.csv" format="E" />
+      <output in_use="1" name="SANTIAM RIVER AT JEFFERSON 23780423" query="COMID = 23780423" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14189000.csv" format="E" />
+      <output in_use="1" name="LUCKIAMUTE RIVER NEAR SUVER 23762661" query="COMID = 23762661" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14190500.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT SALEM 23791093" query="COMID = 23791093" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14191000.csv" format="E" />
+      <output in_use="1" name="SOUTH YAMHILL RIVER AT MCMINNVILLE 23796627" query="COMID = 23796627" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14194150.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT NEWBERG 23791305" query="COMID = 23791305" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14197900.csv" format="E" />
+      <output in_use="1" name="BULL CREEK NEAR WILHOIT 23801710" query="COMID = 23801710" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14198400.csv" format="E" />
+      <output in_use="1" name="NATE CREEK TRIBUTARY NEAR COLTON 23801184" query="COMID = 23801184" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14199704.csv" format="E" />
+      <output in_use="1" name="PUDDING RIVER NEAR WOODBURN 23800604" query="COMID = 23800604" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14201340.csv" format="E" />
+      <output in_use="1" name="PUDDING RIVER AT AURORA 23800594" query="COMID = 23800594" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14202000.csv" format="E" />
+      <output in_use="1" name="TUALATIN RIVER NEAR DILLEY 23805092" query="COMID = 23805092" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14203500.csv" format="E" />
+      <output in_use="1" name="EAST FORK DAIRY CREEK NEAR MEACHAM CORNER 23804986" query="COMID = 23804986" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14205400.csv" format="E" />
+      <output in_use="1" name="FANNO CREEK AT 56TH AVE AT PORTLAND 23805292" query="COMID = 23805292" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14206900.csv" format="E" />
+      <output in_use="1" name="FANNO CREEK AT DURHAM 23805270" query="COMID = 23805270" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14206950.csv" format="E" />
+      <output in_use="1" name="TUALATIN RIVER AT WEST LINN 23804832" query="COMID = 23804832" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14207500.csv" format="E" />
+      <output in_use="1" name="OAK GROVE FORK NEAR GOVERNMENT CAMP 23810706" query="COMID = 23810706" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14208700.csv" format="E" />
+      <output in_use="1" name="OAK GROVE FORK ABOVE POWERPLANT INTAKE 23809432" query="COMID = 23809432" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14209000.csv" format="E" />
+      <output in_use="1" name="CLACKAMAS RIVER ABOVE THREE LYNX CREEK 23809158" query="COMID = 23809158" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14209500.csv" format="E" />
+      <output in_use="1" name="CLACKAMAS RIVER AT ESTACADA 23809080" query="COMID = 23809080" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14210000.csv" format="E" />
+      <output in_use="1" name="CLACKAMAS RIVER NEAR OREGON CITY 23809000" query="COMID = 23809000" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211010.csv" format="E" />
+      <output in_use="1" name="TRYON CREEK NEAR LAKE OSWEGO 23815500" query="COMID = 23815500" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211315.csv" format="E" />
+      <output in_use="1" name="JOHNSON CREEK AT REGNER ROAD AT GRESHAM 23815070" query="COMID = 23815070" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211400.csv" format="E" />
+      <output in_use="1" name="KELLEY CREEK AT SE 159TH DRIVE AT PORTLAND 23815128" query="COMID = 23815128" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211499.csv" format="E" />
+      <output in_use="1" name="JOHNSON CREEK AT SYCAMORE 23815066" query="COMID = 23815066" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211500.csv" format="E" />
+      <output in_use="1" name="JOHNSON CREEK AT MILWAUKIE 23815062" query="COMID = 23815062" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211550.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT PORTLAND 23815040" query="COMID = 23815040" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211720.csv" format="E" />
+    </output_group>
+  
+    <output_group name="FLOW big list WRB flows with Obs without leapdays" interval="monthly" >
+      <output in_use="1" name="MF WILLAMETTE RIVER ABV SALT CRK NEAR OAKRIDGE 23751940" query="COMID = 23751940" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14145500.csv" format="E" />
+      <output in_use="1" name="MF WILLAMETTE RIVER BLW N FORK NR OAKRIDGE 23751880" query="COMID = 23751880" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14148000.csv" format="E" />
+      <output in_use="1" name="MIDDLE FORK WILLAMETTE RIVER NEAR DEXTER 23751830" query="COMID = 23751830" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14150000.csv" format="E" />
+      <output in_use="1" name="WINBERRY CREEK NEAR LOWELL 23752606" query="COMID = 23752606" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14150800.csv" format="E" />
+      <output in_use="1" name="FALL CREEK BLW WINBERRY CREEK NEAR FALL CREEK 23752598" query="COMID = 23752598" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14151000.csv" format="E" />
+      <output in_use="1" name="MIDDLE FORK WILLAMETTE RIVER AT JASPER 23751778" query="COMID = 23751778" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14152000.csv" format="E" />
+      <output in_use="1" name="COAST FORK WILLAMETTE R BLW COTTAGE GROVE DAM 23759308" query="COMID = 23759308" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14153500.csv" format="E" />
+      <output in_use="1" name="ROW RIVER ABOVE PITCHER CREEK NEAR DORENA 23759452" query="COMID = 23759452" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14154500.csv" format="E" />
+      <output in_use="1" name="ROW RIVER NEAR COTTAGE GROVE 23759440" query="COMID = 23759440" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14155500.csv" format="E" />
+      <output in_use="1" name="COAST FORK WILLAMETTE RIVER NEAR GOSHEN 23759228" query="COMID = 23759228" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14157500.csv" format="E" />
+      <output in_use="1" name="MCKENZIE RIVER AT OUTLET OF CLEAR LAKE 23773373" query="COMID = 23773373" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14158500.csv" format="E" />
+      <output in_use="1" name="SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRNGS 23773393" query="COMID = 23773393" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14158790.csv" format="E" />
+      <output in_use="1" name="MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS 23773359" query="COMID = 23773359" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14158850.csv" format="E" />
+      <output in_use="1" name="SO FK MCKENZIE RIVER ABV COUGAR LAKE NR RAINBOW 23773037" query="COMID = 23773037" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14159200.csv" format="E" />
+      <output in_use="1" name="SOUTH FORK MCKENZIE RIVER NEAR RAINBOW 23773009" query="COMID = 23773009" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14159500.csv" format="E" />
+      <output in_use="1" name="LOOKOUT CREEK NEAR BLUE RIVER 23773411" query="COMID = 23773411" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14161500.csv" format="E" />
+      <output in_use="1" name="BLUE RIVER AT BLUE RIVER 23773405" query="COMID = 23773405" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14162200.csv" format="E" />
+      <output in_use="1" name="MCKENZIE RIVER NEAR VIDA 23772909" query="COMID = 23772909" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14162500.csv" format="E" />
+      <output in_use="1" name="CEDAR CREEK AT SPRINGFIELD 23774369" query="COMID = 23774369" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14164700.csv" format="E" />
+      <output in_use="1" name="McKENZIE RIVER ABV HAYDEN BR AT SPRINGFIELD 23772751" query="COMID = 23772751" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14164900.csv" format="E" />
+      <output in_use="1" name="MOHAWK RIVER NEAR SPRINGFIELD 23773513" query="COMID = 23773513" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14165000.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT HARRISBURG 23763337" query="COMID = 23763337" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14166000.csv" format="E" />
+      <output in_use="1" name="LONG TOM RIVER NEAR NOTI 23763161" query="COMID = 23763161" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14166500.csv" format="E" />
+      <output in_use="1" name="LONG TOM RIVER NEAR ALVADORE 23763139" query="COMID = 23763139" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14169000.csv" format="E" />
+      <output in_use="1" name="LONG TOM RIVER AT MONROE 23763075" query="COMID = 23763075" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14170000.csv" format="E" />
+      <output in_use="1" name="MARYS RIVER NEAR PHILOMATH 23762895" query="COMID = 23762895" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14171000.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT CORVALLIS 23762877" query="COMID = 23762877" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14171600.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT ALBANY 23762845" query="COMID = 23762845" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14174000.csv" format="E" />
+      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14178000.csv" format="E" />
+      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14179000.csv" format="E" />
+      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14180300.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14181500.csv" format="E" />
+      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14182500.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14183000.csv" format="E" />
+      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14184100.csv" format="E" />
+      <output in_use="1" name="SOUTH SANTIAM RIVER BELOW CASCADIA 23785793" query="COMID = 23785793" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14185000.csv" format="E" />
+      <output in_use="1" name="QUARTZVILLE CREEK NEAR CASCADIA 23786019" query="COMID = 23786019" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14185900.csv" format="E" />
+      <output in_use="1" name="WILEY CREEK NEAR FOSTER 23785721" query="COMID = 23785721" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14187000.csv" format="E" />
+      <output in_use="1" name="SOUTH SANTIAM RIVER NEAR FOSTER 23785717" query="COMID = 23785717" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14187200.csv" format="E" />
+      <output in_use="1" name="SOUTH SANTIAM RIVER AT WATERLOO 23785687" query="COMID = 23785687" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14187500.csv" format="E" />
+      <output in_use="1" name="SCHAFER CREEK NEAR LACOMB 23786665" query="COMID = 23786665" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14188610.csv" format="E" />
+      <output in_use="1" name="THOMAS CREEK NEAR SCIO 23786251" query="COMID = 23786251" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14188800.csv" format="E" />
+      <output in_use="1" name="SANTIAM RIVER AT JEFFERSON 23780423" query="COMID = 23780423" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14189000.csv" format="E" />
+      <output in_use="1" name="LUCKIAMUTE RIVER NEAR SUVER 23762661" query="COMID = 23762661" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14190500.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT SALEM 23791093" query="COMID = 23791093" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14191000.csv" format="E" />
+      <output in_use="1" name="SOUTH YAMHILL RIVER AT MCMINNVILLE 23796627" query="COMID = 23796627" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14194150.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT NEWBERG 23791305" query="COMID = 23791305" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14197900.csv" format="E" />
+      <output in_use="1" name="BULL CREEK NEAR WILHOIT 23801710" query="COMID = 23801710" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14198400.csv" format="E" />
+      <output in_use="1" name="NATE CREEK TRIBUTARY NEAR COLTON 23801184" query="COMID = 23801184" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14199704.csv" format="E" />
+      <output in_use="1" name="PUDDING RIVER NEAR WOODBURN 23800604" query="COMID = 23800604" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14201340.csv" format="E" />
+      <output in_use="1" name="PUDDING RIVER AT AURORA 23800594" query="COMID = 23800594" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14202000.csv" format="E" />
+      <output in_use="1" name="TUALATIN RIVER NEAR DILLEY 23805092" query="COMID = 23805092" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14203500.csv" format="E" />
+      <output in_use="1" name="EAST FORK DAIRY CREEK NEAR MEACHAM CORNER 23804986" query="COMID = 23804986" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14205400.csv" format="E" />
+      <output in_use="1" name="FANNO CREEK AT 56TH AVE AT PORTLAND 23805292" query="COMID = 23805292" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14206900.csv" format="E" />
+      <output in_use="1" name="FANNO CREEK AT DURHAM 23805270" query="COMID = 23805270" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14206950.csv" format="E" />
+      <output in_use="1" name="TUALATIN RIVER AT WEST LINN 23804832" query="COMID = 23804832" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14207500.csv" format="E" />
+      <output in_use="1" name="OAK GROVE FORK NEAR GOVERNMENT CAMP 23810706" query="COMID = 23810706" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14208700.csv" format="E" />
+      <output in_use="1" name="OAK GROVE FORK ABOVE POWERPLANT INTAKE 23809432" query="COMID = 23809432" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14209000.csv" format="E" />
+      <output in_use="1" name="CLACKAMAS RIVER ABOVE THREE LYNX CREEK 23809158" query="COMID = 23809158" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14209500.csv" format="E" />
+      <output in_use="1" name="CLACKAMAS RIVER AT ESTACADA 23809080" query="COMID = 23809080" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14210000.csv" format="E" />
+      <output in_use="1" name="CLACKAMAS RIVER NEAR OREGON CITY 23809000" query="COMID = 23809000" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211010.csv" format="E" />
+      <output in_use="1" name="TRYON CREEK NEAR LAKE OSWEGO 23815500" query="COMID = 23815500" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211315.csv" format="E" />
+      <output in_use="1" name="JOHNSON CREEK AT REGNER ROAD AT GRESHAM 23815070" query="COMID = 23815070" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211400.csv" format="E" />
+      <output in_use="1" name="KELLEY CREEK AT SE 159TH DRIVE AT PORTLAND 23815128" query="COMID = 23815128" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211499.csv" format="E" />
+      <output in_use="1" name="JOHNSON CREEK AT SYCAMORE 23815066" query="COMID = 23815066" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211500.csv" format="E" />
+      <output in_use="1" name="JOHNSON CREEK AT MILWAUKIE 23815062" query="COMID = 23815062" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211550.csv" format="E" />
+      <output in_use="1" name="WILLAMETTE RIVER AT PORTLAND 23815040" query="COMID = 23815040" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211720.csv" format="E" />
+    </output_group>
+
+  </outputs>
+  <!--
+  <video_capture use='0' frameRate='30'>
+    <movie col='TEMP'   file='\envision\studyareas\WW2100\Outputs\AVIs\Temp.avi' />
+    <movie col='PRECIP' file='\envision\studyareas\WW2100\Outputs\AVIs\Precip.avi' />
+    <movie col='SNOW'   file='\envision\studyareas\WW2100\Outputs\AVIs\Snow.avi' />
+    <movie col='SWC'    file='\envision\studyareas\WW2100\Outputs\AVIs\swc.avi' />
+    <movie col='ET'    file='\envision\studyareas\WW2100\Outputs\AVIs\et.avi' />
+  </video_capture>
+-->
+  
+</flow_model>

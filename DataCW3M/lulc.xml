@@ -1,0 +1,291 @@
+<lulcTree>
+
+	<classification name='LULC_A' col='LULC_A' level='1'>
+    <lulc id='0' name='Unknown' />
+		<lulc id='1' name='Developed' />
+		<lulc id='2' name='Agriculture' />
+		<lulc id='3' name='Other Vegetation' />
+		<lulc id='4' name='Forest' />
+		<lulc id='5' name='Barren' />
+		<lulc id='6' name='Wetlands' />
+		<lulc id='7' name='Water/Snow/Ice' />
+	</classification>
+
+	<classification name='LULC_B' col='LULC_B' level='2'>
+    <lulc id='10' parentID='0' name='Unknown' />    
+
+    <lulc id='11' parentID='1' name='Developed High-Intensity' />
+    <lulc id='12' parentID='1' name='Developed Medium-Intensity' />
+    <lulc id='13' parentID='1' name='Developed Low-Intensity' />
+    <lulc id='14' parentID='1' name='Developed Open Space' />
+    <lulc id='15' parentID='1' name='Developed Undifferentiated' />
+
+    <lulc id='20' parentID='2' name='crop not yet selected' />
+    <lulc id="21" parentID='2' name="Orchards, vineyards, and tree farms" />
+    <lulc id="22" parentID='2' name="Grass seed" />
+    <lulc id="23" parentID='2' name="Pasture" />
+    <lulc id="24" parentID='2' name="Wheat" />
+    <lulc id="25" parentID='2' name="Fallow" />
+    <lulc id="26" parentID='2' name="Corn" />
+    <lulc id="27" parentID='2' name="Clover" />
+    <lulc id="28" parentID='2' name="Hay" />
+    <lulc id="29" parentID='2' name="Other crops" />
+    
+    <lulc id='31' parentID='3' name='Grassland/Herbaceous' />
+    <lulc id='32' parentID='3' name='Shrub/Scrub' />
+    
+    <lulc id='41' parentID='4' name='Hardwood Forest' />
+    <lulc id='421' parentID='4' name='Conifer 0-20 yrs' />
+    <lulc id='422' parentID='4' name='Conifer closed 21-40 yrs' />
+    <lulc id='423' parentID='4' name='Conifer closed 41-60 yrs' />
+    <lulc id='424' parentID='4' name='Conifer closed 61-80 yrs' />
+    <lulc id='425' parentID='4' name='Conifer closed 81-120 yrs' />
+    <lulc id='426' parentID='4' name='Conifer closed 121-200 yrs' />
+    <lulc id='427' parentID='4' name='Conifer closed 200+ yrs' />
+    <lulc id='43' parentID='4' name='Mixed Forest' />
+    <lulc id='44' parentID='4' name='Savanna' />
+    
+    <lulc id='51' parentID='5' name='Barren' />
+    <lulc id='61' parentID='6' name='Wetlands' />
+    <lulc id='71' parentID='7' name='Open Water' />
+    <lulc id='72' parentID='7' name='Snow/Ice' />    
+  </classification>
+
+
+	<classification name='LULC_C' col='VEGCLASS' level='3'>
+    <lulc id='1' parentID='26' name='Corn' />
+		<lulc id='4' parentID='29' name='Sorghum' />
+		<lulc id='5' parentID='29' name='Soybeans' />
+		<lulc id='12' parentID='26' name='Sweet Corn' />
+		<lulc id='14' parentID='29' name='Mint' />
+		<lulc id='21' parentID='24' name='Barley' />
+		<lulc id='23' parentID='24' name='Spring Wheat' />
+		<lulc id='24' parentID='24' name='Winter Wheat' />
+		<lulc id='27' parentID='29' name='Rye' />
+		<lulc id='28' parentID='29' name='Oats' />
+		<lulc id='30' parentID='29' name='Speltz' />
+		<lulc id='31' parentID='29' name='Canola' />
+		<lulc id='32' parentID='29' name='Flaxseed' />
+		<lulc id='35' parentID='29' name='Mustard' />
+		<lulc id='36' parentID='28' name='Alfalfa' />
+		<lulc id='37' parentID='28' name='Other Hay/Non Alfalfa' />
+		<lulc id='39' parentID='29' name='Buckwheat' />
+		<lulc id='41' parentID='29' name='Sugarbeets' />
+		<lulc id='42' parentID='29' name='Dry Beans' />
+		<lulc id='43' parentID='29' name='Potatoes' />
+		<lulc id='44' parentID='29' name='Other Crops' />
+		<lulc id='47' parentID='29' name='Misc Vegs and Fruits' />
+		<lulc id='49' parentID='29' name='Onions' />
+		<lulc id='52' parentID='29' name='Lentils' />
+		<lulc id='53' parentID='29' name='Peas' />
+		<lulc id='55' parentID='29' name='Caneberries' />
+		<lulc id='56' parentID='29' name='Hops' />
+		<lulc id='57' parentID='29' name='Herbs' />
+		<lulc id='58' parentID='27' name='Clover/Wildflowers' />
+		<lulc id='59' parentID='22' name='Sod/Grass Seed' />
+		<lulc id='61' parentID='25' name='Fallow/Idle Cropland' />
+		<lulc id='66' parentID='21' name='Cherries' />
+		<lulc id='68' parentID='21' name='Apples' />
+		<lulc id='69' parentID='21' name='Grapes' />
+		<lulc id='70' parentID='21' name='Christmas Trees' />
+		<lulc id='71' parentID='21' name='Other Tree Crops' />
+		<lulc id='76' parentID='21' name='Walnuts' />
+		<lulc id='77' parentID='21' name='Pears' />
+      <lulc id='111' parentID='71' name='Open Water' />
+      <lulc id='112' parentID='72' name='Perennial Ice/Snow' />
+      <lulc id='121' parentID='14' name='Developed/Open Space' />
+      <lulc id='122' parentID='13' name='Developed/Low Intensity' />
+      <lulc id='123' parentID='12' name='Developed/Med Intensity' />
+      <lulc id='124' parentID='11' name='Developed/High Intensity' />
+      <lulc id='125' parentID='15' name='Developed/Undifferentiated' />
+      <lulc id='131' parentID='51' name='Barren' />
+      <lulc id='141' parentID='41' name='Deciduous Forest' />
+      <lulc id='142' parentID='423' name='Evergreen Forest' />
+      <lulc id='143' parentID='43' name='Mixed Forest' />
+      <lulc id='152' parentID='32' name='Shrubland' />
+      <lulc id='171' parentID='31' name='Grassland Herbaceous' />
+      <lulc id='181' parentID='23' name='Pasture/Hay' />
+      <lulc id='190' parentID='61' name='Woody Wetlands' />
+      <lulc id='195' parentID='61' name='Herbaceous Wetlands' />
+      <lulc id='205' parentID='29' name='Triticale' />
+		  <lulc id='208' parentID='29' name='Garlic' />
+		  <lulc id='214' parentID='29' name='Broccoli' />
+		  <lulc id='216' parentID='29' name='Peppers' />
+		  <lulc id='219' parentID='29' name='Greens' />
+		  <lulc id='220' parentID='29' name='Plums' />
+		  <lulc id='221' parentID='29' name='Strawberries' />
+		  <lulc id='222' parentID='29' name='Squash' />
+		  <lulc id='224' parentID='29' name='Vetch' />
+		  <lulc id='229' parentID='29' name='Pumpkins' />
+		  <lulc id='242' parentID='29' name='Blueberries' />
+		  <lulc id='243' parentID='29' name='Cabbage' />
+		  <lulc id='244' parentID='29' name='Cauliflower' />
+		  <lulc id='246' parentID='29' name='Radishes' />
+		  <lulc id='247' parentID='29' name='Turnips' />
+    <lulc id='299' parentID='20' name='crop not yet selected' />
+    <lulc id='3503300' parentID='43' name='(DFal:SHc) Douglas-fir/Red alder' />
+      <lulc id='7702000' parentID='421' name='(JP:GF) Jeffrey pine' />
+      <lulc id='7702100' parentID='421' name='(JP:GFp) Jeffrey pine' />
+      <lulc id='7708210' parentID='427' name='(JP:Lm1) Jeffrey pine' />
+      <lulc id='7708110' parentID='427' name='(JP:Lo1) Jeffrey pine' />
+      <lulc id='7707410' parentID='426' name='(JP:M1p) Jeffrey pine' />
+      <lulc id='7707210' parentID='426' name='(JP:Mm1) Jeffrey pine' />
+      <lulc id='7707110' parentID='426' name='(JP:Mo1) Jeffrey pine' />
+      <lulc id='7705110' parentID='422' name='(JP:Po1) Jeffrey pine' />
+      <lulc id='7706410' parentID='423' name='(JP:S1p) Jeffrey pine' />
+      <lulc id='7706210' parentID='425' name='(JP:Sm1) Jeffrey pine' />
+      <lulc id='7706110' parentID='424' name='(JP:So1) Jeffrey pine' />
+      <lulc id='7704100' parentID='421' name='(JP:Yo) Jeffrey pine' />
+      <lulc id='7704400' parentID='421' name='(JP:Yop) Jeffrey pine' />
+      <lulc id='2055210' parentID='44' name='PK:Pm1 OWC_fal 41-70' />
+      <lulc id='2503100' parentID='41' name='(Al:SHo) Red alder OCR_fww 1-6' />
+      <lulc id='2504100' parentID='41' name='(Al:Yo) Red alder OCR_fww 6-15' />
+      <lulc id='2505310' parentID='41' name='(Al:Pc1) Red alder OCR_fww 16-22' />
+      <lulc id='2506110' parentID='41' name='(Al:So1) Red alder OCR_fww 23-38' />
+      <lulc id='2506210' parentID='41' name='(Al:Sm1) Red alder' />
+      <lulc id='2506310' parentID='41' name='(Al:Sc1) Red alder' />
+      <lulc id='2702000' parentID='41' name='(BM:GF) Big_leaf_Maple GrassForb' />
+      <lulc id='2708310' parentID='41' name='(BM:Lc1) Big_leaf_Maple Lgtree_close_single' />
+      <lulc id='2705320' parentID='41' name='(BM:Pc2) Big_leaf_Maple Pole_close_multi' />
+      <lulc id='2705210' parentID='41' name='(BM:Pm1) Big_leaf_Maple Pole_med_single' />
+      <lulc id='2706310' parentID='41' name='(BM:Sc1) Big_leaf_Maple Smtree_close_single' />
+      <lulc id='2704100' parentID='41' name='(BM:Yo) Big_leaf_Maple SSap_open' />
+      <lulc id='3002000' parentID='41' name='(Oa:GF) Oregon_white_oak GrassForb' />
+      <lulc id='3009110' parentID='41' name='(Oa:Go1) Oregon_white_oak Gttree_open_single' />
+      <lulc id='3008110' parentID='41' name='(Oa:Lo1) Oregon_white_oak Lgtree_open_single' />
+      <lulc id='3007110' parentID='41' name='(Oa:Mo1) Oregon_white_oak Mdtree_open_single' />
+      <lulc id='3005110' parentID='41' name='(Oa:Po1) Oregon_white_oak Pole_open_single' />
+      <lulc id='3006110' parentID='41' name='(Oa:So1) Oregon_white_oak Smtree_open_single' />
+      <lulc id='3004100' parentID='41' name='(Oa:Yo) Oregon_white_oak SSap_open' />
+      <lulc id='3078220' parentID='41' name='(OD:Lm2) Oregon_white_oak_Douglas_fir Lgtree_med_multi' />
+      <lulc id='3077220' parentID='41' name='(OD:Mm2) Oregon_white_oak_Douglas_fir Mdtree_med_multi' />
+      <lulc id='3076220' parentID='41' name='(OD:Sm2) Oregon_white_oak_Douglas_fir Smtree_med_multi' />
+      <lulc id='3102000' parentID='41' name='(TO:GF) Tanoak GrassForb' />
+      <lulc id='3102100' parentID='41' name='(TO:GFp) Tanoak GrassForb_PostDist*' />
+      <lulc id='3108320' parentID='41' name='(TO:Lc2) Tanoak Lgtree_close_multi' />
+      <lulc id='3107320' parentID='41' name='(TO:Mc2) Tanoak Mdtree_close_multi' />
+      <lulc id='3105310' parentID='41' name='(TO:Pc1) Tanoak Pole_close_single' />
+      <lulc id='3103300' parentID='41' name='(TO:SHc) Tanoak ClosedShrub' />
+      <lulc id='3106320' parentID='41' name='(TO:Sc2) Tanoak Smtree_close_multi' />
+      <lulc id='3104100' parentID='41' name='(TO:Yo) Tanoak SSap_open' />
+      <lulc id='3104400' parentID='41' name='(TO:Yop) Tanoak SSap_PostDist' />
+      <lulc id='3506320' parentID='43' name='DFal:Sc2 OCR_fww 23-40' />
+      <lulc id='3509220' parentID='427' name='DFal:Gm2 OCR_fww 126-200' />
+      <lulc id='3752000' parentID='43' name='DO:GF Douglas-fir/Oak grass-forb' />
+      <lulc id='3752100' parentID='43' name='DO:GFp Douglas-fir/Oak grass-forb post-disturbance' />
+      <lulc id='3754100' parentID='43' name='DO:Yo Douglas-fir/Oak SSap_open' />
+      <lulc id='4002000' parentID='421' name='(DF:GF) Douglas-fir GrassForb' />
+      <lulc id='4002100' parentID='421' name='(DF:GFp) Douglas-fir GrassForb_PostDist*' />
+      <lulc id='4003100' parentID='421' name='(DF:SHo) Douglas-fir OpenShrub' />
+      <lulc id='4055310' parentID='421' name='DFmx:Pc1 ~31-50' />
+      <lulc id='4056320' parentID='425' name='DFmx:Sc2 OWC_fdx 51-70' />
+      <lulc id='4058320' parentID='426' name='DFmx:Lc2 OWC_fdx 110-210' />
+      <lulc id='7052000' parentID='421' name='(LP:GF) Lodgepole_pine GrassForb' />
+      <lulc id='7052100' parentID='421' name='(LP:GFp) Lodgepole_pine GrassForb_PostDist*' />
+      <lulc id='6052000' parentID='421' name='(MH:GF) Mountain_hemlock GrassForb' />
+      <lulc id='6052100' parentID='421' name='(MH:GFp) Mountain_hemlock GrassForb_PostDist*' />
+      <lulc id='4352000' parentID='421' name='(SFDF:GF) Pacific_silver_fir_Douglas-fir GrassForb' />
+      <lulc id='4352100' parentID='421' name='(SFDF:GFp) Pacific_silver_fir_Douglas-fir GrassForb_PostDist*' />
+      <lulc id='4004100' parentID='421' name='(DF:Yo) Douglas-fir SSap_open' />
+      <lulc id='4004400' parentID='421' name='(DF:Yop) Douglas-fir SSap_PostDist' />
+      <lulc id='7054100' parentID='421' name='(LP:Yo) Lodgepole_pine SSap_open' />
+      <lulc id='7054400' parentID='421' name='(LP:Yop) Lodgepole_pine SSap_PostDist' />
+      <lulc id='6054100' parentID='422' name='(MH:Yo) Mountain_hemlock SSap_open' />
+      <lulc id='6054400' parentID='421' name='(MH:Yop) Mountain_hemlock SSap_PostDist' />
+      <lulc id='4354100' parentID='421' name='(SFDF:Yo) Pacific_silver_fir_Douglas-fir SSap_open' />
+      <lulc id='4354400' parentID='421' name='(SFDF:Yop) Pacific_silver_fir_Douglas-fir SSap_PostDist' />
+      <lulc id='4005410' parentID='421' name='(DF:P1p) Douglas-fir Pole_single_PostDist' />
+      <lulc id='4005310' parentID='422' name='(DF:Pc1) Douglas-fir Pole_close_single' />
+      <lulc id='4005210' parentID='422' name='(DF:Pm1) Douglas-fir Pole_med_single' />
+      <lulc id='4005110' parentID='423' name='(DF:Po1) Douglas-fir Pole_open_single' />
+      <lulc id='7055210' parentID='423' name='(LP:Pm1) Lodgepole_pine Pole_med_single' />
+      <lulc id='7055110' parentID='423' name='(LP:Po1) Lodgepole_pine Pole_open_single' />
+      <lulc id='6055210' parentID='424' name='(MH:Pm1) Mountain_hemlock Pole_med_single' />
+      <lulc id='6055110' parentID='424' name='(MH:Po1) Mountain_hemlock Pole_open_single' />
+      <lulc id='4355210' parentID='423' name='(SFDF:Pm1) Pacific_silver_fir_Douglas-fir Pole_med_single' />
+      <lulc id='4006410' parentID='423' name='(DF:S1p) Douglas-fir Smtree_single_PostDist' />
+      <lulc id='4006310' parentID='424' name='(DF:Sc1) Douglas-fir Smtree_close_single' />
+      <lulc id='4006320' parentID='424' name='(DF:Sc2) Douglas-fir Smtree_close_multi' />
+      <lulc id='4006210' parentID='423' name='(DF:Sm1) Douglas-fir Smtree_med_single' />
+      <lulc id='4006220' parentID='424' name='(DF:Sm2) Douglas-fir Smtree_med_multi' />
+      <lulc id='4006110' parentID='423' name='(DF:So1) Douglas-fir Smtree_open_single' />
+      <lulc id='7056320' parentID='425' name='(LP:Sc2) Lodgepole_pine Smtree_close_multi' />
+      <lulc id='7056220' parentID='424' name='(LP:Sm2) Lodgepole_pine Smtree_med_multi' />
+      <lulc id='7056110' parentID='424' name='(LP:So1) Lodgepole_pine Smtree_open_single' />
+      <lulc id='6056410' parentID='425' name='(MH:S1p) Mountain_hemlock Smtree_single_PostDist' />
+      <lulc id='6056320' parentID='425' name='(MH:Sc2) Mountain_hemlock Smtree_close_multi' />
+      <lulc id='6056220' parentID='425' name='(MH:Sm2) Mountain_hemlock Smtree_med_multi' />
+      <lulc id='6056110' parentID='425' name='(MH:So1) Mountain_hemlock Smtree_open_single' />
+      <lulc id='4356410' parentID='425' name='(SFDF:S1p) Pacific_silver_fir_Douglas-fir Smtree_single_PostDist' />
+      <lulc id='4356320' parentID='425' name='(SFDF:Sc2) Pacific_silver_fir_Douglas-fir Smtree_close_multi' />
+      <lulc id='4356220' parentID='425' name='(SFDF:Sm2) Pacific_silver_fir_Douglas-fir Smtree_med_multi' />
+      <lulc id='7057320' parentID='426' name='(LP:Mc2) Lodgepole_pine' />
+      <lulc id='4007410' parentID='425' name='(DF:M1p) Douglas-fir Mdtree_single_PostDist' />
+      <lulc id='4007310' parentID='426' name='(DF:Mc1) Douglas-fir Mdtree_close_single' />
+      <lulc id='4007320' parentID='425' name='(DF:Mc2) Douglas-fir Mdtree_close_multi' />
+      <lulc id='4007210' parentID='424' name='(DF:Mm1) Douglas-fir Mdtree_med_single' />
+      <lulc id='4007220' parentID='425' name='(DF:Mm2) Douglas-fir Mdtree_med_multi' />
+      <lulc id='4007110' parentID='424' name='(DF:Mo1) Douglas-fir Mdtree_open_single' />
+      <lulc id='4207320' parentID='424' name='(DG:Mc2) Douglas-fir_Grand_fir Mdtree_close_multi' />
+      <lulc id='6057410' parentID='425' name='(MH:M1p) Mountain_hemlock Mdtree_single_PostDist' />
+      <lulc id='6057320' parentID='425' name='(MH:Mc2) Mountain_hemlock Mdtree_close_multi' />
+      <lulc id='6057220' parentID='426' name='(MH:Mm2) Mountain_hemlock Mdtree_med_multi' />
+      <lulc id='6057110' parentID='426' name='(MH:Mo1) Mountain_hemlock Mdtree_open_single' />
+      <lulc id='4357410' parentID='426' name='(SFDF:M1p) Pacific_silver_fir_Douglas-fir Mdtree_single_PostDist' />
+      <lulc id='4357320' parentID='426' name='(SFDF:Mc2) Pacific_silver_fir_Douglas-fir Mdtree_close_multi' />
+      <lulc id='4357220' parentID='426' name='(SFDF:Mm2) Pacific_silver_fir_Douglas-fir Mdtree_med_multi' />
+      <lulc id='7657220' parentID='425' name='(WP:Mm2) Western_white_pine Mdtree_med_multi' />
+      <lulc id='4107110' parentID='426' name='(DFWF:Mo1) Douglas-fir/White fir' />
+      <lulc id='4107220' parentID='425' name='(DFWF:Mm2) Douglas-fir/White fir' />
+      <lulc id='4108220' parentID='426' name='(DFWF:Lm2) Douglas-fir/White fir' />
+      <lulc id='4008410' parentID='426' name='(DF:L1p) Douglas-fir Lgtree_single_PostDist' />
+      <lulc id='4008310' parentID='426' name='(DF:Lc1) Douglas-fir Lgtree_close_single' />
+      <lulc id='4008320' parentID='426' name='(DF:Lc2) Douglas-fir Lgtree_close_multi' />
+      <lulc id='4008210' parentID='425' name='(DF:Lm1) Douglas-fir Lgtree_med_single' />
+      <lulc id='4008220' parentID='426' name='(DF:Lm2) Douglas-fir Lgtree_med_multi' />
+      <lulc id='4008110' parentID='425' name='(DF:Lo1) Douglas-fir Lgtree_open_single' />
+      <lulc id='4208320' parentID='426' name='(DG:Lc2) Douglas-fir_Grand_fir Lgtree_close_multi' />
+      <lulc id='6058320' parentID='427' name='(MH:Lc2) Mountain_hemlock Lgtree_close_multi' />
+      <lulc id='6058220' parentID='427' name='(MH:Lm2) Mountain_hemlock Lgtree_med_multi' />
+      <lulc id='6058110' parentID='427' name='(MH:Lo1) Mountain_hemlock Lgtree_open_single' />
+      <lulc id='4358410' parentID='426' name='(SFDF:L1p) Pacific_silver_fir_Douglas-fir Lgtree_single_PostDist' />
+      <lulc id='4358320' parentID='427' name='(SFDF:Lc2) Pacific_silver_fir_Douglas-fir Lgtree_close_multi' />
+      <lulc id='4358220' parentID='426' name='(SFDF:Lm2) Pacific_silver_fir_Douglas-fir Lgtree_med_multi' />
+      <lulc id='7658220' parentID='426' name='(WP:Lm2) Western_white_pine Lgtree_med_multi' />
+      <lulc id='4109220' parentID='427' name='(DFWF:Gm2) Douglas-fir/White fir' />
+      <lulc id='4459320' parentID='427' name='(WH:Gc2) Western hemlock' />
+      <lulc id='4009410' parentID='427' name='(DF:G1p) Douglas-fir Gttree_single_PostDist' />
+      <lulc id='4009310' parentID='426' name='(DF:Gc1) Douglas-fir Gttree_close_single' />
+      <lulc id='4009320' parentID='427' name='(DF:Gc2) Douglas-fir Gttree_close_multi' />
+      <lulc id='4009210' parentID='427' name='(DF:Gm1) Douglas-fir Gttree_med_single' />
+      <lulc id='4009220' parentID='427' name='(DF:Gm2) Douglas-fir Gttree_med_multi' />
+      <lulc id='4009110' parentID='426' name='(DF:Go1) Douglas-fir Gttree_open_single' />
+      <lulc id='4209320' parentID='427' name='(DG:Gc2) Douglas-fir_Grand_fir Gttree_close_multi' />
+      <lulc id='6059320' parentID='427' name='(MH:Gc2) Mountain_hemlock Gttree_close_multi' />
+      <lulc id='6059110' parentID='427' name='(MH:Go1) Mountain_hemlock Gttree_open_single' />
+      <lulc id='4359410' parentID='427' name='(SFDF:G1p) Pacific_silver_fir_Douglas-fir Gttree_single_PostDist' />
+      <lulc id='4359320' parentID='427' name='(SFDF:Gc2) Pacific_silver_fir_Douglas-fir Gttree_close_multi' />
+      <lulc id='4359220' parentID='427' name='(SFDF:Gm2) Pacific_silver_fir_Douglas-fir Gttree_med_multi' />
+      <lulc id='8009320' parentID='427' name='(SK:Gc2) Sitka_spruce Gttree_close_multi' />
+      <lulc id='8009220' parentID='427' name='(SK:Gm2) Sitka_spruce Gttree_med_multi' />
+      <lulc id='8009110' parentID='427' name='(SK:Go1) Sitka_spruce Gttree_open_single' />
+      <lulc id='3507320' parentID='43' name='(DFal:Mc2) Douglas-fir/Red alder' />
+      <lulc id='3602000' parentID='43' name='(DO:GF) Douglas-fir/White Oak GrassForb' />
+      <lulc id='3552000' parentID='43' name='(DO:GF) Douglas-fir_Oak GrassForb' />
+      <lulc id='3552100' parentID='43' name='(DO:GFp) Douglas-fir_Oak GrassForb_PostDist*' />
+      <lulc id='3558320' parentID='43' name='(DO:Lc2) Douglas-fir_Oak Lgtree_close_multi' />
+      <lulc id='3557320' parentID='43' name='(DO:Mc2) Douglas-fir_Oak Mdtree_close_multi' />
+      <lulc id='3555210' parentID='43' name='(DO:Pm1) Douglas-fir_Oak Pole_med_single' />
+      <lulc id='3556320' parentID='43' name='(DO:Sc2) Douglas-fir_Oak Smtree_close_multi' />
+      <lulc id='3554100' parentID='43' name='(DO:Yo) Douglas-fir_Oak SSap_open' />
+      <lulc id='2052000' parentID='44' name='(PK:GF) Subalpine parkland GrassForb' />
+      <lulc id='2056210' parentID='44' name='(PK:Sm1) Subalpine parkland' />
+      <lulc id='2057210' parentID='44' name='(PK:Mm1) Subalpine parkland' />
+      <lulc id='3088210' parentID='44' name='(Ow:Lm1) Oak_Woodland Lgtree_med_single' />
+      <lulc id='3087210' parentID='44' name='(Ow:Mm1) Oak_Woodland Mdtree_med_single' />
+      <lulc id='3085210' parentID='44' name='(Ow:Pm1) Oak_Woodland Pole_med_single' />
+      <lulc id='3086210' parentID='44' name='(Ow:Sm1) Oak_Woodland Smtree_med_single' />
+   </classification>
+
+
+</lulcTree>

@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+ NOTE:  ORDER IS IMPORTANT AND MUST MATCH ID's in the correspondign INI File!
+ 
+ evalType  : specifies how this evaluation is made.  One of the following (required)
+               HIGH - want to maximize the area within the range defined by the bounds (low values indicate scarcity)
+               LOW  - want to minimize the area within the range defined by the bounds (high values indicate scarcity)
+ 
+ method    : specifies how the calcualtion is made.  One of the following (required)
+               AREAWTMEAN - compute an area-weighted mean value
+               
+ lowerBound: the lower bound for this attribute, expressed in total area or percent area, depending on the valueof the "area" attribute (required)
+ upperBound: the upper bound for this attribute, expressed in total area or percent area, depending on the valueof the "area" attribute (required)
+ 
+ 
+ Autonomous Processes
+ 
+   
+   name (required)     name of model
+   id   (required)     id specified in ENVX file
+   col  (optional)     database field name for process to populate
+   value (optional)    computed value to populate into database
+   query (optional)    spatial query limiting scope of computation
+   constraints (optional)
+   useDelta  (optional) instead of iterating through map, iterate though delta array.   In this case
+                        usedelta must contain one or more field=value pairs, separated by semicolons, to look for in the delta array.
+                        If a query is specified, it also must be satisifed for the model to run on an IDU cell.
+-->
+
+<modeler>
+  <const name='m2perAcre' value='4046.86' />
+
+   <auto_process name='ResetIRRIGATION' id='11' value='' query='IRRIGATION=1' >
+      <var name='IRRIGATIONZero' col='IRRIGATION' value='0' />
+   </auto_process>
+
+   <auto_process name='ResetFireDISTURB' id='12' value='' query='DISTURB=23 {STAND_REPLACING_FIRE}' >
+      <var name='DISTURBattribute1' col='DISTURB' value='0' />
+   </auto_process>
+
+   <auto_process name='ResetCCdisturb' id='13' value='' query='DISTURB>=100 and 200>DISTURB and LULC_A=4 {Forest} and DGVMvegtyp>0' >
+      <var name="Vegtype disturbance" col="DISTURB" value="if(PVT!=VTYPExPVT, 100+10*PVT+VTYPExPVT, 0)" />
+      <lookup name='VTYPExPVT' attr_col='DGVMvegtyp' default='0' >
+
+         <map attr_val='6'  value='2' />
+         <!-- subalpine forest -> fmh (mountain hemlock - cold/dry) -->
+
+         <map attr_val='7'  value='6' />
+         <!-- maritime needleleaf forest -> fwi (western hemlock - intermediate) -->
+
+         <map attr_val='8'  value='9' />
+         <!-- temperate needleleaf forest -> fdd (douglas-fir - dry) -->
+
+         <map attr_val='10'  value='5' />
+         <!-- cool mixed forest -> fvg (grand fir - valley) -->
+
+         <map attr_val='11'  value='1' />
+         <!-- temperate warm mixed forest -> fdw (douglas-fir/white oak) -->
+
+         <map attr_val='12'  value='7' />
+         <!-- temperate needleleaf woodland -> fuc (ultramafic) -->
+
+         <map attr_val='14'  value='5' />
+         <!-- temperate cool mixed woodland -> fvg (grand fir - valley) -->
+
+         <map attr_val='15'  value='1' />
+         <!-- temperate warm mixed woodland -> fdw (douglas-fir/white oak) -->
+
+         <map attr_val='16'  value='4' />
+         <!-- C3 shrubland -> fto (tanoak - moist) -->
+
+         <map attr_val='22'  value='8' />
+         <!-- subtropical mixed forest -> ftm (tanoak/douglas-fir - moist) -->
+
+         <map attr_val='25'  value='8' />
+         <!-- subtropical evergreen broadleaf woodland -> ftm (tanoak/douglas-fir - moist) -->
+
+         <map attr_val='27'  value='4' />
+         <!-- C4 shrubland -> fto (tanoak - moist) -->
+
+         <map attr_val='36'  value='3' />
+         <!-- cool needleleaf forest -> fsi (Pacific silver fir - intermediate) -->
+
+      </lookup>
+   </auto_process>
+
+  <auto_process name='ResetHarvestDISTURB' id='14' value='' query='DISTURB=1 {HARVEST}' >
+    <var name='Harvest disturbance' col='DISTURB' value='0' />
+  </auto_process>
+
+  <auto_process name='ResetVEGTRNTYPE' id='15' value='' query='1' >
+    <var name='vegetation transition type' col='VEGTRNTYPE' value='0' />
+  </auto_process>
+
+  <auto_process name='ResetCropChoice' id='16' value='' query='LULC_A=2 AND LULC_B!=21' >
+    <var name='Crop' col='VEGCLASS' value='299' />
+  </auto_process>
+
+  <auto_process name='PVTdisturb' id="110" value=""
+                query="LULC_A=4 {Forest} and DGVMvegtyp>0 and DISTURB=0" >
+    <var name="Vegtype disturbance" col="DISTURB" value="if(PVT!=VTYPExPVT, 100+10*PVT+VTYPExPVT, 0)" />
+    <lookup name='VTYPExPVT' attr_col='DGVMvegtyp' default='0' >
+
+      <map attr_val='6'  value='2' />
+      <!-- subalpine forest -> fmh (mountain hemlock - cold/dry) -->
+
+      <map attr_val='7'  value='6' />
+      <!-- maritime needleleaf forest -> fwi (western hemlock - intermediate) -->
+
+      <map attr_val='8'  value='9' />
+      <!-- temperate needleleaf forest -> fdd (douglas-fir - dry) -->
+
+      <map attr_val='10'  value='5' />
+      <!-- cool mixed forest -> fvg (grand fir - valley) -->
+
+      <map attr_val='11'  value='1' />
+      <!-- temperate warm mixed forest -> fdw (douglas-fir/white oak) -->
+
+      <map attr_val='12'  value='7' />
+      <!-- temperate needleleaf woodland -> fuc (ultramafic) -->
+
+      <map attr_val='14'  value='5' />
+      <!-- temperate cool mixed woodland -> fvg (grand fir - valley) -->
+
+      <map attr_val='15'  value='1' />
+      <!-- temperate warm mixed woodland -> fdw (douglas-fir/white oak) -->
+
+      <map attr_val='16'  value='4' />
+      <!-- C3 shrubland -> fto (tanoak - moist) -->
+
+      <map attr_val='22'  value='8' />
+      <!-- subtropical mixed forest -> ftm (tanoak/douglas-fir - moist) -->
+
+      <map attr_val='25'  value='8' />
+      <!-- subtropical evergreen broadleaf woodland -> ftm (tanoak/douglas-fir - moist) -->
+
+      <map attr_val='27'  value='4' />
+      <!-- C4 shrubland -> fto (tanoak - moist) -->
+
+      <map attr_val='36'  value='3' />
+      <!-- cool needleleaf forest -> fsi (Pacific silver fir - intermediate) -->
+
+    </lookup>
+  </auto_process>
+
+
+</modeler>
