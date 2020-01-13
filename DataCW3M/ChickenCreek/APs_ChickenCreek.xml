@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<envision>
+
+   <ww2100 test_mode="1" tau_climate="30." tau_WR="10." land_use_interval="5"
+      UGApop_file="ScenarioData/PopulationAndIncomeScenarios/POPULATION_SCENARIO_NAME/UGBpop_ChickenCreek.csv"
+      household_income_file="ScenarioData/PopulationAndIncomeScenarios/POPULATION_SCENARIO_NAME/hhold_income.csv" >
+
+      <time_dependent_coefficient symbol="Eyr" method="timeseries_linear" value="(2010,1), (2100,1)"
+            description="energy cost index time series" />
+
+      <climate_files
+            precip_filename ="MonthlyDataOnPRISMgrid/CLIMATE_SCENARIO_NAME/ppt.nc"
+            tmin_filename ="MonthlyDataOnPRISMgrid/CLIMATE_SCENARIO_NAME/tmin.nc" />
+
+      <ColdStart id ="5"  />
+<!--
+     <ColdStart id ="5" use_vegclass_initialization ="0" 
+        Age2StructuralStageFile="/U-envision/trunk/StudyAreas/OUWIN/age2ss.csv" />
+
+      <ColdStart id ="5" use_vegclass_initialization ="0"
+         PopulationUnitsFile="/U-envision/trunk/StudyAreas/OUWIN/EconAndPopData/IDU_UGB_RR_110413.csv" /> Note that as of u121, this file has IDU indices for WW2100, not OUWIN.
+-->     
+<!--
+     <ColdStart id ="5" use_vegclass_initialization ="1"
+       Age2StructuralStageFile="/U-envision/trunk/StudyAreas/OUWIN/age2ss.csv"
+               
+        initial_irrigation_fraction="0.6"
+        SWHCfile="/U-envision/trunk/StudyAreas/OUWIN/MC2data/WW2100_Hist_single.nc" >
+
+         <ForestSTMfiles
+           DGVMvegtype_file ="/U-envision/trunk/StudyAreas/OUWIN/CLIMATE_SCENARIO_NAME/vtype.nc"
+           CoverTypes_file = "/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/CoverTypes.csv"
+           StructuralStages_file = "/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/StructuralStages.csv"
+           TransitionTypes_file = "/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/Transition Types.csv"
+           Stratum2PVT_file ="/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/Stratum2PVT.csv"
+           LAIandC_file ="/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/LAIandC.csv"
+           DeterministicTransitionInput_file ="/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/Deterministic Transitions.csv"
+           ProbabilisticTransitionInput_file ="/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/Probabilistic Transitions.csv"
+           DeterministicTransitionOutput_file ="/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/wv_deterministic_transition_lookup.csv"
+           ProbabilisticTransitionOutput_file ="/U-envision/trunk/StudyAreas/OUWIN/ForestSTM/wv_probability_transition_lookup.csv"
+         />
+      </ColdStart>
+-->
+      <fish id="190">
+         <groups>
+            <group id="0"  name="Native" />
+            <group id="1"  name="Exotic" />
+         </groups>
+
+         <species>
+            <specie name="Banded killifish"       use='1' code='BAKIL' group='1' intercept='-1.223'  tmax='-0.068'    />
+            <!--            <specie name="Black crappie"          use='1' code='BLCRA' group='1' intercept='0'       tmax=''          /> -->
+            <specie name="Bluegill"               use='1' code='BLUEG' group='1' intercept='-1.089'   tmax='-0.026'    />
+            <!--            <specie name="Brown bullhead"         use='1' code='BRBUL' group='1' intercept=''        tmax=''          /> -->
+            <specie name="Common carp"            use='1' code='COCAR' group='1' intercept='1.312' tmax='-0.150'     />
+            <specie name="Largemouth bass"        use='1' code='LMBAS' group='1' intercept='-0.192'   tmax='-0.006'    />
+            <specie name="Western mosquitofish"   use='1' code='MOSQU' group='1' intercept='-2.760'  tmax='-0.008'     />
+            <!--            <specie name="Pumpkinseed"            use='1' code='PUMPK' group='1' intercept=''        tmax=''          />   -->
+            <specie name="Smallmouth bass"        use='1' code='SMBAS' group='1' intercept='4.042' tmax='-0.235'     />
+            <specie name="Warmouth"               use='1' code='WARMO' group='1' intercept='-13.483' tmax='0.552'     />
+            <specie name="Yellow perch"           use='1' code='YEPER' group='1' intercept='7.207'   tmax='-0.541'    />
+            <specie name="Chiselmouth"            use='1' code='CHISE' group='0' intercept='-1.659'  tmax='0.153'    />
+            <specie name="Chinook salmon"         use='1' code='CHSAL' group='0' intercept='4.950'  tmax='-0.234'    />
+            <specie name="Cutthroat trout"        use='1' code='CUTRO' group='0' intercept='0.367'   tmax='-0.081'    />
+            <specie name="Lamprey ammocoete"      use='1' code='LAMPR' group='0' intercept='-6.358' tmax='0.441'   />
+            <specie name="Leopard dace"           use='1' code='LEDAC' group='0' intercept='-5.937'  tmax='0.278'     />
+            <specie name="Longnose dace"          use='1' code='LNDAC' group='0' intercept='-3.432'  tmax='0.215'    />
+            <specie name="Largescale sucker"      use='1' code='LSSUC' group='0' intercept='26.570'  tmax='0.000'     />
+            <specie name="Mountain sucker"        use='1' code='MOSUC' group='0' intercept='-2.140'   tmax='0.106'    />
+            <specie name="Mountain whitefish"     use='1' code='MOWHI' group='0' intercept='-2.142'  tmax='0.131'    />
+            <specie name="Northern pikeminnow"    use='1' code='NPMIN' group='0' intercept='-7.790'  tmax='0.571'     />
+            <specie name="Peamouth chub"          use='1' code='PEAMO' group='0' intercept='0.888'  tmax='-0.058'     />
+            <specie name="Paiute sculpin"         use='1' code='PISCU' group='0' intercept='-5.039'  tmax='0.277'     />
+            <specie name="Prickly sculpin"        use='1' code='PRSCU' group='0' intercept='2.990'   tmax='-0.026'    />
+            <specie name="Rainbow trout"          use='1' code='RATRO' group='0' intercept='-0.288'   tmax='-0.096'    />
+            <specie name="Reticulate sculpin"     use='1' code='RESCU' group='0' intercept='-18.424'  tmax='1.326'     />
+            <specie name="Redside shiner"         use='1' code='RESHI' group='0' intercept='-6.680'  tmax='0.464'    />
+            <specie name="Sandroller"             use='1' code='SANDR' group='0' intercept='-2.3581'   tmax='0.055'    />
+            <specie name="Speckled dace"          use='1' code='SPDAC' group='0' intercept='-2.977'  tmax='0.2371'    />
+            <specie name="Threespine stickleback" use='1' code='TSSTI' group='0' intercept='5.395'  tmax='-0.33'    />
+            <specie name="Torrent sculpin"        use='1' code='TOSCU' group='0' intercept='-4.5016'  tmax='0.2986'    />
+         </species>
+      </fish>
+
+      <carbon id='-1' >
+      </carbon>
+
+      <!-- The land use transition model always signals which IDUs have transitioned by negating the value in the PROBUSECHG column.
+Test mode in the Land Use Transitions model works this way: 
+test_mode can be set to 0, 1, 2, or 3.  0 turns off test mode.
+Whenever test_mode is >0, then 
+- the PROB0, PROB1, and PROB2 columns are used to store the predicted values for developed use, agricultural use, and forest use, respectively, and
+- the X0 thru X13 columns are used to store the independent variable values for the predicted value of developed use (test_mode=1), agricultural use (test_mode=2), or forest use (test_mode=3)
+- the BETAX column is used to store the beta*X sum corresponding to the independent variable values in the X0 thru X13 columns
+-->
+      <land_use_transitions id='170' test_mode ='0' >
+           <developed_use>
+	   <coefficients>
+               <coefficient symbol='beta0' value='8.671' description='constant' />
+               <coefficient symbol='beta1' value='0.434' description='UGB' />
+               <coefficient symbol='beta2' value='0.107' description='pop_den' />
+               <coefficient symbol='beta3' value='0.627' description='ln_HH_inc' />
+               <coefficient symbol='beta4' value='0.001' description='imp' />
+               <coefficient symbol='beta5' value='-0.046' description='citydist' />
+               <coefficient symbol='beta6' value='0.0008' description='citydist_sq' />
+               <coefficient symbol='beta7' value='0.092' description='Benton_group' />
+               <coefficient symbol='beta8' value='-0.276' description='Lane_group' />
+               <coefficient symbol='beta9' value='0.239' description='Washington_group' />
+            </coefficients>
+            <coefficient symbol='Correction_factor' value='1.035' />
+            <parameter symbol='imp' value='93.92385' description='year 2000 developed-use ave improvement value' />
+         </developed_use>
+         <agricultural_use >
+            <coefficients>
+               <!--from Dan Bigelow's WW2100AP_083013.xml file-->
+               <coefficient symbol='beta0' value='7.51' description='constant' />
+               <coefficient symbol='beta1' value='-0.008' description='acres' />
+               <coefficient symbol='beta2' value='-0.014' description='slope' />
+               <coefficient symbol='beta3' value='-0.018' description='citydist' />
+               <coefficient symbol='beta4' value='0.0005' description='citydist_sq' />
+               <coefficient symbol='beta5' value='-0.209' description='Benton_group' />
+               <coefficient symbol='beta6' value='-0.354' description='Lane_group' />
+               <coefficient symbol='beta7' value='-0.786' description='Washington_group' />
+               <coefficient symbol='beta8' value='0.001' description='imp' />
+               <coefficient symbol='beta9' value='0.003' description='farm_rent' />
+               <coefficient symbol='beta10' value='0.002' description='mean_imp' />
+            </coefficients>
+            <coefficient symbol='Correction_factor' value='1.167' />
+            <parameter symbol='imp' value='57.92065' description='year 2000 agricultural-use ave improvement value' />
+            <parameter symbol='mean_imp' value='38.712768' description='mean agricultural-use improvement value' />
+         </agricultural_use>
+         <forest_use>
+            <coefficients>
+               <!--from Dan Bigelow's WW2100AP_083013.xml file-->
+               <coefficient symbol='beta0' value='5.881' description='constant' />
+               <coefficient symbol='beta1' value='-0.0003' description='acres' />
+               <coefficient symbol='beta2' value='-0.051' description='slope' />
+               <coefficient symbol='beta3' value='-0.001' description='elev' />
+               <coefficient symbol='beta4' value='-0.00009' description='riv_feet' />
+               <coefficient symbol='beta5' value='0.252' description='PNI' />
+               <coefficient symbol='beta6' value='0.039' description='ugbdist' />
+               <coefficient symbol='beta7' value='-0.111' description='citydist' />
+               <coefficient symbol='beta8' value='0.002' description='citydist_sq' />
+               <coefficient symbol="beta9" value="-0.996" description="Benton_group" />
+               <coefficient symbol="beta10" value="-0.295" description="Lane_group" />
+               <coefficient symbol='beta11' value='-1.274' description='Washington_group' />
+               <coefficient symbol='beta12' value='0.0003' description='imp' />
+               <coefficient symbol='beta13' value='0.006' description='mean_imp' />
+            </coefficients>
+            <coefficient symbol='Correction_factor' value='1.226' />
+            <parameter symbol='imp' value='47.81576' description='year 2000 forest-use ave improvement value' />
+            <parameter symbol='mean_imp' value='25.6702726' description='mean forest-use improvement value' />
+         </forest_use>
+         <transitions >
+            <coefficient symbol='self' value='0.00489' description='use w/ ARa and FRf' />
+            <coefficient symbol='crossR' value='0.00242' offset_value='-7.799' description='use w/ FRa and ARf' />
+            <coefficient symbol='DR' value='0.00013' offset_value='-4.788' />
+            <transition from_use='ag' >
+               <to  to_use='ag' >
+                  <parameter symbol='max' value='200' />
+                  <coefficient symbol='scale_factor' value='0.05' description='coef of ag_val' />
+               </to>
+               <to to_use='forest' >
+                  <parameter symbol='max' value='2000' />
+		  <coefficient symbol='scale_factor' value='2.0' description='coef of for_val'/>	
+               </to>
+               <to to_use='developed' >
+                  <parameter symbol='max' value='50000' />
+                  <coefficient symbol='scale_factor' value='0.03' description='coef of dev_val'/>
+               </to>
+            </transition>
+            <transition from_use='forest' >
+               <to  to_use='ag' >
+                  <parameter symbol='max' value='2000' />
+		  <coefficient symbol='scale_factor' value='0.5' description='coef of ag_val' />
+               </to>
+               <to to_use='forest' >
+                  <parameter symbol='max' value='200' />
+                  <coefficient symbol='scale_factor' value='0.7' description='coef of for_val'/>
+               </to>
+               <to to_use='developed' >
+                  <parameter symbol='max' value='50000' />
+                  <coefficient symbol='scale_factor' value='0.03' description='coef of dev_val'/>
+               </to>
+            </transition>
+         </transitions>
+      </land_use_transitions>
+
+      <!--urban_water should be id='60'
+	As of 4/22/15, urban water test mode doesn't do anything. 
+      -->
+     <urban_water id='60' test_mode="0"
+        manufacturing_income_file="ScenarioData/PopulationAndIncomeScenarios/POPULATION_SCENARIO_NAME/mfg_income_ChickenCreek.csv"
+        commercial_income_file="ScenarioData/PopulationAndIncomeScenarios/POPULATION_SCENARIO_NAME/comm_income_ChickenCreek.csv"
+        cooling_cost_file="cooling_cost.csv"
+        FullCostUrb_residential_price_file="FullCostUrb_residential_prices.csv"
+        FullCostUrb_commercial_industrial_price_file="FullCostUrb_commercial_industrial_prices.csv" >
+       <prices>
+         <price_ccf area="Portland Metro" residential="2.44" non-residential="2.44" IBR="0" population_divisor="17"/>
+         <price_ccf area="Salem-Keizer" residential="2.04" non-residential="1.50" IBR="0" population_divisor="2"/>
+         <price_ccf area="Corvallis" residential="1.93" non-residential="2.11" IBR="1" population_divisor="1"/>
+         <price_ccf area="Eugene-Springfield" residential="2.00" non-residential="2.00" IBR="1" population_divisor="2"/>
+       </prices>
+     </urban_water>
+
+      <DGVMvegtypeData id='140' >
+         <DGVMvegtypeData_file
+                   DGVMvegtype_filename ="ScenarioData/vtype_CLIMATE_SCENARIO_NAME.nc" />
+      </DGVMvegtypeData>
+
+      <irrigation_choice id="39" test_mode="0" >
+         <!-- s/b id=39 -->
+         <coefficients>
+            <coefficient symbol="beta0" value="2.24871" description="intercept" />
+            <coefficient symbol="beta1"  value="-0.09432" description="Precip dev, June" />
+            <coefficient symbol="beta2"  value="-0.41341" description="Precip dev, July" />
+            <coefficient symbol="beta3"  value="-0.15841" description="Precip dev, August" />
+            <coefficient symbol="beta4"  value="-0.0098" description="Elevation (meters)" />
+            <coefficient symbol="beta5"  value="0.00083" description="Elevation*spring precip (avg. Apr-Jun" />
+            <coefficient symbol="beta6"  value="0.43069" description="EFU (0/1)" />
+            <coefficient symbol="beta7"  value="0.33113" description="Groundwater right (0/1)" />
+            <coefficient symbol="beta8"  value="-0.00842" description="Poor drainage (%)" />
+            <coefficient symbol="beta9"  value="-0.00949" description="Groundwater-right*depth-to-groundwater (m)" />
+            <coefficient symbol="beta10"  value="-0.21901" description="Water holding capacity (cmH2O)" />
+            <coefficient symbol="beta11"  value="-0.02615" description="Distance to Willamette R. (km)" />
+            <coefficient symbol="beta12"  value="-0.00873" description="Distance to nearest major city (km)" />
+            <coefficient symbol="beta13"  value="0.83972" description="LCC1 (0/1)" />
+            <coefficient symbol="beta14"  value="1.07992" description="LCC2 (0/1)" />
+            <coefficient symbol="beta15"  value="0.82066" description="LCC3 (0/1)" />
+            <coefficient symbol="beta16"  value="1.4981" description="LCC4 (0/1)" />
+         </coefficients>
+      </irrigation_choice>
+
+      <!--should be popGrowth id="30"-->
+      <popGrowth id="30" ruralPopUnitCol="RPA"
+         RRpop_file="ScenarioData/PopulationAndIncomeScenarios/POPULATION_SCENARIO_NAME/RRpop.csv"
+      />
+
+      <farmland_rent id="160" test_mode="0" >
+         <coefficients>
+            <coefficient symbol="a0" value="1.206" description="intercept" />
+            <coefficient symbol="a1"  value="104.7" description="LCC1 (0/1)" />
+            <coefficient symbol="a2"  value="95.6" description="LCC2 (0/1)" />
+            <coefficient symbol="a3"  value="69.9" description="LCC3 (0/1)" />
+            <coefficient symbol="a4"  value="66.6" description="LCC3 (0/1)" />
+            <coefficient symbol="a5"  value="20.5" description="LCC5 (0/1)" />
+            <coefficient symbol="a6"  value="20.5" description="LCC6 (0/1)" />
+            <coefficient symbol="a7"  value="19.9" description="LCC7 (0/1)" />
+            <coefficient symbol="a8"  value="38.9" description="IRR*LCC1" />
+            <coefficient symbol="a9"  value="39.1" description="IRR*LCC2" />
+            <coefficient symbol="a10"  value="17.8" description="IRR*LCC3" />
+            <coefficient symbol="a11"  value="22.1" description="IRR*LCC4" />
+            <coefficient symbol="a12"  value="-0.04" description="ElevDeMean" />
+            <coefficient symbol="a13"  value="1.37" description="PrDeMean" />
+            <coefficient symbol="a14"  value="26.6" description="MinTempDeMean" />
+            <coefficient symbol="a15"  value="93.68" description="mean Elev" />
+            <coefficient symbol="a16"  value="13.49"
+			         description="mean growing season precip, inH2O" />
+            <coefficient symbol="a17"  value="8.581" description="mean growing season tmin" />
+            <coefficient symbol="a18"  value="2.0"
+			         description="placeholder coefficient in pumping cost expression" />
+         </coefficients>
+         <time_dependent_data symbol="Cw_groundwater" type="timeseries" method="linear"
+               value="(2010,0), (2100,0)" description="irrigation H2O cost from groundwater" />
+         <time_dependent_data symbol="Cw_surfacewater" type="timeseries" method="linear"
+               value="(2010,0), (2100,0)" description="irrigation H2O cost from surface water" />
+      </farmland_rent>
+
+      <crop_choice id="50" test_mode="0" 
+                   coefficients_file="cropchoice.csv" > 
+         <time_dependent_datasets>
+            <time_dependent_data symbol="PG" description="price of grass seed, $/ton"
+                  type="timeseries" method="linear" value="(2010, 0.), (2100, 0.)" />
+            <time_dependent_data symbol="PW" description="price of wheat, $/bushel"
+                  type="timeseries" method="linear" value="(2010, 0.), (2100, 0.)" />
+            <time_dependent_data symbol="snowpack" description="regional snowpack on Apr 1"
+                  type="file" method="linear" value="ScenarioData/SCENARIO_NAME/snowpack.csv" />
+         </time_dependent_datasets>
+      </crop_choice>
+
+     <UGA_expansion id="180" test_mode="0" default_threshold_pct="80"
+          UGA_threshold_pct_file="ScenarioData/UGA_threshold.csv">
+
+         <UGAs>
+           <!--Cottage Grove city center coords are approximate-->
+           <!--        <UGA id="" name="" city_center_E="" city_center_N="" threshold_pct="80" display="0" /> -->
+           <UGA id="2" name="Albany" city_center_E="493141" city_center_N="4942404" threshold_pct="80" display="1" />
+           <UGA id="12" name="Corvallis" city_center_E="476957" city_center_N="4934821" threshold_pct="80" display="1" />
+           <UGA id="22" name="Eugene-Springfield" city_center_E="493716" city_center_N="4878556" threshold_pct="72" display="1" />
+           <UGA id="39" name="McMinnville" city_center_E="484906" city_center_N="5006456" threshold_pct="80" display="1" />
+           <UGA id="40" name="Metro" city_center_E="524352" city_center_N="5016976" threshold_pct="80" display="1"/>
+           <UGA id="47" name="Newberg" city_center_E="503066" city_center_N="5016976" threshold_pct="80" display="1" />
+           <UGA id="51" name="Salem-Keizer" city_center_E="497971" city_center_N="4975491" threshold_pct="80" display="1" />
+           <UGA id="71" name="Woodburn" city_center_E="511107" city_center_N="4999241" threshold_pct="80" display="1" />
+           <!-- small UGBs -->
+           <UGA id="1" name="Adair Village" city_center_E="482854" city_center_N="4946477" threshold_pct="80" display="1" />
+           <UGA id="3" name="Amity" city_center_E="483985" city_center_N="4995841" threshold_pct="80" display="1" />
+           <UGA id="4" name="Aumsville" city_center_E="510294" city_center_N="4965906" threshold_pct="80" display="1" />
+           <UGA id="5" name="Aurora" city_center_E="518991" city_center_N="5008276" threshold_pct="80" display="1" />
+           <UGA id="6" name="Banks" city_center_E="491317" city_center_N="5051183" threshold_pct="80" display="1" />
+           <UGA id="7" name="Barlow" city_center_E="521783" city_center_N="5011044" threshold_pct="80" display="1" />
+           <UGA id="8" name="Brownsville" city_center_E="501389" city_center_N="4915457" threshold_pct="80" display="1" />
+           <UGA id="9" name="Canby" city_center_E="524720" city_center_N="5012557" threshold_pct="80" display="1" />
+           <UGA id="10" name="Carlton" city_center_E="486252" city_center_N="5015681" threshold_pct="80" display="1" />
+           <UGA id="11" name="Coburg" city_center_E="495255" city_center_N="4887420" threshold_pct="80" display="1" />
+           <UGA id="13" name="Cottage Grove" city_center_E="495237" city_center_N="4849011" threshold_pct="80" display="1" />
+           <UGA id="14" name="Creswell" city_center_E="498739" city_center_N="4863098" threshold_pct="80" display="1" />
+           <UGA id="15" name="Dallas" city_center_E="475193" city_center_N="4974328" threshold_pct="80" display="1" />
+           <UGA id="16" name="Dayton" city_center_E="493658" city_center_N="5007500" threshold_pct="80" display="1" />
+           <UGA id="17" name="Detroit" city_center_E="567186" city_center_N="4953769" threshold_pct="80" display="1" />
+           <UGA id="18" name="Donald" city_center_E="512593" city_center_N="5007677" threshold_pct="80" display="1" />
+           <UGA id="19" name="Dundee" city_center_E="499264" city_center_N="5013659" threshold_pct="80" display="1" />
+           <UGA id="20" name="Estacada" city_center_E="552405" city_center_N="5016534" threshold_pct="80" display="1" />
+           <UGA id="23" name="Falls City" city_center_E="465441" city_center_N="4968058" threshold_pct="80" display="1" />
+           <UGA id="25" name="Gaston" city_center_E="488633" city_center_N="5031149" threshold_pct="80" display="1" />
+           <UGA id="26" name="Gates" city_center_E="545877" city_center_N="4956016" threshold_pct="80" display="1" />
+           <UGA id="27" name="Gervais" city_center_E="508108" city_center_N="4994926" threshold_pct="80" display="1" />
+           <UGA id="28" name="Halsey" city_center_E="491264" city_center_N="4914467" threshold_pct="80" display="1" />
+           <UGA id="29" name="Harrisburg" city_center_E="486843" city_center_N="4902325" threshold_pct="80" display="1" />
+           <UGA id="30" name="Hubbard" city_center_E="515111" city_center_N="5003126" threshold_pct="80" display="1" />
+           <UGA id="31" name="Idanha" city_center_E="572290" city_center_N="4950566" threshold_pct="80" display="1" />
+           <UGA id="33" name="Jefferson" city_center_E="499368" city_center_N="4951807" threshold_pct="80" display="1" />
+           <UGA id="34" name="Junction City" city_center_E="483290" city_center_N="4894673" threshold_pct="80" display="1" />
+           <UGA id="35" name="Lafayette" city_center_E="491231" city_center_N="5010327" threshold_pct="80" display="1" />
+           <UGA id="36" name="Lebanon" city_center_E="507375" city_center_N="4930475" threshold_pct="80" display="1" />
+           <UGA id="37" name="Lowell" city_center_E="517545" city_center_N="4863120" threshold_pct="80" display="1" />
+           <UGA id="38" name="Lyons" city_center_E="531110" city_center_N="4957989" threshold_pct="80" display="1" />
+           <UGA id="41" name="Mill City" city_center_E="540817" city_center_N="4955312" threshold_pct="80" display="1" />
+           <UGA id="43" name="Molalla" city_center_E="532537" city_center_N="4999662" threshold_pct="80" display="1" />
+           <UGA id="44" name="Monmouth" city_center_E="483274" city_center_N="4966590" threshold_pct="80" display="1" />
+           <UGA id="45" name="Monroe" city_center_E="476125" city_center_N="4907152" threshold_pct="80" display="1" />
+           <UGA id="46" name="Mt. Angel" city_center_E="515873" city_center_N="4990698" threshold_pct="80" display="1" />
+           <UGA id="48" name="North Plains" city_center_E="500393" city_center_N="5049321" threshold_pct="80" display="1" />
+           <UGA id="49" name="Oakridge" city_center_E="543195" city_center_N="4843805" threshold_pct="80" display="1" />
+           <UGA id="52" name="Sandy" city_center_E="556595" city_center_N="5027516" threshold_pct="80" display="1" />
+           <UGA id="55" name="Scio" city_center_E="511812" city_center_N="4950105" threshold_pct="80" display="1" />
+           <UGA id="56" name="Scotts Mills" city_center_E="526024" city_center_N="4987563" threshold_pct="80" display="1" />
+           <UGA id="57" name="Sheridan" city_center_E="468655" city_center_N="4993802" threshold_pct="80" display="1" />
+           <UGA id="58" name="Silverton" city_center_E="517283" city_center_N="4983525" threshold_pct="80" display="1" />
+           <UGA id="59" name="Sodaville" city_center_E="510449" city_center_N="4925480" threshold_pct="80" display="1" />
+           <UGA id="61" name="St. Paul" city_center_E="501733" city_center_N="5006531" threshold_pct="80" display="1" />
+           <UGA id="62" name="Stayton" city_center_E="516054" city_center_N="4961859" threshold_pct="80" display="1" />
+           <UGA id="64" name="Sweet Home" city_center_E="523624" city_center_N="4916548" threshold_pct="80" display="1" />
+           <UGA id="65" name="Tangent" city_center_E="491497" city_center_N="4933331" threshold_pct="80" display="1" />
+           <UGA id="66" name="Turner" city_center_E="503848" city_center_N="4966169" threshold_pct="80" display="1" />
+           <UGA id="67" name="Veneta" city_center_E="471874" city_center_N="4877152" threshold_pct="80" display="1" />
+           <UGA id="68" name="Waterloo" city_center_E="514019" city_center_N="4926761" threshold_pct="80" display="1" />
+           <UGA id="69" name="Westfir" city_center_E="539626" city_center_N="4845097" threshold_pct="80" display="1" />
+           <UGA id="70" name="Willamina" city_center_E="461808" city_center_N="4991814" threshold_pct="80" display="1" />
+           <UGA id="72" name="Yamhill" city_center_E="485626" city_center_N="5020878" threshold_pct="80" display="1" />
+         </UGAs>
+       </UGA_expansion>
+
+   </ww2100>
+
+
+</envision>
+
+<!--
+      <coefficients>
+         <coefficient symbol="beta0" value="" description="intercept" />
+         <coefficient symbol="beta1"  value="" description="" />
+         <coefficient symbol="beta2"  value="" description="" />
+         <coefficient symbol="beta3"  value="" description="" />
+         <coefficient symbol="beta4"  value="" description="" />
+         <coefficient symbol="beta5"  value="" description="" />
+         <coefficient symbol="beta6"  value="" description="" />
+         <coefficient symbol="beta7"  value="" description="" />
+         <coefficient symbol="beta8"  value="" description="" />
+         <coefficient symbol="beta9"  value="" description="" />
+         <coefficient symbol="beta10"  value="" description="" />
+         <coefficient symbol="beta11"  value="" description="" />
+         <coefficient symbol="beta12"  value="" description="" />
+         <coefficient symbol="beta13"  value="" description="" />
+         <coefficient symbol="beta14"  value="" description="" />
+         <coefficient symbol="beta15"  value="" description="" />
+         <coefficient symbol="beta16"  value="" description="" />
+      </coefficients>
+-->
