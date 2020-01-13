@@ -249,6 +249,11 @@ WW2100AP::WW2100AP()
    {
    // Add input vars.
 
+   /* 1 */ m_GetWeatherInVarIndex = AddInputVar("UseStationaryClim", m_useStationaryClim, "0=Off, 1=On");
+   /* 2 */ AddInputVar("StationaryClimFirstYear", m_stationaryClimFirstYear, "first year of interval");
+   /* 3 */ AddInputVar("StationaryClimLastYear", m_stationaryClimLastYear, "last year of interval");
+   m_GetWeatherInVarCount = 3;
+
    /* 1 */ m_DGVMvegtypeDataInVarIndex = AddInputVar("Climate Scenario", m_currentClimateScenarioIndex, "0=Ref, 1=LowClim, 2=HiClim, 3=Stationary, 4=Historical, 5=Baseline");
    m_DGVMvegtypeDataInVarCount = 1;
 
@@ -340,12 +345,17 @@ int WW2100AP::InputVar( int id, MODEL_VAR** modelVar )
    else if ( m_useCarbonModel==id )
       {
       }
-   else if ( m_idUW==id )
+   else if (ID_GETWEATHER == id)
       {
-	   *modelVar = m_inputVars.GetData() + m_UWinVarIndex;
-	   numVars = m_UWinVarCount;
+      *modelVar = m_inputVars.GetData() + m_GetWeatherInVarIndex;
+      numVars = m_GetWeatherInVarCount;
+      } // end of if ( ID_GETWEATHER==id )
+   else if (m_idUW == id)
+      {
+      *modelVar = m_inputVars.GetData() + m_UWinVarIndex;
+      numVars = m_UWinVarCount;
       } // end of if ( m_idUW==id )
-   else if ( m_idLandTrans==id )   
+   else if ( m_idLandTrans==id )
       {
       *modelVar = m_inputVars.GetData() + m_LTinVarIndex;
       numVars = m_LTinVarCount;
@@ -956,18 +966,19 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
 
 bool WW2100AP::RunGetWeather(EnvContext *pContext)
    {
-   int weather_year = pContext->currentYear;
-   if (m_currentClimateScenarioIndex == STATIONARY_CLIM_SCENARIO_INDEX)
+   if (m_currentClimateScenarioIndex == STATIONARY_CLIM_SCENARIO_INDEX // For backward compatibility with WW2100
+      || m_useStationaryClim != 0)
       {
-      weather_year = 2010;
-      while (weather_year >= 2010)
-         {
-         double rand_num = m_WeatherRandomDraw.RandValue(0., 1.);
-         weather_year = (int)(rand_num*(2010 - 1950) + 1950);
-         }
-      }
+      double rand_num = m_WeatherRandomDraw.GetUnif01();
+      pContext->weatherYear = (int)(rand_num * (m_stationaryClimLastYear - m_stationaryClimFirstYear) + m_stationaryClimFirstYear);
 
-   pContext->weatherYear = weather_year;
+      CString msg;
+      msg.Format("RunGetWeather() rand_num = %f, m_stationaryClimFirstYear = %d, m_stationaryClimLastYear = %d, pContext->weatherYear = %d",
+         rand_num, m_stationaryClimFirstYear, m_stationaryClimLastYear, pContext->weatherYear);
+      Report::LogMsg(msg);
+      }
+   else pContext->weatherYear = pContext->currentYear;
+
    return(true);
    } // end of RunGetWeather()
 

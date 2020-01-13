@@ -831,7 +831,7 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
 
    // Annual Quick Check metrics
    this->m_QuickCheckMetrics.SetName("ALTWM Quick Check");
-   this->m_QuickCheckMetrics.SetSize(15, 0);
+   this->m_QuickCheckMetrics.SetSize(16, 0);
    this->m_QuickCheckMetrics.SetLabel(0, "Year");
    this->m_QuickCheckMetrics.SetLabel(1, "tot in HRUs reaches and reservoirs at end of last year (mm H2O)"); // m_totH2OlastYr (m3)
    this->m_QuickCheckMetrics.SetLabel(2, "Precip (mm H2O)"); // PRECIP_YR
@@ -847,6 +847,7 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
    this->m_QuickCheckMetrics.SetLabel(12, "municipal and rural domestic (ac-ft)");
    this->m_QuickCheckMetrics.SetLabel(13, "mass balance discrepancy (mm H2O)");
    this->m_QuickCheckMetrics.SetLabel(14, "mass balance discrepancy (fraction)");
+   this->m_QuickCheckMetrics.SetLabel(15, "weather year");
    gpFlow->AddOutputVar("ALTWM Quick Check", &m_QuickCheckMetrics, "ALTWM Quick Check");
 
    // Daily Municipal Allocations = m_ugaUWallocatedDay[uga]
@@ -3902,7 +3903,7 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    float muni_ac_ft = (muni_accumulator_m3 + m_GWnoWR_Yr_m3) * ACREFT_PER_M3;
 
    CArray< float, float > rowQuickCheckMetrics;
-   rowQuickCheckMetrics.SetSize(15);
+   rowQuickCheckMetrics.SetSize(16);
    rowQuickCheckMetrics[0] = (float)time;
    rowQuickCheckMetrics[1] = tot_H2O_last_year_mm;
    rowQuickCheckMetrics[2] = precip_yr_mm;
@@ -3925,6 +3926,8 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    double discrepancy_mm = year_out_mm - year_in_mm;
    rowQuickCheckMetrics[13] = (float)discrepancy_mm;
    rowQuickCheckMetrics[14] = (float)(discrepancy_mm / year_in_mm);
+
+   rowQuickCheckMetrics[15] = (float)(m_pEnvContext->weatherYear);
 
    this->m_QuickCheckMetrics.AppendRow(rowQuickCheckMetrics);
 

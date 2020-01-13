@@ -519,6 +519,10 @@ protected:
    bool RunGetWeather(EnvContext *pContext);
 
    RandUniform m_WeatherRandomDraw;
+   int m_GetWeatherInVarIndex, m_GetWeatherInVarCount;
+   int m_useStationaryClim;
+   int m_stationaryClimFirstYear;
+   int m_stationaryClimLastYear;
 
 
    //--------------------------------------------
