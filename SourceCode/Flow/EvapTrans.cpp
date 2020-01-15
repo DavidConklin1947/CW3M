@@ -632,7 +632,7 @@ bool EvapTrans::FillLookupTables( FlowContext* pFlowContext ) // determine plant
       pFlowContext->pFlowModel->GetCurrentYearDailyWeatherField(CDT_PRECIP, doy);
       pFlowContext->pFlowModel->GetCurrentYearDailyWeatherField(CDT_TMIN, doy);
 
-      pFlowContext->pFlowModel->DailyUpdateToSingleYearWeatherAverages(doy, pFlowContext->pEnvContext->daysInCurrentYear, pFlowContext->pEnvContext->m_simDate.year);
+      pFlowContext->pFlowModel->DailyUpdateToSingleYearWeatherAverages(doy, pFlowContext->pEnvContext->daysInCurrentYear, pFlowContext->pEnvContext->weatherYear);
 
       if (num_hrus_harvested >= hruCount) continue;
 
@@ -846,10 +846,10 @@ bool EvapTrans::FillLookupTables( FlowContext* pFlowContext ) // determine plant
    }
 
    // Make sure the weather for January 1st is loaded into the IDU and HRU layers.
-   pFlowContext->pFlowModel->GetDailyWeatherField(CDT_TMAX, 0, pFlowContext->pEnvContext->currentYear);
-   pFlowContext->pFlowModel->GetDailyWeatherField(CDT_TMIN, 0, pFlowContext->pEnvContext->currentYear);
-   pFlowContext->pFlowModel->GetDailyWeatherField(CDT_TMEAN, 0, pFlowContext->pEnvContext->currentYear);
-   pFlowContext->pFlowModel->GetDailyWeatherField(CDT_PRECIP, 0, pFlowContext->pEnvContext->currentYear);
+   pFlowContext->pFlowModel->GetDailyWeatherField(CDT_TMAX, 0, pFlowContext->pEnvContext->weatherYear);
+   pFlowContext->pFlowModel->GetDailyWeatherField(CDT_TMIN, 0, pFlowContext->pEnvContext->weatherYear);
+   pFlowContext->pFlowModel->GetDailyWeatherField(CDT_TMEAN, 0, pFlowContext->pEnvContext->weatherYear);
+   pFlowContext->pFlowModel->GetDailyWeatherField(CDT_PRECIP, 0, pFlowContext->pEnvContext->weatherYear);
 
    pFlowContext->pFlowModel->UpdateIDUclimateTemporalAverages(pFlowContext->pEnvContext->m_yearsInStartingClimateAverages, pFlowContext->pEnvContext);
    pFlowContext->pFlowModel->UpdateAgBasinClimateTemporalAverages(pFlowContext->pEnvContext);

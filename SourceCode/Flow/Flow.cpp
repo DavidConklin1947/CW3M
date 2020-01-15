@@ -4291,7 +4291,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
    {
    pFlowContext->pEnvContext->m_simDate.MoveToNextDay(pFlowContext->pEnvContext->m_maxDaysInYear);
 
-   if (!OpenClimateDataFiles(m_flowContext.pEnvContext->m_simDate.year)) return(false);
+   if (!OpenClimateDataFiles(m_flowContext.pEnvContext->weatherYear)) return(false);
 
    m_annualTotalET        = 0; // acre-ft
    m_annualTotalPrecip    = 0; // acre-ft
@@ -12675,13 +12675,13 @@ bool FlowModel::GetHRUClimate(CDTYPE type, HRU *pHRU, int doyTgt, float &value) 
 
 bool FlowModel::GetTodaysWeatherField(CDTYPE type)
 {
-   return(GetDailyWeatherField(type, m_flowContext.dayOfYear, m_flowContext.pEnvContext->m_simDate.year));
+   return(GetDailyWeatherField(type, m_flowContext.dayOfYear, m_flowContext.pEnvContext->weatherYear));
 } // end of GetTodaysWeatherField()
 
 
 bool FlowModel::GetCurrentYearDailyWeatherField(CDTYPE type, int tgtDoy0)
 {
-   return(GetDailyWeatherField(type, tgtDoy0, m_flowContext.pEnvContext->m_simDate.year));
+   return(GetDailyWeatherField(type, tgtDoy0, m_flowContext.pEnvContext->weatherYear));
 } // end of GetCurrentYearDailyWeatherField()
 
 
