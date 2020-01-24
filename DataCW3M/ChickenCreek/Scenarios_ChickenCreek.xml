@@ -230,6 +230,10 @@ evalModelFreq='1'>
       Adapted for CW3M for Maria Wright in January 2020.
       Uses random draw from climate scenario 3 WW2100 Stationary Climate.
       MIROC climate data was used for the StationaryClim climate_scenario in WW2100.
+      Using climate scenario 3 is equivalent to specifying
+      GetWeather.UseStationaryClim = 1
+      GetWeather.StationaryClimFirstYear = 1950
+      GetWeather.StationaryClimLastYear = 2009
     </description>
     <policies>
     </policies>
@@ -239,6 +243,35 @@ evalModelFreq='1'>
       <var vtype='8' inUse='1' name='UrbanWater.Population Scenario' value='6' />
       <var vtype='8' inUse='1' name='FarmlandRent.Climate Scenario' value='3' />
       <var vtype='8' inUse='1' name='Flow.Climate Scenario' value='3' />
+      <var vtype='8' inUse='0' name='Flow.Use Parameter Estimation' value='0.000000' />
+      <var vtype='8' inUse='0' name='Flow.Grid Classification?' value='2.000000' />
+      <var vtype='8' inUse='0' name='Flow.Dynamic Water Right type' value='0.000000' />
+      <var vtype='8' inUse='1' name='Flow.Regulation type' value='1.000000' />
+      <var vtype='8' inUse='1' name='StandDisturbance.Public timber harvest.InUse' value='1.000000' />
+      <var vtype='8' inUse='1' name='StandDisturbance.Private timber harvest.InUse' value='1.000000' />
+      <var vtype='8' inUse='1' name='StandDisturbance.Fire Hindcast.InUse' value='0.000000' />
+      <var vtype='1' inUse='0' name='Decision Elements' value='7.000000' />
+    </vars>
+  </scenario>
+
+  <scenario name='RefWW2100'
+  originator='Dave Conklin'
+  isEditable='1'
+  isShared='1'
+  policyPreferenceWt='0.333333'
+  evalModelFreq='1'>
+    <description>
+      Reference Scenario from WW2100 wv_Scenarios.xml adapted for the CW3M Chicken Creek study area
+      Uses WW2100 Reference climate dataset, which is WW2100 MIROC 1950-2099 with uniform 365-day years.
+    </description>
+    <policies>
+    </policies>
+    <vars>
+      <var vtype='8' inUse='1' name='PopGrowth.Population Scenario' value='6.000000' />
+      <var vtype='8' inUse='1' name='LandUseTransitions.Population Scenario' value='6' />
+      <var vtype='8' inUse='1' name='UrbanWater.Population Scenario' value='6' />
+      <var vtype='8' inUse='1' name='FarmlandRent.Climate Scenario' value='0' />
+      <var vtype='8' inUse='1' name='Flow.Climate Scenario' value='0.000000' />
       <var vtype='8' inUse='0' name='Flow.Use Parameter Estimation' value='0.000000' />
       <var vtype='8' inUse='0' name='Flow.Grid Classification?' value='2.000000' />
       <var vtype='8' inUse='0' name='Flow.Dynamic Water Right type' value='0.000000' />
