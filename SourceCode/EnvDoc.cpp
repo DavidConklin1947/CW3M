@@ -700,10 +700,7 @@ int CEnvDoc::StartUp()
       if ( this->m_cmdMultiRunCount <= 1 )
          OnAnalysisRun(); 
       else
-         {
-         // multirun specified at command line
-         }
-         {
+         { // multirun specified at command line
          this->m_model.m_iterationsToRun = this->m_cmdMultiRunCount;
          OnAnalysisRunmultiple();         
          }

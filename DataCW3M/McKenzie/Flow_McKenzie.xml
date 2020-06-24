@@ -320,11 +320,11 @@ dynamic="0"
            Units:  precipitation in mm/d, temperature degrees C
         2) Paths which begin with a backslash will have the system environment variable CLIMATE_DRIVE prepended.
   -->
-  <scenarios default="6">
+  <climate_scenarios default="6">
 
     <!-- "MIROC" aka "WW2100 Reference" gridded climate data prepared by OCCRI for WW2100 from CMIP5 RCP 8.5 MIROC GCM data downscaled
     by John Abatzaglou's group at the University of Idaho using the MACA method -->
-    <scenario name="MIROC" id="0">
+    <climate_scenario name="MIROC" id="0" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmin" var_name="tasmin"  />
@@ -332,11 +332,11 @@ dynamic="0"
       <climate type="solrad"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_rsds"   var_name="rsds"    />
       <climate type="windspd"  path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_was"    var_name="was"     />
       <climate type="tavg"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tavg"   var_name="tavg"    />
-    </scenario>
+    </climate_scenario>
 
     <!-- "GFDL" aka "WW2100 LowClim" (low climate change) gridded climate data prepared by OCCRI for WW2100 from CMIP5 RCP 4.5 GFDL GCM data downscaled
     by John Abatzaglou's group at the University of Idaho using the MACA method -->
-    <scenario name="GFDL" id="1" >
+    <climate_scenario name="GFDL" id="1" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\ClimateSvn\trunk\daily\willamette_GFDL_pr"     var_name="pr"      />
       <climate type="tmax"     path="\ClimateSvn\trunk\daily\willamette_GFDL_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\ClimateSvn\trunk\daily\willamette_GFDL_tasmin" var_name="tasmin"  />
@@ -344,11 +344,11 @@ dynamic="0"
       <climate type="solrad"   path="\ClimateSvn\trunk\daily\willamette_GFDL_rsds"   var_name="rsds"    />
       <climate type="windspd"  path="\ClimateSvn\trunk\daily\willamette_GFDL_was"    var_name="was"     />
       <climate type="tavg"     path="\ClimateSvn\trunk\daily\willamette_GFDL_tavg"   var_name="tavg"    />
-    </scenario>
+    </climate_scenario>
 
     <!-- "HadGEM" aka "WW2100 HighClim" (high climate change) gridded climate data prepared by OCCRI for WW2100 from CMIP5 8.5 HadGEM GCM data downscaled
     by John Abatzaglou's group at the University of Idaho using the MACA method -->
-    <scenario name="HadGEM" id="2" >
+    <climate_scenario name="HadGEM" id="2" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_pr_365"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_tasmax_365" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_tasmin_365" var_name="tasmin"  />
@@ -356,10 +356,10 @@ dynamic="0"
       <climate type="solrad"   path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_rsds_365"   var_name="rsds"    />
       <climate type="windspd"  path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_was_365"    var_name="was"     />
       <climate type="tavg"     path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_tavg_365"   var_name="tavg"    />
-    </scenario>
+    </climate_scenario>
 
-    <!-- MIROC climate data was used for the StationaryClim scenario in WW2100-->
-    <scenario name="WW2100 Stationary Climate" id="3">
+    <!-- MIROC climate data was used for the StationaryClim climate_scenario in WW2100-->
+    <climate_scenario name="WW2100 Stationary Climate" id="3" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmin" var_name="tasmin"  />
@@ -367,10 +367,10 @@ dynamic="0"
       <climate type="solrad"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_rsds"   var_name="rsds"    />
       <climate type="windspd"  path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_was"    var_name="was"     />
       <climate type="tavg"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tavg"   var_name="tavg"    />
-    </scenario>
+    </climate_scenario>
 
     <!-- "MACA training data" - these are gridded, run from 1979 thru 2011, and were prepared by OCCRI for WW2100 -->
-    <scenario name="WW2100 MACA training data" id="4">
+    <climate_scenario name="WW2100 MACA training data" id="4" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tasmin" var_name="tasmin"  />
@@ -378,69 +378,63 @@ dynamic="0"
       <climate type="solrad"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_rsds"   var_name="rsds"    />
       <climate type="windspd"  path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_vas"    var_name="vas"     />
       <climate type="tavg"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tavg"   var_name="tavg"    />
-    </scenario>
+    </climate_scenario>
 
     <!-- these are gridded, run from 2000 thru 2017, and were prepared by John Dalrymple for the model skill assessment work -->
-    <scenario name="BaselineGrid" id="5">
+    <climate_scenario name="BaselineGrid" id="5" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_tasmin" var_name="tasmin"  />
       <climate type="humidity" path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_sph"    var_name="sph"     />
       <climate type="solrad"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_rsds"   var_name="rsds"    />
       <climate type="windspd"  path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_vas"    var_name="vas"     />
-    </scenario>
+    </climate_scenario>
 
     <!-- these are idu-centric ones, run from 2000 thru 2017, and were prepared by Steve Drake for INFEWS -->
-    <scenario name="BaselinePoly" id="6">
+    <climate_scenario name="BaselinePoly" id="6" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_tasmin" var_name="tasmin"  />
       <climate type="humidity" path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_sph"    var_name="sph"     />
       <climate type="solrad"   path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_rsds"   var_name="rsds"    />
       <climate type="windspd"  path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_vas"    var_name="vas"     />
-    </scenario>
+    </climate_scenario>
 
     <!-- Gridded recent actual weather used for demos - 2010-17 -->
-    <scenario name="GriddedRecentWeatherForDemos" id="7">
+    <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="365" >
       <climate type="precip"   path="GriddedRecentWeather\uofimet_willamette_pr"     var_name="pr"      />
       <climate type="tmax"     path="GriddedRecentWeather\uofimet_willamette_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="GriddedRecentWeather\uofimet_willamette_tasmin" var_name="tasmin"  />
       <climate type="humidity" path="GriddedRecentWeather\uofimet_willamette_sph"    var_name="sph"     />
       <climate type="solrad"   path="GriddedRecentWeather\uofimet_willamette_rsds"   var_name="rsds"    />
       <climate type="windspd"  path="GriddedRecentWeather\uofimet_willamette_vas"    var_name="vas"     />
-    </scenario>
+    </climate_scenario>
 
     <!-- These are gridded and run from 1979 through the latest year available. The data includes leapdays. The data for all the years is combined in a single,
     separate file for each field.  The set was seeded for 1979-2018 by downloading from the MACA website at the University of Idaho in March, 2018.
     John Dalrymple obtained the files from the MACA website. -->
-    <scenario name="BaselineGridMultiyearFiles" id="8">
+    <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
-               var_name="precipitation_amount" units="mm"
-               firstYear="1979" lastYear="2018" />
+               var_name="precipitation_amount" units="mm" />
       <climate type="tmax"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_max_air_temperature_1979-2018.nc"
-               var_name="max_air_temperature" units="K"
-               firstYear="1979" lastYear="2018" />
+               var_name="max_air_temperature" units="K" />
       <climate type="tmin"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_min_air_temperature_1979-2018.nc"
-               var_name="min_air_temperature" units="K"
-               firstYear="1979" lastYear="2018" />
+               var_name="min_air_temperature" units="K" />
       <climate type="humidity"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_specific_humidity_1979-2018.nc"
-               var_name="specific_humidity" units="kg/kg"
-               firstYear="1979" lastYear="2018" />
+               var_name="specific_humidity" units="kg/kg" />
       <climate type="solrad"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_1979-2018.nc"
-               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"
-               firstYear="1979" lastYear="2018" />
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
       <climate type="windspd"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2018.nc"
-               var_name="wind_speed" units="m/s"
-               firstYear="1979" lastYear="2018" />
-    </scenario>
+               var_name="wind_speed" units="m/s" />
+    </climate_scenario>
 
-  </scenarios>
+  </climate_scenarios>
 
   <controlPoints>
     <controlPoint id="1"      name="Min flow at Salem"                path="Reservoirs\ControlPoints\{ScenarioName}\"

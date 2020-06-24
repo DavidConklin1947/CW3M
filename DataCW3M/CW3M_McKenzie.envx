@@ -35,9 +35,8 @@
     exportDeltas               ='0'
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
-    maxDaysInYear ='365'
   />
-
+<!--     maxDaysInYear ='365' -->
   <layers >
 
     <layer

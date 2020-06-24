@@ -367,7 +367,7 @@ bool CEnvApp::ProcessEnvCmdLineArgs( EnvCommandLineInfo &cmdInfo )
    CLI *pCmdOutput      = cmdInfo.FindCmd( 3 ); 
    CLI *pCmdFromFile    = cmdInfo.FindCmd( 4 );
    CLI *pCmdRun         = cmdInfo.FindCmd( 5 );
-   CLI *pCmdMultiRun    = cmdInfo.FindCmd( 5 );
+   CLI *pCmdMultiRun    = cmdInfo.FindCmd( 6 );
 
          // /r:scenarioIndex (-1 for all scenarios)
    if ( pCmdLoadProject )
