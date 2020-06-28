@@ -320,7 +320,7 @@ dynamic="0"
            Units:  precipitation in mm/d, temperature degrees C
         2) Paths which begin with a backslash will have the system environment variable CLIMATE_DRIVE prepended.
   -->
-  <climate_scenarios default="6">
+  <climate_scenarios default="7">
 
     <!-- "MIROC" aka "WW2100 Reference" gridded climate data prepared by OCCRI for WW2100 from CMIP5 RCP 8.5 MIROC GCM data downscaled
     by John Abatzaglou's group at the University of Idaho using the MACA method -->
@@ -359,7 +359,7 @@ dynamic="0"
     </climate_scenario>
 
     <!-- MIROC climate data was used for the StationaryClim climate_scenario in WW2100-->
-    <climate_scenario name="WW2100 Stationary Climate" id="3" maxDaysInClimateYear="365" >
+    <climate_scenario name="WW2100StationaryClimate" id="3" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmin" var_name="tasmin"  />
@@ -370,7 +370,7 @@ dynamic="0"
     </climate_scenario>
 
     <!-- "MACA training data" - these are gridded, run from 1979 thru 2011, and were prepared by OCCRI for WW2100 -->
-    <climate_scenario name="WW2100 MACA training data" id="4" maxDaysInClimateYear="365" >
+    <climate_scenario name="MACAtrainingData" id="4" maxDaysInClimateYear="365" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tasmin" var_name="tasmin"  />
@@ -432,6 +432,130 @@ dynamic="0"
       <climate type="windspd"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2018.nc"
                var_name="wind_speed" units="m/s" />
+    </climate_scenario>
+
+    <!-- MACAv2-METDATA MIROC5 historical daily dataset -->
+    <climate_scenario name="MIROC5_macav2" id="9" maxDaysInClimateYear="366" firstYear="1950" lastYear="2005" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_pr_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="precipitation" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_tasmax_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_tasmin_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_huss_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="rhmin"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmin_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="relative_humidity" units="%" />
+      <climate type="rhmax"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmax_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="relative_humidity" units="%"  />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rsds_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
+      <climate type="uas"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_uas_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="eastward_wind" units="m/s" />
+      <climate type="vas"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_vas_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="northward_wind" units="m/s" />
+    </climate_scenario>
+
+    <!-- MACAv2-METDATA MIROC5 RCP 8.5 2006-99 daily dataset -->
+    <climate_scenario name="MIROC5_rcp85" id="10" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_pr_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="precipitation" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmax_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmin_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_huss_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="rhmin"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmin_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="relative_humidity" units="%" />
+      <climate type="rhmax"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmax_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="relative_humidity" units="%"  />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rsds_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
+      <climate type="uas"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_uas_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="eastward_wind" units="m/s" />
+      <climate type="vas"
+               path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_vas_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="northward_wind" units="m/s" />
+    </climate_scenario>
+
+    <!-- MACAv2-METDATA HadGEM2-ES historical daily dataset -->
+    <climate_scenario name="HadGEM2-ES_macav2" id="11" maxDaysInClimateYear="366" firstYear="1950" lastYear="2005" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_pr_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="precipitation" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_tasmax_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_tasmin_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_huss_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="rhmin"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmin_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="relative_humidity" units="%" />
+      <climate type="rhmax"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmax_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="relative_humidity" units="%"  />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rsds_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
+      <climate type="uas"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_uas_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="eastward_wind" units="m/s" />
+      <climate type="vas"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_vas_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
+               var_name="northward_wind" units="m/s" />
+    </climate_scenario>
+
+    <!-- MACAv2-METDATA HadGEM2-ES RCP 8.5 2006-99 daily dataset -->
+    <climate_scenario name="HadGEM2-ES_rcp85" id="12" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_pr_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="precipitation" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmax_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmin_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_huss_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="rhmin"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmin_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="relative_humidity" units="%" />
+      <climate type="rhmax"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmax_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="relative_humidity" units="%"  />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rsds_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
+      <climate type="uas"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_uas_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="eastward_wind" units="m/s" />
+      <climate type="vas"
+               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_vas_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               var_name="northward_wind" units="m/s" />
     </climate_scenario>
 
   </climate_scenarios>
