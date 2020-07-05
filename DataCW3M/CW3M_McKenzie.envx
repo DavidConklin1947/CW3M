@@ -35,6 +35,7 @@
     exportDeltas               ='0'
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
+    useWaterYears              ='1'
   />
 <!--     maxDaysInYear ='365' -->
   <layers >
@@ -391,7 +392,7 @@ timing       ='1'
 freq         ='10'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='Reporter.xml'
+initInfo     ='McKenzie\Reporter_McKenzie.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />

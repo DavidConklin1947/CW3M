@@ -145,6 +145,7 @@ Source: "D:\CW3M.git\trunk\DataCW3M\McKenzie\IDU_McKenzie.shp.xml"; DestDir: "\C
 Source: "D:\CW3M.git\trunk\DataCW3M\McKenzie\IDU_McKenzie.shx"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 Source: "D:\CW3M.git\trunk\DataCW3M\McKenzie\Reach_McKenzie*"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 ;Source: "D:\CW3M.git\trunk\DataCW3M\McKenzie\PEST\*"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie\PEST";
+Source: "D:\CW3M.git\trunk\DataCW3M\McKenzie\Reporter_McKenzie.xml"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

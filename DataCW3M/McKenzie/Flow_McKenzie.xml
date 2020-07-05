@@ -829,13 +829,36 @@ dynamic="0"
     -->
 
   <outputs>
-
+<!--
     <output_group name="FLOW HBVCALIB outflows" >
       <output in_use="1" name="HBVCALIB=16 outflow 23765583 McKenzie outlet (cfs)" query="COMID=23765583" value="Q*35.3146667" type="sum" domain="reach" />
     </output_group>
+-->
+    <output_group name="FLOW McKenzie wetland yearly outflows (cms)" interval ="yearly" >
+      <output in_use="1" name="outflow 23765583 McKenzie R outlet 113m elev" query="COMID=23765583" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23772709 McKenzie R 116m elev" query="COMID=23772709" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774413 Cedar Cr 162m elev" query="COMID=23774413" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23773619 McGowan Cr 539m elev" query="COMID=23773619" value="Q" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie wetland monthly outflows (cms)" interval ="monthly" >
+      <output in_use="1" name="outflow 23765583 McKenzie outlet" query="COMID=23765583" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23772709" query="COMID=23772709" value="Q" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie yearly temp and precip" interval="yearly" >
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
     
-
-
+    <output_group name="FLOW McKenzie monthly temp and precip" interval="monthly" >
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
   </outputs>
   <!--
   <video_capture use='0' frameRate='30'>

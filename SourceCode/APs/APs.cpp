@@ -19,13 +19,20 @@
 #define new DEBUG_NEW
 #endif
 
-static char * climateScenarioNames[] =
-{ "MIROC",      // Climate Scenario = 0 (default value) (reference scenario)
-"GFDL",        // Climate Scenario = 1
-"HadGEM",      // Climate Scenario = 2
-"MIROC",  	   // Climate Scenario = 3.  StationaryClim scenario uses random water years drawn from MIROC 1950-2009.
-"historic",    // Climate Scenario = 4.  WeatherOnGrids\ActualWeather\WRB_4km_1979-2011\abat_willamette_...
-"Baseline"};   // Climate Scenario = 5.  Actual weather
+static char* climateScenarioNames[] =
+{ "MIROC5 from MACA v1",      // Climate Scenario = 0 (default value) 
+"GFDL from MACA v1",        // Climate Scenario = 1
+"HadGEM from MACA v1",      // Climate Scenario = 2
+"MIROC5 from MACA v1 used for Stationary Climate",  	   // Climate Scenario = 3.  StationaryClim scenario uses random water years drawn from MIROC 1950-2009.
+"MACA v1 training data",    // Climate Scenario = 4.  WeatherOnGrids\ActualWeather\WRB_4km_1979-2011\abat_willamette_...
+"BaselineGrid",             // Climate Scenario = 5.  Actual weather on a grid
+"BaselinePoly",             // Climate Scenario = 6,  Actual weather on polygons
+"GriddedRecentWeatherForDemos", // Climate Scenario = 7, some of the years from BaselineGrid
+"BaselineGridMultiyearFiles from gridMet", // Climate Scenario = 8, CW3M baseline
+"MIROC5_macav2 20th century", // Climate Scenario = 9, MIROC5 from MACA v2 r1i1p1 20th century
+"MIROC5_rcp85 from macav2metdata", // Climate Scenario = 10, MIROC5 from MACA v2 r1i1p1 rcp85
+"HadGEM2-ES_macav2 20th century", // Climate Scenario = 11, HadGEM-ES365 r1i1p1 20th century
+"HadGEM2-ES_rcp85 from macav2metdata" }; // Climate Scenario = 12, HadGEM-ES365 r1i1p1 rcp85
 
 static char * PopScenarioNames[] =
    {
@@ -263,10 +270,10 @@ WW2100AP::WW2100AP()
    /* 4 */ AddInputVar("StationaryClimSeed", m_stationaryClimSeed, "random number seed");
    m_GetWeatherInVarCount = 4;
 
-   /* 1 */ m_DGVMvegtypeDataInVarIndex = AddInputVar("Climate Scenario", m_currentClimateScenarioIndex, "0=Ref, 1=LowClim, 2=HiClim, 3=Stationary, 4=Historical, 5=Baseline");
+   /* 1 */ m_DGVMvegtypeDataInVarIndex = AddInputVar("Climate Scenario", m_currentClimateScenarioIndex, "see CW3M Digital Handbook");
    m_DGVMvegtypeDataInVarCount = 1;
 
-   /* 1 */ m_IrrInVarIndex = AddInputVar("Climate Scenario", m_currentClimateScenarioIndex, "0=Ref, 1=LowClim, 2=HiClim, 3=Stationary, 4=Historical, 5=Baseline");
+   /* 1 */ m_IrrInVarIndex = AddInputVar("Climate Scenario", m_currentClimateScenarioIndex, "see CW3M Digital Handbook");
    /* 2 */ AddInputVar("Irrigation Scenario", m_currentIrrScenarioIndex, "0=Ref (~2/3), 1=More (~5/6) 2=None (0)");
    /* 3 */ AddInputVar("Crop Scenario", m_currentCropScenarioIndex, "0=Ref, 1=AllFallow");
    m_IrrInVarCount = 3;
@@ -277,7 +284,7 @@ WW2100AP::WW2100AP()
    /* 1 */ m_PGinVarIndex = AddInputVar("Population Scenario", m_currentPopScenarioIndex, "0=Ref, 1=HiPop, 2=NoGrow, 3=Extreme, 4=NoPopGrowth, 5=NoIncGrowth, 6=Baseline");
    m_PGinVarCount = 1;
 
-   /* 1 */ m_FRinVarIndex = AddInputVar("Climate Scenario", m_currentClimateScenarioIndex, "0=Ref, 1=LowClim, 2=HiClim, 3=Stationary, 4=Historical, 5=Baseline");
+   /* 1 */ m_FRinVarIndex = AddInputVar("Climate Scenario", m_currentClimateScenarioIndex, "see CW3M Digital Handbook");
    /* 2 */ AddInputVar("Dynamic Water Right type", m_dynamicWRType, "0=none, 1=unused, 2=unused, 3=NewIrrig Scenario, 4=Extreme Scenario");
    m_FRinVarCount = 2;
 
