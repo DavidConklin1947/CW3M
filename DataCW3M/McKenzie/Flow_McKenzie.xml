@@ -530,31 +530,31 @@ dynamic="0"
     <!-- MACAv2-METDATA HadGEM2-ES RCP 8.5 2006-99 daily dataset -->
     <climate_scenario name="HadGEM2-ES_rcp85" id="12" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" >
       <climate type="precip"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_pr_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_pr_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="precipitation" units="mm" />
       <climate type="tmax"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmax_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmax_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="air_temperature" units="K" />
       <climate type="tmin"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmin_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_tasmin_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="air_temperature" units="K" />
       <climate type="humidity"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_huss_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_huss_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="specific_humidity" units="kg/kg" />
       <climate type="rhmin"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmin_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmin_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="relative_humidity" units="%" />
       <climate type="rhmax"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmax_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rhsmax_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="relative_humidity" units="%"  />
       <climate type="solrad"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rsds_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_rsds_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
       <climate type="uas"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_uas_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_uas_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="eastward_wind" units="m/s" />
       <climate type="vas"
-               path="\WeatherOnGrids\trunk\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_vas_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
+               path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_vas_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="northward_wind" units="m/s" />
     </climate_scenario>
 
@@ -846,14 +846,14 @@ dynamic="0"
       <output in_use="1" name="outflow 23772709" query="COMID=23772709" value="Q" type="sum" domain="reach" />
     </output_group>
 
-    <output_group name="FLOW McKenzie yearly temp and precip" interval="yearly" >
+    <output_group name="FLOW McKenzie temp and precip yearly" interval="yearly" >
       <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
     </output_group>
     
-    <output_group name="FLOW McKenzie monthly temp and precip" interval="monthly" >
+    <output_group name="FLOW McKenzie temp and precip monthly" interval="monthly" >
       <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />

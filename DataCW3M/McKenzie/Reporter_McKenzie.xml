@@ -169,32 +169,8 @@
   </output_group>
 
      <output_group name="REP Irrigation Rent Premium Metrics" >
-       <output name="IRP for WRB ag lands ($)" query="LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for WRB ag lands ($)" query="LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Willamette mainstem basin ($)" query="SUB_AREA=0 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Willamette mainstem basin ($)" query="SUB_AREA=0 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
        <output name="IRP for McKenzie basin ($)" query="SUB_AREA=1 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
        <output name="IRP loss due to WR shutoffs for McKenzie basin ($)" query="SUB_AREA=1 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Pudding basin ($)" query="SUB_AREA=2 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Pudding basin ($)" query="SUB_AREA=2 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Clackamas basin ($)" query="SUB_AREA=3 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Clackamas basin ($)" query="SUB_AREA=3 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Long Tom basin ($)" query="SUB_AREA=4 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Long Tom basin ($)" query="SUB_AREA=4 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Marys basin ($)" query="SUB_AREA=5 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Marys basin ($)" query="SUB_AREA=5 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for NSantiam basin ($)" query="SUB_AREA=6 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for NSantiam basin ($)" query="SUB_AREA=6 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for SSantiam basin ($)" query="SUB_AREA=7 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for SSantiam basin ($)" query="SUB_AREA=7 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Tualatin basin ($)" query="SUB_AREA=8 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Tualatin basin ($)" query="SUB_AREA=8 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Coast Fork basin ($)" query="SUB_AREA=9 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Coast Fork basin ($)" query="SUB_AREA=9 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Middle Fork basin ($)" query="SUB_AREA=10 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Middle Fork basin ($)" query="SUB_AREA=10 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP for Yamhill basin ($)" query="SUB_AREA=11 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1)" value="IRP*(AREA/m2perAcre)" type="SUM" />
-       <output name="IRP loss due to WR shutoffs for Yamhill basin ($)" query="SUB_AREA=11 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
      </output_group>
      <!-- Metrics for irrigation analysis -->
 <!--
@@ -215,106 +191,6 @@
     <output name="TET (mm H2O)" query="IDU_INDEX=90470" value="ET_yr + RAINEVAP_Y + SNOWEVAP_Y" type="areaWtMean" />
   </output_group>
 -->
-     <output_group name="REP Irrigation Marys (63911)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=63911" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=63911" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=63911" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=63911" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=63911" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=63911" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=63911" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=63911" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Pudding (125531)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=125531" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=125531" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=125531" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=125531" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=125531" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=125531" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=125531" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=125531" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Main (95352)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=95352" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=95352" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=95352" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=95352" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=95352" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=95352" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=95352" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=95352" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Main (42361)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=42361" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=42361" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=42361" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=42361" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=42361" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=42361" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=42361" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=42361" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Main (47847)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=47847" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=47847" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=47847" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=47847" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=47847" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=47847" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=47847" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=47847" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Main (53318)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=53318" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=53318" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=53318" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=53318" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=53318" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=53318" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=53318" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=53318" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Main (46864)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=46864" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=46864" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=46864" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=46864" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=46864" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=46864" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=46864" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=46864" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Pudding (110434)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=110434" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=110434" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=110434" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=110434" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=110434" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=110434" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=110434" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=110434" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Pudding (102929)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=102929" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=102929" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=102929" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=102929" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=102929" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=102929" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=102929" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=102929" value="WR_SH_NDX" type="sum"  />
-     </output_group>
-     <output_group name="REP Irrigation Pudding (107345)">
-       <output name="Planting Date (DOY)" query="IDU_INDEX=107345" value="PLANTDATE" type="sum" />
-       <output name="WR shutoff day (DOY)" query="IDU_INDEX=107345" value="WR_SH_DAY" type="sum"  />
-       <output name="Harvest Date (DOY)" query="IDU_INDEX=107345" value="HARVDATE" type="sum" />
-       <output name="LULC_B" query="IDU_INDEX=107345" value="LULC_B" type="sum" />
-       <output name="Irrigation Decision (0-1)" query="IDU_INDEX=107345" value="IRRIGATION" type="sum" />
-       <output name="WR SHORTG" query="IDU_INDEX=107345" value="WR_SHORTG" type="sum"  />
-       <output name="WR shutoff" query="IDU_INDEX=107345" value="WR_SHUTOFF" type="sum"  />
-       <output name="WR shutoff index" query="IDU_INDEX=107345" value="WR_SH_NDX" type="sum"  />
-     </output_group>
 
      <output_group name="Land Areas by Crop (acres)">
        <output name="Total Ag (ac)" query="LULC_A=2" value="AREA*ac_per_m2" type="sum" />
@@ -414,18 +290,6 @@
 
      <!-- end of metrics for irrigation analysis -->
 
-      <output_group name='REP Study Area Snowpack and Corvallis precip' >
-        <output name='Whole study area SNOW_APR (mm SWE)' query='1' value='SNOW_APR' type='AREAWTMEAN' />
-        <output name='Whole study area MAXSNOW (mm SWE)' query='1' value='MAXSNOW' type='AREAWTMEAN' />
-        <output name='Whole study area SNOW_APR10 (mm SWE)' query='1' value='SNOW_APR10' type='AREAWTMEAN' />
-        <output name='Corvallis-Philomath UGA PRECIP_YR (mm)' query='UGB=12' value='PRECIP_YR' type='AREAWTMEAN' />
-        <output name='Corvallis-Philomath UGA PRECIP_YR (in)' query='UGB=12' value='PRECIP_YR*inches_per_mm' type='AREAWTMEAN' />
-        <output name='South Corvallis IDU_ID 66854 PRECIP_YR (mm)' query='IDU_ID=66854' value='PRECIP_YR' type='AREAWTMEAN' />
-        <output name='South Corvallis IDU_ID 66854 PRECIP_YR (in)' query='IDU_ID=66854' value='PRECIP_YR*inches_per_mm' type='AREAWTMEAN' />
-        <output name='Hyslop Farm IDU_ID 75947 PRECIP_YR (mm)' query='IDU_ID=75947' value='PRECIP_YR' type='AREAWTMEAN' />
-        <output name='Hyslop Farm IDU_ID 75947 PRECIP_YR (in)' query='IDU_ID=75947' value='PRECIP_YR*inches_per_mm' type='AREAWTMEAN' />
-      </output_group>
-
      <!-- SNOTEL site snowpack-->
      <output_group name="REP SNOTEL site Apr 1 SWE (mm)">
        <output name="SNOTEL Clackamas Lake idu 125100" query="IDU_INDEX=125100" value="SNOW_APR" type="AREAWTMEAN" />
@@ -490,16 +354,6 @@
        <output name ="ET over Forest not in STM (af)" query="LULC_A=4 and PVT&lt;1 or PVT&gt;9" value="ET_YR*mPermm*AREA/m3PerAcreFt" type="SUM" />
        <output name ="area of Forest not in STM (ac)" query="LULC_A=4 and PVT&lt;1 or PVT&gt;9" value="AREA*ac_per_m2" type="SUM" />
      </output_group>
-     <!-- Outtake from REP ET by LULC_A
-     <output name ="LAI over LULC_A=1 Developed " query="LULC_A=1" value="LAI" type="AREAWTMEAN" />
-     <output name ="LAI over LULC_A=2 Ag " query="LULC_A=2" value="LAI" type="AREAWTMEAN" />
-     <output name ="LAI over LULC_A=3 Other Vegetation " query="LULC_A=3" value="LAI" type="AREAWTMEAN" />
-     <output name ="LAI over LULC_A=4 Forest " query="LULC_A=4" value="LAI" type="AREAWTMEAN" />
-     <output name ="LAI over LULC_A=5 Barren " query="LULC_A=5" value="LAI" type="AREAWTMEAN" />
-     <output name ="LAI over LULC_A=6 Wetlands " query="LULC_A=6" value="LAI" type="AREAWTMEAN" />
-     <output name ="LAI over LULC_A=7 Water-Snow-Ice " query="LULC_A=7" value="LAI" type="AREAWTMEAN" />
-     <output name ="LAI over LULC_A&lt;1 or >7 unknown " query="LULC_A&lt;1 or LULC_A&gt;7" value="LAI" type="AREAWTMEAN" />
-     -->
      <!-- these don't work.  I don't know why.  DRC 6/9/16
      <output name="REP elev by ECOREGION (ft)" query="1" stratify_by="ECOREGION" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
      <output name="REP elev by HBVCALIB (ft)" query="1" stratify_by="HBVCALIB" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
