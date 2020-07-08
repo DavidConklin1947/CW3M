@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CW3M_McKenzie"
-#define MyAppVersion "McKenzie_0.3.1"
+#define MyAppVersion "McKenzie_0.3.2"
 ;#define MyAppVersion "x.x.x"
 #define MyAppPublisher "Oregon Freshwater Simulations, Inc."
 #define MyAppURL "http:/www.freshwatersim.com"
@@ -125,6 +125,21 @@ Source: "D:\CW3M.git\trunk\DataCW3M\ScenarioData\PopulationAndIncomeScenarios\Ba
 ;Source: "D:\CW3M.git\trunk\DataCW3M\IDU_CW3M.shp.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 ;Source: "D:\CW3M.git\trunk\DataCW3M\IDU_CW3M.shx"; DestDir: "\CW3M_{#MyAppVersion}"; 
 ;Source: "D:\CW3M.git\trunk\DataCW3M\Reach_CW3M*"; DestDir: "\CW3M_{#MyAppVersion}"; 
+
+Source: "D:\CW3M.git\trunk\DataCW3M\CW3M_Clackamas.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\Flow_Clackamas.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\Flow_Clackamas2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\HRU_Clackamas*"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\IDU_Clackamas.cpg"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\IDU_Clackamas.dbf"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\IDU_Clackamas.prj"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\IDU_Clackamas.sbn"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\IDU_Clackamas.sbx"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\IDU_Clackamas.shp"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\IDU_Clackamas.shp.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\IDU_Clackamas.shx"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\Reach_Clackamas*"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "D:\CW3M.git\trunk\DataCW3M\Clackamas\Reporter_Clackamas.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
 
 Source: "D:\CW3M.git\trunk\DataCW3M\CW3M_McKenzie.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
 ;Source: "D:\CW3M.git\trunk\DataCW3M\CW3M_McKenzie_PEST.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
