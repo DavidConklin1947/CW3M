@@ -830,6 +830,48 @@ dynamic="0"
 
   <outputs>
 
+    <output_group name="FLOW Clackamas wetland yearly outflows (cms)" interval ="yearly" >
+      <output in_use="1" name="WETL 19-20 outflow 23809000 Clackamas R 6-12m elev" query="COMID=23809000" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 21 outflow 23809012 Clackamas R 29m elev" query="COMID=23809012" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 22-24 outflow 23809054 Clackamas R 50-54m elev" query="COMID=23809054" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 25 outflow 23809058 Clackamas R 58m elev" query="COMID=23809058" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 26 outflow 23815518 253m elev" query="COMID=23815518" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 27 outflow 23815444 Crystal Springs Cr 31m elev" query="COMID=23815444" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 28 outflow 23815070 Johnson Creek 95m elev" query="COMID=23815070" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 29 outflow 23809078 Clackamas R 87m elev" query="COMID=23809078" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 30 outflow 23809418 Oak Grove Fork 666m elev" query="COMID=23809418" value="Q" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW Clackamas wetland yearly precip (mmH2O)" interval ="yearly" >
+      <output in_use="1" name="WETL 19 precip Clackamas R 6m elev" query="WETL_ID=19" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 20 precip Clackamas R 12m elev" query="WETL_ID=20" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 21 precip Clackamas R 29m elev" query="WETL_ID=21" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 22 precip Clackamas R 50m elev" query="WETL_ID=22" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 23 precip Clackamas R 54m elev" query="WETL_ID=23" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 24 precip Clackamas R 54m elev" query="WETL_ID=24" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 25 precip Clackamas R 58m elev" query="WETL_ID=25" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 26 precip Clackamas R 253m elev" query="WETL_ID=26" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 27 precip Crystal Springs Cr 31m elev" query="WETL_ID=27" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 28 precip Johnson Creek 95m elev" query="WETL_ID=28" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 29 precip Clackamas R 87m elev" query="WETL_ID=29" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 30 precip Oak Grove Fork 666m elev" query="WETL_ID=30" value="PRECIP" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW Clackamas wetland yearly temperature (mmH2O)" interval ="yearly" >
+      <output in_use="1" name="WETL 19 temperature Clackamas R 6m elev" query="WETL_ID=19" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 20 temperature Clackamas R 12m elev" query="WETL_ID=20" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 21 temperature Clackamas R 29m elev" query="WETL_ID=21" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 22 temperature Clackamas R 50m elev" query="WETL_ID=22" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 23 temperature Clackamas R 54m elev" query="WETL_ID=23" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 24 temperature Clackamas R 54m elev" query="WETL_ID=24" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 25 temperature Clackamas R 58m elev" query="WETL_ID=25" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 26 temperature Clackamas R 253m elev" query="WETL_ID=26" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 27 temperature Crystal Springs Cr 31m elev" query="WETL_ID=27" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 28 temperature Johnson Creek 95m elev" query="WETL_ID=28" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 29 temperature Clackamas R 87m elev" query="WETL_ID=29" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 30 temperature Oak Grove Fork 666m elev" query="WETL_ID=30" value="TEMP" type="areaWtMean" domain="idu" />
+    </output_group>
+
     <output_group name="FLOW HBVCALIB outflows" >
       <output in_use="1" name="HBVCALIB=26 outflow 23809000 Clackamas outlet (cfs)" query="COMID=23809000" value="Q*35.3146667" type="sum" domain="reach" />
     </output_group>
