@@ -11,7 +11,28 @@
   <const name="gal_per_ccf" value="748.052" />
   <const name="inches_per_mm" value="0.039370" />
   <const name="ft_per_m" value="3.28084" />
-
+<!--
+  <output_group name="REP McKenzie wetland elevations (m ASL)" >
+    <output name="WETL 1 ELEV_MEAN McKenzie R outlet 113m elev" query="WETL_ID=1" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 2 ELEV_MEAN McKenzie R 116m elev" query="WETL_ID=2" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 3 ELEV_MEAN 118m elev" query="WETL_ID=3" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 4 ELEV_MEAN McKenzie R 120m elev" query="WETL_ID=4" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 5 ELEV_MEAN McKenzie R 124m elev" query="WETL_ID=5" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 6 ELEV_MEAN McKenzie R 123m elev" query="WETL_ID=6" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 7 ELEV_MEAN McKenzie R 125m elev" query="WETL_ID=7" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 8 ELEV_MEAN 129m elev" query="WETL_ID=8" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 9 ELEV_MEAN McKenzie R 129m elev" query="WETL_ID=9" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 10 ELEV_MEAN McKenzie R 132m elev" query="WETL_ID=10" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 11 ELEV_MEAN McKenzie R 131m elev" query="WETL_ID=11" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 12 ELEV_MEAN McKenzie R 134m elev" query="WETL_ID=12" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 13 ELEV_MEAN McKenzie R 135m elev" query="WETL_ID=13" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 14 ELEV_MEAN McKenzie R 139m elev" query="WETL_ID=14" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 15 ELEV_MEAN McKenzie R 162m elev" query="WETL_ID=15" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 16 ELEV_MEAN Cedar Cr 149m elev" query="WETL_ID=16"  value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 17 ELEV_MEAN Cedar Cr 162m elev" query="WETL_ID=17" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WETL 18 ELEV_MEAN McGowan Cr 539m elev" query="WETL_ID=18" value="ELEV_MEAN" type="areaWtMean" />
+  </output_group>
+-->
   <output_group name="REP Wetlands" >
     <output name="Number of Wetland IDUs" query="LULC_A=6" value="1" type="sum" />
     <output name="total area of wetlands (ha)" query="LULC_A=6" value="AREA/10000" type="sum" />

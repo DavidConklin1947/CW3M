@@ -837,17 +837,32 @@ dynamic="0"
     <output_group name="FLOW McKenzie wetland yearly outflows (cms)" interval ="yearly" >
       <output in_use="1" name="WETL 1 outflow 23765583 McKenzie R outlet 113m elev" query="COMID=23765583" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 2 outflow 23772709 McKenzie R 116m elev" query="COMID=23772709" value="Q" type="sum" domain="reach" />
-      <output in_use="1" name="WETL 3 outflow 23774113 118m elev" query="COMID=23774113" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 3 outflow 23772721 McKenzie R 118m elev" query="COMID=23772721" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 4-7 outflow 23772727 McKenzie R 120-125m elev" query="COMID=23772727" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 8 outflow 23774181 129m elev" query="COMID=23774181" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 9 outflow 23772731 McKenzie R 129m elev" query="COMID=23772731" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 10-11 outflow 23772737 McKenzie R 131-132m elev" query="COMID=23772737" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 12-14 outflow 23772745 McKenzie R 134-139m elev" query="COMID=23772745" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 15 outflow 23772753 McKenzie R 162m elev" query="COMID=23772753" value="Q" type="sum" domain="reach" />
-      <output in_use="1" name="WETL 16 outflow 23774369 Cedar Cr 149m elev" query="COMID=23774369" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 16 outflow 23772765 McKenzie R 148m elev" query="COMID=23772765" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 17 outflow 23774413 Cedar Cr 162m elev" query="COMID=23774413" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 18 outflow 23773619 McGowan Cr 539m elev" query="COMID=23773619" value="Q" type="sum" domain="reach" />
     </output_group>
+    
+    <output_group name="FLOW McKenzie wetland daily outflows (cms)" interval ="daily" >
+      <output in_use="1" name="outflow 23774417 McKenzie Ditch into 23774421" query="COMID=23774417" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774431 McKenzie Ditch into 23774421" query="COMID=23774431" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774421 McKenzie Ditch into 23774419" query="COMID=23774421" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774419 McKenzie Ditch into 23774413" query="COMID=23774419" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774441 Cedar Cr into 23774413" query="COMID=23774441" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774413 Cedar Cr into 23774369" query="COMID=23774413" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774369 Cedar Cr into 23774329" query="COMID=23774369" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774329 Cedar Cr into 23772765" query="COMID=23774329" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23772765 McKenzie R into 23772763" query="COMID=23772765" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774107 into 23774113" query="COMID=23774107" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 3 outflow 23774113 118m elev" query="COMID=23774113" value="Q" type="sum" domain="reach" />
+    </output_group>
+
 
     <output_group name="FLOW McKenzie wetland yearly precip (mmH2O)" interval ="yearly" >
       <output in_use="1" name="WETL 1 precip McKenzie R outlet 113m elev" query="WETL_ID=1" value="PRECIP" type="areaWtMean" domain="idu" />

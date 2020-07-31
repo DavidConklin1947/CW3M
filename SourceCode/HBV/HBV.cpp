@@ -128,7 +128,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       if (hru_snowpack_mmH2O < 0. || hru_sm2soil_mmH2O < 0. || hru_sm2atm_mmH2O < 0.)
       {
          CString msg; 
-         msg.Format("HBVdailyProcess()1 h = %d, hru_snowpack_mmH2O = %f, hru_sm2soil_mmH2O = %f, hru_sm2atm_mmH2O = %f",
+         msg.Format("HBVdailyProcess()1 h = %d, hru_snowpack_mmH2O = %g, hru_sm2soil_mmH2O = %g, hru_sm2atm_mmH2O = %g",
             h, hru_snowpack_mmH2O, hru_sm2soil_mmH2O, hru_sm2atm_mmH2O);
          Report::WarningMsg(msg);
          // if (hru_snowpack_mmH2O < 0.) hru_snowpack_mmH2O = 0.f;
@@ -426,7 +426,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 
 float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
    {
-   int hru_of_interest = -1;  
+   int hru_of_interest = 1816;  
 
    if (pFlowContext->timing & 1) // Init()
       return HBV::InitHBV_Global(pFlowContext, NULL);
@@ -520,17 +520,17 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
          }
       int hbvcalib_int; hbvcalib.GetAsInt(hbvcalib_int);
       if (pLULC_Table->m_type == DOT_FLOAT) hbvcalib.ChangeType(TYPE_FLOAT);
-      bool ok = pLULC_Table->Lookup(hbvcalib, m_col_cfmax, CFMAX);                // degree-day factor (mm oC-1 day-1)
+      bool ok = pLULC_Table->Lookup(hbvcalib, m_col_cfmax, CFMAX) && CFMAX>0;                // degree-day factor (mm oC-1 day-1)
       float melt_mm_per_degC = CFMAX; // 6.5f; // snow melt rate as a function of temperature, value from Anne Nolin
       ok &= pLULC_Table->Lookup(hbvcalib, m_col_tt, tt);                         // refreezing coefficient
-      ok &= pLULC_Table->Lookup(hbvcalib, m_col_cfr, CFR);                         // refreezing coefficient
-      ok &= pLULC_Table->Lookup(hbvcalib, m_col_fc, fc);                           // maximum soil moisture storage (mm)
-      ok &= pLULC_Table->Lookup(hbvcalib, m_col_beta, Beta);                       // parameter that determines the relative contribution to runoff from rain or snowmelt (-)
-      ok &= pLULC_Table->Lookup(hbvcalib, m_col_kperc, kPerc);                     // Percolation constant (mm)
-      ok &= pLULC_Table->Lookup(hbvcalib, m_col_uzl, UZL);                         // threshold parameter (mm)
-      ok &= pLULC_Table->Lookup(hbvcalib, m_col_k0, k0);                           // Recession coefficient (day-1)
-      ok &= pLULC_Table->Lookup(hbvcalib, m_col_k1, k1);                           // Recession coefficient (day-1)
-      ok &= pLULC_Table->Lookup(hbvcalib, m_col_k2, k2);                           // Recession coefficient (day-1)
+      ok &= pLULC_Table->Lookup(hbvcalib, m_col_cfr, CFR) && CFR>0;                         // refreezing coefficient
+      ok &= pLULC_Table->Lookup(hbvcalib, m_col_fc, fc) && fc>0;                           // maximum soil moisture storage (mm)
+      ok &= pLULC_Table->Lookup(hbvcalib, m_col_beta, Beta) && Beta>0;                       // parameter that determines the relative contribution to runoff from rain or snowmelt (-)
+      ok &= pLULC_Table->Lookup(hbvcalib, m_col_kperc, kPerc) && kPerc>0;                     // Percolation constant (mm)
+      ok &= pLULC_Table->Lookup(hbvcalib, m_col_uzl, UZL) && UZL>0;                         // threshold parameter (mm)
+      ok &= pLULC_Table->Lookup(hbvcalib, m_col_k0, k0) && k0>0;                           // Recession coefficient (day-1)
+      ok &= pLULC_Table->Lookup(hbvcalib, m_col_k1, k1) && k1>0;                           // Recession coefficient (day-1)
+      ok &= pLULC_Table->Lookup(hbvcalib, m_col_k2, k2) && k2>0;                           // Recession coefficient (day-1)
       if (!ok)
          {
          CString msg; msg.Format("*** HBV_IrrigatedSoil()1 ok = %d, h = %d, hbvcalib = %f Error getting parameter value", ok, h, hbvcalib);

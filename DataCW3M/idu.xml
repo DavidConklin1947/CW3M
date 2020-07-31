@@ -2678,10 +2678,23 @@ label:  readable field description
       <attr value="10" color="(150,197,81)" label="10 Green Peter Reservoir drainage" />
       <attr value="12" color="(115,92,23)" label="12 Detroit Reservoir drainage" />
       <attr value="13" color="(255,0,0)" label="13 Chicken Creek watershed" />
+      <attr value="15" color="(0,0,0)" label="15 Upper Willamette mainstem" />
+      <attr value="16" color="(255,255,0)" label="16 McKenzie outlet" />
+      <attr value="17" color="(0,0,0)" label="17 Coast Fork" />
+      <attr value="18" color="(0,0,0)" label="18 Middle Fork" />
+      <attr value="19" color="(0,0,0)" label="19 Molalla basin" />
+      <attr value="20" color="(0,0,0)" label="20 Pudding basin" />
+      <attr value="21" color="(0,0,0)" label="21 Luckiamute basin" />
+      <attr value="22" color="(0,0,0)" label="22 Calapooia basin" />
       <attr value="23" color="(220,150,197)" label="23 Marys River basin" />
+      <attr value="24" color="(0,0,0)" label="24 Long Tom outlet" />
+      <attr value="25" color="(255,255,255)" label="25 Mohawk basin" />
+      <attr value="26" color="(0,0,0)" label="26 lower Clackamas" />
       <attr value="27" color="(81,243,220)" label="27 Johnson Creek watershed" />
       <attr value="28" color="(46,139,162)" label="28 Clackamas above River Mill" />
       <attr value="29" color="(11,34,104)" label="29 Willamette above Salem" />
+      <attr value="31" color="(0,0,0)" label="31 lower Yamhill" />
+      <attr value="33" color="(0,0,0)" label="33 Oak Creek watershed" />
       <attr value="34" color="(231,185,46)" label="34 McKenzie above Walterville" />
       <attr value="35" color="(197,81,243)" label="35 Long Tom above Monroe" />
       <attr value="36" color="(162,231,185)" label="36 S Santiam above Waterloo" />
@@ -2690,6 +2703,9 @@ label:  readable field description
       <attr value="39" color="(57,173,11)" label="39 Coast Fork above Goshen" />
       <attr value="41" color="(243,220,150)" label="41 Tualatin above West Linn" />
       <attr value="42" color="(208,115,92)" label="42 Yamhill above McMinnville" />
+      <attr value="43" color="(0,0,0)" label="43 lower S. Santiam" />
+      <attr value="44" color="(0,0,0)" label="44 lower N. Santiam" />
+      <attr value="45" color="(0,0,0)" label="45 lower Santiam" />
     </attributes>
   </field>
 
