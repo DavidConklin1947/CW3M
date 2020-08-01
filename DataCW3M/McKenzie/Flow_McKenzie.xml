@@ -848,6 +848,10 @@ dynamic="0"
       <output in_use="1" name="WETL 17 outflow 23774413 Cedar Cr 162m elev" query="COMID=23774413" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 18 outflow 23773619 McGowan Cr 539m elev" query="COMID=23773619" value="Q" type="sum" domain="reach" />
     </output_group>
+
+    <output_group name="FLOW McKenzie daily outflows at gages (cfs)" interval ="daily" >
+      <output in_use="1" name="outflow 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="Q*35.315" type="sum" domain="reach" />
+    </output_group>
     
     <output_group name="FLOW McKenzie wetland daily outflows (cms)" interval ="daily" >
       <output in_use="1" name="outflow 23774417 McKenzie Ditch into 23774421" query="COMID=23774417" value="Q" type="sum" domain="reach" />
