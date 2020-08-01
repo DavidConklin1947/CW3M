@@ -11201,18 +11201,55 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                
                   pOutput->m_inUse    = inUse;
                   if (obs != NULL)
-                     {
+                  {
                      pOutput->m_nameObs = obs;
+/*x
+                     pOutput->m_pDataObjObs = new FDataObj;
+                     int rows = -1;
+x*/
                      CString fullPath;
                      if ( PathManager::FindPath( obs, fullPath ) < 0 )
-                        {
+                     {
                         CString msg;
                         msg.Format( "Flow: Unable to find observation file '%s' specified for Model Output '%s'", obs, name );
                         Report::WarningMsg( msg );
                         pOutput->m_inUse = false;
-                        }
+                     }
                      else
+                     {
+/*x
+                        int dayNumberOfObsFor1900Jan1 = -1;
+                        if (strlen(format) == 1 && format[0] == 'E')
+                           dayNumberOfObsFor1900Jan1 = pEnvContext->m_maxDaysInYear == 365 ? (1900 * 365) : 0;
+                        else if (strlen(format) > 1 && format[0] == 'E' && isdigit(format[1]))
+                           dayNumberOfObsFor1900Jan1 = atoi(format + 1);
+                        else
                         {
+                           CString msg("Flow: Unrecognized observation 'format' attribute '");
+                           msg += type;
+                           msg += "' reading <output> tag for '";
+                           msg += name;
+                           msg += "'. This output will be ignored...";
+                           Report::ErrorMsg(msg);
+
+                           msg.Format("FlowModel::LoadXml() When reading <output> tag for %s, observation format %s is not 'E' by itself and cannot be interpreted as 'E' followed by an integer (the integer would represent the day number in the "
+                              "observation file of an observation on Jan 1, 1900).", name, format);
+                           Report::ErrorMsg(msg);
+                           pOutput->m_inUse = false;
+                        }
+                        if (!(pEnvContext->m_maxDaysInYear == 365 && dayNumberOfObsFor1900Jan1 == 693500) ||
+                           (pEnvContext->m_maxDaysInYear == 366 && dayNumberOfObsFor1900Jan1 == 0))
+                        {
+                           CString msg;
+                           msg.Format("Flow: 'format' attribute %s in <output> tag for %s: the year lengths in observations may be incompatible with the year lengths in the climate data",
+                              format, name);
+                           Report::WarningMsg(msg);
+                        }
+
+                        pOutput->m_dayNumberOfObsFor1900Jan1 = dayNumberOfObsFor1900Jan1;
+                        rows = pOutput->m_pDataObjObs->ReadAscii(fullPath);
+                     }
+x*/
                         pOutput->m_pDataObjObs = new FDataObj;
                         //CString inFile;
                         //inFile.Format("%s%s",pModel->m_path,obs);    // m_path is not slash-terminated
@@ -11249,21 +11286,21 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                               pOutput->m_inUse = false;
                               }
                            }
-   
-                        if ( rows <= 0 ) 
-                           {
-                           CString msg;
-                           msg.Format( "Flow: Unable to load observation file '%s' specified for Model Output '%s'", (LPCTSTR) fullPath, name );
-                           Report::WarningMsg( msg );
+//x*/   
+                     if ( rows <= 0 ) 
+                     {
+                        CString msg;
+                        msg.Format( "Flow: Unable to load observation file '%s' specified for Model Output '%s'", (LPCTSTR) fullPath, name );
+                        Report::WarningMsg( msg );
 
-                           delete pOutput->m_pDataObjObs;
-                           pOutput->m_pDataObjObs = NULL;
-                           pOutput->m_inUse = false;
-                           }
+                        delete pOutput->m_pDataObjObs;
+                        pOutput->m_pDataObjObs = NULL;
+                        pOutput->m_inUse = false;
+                     }
 
-                        pModel->m_numQMeasurements++;
+                     pModel->m_numQMeasurements++;
                         }               
-                     } // end of if (obs != NULL)
+                  } // end of if (obs != NULL)
 
                   pOutput->m_modelType = MOT_SUM;
                   if ( type != NULL )
@@ -14047,6 +14084,18 @@ bool FlowModel::CollectModelOutput(void)
             days_since_1900Jan1 += m_flowContext.dayOfYear;
             int obs_day_number = pOutput->m_dayNumberOfObsFor1900Jan1 + days_since_1900Jan1;
             outputArray[index++] = pOutput->m_pDataObjObs->IGet((float)obs_day_number);
+
+            if (m_flowContext.dayOfYear == 0 && m_flowContext.pEnvContext->yearOfRun==0)
+            { // Warn once if calendar of observations might be inconsistent with calendar of climate data
+               if (!((m_flowContext.pEnvContext->m_maxDaysInYear == 365 && pOutput->m_dayNumberOfObsFor1900Jan1 == 693500) ||
+                  (m_flowContext.pEnvContext->m_maxDaysInYear == 366 && pOutput->m_dayNumberOfObsFor1900Jan1 == 0)))
+               {
+                  CString msg;
+                  msg.Format("Flow: 'format' attribute in <output> tag for %s: the year lengths in observations may be incompatible with the year lengths in the climate data",
+                     pOutput->m_name);
+                  Report::WarningMsg(msg);
+               }
+            }
          }
       }
 

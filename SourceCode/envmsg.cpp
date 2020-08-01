@@ -77,7 +77,7 @@ int ReportBoxProc(  LPCTSTR hdr, LPCTSTR msg, int flags )
    if ( dlg.m_output )
       Report::reportFlag += RF_CALLBACK;
    
-   retVal = AfxGetMainWnd()->MessageBox( msg, hdr, flags );
+//   retVal = AfxGetMainWnd()->MessageBox( msg, hdr, flags );
    
    return retVal;
    }
