@@ -14405,6 +14405,13 @@ float CalcRelHumidity(float specHumid, float tMean, float elevation)
    }
 
 
+WaterParcel::WaterParcel() 
+{ 
+   m_volume_m3 = 0; 
+   m_thermalEnergy_kJ = 0; 
+} // end of default constructor for WaterParcel objects
+
+
 WaterParcel::WaterParcel(double volume_m3, float temperature_degC)
 {
    m_volume_m3 = volume_m3;
@@ -14426,12 +14433,10 @@ WaterParcel * WaterParcel::Discharge(double outflowVolume_m3) // Creates a new W
 } // end of Discharge()
 
 
-void WaterParcel::MixIn(WaterParcel * pInflow) // Eliminates the inflow WaterParcel.
+void WaterParcel::MixIn(WaterParcel inflow) 
 {
-   m_volume_m3 += pInflow->m_volume_m3;
-   m_thermalEnergy_kJ += pInflow->m_thermalEnergy_kJ;
-
-   delete pInflow;
+   m_volume_m3 += inflow.m_volume_m3;
+   m_thermalEnergy_kJ += inflow.m_thermalEnergy_kJ;
 } // end of MixIn()
 
 

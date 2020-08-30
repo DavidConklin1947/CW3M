@@ -88,6 +88,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          pFlowContext->pReach = pReach;
          ReachSubnode *pNode = pReach->GetReachSubnode(l);
          float lateralInflow = GetLateralInflow(pReach);
+         WaterParcel newLateralInflowWP = GetLateralInflowWP(pReach); 
          float externalFluxes = GetReachFluxes(pFlowContext, pReach);
          float new_lateralInflow = lateralInflow + externalFluxes;
 
@@ -101,6 +102,9 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             }
 
          float outflow = EstimateReachOutflow(pReach, l, pFlowContext->timeStep, new_lateralInflow); // m3/day
+         WaterParcel OutflowWP(0,0);
+         OutflowWP = EstimateReachOutflowWP(pReach, l, pFlowContext->timeStep, newLateralInflowWP); // returns a pointer to a newly created WaterParcel
+         ASSERT(outflow == pOutflowWP->m_volume_m3);
          pNode->m_discharge = outflow / SEC_PER_DAY;  //convert units to m3/s;  
 
          if (pNode->m_discharge < 0 || pNode->m_discharge > 1.e10f || pNode->m_discharge != pNode->m_discharge)
@@ -154,6 +158,33 @@ float ReachRouting::GetLateralInflow( Reach *pReach )
 
    return inflow;
    } // end of GetLateralFlow()
+
+
+WaterParcel ReachRouting::GetLateralInflowWP(Reach* pReach)
+{
+   WaterParcel inflowWP(0, 0);
+   inflowWP.m_volume_m3 = pReach->GetFluxValue();
+   WaterParcel subnodeInflowWP(inflowWP.m_volume_m3 / pReach->GetSubnodeCount(), inflowWP.WaterTemperature());
+
+   if (inflowWP.m_volume_m3 != inflowWP.m_volume_m3)
+   {
+      CString msg; msg.Format("*** GetLateralInflowWP(): inflowWP.m_volume_m3 = %f, pReach->GetFluxValue() = %f, pReach->GetSubnodeCount() = %d",
+         inflowWP.m_volume_m3, pReach->GetFluxValue(), pReach->GetSubnodeCount());
+      Report::LogMsg(msg);
+      msg.Format("Setting inflowWP.m_volume_m3 to 0.0 cms and continuing"); Report::LogMsg(msg);
+      inflowWP.m_volume_m3 = 0.f;
+   }
+
+   for (int i = 0; i < pReach->GetSubnodeCount(); i++)
+   {
+      ReachSubnode* pSubnode = pReach->GetReachSubnode(i);
+      pSubnode->m_lateralInflowWP = subnodeInflowWP;
+      pSubnode->m_lateralInflow = (float)subnodeInflowWP.m_volume_m3; 
+   }
+
+   return subnodeInflowWP;
+} // end of GetLateralInflowWP()
+
 
 
 float ReachRouting::GetReachFluxes( FlowContext *pFlowContext, Reach *pReach )
@@ -375,20 +406,19 @@ double ReachRouting::KinematicWave(double oldQ_cms /* Q */, double upstreamInflo
    return(newQ_cms);
 } // end of KinematicWave()
 
-/*
-WaterParcel * ReachRouting::EstimateReachOutflowWP(Reach *pReach, int subnode, double timeStep, WaterParcel * pLateralInflowWP) // Returns m3.
+
+WaterParcel ReachRouting::EstimateReachOutflowWP(Reach *pReach, int subnode, double timeStep, WaterParcel lateralInflowWP) 
    // WaterParcel version of EstimateReachOutflow()
    {
       ReachSubnode *pSubnode = pReach->GetReachSubnode(subnode); ASSERT(pSubnode != NULL);
 
       double original_energy_kJ = pSubnode->m_waterParcel.m_thermalEnergy_kJ;
-      WaterParcel * pUpstream_inflowWP = GetReachInflowWP(pReach, subnode);
-      pSubnode->m_waterParcel.MixIn(pUpstream_inflowWP);
-      delete(pUpstream_inflowWP); pUpstream_inflowWP = NULL;
+      WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, subnode);
+      pSubnode->m_waterParcel.MixIn(upstream_inflowWP);
 
-      pSubnode->m_waterParcel.MixIn(pLateralInflowWP);
+      pSubnode->m_waterParcel.MixIn(lateralInflowWP);
 
-      double lateralInflow_m3 = pLateralInflowWP->m_volume_m3;
+      double lateralInflow_m3 = lateralInflowWP.m_volume_m3;
 
       // Use yesterday's outflow rate to determine the geometry of this subreach.
       double old_Q_cms = pSubnode->m_discharge; ASSERT(old_Q_cms > 0); // old_Q_cms is yesterday's outflow rate from this subreach.
@@ -454,10 +484,9 @@ WaterParcel * ReachRouting::EstimateReachOutflowWP(Reach *pReach, int subnode, d
 
       SetGeometry(pReach, (float)Qnew_cms);
 
-      WaterParcel * rtnVal = pSubnode->m_waterParcel.Discharge(Qnew_cms);
-      return(rtnVal);    // return WaterParcel *
+      return(pSubnode->m_waterParcel);   
    } // end of EstimateReachOutflowWP()
-*/
+
 
 float ReachRouting::GetReachInflow( Reach *pReach, int subNode )
    {
@@ -485,8 +514,35 @@ float ReachRouting::GetReachInflow( Reach *pReach, int subNode )
       }
 
    return Q;
+   } // end of GetReachInflow()
+
+
+WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
+{
+   WaterParcel inflowWP(0,0);
+   if (subNode == 0)  // look upstream?
+   {
+      Reservoir* pRes = pReach->m_pReservoir;
+      if (pRes != NULL)
+      {
+         inflowWP = pRes->m_dischargeWP;
+         ASSERT(pReach->m_pRight == NULL);
+      }
+      else
+      {
+         inflowWP = GetReachOutflowWP(pReach->m_pLeft);
+         inflowWP.MixIn(GetReachOutflowWP(pReach->m_pRight));
+      }
+   }
+   else
+   {
+      ReachSubnode* pNode = (ReachSubnode*)pReach->m_subnodeArray[subNode - 1];  ///->GetReachSubnode( subNode-1 );
+      ASSERT(pNode != NULL);
+      inflowWP.m_volume_m3 = pNode->m_discharge * SEC_PER_DAY; inflowWP.m_thermalEnergy_kJ = inflowWP.ThermalEnergy(pNode->m_waterParcel.WaterTemperature());
    }
 
+   return(inflowWP);
+} // end of GetReachInflowWP()
 
 float ReachRouting::GetReachOutflow( ReachNode *pReachNode )   // recursive!!! for pahntom nodes
    {

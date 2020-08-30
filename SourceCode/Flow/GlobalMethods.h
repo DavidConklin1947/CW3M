@@ -200,14 +200,15 @@ protected:
    bool  SolveReach2KW(FlowContext*);
 
    float GetLateralInflow( Reach *pReach );
+   WaterParcel GetLateralInflowWP(Reach* pReach);
    float GetReachFluxes( FlowContext*, Reach *pReach );
 
    float GetReachInflow( Reach *pReach, int subNode );
-   WaterParcel * GetReachInflowWP(Reach * pReach, int subnode);
+   WaterParcel GetReachInflowWP(Reach * pReach, int subnode);
    float GetReachOutflow( ReachNode *pReachNode );
 
    float EstimateReachOutflow( Reach *pReach, int i, double timeStep, float lateralInflow);
-// WaterParcel * EstimateReachOutflowWP(Reach *pReach, int subnode, double timeStep, WaterParcel * pLateralInflowWP); 
+   WaterParcel EstimateReachOutflowWP(Reach *pReach, int subnode, double timeStep, WaterParcel lateralInflowWP); 
    double KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, Reach * pReach);
 
    float GetLateralSVInflow( Reach *pReach, int sv );

@@ -280,6 +280,7 @@ protected:
 
 protected:
    float m_globalHandlerFluxValue;        // current value of the global flux  - m3/day
+   float m_globalHandlerEnergyFluxValue_kJperDay;  
 
 public:
    bool m_nanOccurred; // true when a not-a-number has occurred
@@ -467,11 +468,12 @@ public:
 class WaterParcel
 {
 public:
+   WaterParcel();
    WaterParcel(double volume_m3, float temperature_degC);
    ~WaterParcel() {}
 
    WaterParcel * Discharge(double volume_m3);
-   void MixIn(WaterParcel * pInflow);
+   void MixIn(WaterParcel inflow);
    float WaterTemperature();
 
 //private:
@@ -775,6 +777,7 @@ public:
    SVTYPE m_volume;
    SVTYPE m_previousVolume;
    float  m_lateralInflow;       // m3/day
+   WaterParcel m_lateralInflowWP;
    float  m_discharge;           // m3/sec;
    float  m_previousDischarge;   // m3/sec;
    WaterParcel m_waterParcel;
