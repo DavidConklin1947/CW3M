@@ -908,7 +908,18 @@ float Reach::GetDischarge( int subnode /*=-1*/ )
       q = 0.0f;
 
    return q;
-   }
+   } // end of GetDischarge()
+
+
+WaterParcel Reach::GetDischargeWP(int subnode)
+{
+   if (subnode < 0) subnode = this->GetSubnodeCount() - 1;
+
+   ReachSubnode* pNode = (ReachSubnode*)this->m_subnodeArray[subnode];
+   ASSERT(pNode != NULL);
+   ASSERT(!isnan(pNode->m_dischargeWP.m_volume_m3));
+   return(pNode->m_dischargeWP);
+} // end of GetDischargeWP()
 
 
 float Reach::GetUpstreamInflow( )
@@ -1022,6 +1033,7 @@ Reservoir::Reservoir(void)
    , m_releaseFreq(1)
    , m_inflow( 0 )
    , m_outflow( 0 )
+   , m_outflowWP(0,0)
    , m_elevation( 0 )
    , m_power( 0 )
    , m_filled( 0 )
@@ -5570,6 +5582,7 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       outflow = pRes->GetResOutflow(pRes,dayOfYear);
       ASSERT(outflow >= 0);
       pRes->m_outflow = outflow*SEC_PER_DAY;    //m3 per day 
+      pRes->m_outflowWP.m_volume_m3 = outflow * SEC_PER_DAY; pRes->m_outflowWP.m_thermalEnergy_kJ = m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
 
       // Store today's hydropower generation (megawatts) for this reservoir into the reach attribute HYDRO_MW for the reach which receives the reservoir outflow.
       int reach_ndx = m_pReachLayer->FindIndex(m_colStreamCOMID, pReach->m_reachID, 0);
@@ -7900,6 +7913,7 @@ bool FlowModel::InitReservoirs( void )
             //Initialize reservoir outflow to minimum outflow
             float minOutflow = pRes->m_minOutflow;
             pRes->m_outflow = minOutflow;
+            pRes->m_outflowWP.m_volume_m3 = minOutflow; pRes->m_outflowWP.m_thermalEnergy_kJ = m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
 
             //Initialize gate specific flow variables to zero
             pRes->m_maxPowerFlow = 0;
@@ -8026,6 +8040,7 @@ bool FlowModel::InitRunReservoirs( EnvContext *pEnvContext )
          //Initialize reservoir outflow to minimum outflow
          float minOutflow = pRes->m_minOutflow;
          pRes->m_outflow = minOutflow;
+         pRes->m_outflowWP.m_volume_m3 = minOutflow; pRes->m_outflowWP.m_thermalEnergy_kJ = m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
 
          //Initialize gate specific flow variables to zero
          pRes->m_maxPowerFlow = 0;

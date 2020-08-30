@@ -205,7 +205,8 @@ protected:
 
    float GetReachInflow( Reach *pReach, int subNode );
    WaterParcel GetReachInflowWP(Reach * pReach, int subnode);
-   float GetReachOutflow( ReachNode *pReachNode );
+   float GetReachOutflow(ReachNode* pReachNode);
+   WaterParcel GetReachOutflowWP(ReachNode* pReachNode);
 
    float EstimateReachOutflow( Reach *pReach, int i, double timeStep, float lateralInflow);
    WaterParcel EstimateReachOutflowWP(Reach *pReach, int subnode, double timeStep, WaterParcel lateralInflowWP); 

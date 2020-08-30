@@ -525,7 +525,7 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
       Reservoir* pRes = pReach->m_pReservoir;
       if (pRes != NULL)
       {
-         inflowWP = pRes->m_dischargeWP;
+         inflowWP = pRes->m_outflowWP;
          ASSERT(pReach->m_pRight == NULL);
       }
       else
@@ -571,6 +571,18 @@ float ReachRouting::GetReachOutflow( ReachNode *pReachNode )   // recursive!!! f
    }
 
 
+WaterParcel ReachRouting::GetReachOutflowWP(ReachNode* pReachNode)
+{
+   WaterParcel outflowWP(0, 0);
+   if (pReachNode == NULL) return(outflowWP);
+
+   ASSERT(!pReachNode->IsPhantomNode());
+
+   Reach* pReach = gpModel->GetReachFromNode(pReachNode);
+   ASSERT(pReach != NULL);
+   outflowWP = pReach->GetDischargeWP();
+   return(outflowWP);
+} // end of GetReachOutflowWP()
 
 
 float ReachRouting::GetLateralSVInflow( Reach *pReach, int sv )

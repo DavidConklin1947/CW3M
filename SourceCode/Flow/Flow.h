@@ -475,6 +475,7 @@ public:
    WaterParcel * Discharge(double volume_m3);
    void MixIn(WaterParcel inflow);
    float WaterTemperature();
+   float ThermalEnergy(float temperature_degC);
 
 //private:
    double m_volume_m3;
@@ -779,6 +780,7 @@ public:
    float  m_lateralInflow;       // m3/day
    WaterParcel m_lateralInflowWP;
    float  m_discharge;           // m3/sec;
+   WaterParcel m_dischargeWP;
    float  m_previousDischarge;   // m3/sec;
    WaterParcel m_waterParcel;
 
@@ -788,7 +790,8 @@ public:
  
    static SubNode *CreateInstance( void ) { return (SubNode*) new ReachSubnode; }
 
-      ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11f), m_previousDischarge(0.11f), m_volume(0.0f), m_previousVolume(0.0f), 
+      ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11f), m_dischargeWP(0,0),
+         m_previousDischarge(0.11f), m_volume(0.0f), m_previousVolume(0.0f), 
       m_waterParcel(0, 0),
       m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }
@@ -807,7 +810,8 @@ public:
    Reservoir *GetReservoir( void ) { return (Reservoir*) m_pReservoir; }
    void  SetGeometry( float wdRatio );
    float GetDepthFromQ( float Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
-   float GetDischarge( int subnode=-1 );  // -1 mean last (lowest) subnode - m3/sec
+   float GetDischarge( int subnode=-1 );  // -1 means last (lowest) subnode - m3/sec
+   WaterParcel GetDischargeWP(int subnode = -1); // -1 means last (lowest, most downstream) subnode - m3/sec
    float GetUpstreamInflow(); 
    bool GetUpstreamInflow(float &QLeft, float &QRight);
 //x   bool GetUpstreamEnergy(SVTYPE &energyLeft, SVTYPE &energyRight);
@@ -960,6 +964,7 @@ public:
 
    float   m_inflow;
    float   m_outflow;
+   WaterParcel m_outflowWP;
    float   m_elevation;          //current pool elevation
    float   m_power; // Current hydropower output, MW
 
