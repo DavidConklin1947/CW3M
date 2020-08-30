@@ -469,13 +469,13 @@ class WaterParcel
 {
 public:
    WaterParcel();
-   WaterParcel(double volume_m3, float temperature_degC);
+   WaterParcel(double volume_m3, double temperature_degC);
    ~WaterParcel() {}
 
-   WaterParcel * Discharge(double volume_m3);
+   WaterParcel Discharge(double volume_m3);
    void MixIn(WaterParcel inflow);
-   float WaterTemperature();
-   float ThermalEnergy(float temperature_degC);
+   double WaterTemperature();
+   double ThermalEnergy(double temperature_degC);
 
 //private:
    double m_volume_m3;

@@ -5582,7 +5582,7 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       outflow = pRes->GetResOutflow(pRes,dayOfYear);
       ASSERT(outflow >= 0);
       pRes->m_outflow = outflow*SEC_PER_DAY;    //m3 per day 
-      pRes->m_outflowWP.m_volume_m3 = outflow * SEC_PER_DAY; pRes->m_outflowWP.m_thermalEnergy_kJ = m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
+      pRes->m_outflowWP.m_volume_m3 = outflow * SEC_PER_DAY; pRes->m_outflowWP.m_thermalEnergy_kJ = pRes->m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
 
       // Store today's hydropower generation (megawatts) for this reservoir into the reach attribute HYDRO_MW for the reach which receives the reservoir outflow.
       int reach_ndx = m_pReachLayer->FindIndex(m_colStreamCOMID, pReach->m_reachID, 0);
@@ -7913,7 +7913,7 @@ bool FlowModel::InitReservoirs( void )
             //Initialize reservoir outflow to minimum outflow
             float minOutflow = pRes->m_minOutflow;
             pRes->m_outflow = minOutflow;
-            pRes->m_outflowWP.m_volume_m3 = minOutflow; pRes->m_outflowWP.m_thermalEnergy_kJ = m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
+            pRes->m_outflowWP.m_volume_m3 = minOutflow; pRes->m_outflowWP.m_thermalEnergy_kJ = pRes->m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
 
             //Initialize gate specific flow variables to zero
             pRes->m_maxPowerFlow = 0;
@@ -8040,7 +8040,7 @@ bool FlowModel::InitRunReservoirs( EnvContext *pEnvContext )
          //Initialize reservoir outflow to minimum outflow
          float minOutflow = pRes->m_minOutflow;
          pRes->m_outflow = minOutflow;
-         pRes->m_outflowWP.m_volume_m3 = minOutflow; pRes->m_outflowWP.m_thermalEnergy_kJ = m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
+         pRes->m_outflowWP.m_volume_m3 = minOutflow; pRes->m_outflowWP.m_thermalEnergy_kJ = pRes->m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
 
          //Initialize gate specific flow variables to zero
          pRes->m_maxPowerFlow = 0;
@@ -14427,24 +14427,26 @@ WaterParcel::WaterParcel()
 } // end of default constructor for WaterParcel objects
 
 
-WaterParcel::WaterParcel(double volume_m3, float temperature_degC)
+WaterParcel::WaterParcel(double volume_m3, double temperature_degC)
 {
-   m_volume_m3 = volume_m3;
-   m_thermalEnergy_kJ = temperature_degC * volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O;
+   this->m_volume_m3 = volume_m3;
+   this->m_thermalEnergy_kJ = temperature_degC * volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O;
 } // end of WaterParcel constructor
 
 
-WaterParcel * WaterParcel::Discharge(double outflowVolume_m3) // Creates a new WaterParcel.
+WaterParcel WaterParcel::Discharge(double outflowVolume_m3) 
 {
-   ASSERT(outflowVolume_m3 >= 0 && outflowVolume_m3 <= m_volume_m3);
-   WaterParcel * pDischarge = new WaterParcel(outflowVolume_m3, WaterTemperature());
+   ASSERT(outflowVolume_m3 >= 0 && outflowVolume_m3 <= this->m_volume_m3);
+   WaterParcel dischargeWP(outflowVolume_m3, this->WaterTemperature());
 
    double energy_density = m_thermalEnergy_kJ / m_volume_m3;
    double outflow_energy_kJ = energy_density * outflowVolume_m3;
-   m_volume_m3 -= outflowVolume_m3;
-   m_thermalEnergy_kJ -= outflow_energy_kJ;
+   this->m_volume_m3 -= dischargeWP.m_volume_m3;
+   ASSERT(this->m_volume_m3 >= 0);
+   this->m_thermalEnergy_kJ -= dischargeWP.m_thermalEnergy_kJ;
+   ASSERT(this->m_thermalEnergy_kJ >= 0);
 
-   return(pDischarge);
+   return(dischargeWP);
 } // end of Discharge()
 
 
@@ -14455,9 +14457,15 @@ void WaterParcel::MixIn(WaterParcel inflow)
 } // end of MixIn()
 
 
-float WaterParcel::WaterTemperature()
+double WaterParcel::WaterTemperature()
 {
    double temperature_degC = m_thermalEnergy_kJ / (m_volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O);
    return((float)temperature_degC);
 } // end of WaterTemperature()
 
+
+double WaterParcel::ThermalEnergy(double temperature_degC)
+{
+   double thermalEnergy_kJ = temperature_degC * m_volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O;
+   return(thermalEnergy_kJ);
+} // end of ThermalEnergy()
