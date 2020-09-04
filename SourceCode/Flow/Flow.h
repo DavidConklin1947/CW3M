@@ -19,6 +19,7 @@
 #include <randgen\Randunif.hpp>
 #include <randgen\Randnorm.hpp>
 #include "..\..\GDAL\include\netcdf.h"
+#include <UNITCONV.H>
 
 #include <exception>
 using namespace std;
@@ -44,6 +45,8 @@ using namespace std;
 #define LITERS_PER_M3 1000
 #define SPECIFIC_HEAT_H2O 4.187 /* kJ/(kg degC) */
 #define DENSITY_H2O 998.2 /* kg/m^3 */
+#define DEFAULT_REACH_H2O_TEMP_DEGC 10.f
+#define DEFAULT_SOIL_H2O_TEMP_DEGC 5.F
 
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
@@ -472,6 +475,7 @@ public:
    WaterParcel(double volume_m3, double temperature_degC);
    ~WaterParcel() {}
 
+   void Discharge(WaterParcel outflowWP);
    WaterParcel Discharge(double volume_m3);
    void MixIn(WaterParcel inflow);
    double WaterTemperature();
@@ -778,11 +782,12 @@ public:
    SVTYPE m_volume;
    SVTYPE m_previousVolume;
    float  m_lateralInflow;       // m3/day
-   WaterParcel m_lateralInflowWP;
    float  m_discharge;           // m3/sec;
-   WaterParcel m_dischargeWP;
    float  m_previousDischarge;   // m3/sec;
    WaterParcel m_waterParcel;
+   WaterParcel m_previousWP;
+   WaterParcel m_lateralInflowWP;
+   WaterParcel m_dischargeWP;
 
    double m_addedVolume_m3; // amount added to keep compartment from going negative
    float m_addedDischarge_cms; // amount added to ensure discharge is always > 0
@@ -790,7 +795,7 @@ public:
  
    static SubNode *CreateInstance( void ) { return (SubNode*) new ReachSubnode; }
 
-      ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11f), m_dischargeWP(0,0),
+      ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11f), m_dischargeWP(0.11f * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
          m_previousDischarge(0.11f), m_volume(0.0f), m_previousVolume(0.0f), 
       m_waterParcel(0, 0),
       m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }

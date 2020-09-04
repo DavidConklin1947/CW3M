@@ -3875,7 +3875,7 @@ bool FlowModel::ReadState()
          {
          Reach *pReach = m_reachArray[i];
          for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
-         {
+            {
             ReachSubnode *pNode = pReach->GetReachSubnode(j);
             double discharge_as_double; // m_discharge is a float
             double subnode_volume;
@@ -3893,10 +3893,15 @@ bool FlowModel::ReadState()
             pNode->m_discharge = (float)discharge_as_double;
             if (pNode->m_discharge <= 0.) pNode->m_discharge = NOMINAL_LOW_FLOW_CMS;
             pNode->m_volume = subnode_volume;
-            if (pNode->m_volume <= 0.) pNode->m_volume = pNode->m_discharge * SEC_PER_DAY;
-            }
+            if (pNode->m_volume <= 0.) pNode->m_volume = pNode->m_discharge * (float)SEC_PER_DAY;
+
+            WaterParcel initialWP(pNode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
+            pNode->m_waterParcel = initialWP;
+            pNode->m_previousWP = initialWP;
+            pNode->m_dischargeWP = initialWP;
+            } // end of subnode loop
          SetGeometry(pReach, pReach->GetDischarge());
-         }
+         } // end of reach loop
    
       int numNonzeroReservoirs = 0;
       for (int i = 0; i < reservoirCount; i++)
@@ -4008,7 +4013,13 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             //initialize the subnode volumes using mannings equation
             float Q = pSubnode->m_discharge;
             SetGeometry(pReach, Q);
-            if (!m_isReadStateOK) pSubnode->m_volume = pReach->m_width*pReach->m_depth*pReach->m_length / pReach->m_subnodeArray.GetSize();
+            if (!m_isReadStateOK)
+            {
+               pSubnode->m_volume = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
+               WaterParcel initial_stateWP(pSubnode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
+               pSubnode->m_waterParcel = initial_stateWP;
+               pSubnode->m_previousWP = initial_stateWP;
+            }
          }
       }
    }
@@ -6129,7 +6140,10 @@ bool FlowModel::InitReaches(void)
          { // Initialize state variables.
          ReachSubnode *pSubnode = pReach->GetReachSubnode(j);
          pSubnode->m_discharge = Q;
+         pSubnode->m_dischargeWP = WaterParcel(Q * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC);
          pSubnode->m_volume = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
+         pSubnode->m_waterParcel = WaterParcel(pSubnode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
+         pSubnode->m_previousWP = WaterParcel(pSubnode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
 
          if (m_reachSvCount > 1)
             { // Initialize extra state variables
@@ -14434,20 +14448,27 @@ WaterParcel::WaterParcel(double volume_m3, double temperature_degC)
 } // end of WaterParcel constructor
 
 
-WaterParcel WaterParcel::Discharge(double outflowVolume_m3) 
+void WaterParcel::Discharge(WaterParcel dischargeWP) 
+// This routine removes water and energy from a WaterParcel object, but it doesn't put it anywhere.
+// So for conservation of mass and energy, add the WaterParcel in somewhere else (e.g. call MixIn()) before calling Discharge(). 
 {
-   ASSERT(outflowVolume_m3 >= 0 && outflowVolume_m3 <= this->m_volume_m3);
-   WaterParcel dischargeWP(outflowVolume_m3, this->WaterTemperature());
+   double outflowVolume_m3 = dischargeWP.m_volume_m3;
+   ASSERT(outflowVolume_m3 >= 0);
 
-   double energy_density = m_thermalEnergy_kJ / m_volume_m3;
-   double outflow_energy_kJ = energy_density * outflowVolume_m3;
    this->m_volume_m3 -= dischargeWP.m_volume_m3;
    ASSERT(this->m_volume_m3 >= 0);
    this->m_thermalEnergy_kJ -= dischargeWP.m_thermalEnergy_kJ;
    ASSERT(this->m_thermalEnergy_kJ >= 0);
+} // end of Discharge(WaterParcel)
 
+
+WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
+{
+   ASSERT(outflowVolume_m3 >= 0 && outflowVolume_m3 <= this->m_volume_m3);
+   WaterParcel dischargeWP(outflowVolume_m3, this->WaterTemperature());
+   Discharge(dischargeWP);
    return(dischargeWP);
-} // end of Discharge()
+} // end of Discharge(double)
 
 
 void WaterParcel::MixIn(WaterParcel inflow) 

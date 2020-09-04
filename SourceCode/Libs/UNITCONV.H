@@ -105,5 +105,16 @@ const float PI         = 3.1415927f;
 #define PERCENT_PER_DEGREE( r ) ((r/100.0f)*90)       // NON-decimal percent
 
 
+inline bool close_enough(double x, double y, double allowable_relative_diff)
+{
+   if (x == 0 && y == 0) return(true);
+
+   double abs_x = fabs(x);
+   double abs_y = fabs(y);
+
+   double divisor = abs_x > abs_y ? abs_x : abs_y;
+   double abs_relative_diff = fabs((x - y) / divisor);
+   return(abs_relative_diff <= allowable_relative_diff);
+}
 
 #endif
