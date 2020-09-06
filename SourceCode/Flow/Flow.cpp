@@ -3890,15 +3890,18 @@ bool FlowModel::ReadState()
                if (discharge_as_double != discharge_as_double) discharge_as_double = 0.;
                }
             totReachVol += subnode_volume;
+
             pNode->m_discharge = (float)discharge_as_double;
             if (pNode->m_discharge <= 0.) pNode->m_discharge = NOMINAL_LOW_FLOW_CMS;
+            pNode->m_dischargeWP = WaterParcel(SEC_PER_DAY * pNode->m_discharge, DEFAULT_REACH_H2O_TEMP_DEGC);
+
             pNode->m_volume = subnode_volume;
-            if (pNode->m_volume <= 0.) pNode->m_volume = pNode->m_discharge * (float)SEC_PER_DAY;
+ //x           if (pNode->m_volume <= 0.) pNode->m_volume = pNode->m_discharge * (float)SEC_PER_DAY;
+            ASSERT(pNode->m_volume > 0);
 
             WaterParcel initialWP(pNode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
             pNode->m_waterParcel = initialWP;
             pNode->m_previousWP = initialWP;
-            pNode->m_dischargeWP = initialWP;
             } // end of subnode loop
          SetGeometry(pReach, pReach->GetDischarge());
          } // end of reach loop
@@ -14455,6 +14458,7 @@ void WaterParcel::Discharge(WaterParcel dischargeWP)
    double outflowVolume_m3 = dischargeWP.m_volume_m3;
    ASSERT(outflowVolume_m3 >= 0);
 
+   double temp_degC = 
    this->m_volume_m3 -= dischargeWP.m_volume_m3;
    ASSERT(this->m_volume_m3 >= 0);
    this->m_thermalEnergy_kJ -= dischargeWP.m_thermalEnergy_kJ;
@@ -14465,14 +14469,19 @@ void WaterParcel::Discharge(WaterParcel dischargeWP)
 WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
 {
    ASSERT(outflowVolume_m3 >= 0 && outflowVolume_m3 <= this->m_volume_m3);
-   WaterParcel dischargeWP(outflowVolume_m3, this->WaterTemperature());
-   Discharge(dischargeWP);
-   return(dischargeWP);
+   
+   WaterParcel departingWP(0, 0);
+   departingWP.m_volume_m3 = outflowVolume_m3;
+   departingWP.m_thermalEnergy_kJ = (outflowVolume_m3 / this->m_volume_m3)* this->m_thermalEnergy_kJ;
+   this->m_volume_m3 -= outflowVolume_m3;
+   this->m_thermalEnergy_kJ -= departingWP.m_thermalEnergy_kJ;
+
+   return(departingWP);
 } // end of Discharge(double)
 
 
 void WaterParcel::MixIn(WaterParcel inflow) 
-{
+{ // Note that this method tolerates negative values for volume and energy.
    m_volume_m3 += inflow.m_volume_m3;
    m_thermalEnergy_kJ += inflow.m_thermalEnergy_kJ;
 } // end of MixIn()
