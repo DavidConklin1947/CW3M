@@ -968,7 +968,7 @@ public:
    int m_daysInZoneBuffer;
 
    float   m_inflow;
-   float   m_outflow;
+   float   m_outflow; // m3 per day
    WaterParcel m_outflowWP;
    float   m_elevation;          //current pool elevation
    float   m_power; // Current hydropower output, MW

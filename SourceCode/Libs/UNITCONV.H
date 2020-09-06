@@ -115,6 +115,6 @@ inline bool close_enough(double x, double y, double allowable_relative_diff)
    double divisor = abs_x > abs_y ? abs_x : abs_y;
    double abs_relative_diff = fabs((x - y) / divisor);
    return(abs_relative_diff <= allowable_relative_diff);
-}
+} // end of close_enough()
 
 #endif

@@ -3896,7 +3896,6 @@ bool FlowModel::ReadState()
             pNode->m_dischargeWP = WaterParcel(SEC_PER_DAY * pNode->m_discharge, DEFAULT_REACH_H2O_TEMP_DEGC);
 
             pNode->m_volume = subnode_volume;
- //x           if (pNode->m_volume <= 0.) pNode->m_volume = pNode->m_discharge * (float)SEC_PER_DAY;
             ASSERT(pNode->m_volume > 0);
 
             WaterParcel initialWP(pNode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
@@ -5596,7 +5595,7 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       outflow = pRes->GetResOutflow(pRes,dayOfYear);
       ASSERT(outflow >= 0);
       pRes->m_outflow = outflow*SEC_PER_DAY;    //m3 per day 
-      pRes->m_outflowWP.m_volume_m3 = outflow * SEC_PER_DAY; pRes->m_outflowWP.m_thermalEnergy_kJ = pRes->m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
+      pRes->m_outflowWP = WaterParcel(pRes->m_outflow, DEFAULT_REACH_H2O_TEMP_DEGC);
 
       // Store today's hydropower generation (megawatts) for this reservoir into the reach attribute HYDRO_MW for the reach which receives the reservoir outflow.
       int reach_ndx = m_pReachLayer->FindIndex(m_colStreamCOMID, pReach->m_reachID, 0);
@@ -7930,7 +7929,7 @@ bool FlowModel::InitReservoirs( void )
             //Initialize reservoir outflow to minimum outflow
             float minOutflow = pRes->m_minOutflow;
             pRes->m_outflow = minOutflow;
-            pRes->m_outflowWP.m_volume_m3 = minOutflow; pRes->m_outflowWP.m_thermalEnergy_kJ = pRes->m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
+			pRes->m_outflowWP = WaterParcel(minOutflow, DEFAULT_REACH_H2O_TEMP_DEGC);
 
             //Initialize gate specific flow variables to zero
             pRes->m_maxPowerFlow = 0;
@@ -8057,7 +8056,7 @@ bool FlowModel::InitRunReservoirs( EnvContext *pEnvContext )
          //Initialize reservoir outflow to minimum outflow
          float minOutflow = pRes->m_minOutflow;
          pRes->m_outflow = minOutflow;
-         pRes->m_outflowWP.m_volume_m3 = minOutflow; pRes->m_outflowWP.m_thermalEnergy_kJ = pRes->m_outflowWP.ThermalEnergy(10.); // ??? 10. is a placeholder for temperature
+		 pRes->m_outflowWP = WaterParcel(minOutflow, DEFAULT_REACH_H2O_TEMP_DEGC);
 
          //Initialize gate specific flow variables to zero
          pRes->m_maxPowerFlow = 0;
@@ -14458,12 +14457,9 @@ void WaterParcel::Discharge(WaterParcel dischargeWP)
    double outflowVolume_m3 = dischargeWP.m_volume_m3;
    ASSERT(outflowVolume_m3 >= 0);
 
-   double temp_degC = 
-   this->m_volume_m3 -= dischargeWP.m_volume_m3;
-   ASSERT(this->m_volume_m3 >= 0);
-   this->m_thermalEnergy_kJ -= dischargeWP.m_thermalEnergy_kJ;
-   ASSERT(this->m_thermalEnergy_kJ >= 0);
-} // end of Discharge(WaterParcel)
+   this->m_volume_m3 -= dischargeWP.m_volume_m3; ASSERT(this->m_volume_m3 >= 0);
+   this->m_thermalEnergy_kJ -= dischargeWP.m_thermalEnergy_kJ; ASSERT(this->m_thermalEnergy_kJ >= 0);
+} // end of void WaterParcel::Discharge(WaterParcel)
 
 
 WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
@@ -14477,7 +14473,7 @@ WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
    this->m_thermalEnergy_kJ -= departingWP.m_thermalEnergy_kJ;
 
    return(departingWP);
-} // end of Discharge(double)
+} // end of WaterParcel WaterParcel::Discharge(double)
 
 
 void WaterParcel::MixIn(WaterParcel inflow) 
@@ -14490,7 +14486,7 @@ void WaterParcel::MixIn(WaterParcel inflow)
 double WaterParcel::WaterTemperature()
 {
    double temperature_degC = m_thermalEnergy_kJ / (m_volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O);
-   return((float)temperature_degC);
+   return(temperature_degC);
 } // end of WaterTemperature()
 
 
