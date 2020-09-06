@@ -450,7 +450,7 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach *pReach, int subnode, double
       double lateralInflow_m3 = lateralInflowWP.m_volume_m3;
       if (subnode == 0 && Qin_m3 + lateralInflow_m3 < 0. && pReach->IsHeadwaterNode())
       { // More water is leaving the subnode laterally than is entering from upstream; the volume in the subnode will be drawn down.
-         float net_subnode_outflow_m3 = Qin_m3 + lateralInflow_m3;
+         float net_subnode_outflow_m3 = (float)(Qin_m3 + lateralInflow_m3);
          CString msg;
          msg.Format("ApplyReachOutflowWP() COMID = %d, subnode = %d, Qin_m3 = %f, lateralInflow_m3 = %f, net_subnode_outflow_m3 = %f",
             pReach->m_reachID, subnode, Qin_m3, lateralInflow_m3, net_subnode_outflow_m3);        
@@ -482,13 +482,13 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach *pReach, int subnode, double
 //         pSubnode->m_volume -= reach_volume_H2O_to_move_m3;
 
          H2O_to_moveWP.MixIn(WaterParcel(reach_volume_H2O_to_move_m3, pSubnode->m_waterParcel.WaterTemperature()));
-         if (reach_volume_H2O_to_move_m3 > 0) pSubnode->m_waterParcel.Discharge(H2O_to_moveWP.m_volume_m3);
-         else if (reach_volume_H2O_to_move_m3 < 0)
+         if (total_inflow_m3 > 0) pSubnode->m_waterParcel.Discharge(H2O_to_moveWP.m_volume_m3);
+         else if (total_inflow_m3 < 0)
          { // This is when the net lateral flow is out of the reach (e.g. an irrigation point of diversion) and
             // larger than the sum of what's already in the reach and what is entering from upstream.
             // In the real world, the reach would run dry (and the irrigation pumps would stall).
             ASSERT(H2O_to_moveWP.m_volume_m3 < 0);
-            pSubnode->m_waterParcel.MixIn(WaterParcel(-H2O_to_moveWP.m_volume_m3, pSubnode->m_waterParcel.WaterTemperature()));
+            pSubnode->m_waterParcel.MixIn(WaterParcel(-total_inflow_m3, pSubnode->m_waterParcel.WaterTemperature()));
          }
       }
       else if (upstream_inflow_m3 <= 0. && subnode == 0 && pReach->m_pLeft == NULL && pReach->m_pRight == NULL)
