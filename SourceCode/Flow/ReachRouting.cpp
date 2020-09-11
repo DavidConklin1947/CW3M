@@ -122,8 +122,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             new_lateralInflow = NOMINAL_LOW_FLOW_CMS;
             }
 
-         double m_volume_before = pNode->m_volume;
-         double waterParcel_m_volume_m3_before = pNode->m_waterParcel.m_volume_m3;
          float outflow = EstimateReachOutflow(pReach, l, pFlowContext->timeStep, new_lateralInflow); // m3/day
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep, newLateralInflowWP); 
@@ -495,7 +493,8 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach *pReach, int subnode, double
                double min_volume_m3 = (NOMINAL_LOW_WATER_LITERS_PER_METER * pReach->m_length / pReach->GetSubnodeCount()) / LITERS_PER_M3;
                double magic_H2O_to_add_m3 = min_volume_m3 + fabs(total_inflow_m3) - pSubnode->m_waterParcel.m_volume_m3;
                pSubnode->m_waterParcel.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature()));
-               pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+//x            pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+//             pSubnode->m_magicWP.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature());
             }
             // else... Until the water in the reach is exhausted, we don't have to do anything.
          }
@@ -508,7 +507,8 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach *pReach, int subnode, double
          { // This is a headwater reach which is not associated with an HRU, so there is no inflow from soil.
             double magic_H2O_to_add_m3 = NOMINAL_LOW_FLOW_CMS * SEC_PER_DAY;
             H2O_to_moveWP.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature()));
-            pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+//x         pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+//          pSubnode->m_magicWP.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature());
             if (lateralInflow_m3 < 0.)
             { // Negative lateral inflow is probably an irrigation withdrawal.
                CString msg; msg.Format("ApplyReachOutflow()2 Trying to withdraw water from a headwater reach which is not associated with an HRU\n"
