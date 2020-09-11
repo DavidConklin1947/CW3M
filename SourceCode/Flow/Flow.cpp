@@ -14485,6 +14485,8 @@ void WaterParcel::MixIn(WaterParcel inflow)
 
 double WaterParcel::WaterTemperature()
 {
+   if (m_volume_m3 <= 0) return(0);
+
    double temperature_degC = m_thermalEnergy_kJ / (m_volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O);
    return(temperature_degC);
 } // end of WaterTemperature()

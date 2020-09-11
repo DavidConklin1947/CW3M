@@ -54,7 +54,7 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
          if (pNode->m_discharge <= 0)
          {
             float discharge_m3 = pNode->m_discharge * SEC_PER_DAY;
-            ASSERT(close_enough(discharge_m3, pNode->m_dischargeWP.m_volume_m3, 1e-4));
+            ASSERT(close_enough(discharge_m3, pNode->m_dischargeWP.m_volume_m3, 0.2, 1000.));
 
             double H2O_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
             if (pNode->m_discharge < 0) H2O_temp_degC = fabs(pNode->m_dischargeWP.WaterTemperature());
@@ -72,7 +72,7 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
          }
          if (pNode->m_volume <= 0)
          {
-            ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 1e-4));
+            ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.2, 1000.));
             double H2O_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
             if (pNode->m_volume < 0) H2O_temp_degC = fabs(pNode->m_waterParcel.WaterTemperature());
             float depth = GetDepthFromQ(pReach, pNode->m_discharge, pReach->m_wdRatio);
@@ -122,10 +122,13 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             new_lateralInflow = NOMINAL_LOW_FLOW_CMS;
             }
 
+         double m_volume_before = pNode->m_volume;
+         double waterParcel_m_volume_m3_before = pNode->m_waterParcel.m_volume_m3;
          float outflow = EstimateReachOutflow(pReach, l, pFlowContext->timeStep, new_lateralInflow); // m3/day
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep, newLateralInflowWP); 
-         ASSERT(close_enough(outflow, outflowWP.m_volume_m3, 0.001));
+         ASSERT(close_enough(outflow, outflowWP.m_volume_m3, 0.2, 1000.));
+         ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.2, 1000.));
          pNode->m_discharge = outflow / SEC_PER_DAY;  //convert units to m3/s;  
 
          if (pNode->m_discharge < 0 || pNode->m_discharge > 1.e10f || pNode->m_discharge != pNode->m_discharge)
@@ -315,6 +318,17 @@ float ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double tim
          Qin = (float)(H2O_to_move_m3_per_timestep / dt); // m3/sec
          pSubnode->m_volume = lateralInflow_m3;
       }
+      else if (lateralInflow_m3 < 0 && (fabs(lateralInflow_m3) > (pSubnode->m_volume + Qin * dt)))
+      { // This is where there is more water leaving the reach laterally than
+         // the sum of what's already in the reach and what is entering from upstream.
+         // In the real world, the reach would run dry (and the irrigation pumps would stall).
+         // Here we add enough magic water to keep the reach from running dry.  
+         // This violates conservation of mass.
+         double min_volume_m3 = (NOMINAL_LOW_WATER_LITERS_PER_METER * pReach->m_length / pReach->GetSubnodeCount()) / LITERS_PER_M3;
+         double H2O_deficit_m3 = fabs(pSubnode->m_volume + Qin * dt + lateralInflow_m3);
+         double magic_H2O_to_add_m3 = H2O_deficit_m3 + min_volume_m3;
+         pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+      }
    }
 
    float Qstar = ( Q + Qin  ) / 2.0f;   // from Chow, eqn. 9.6.4 (m3/sec)
@@ -434,16 +448,16 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach *pReach, int subnode, double
       double upstream_inflow_m3 = upstream_inflowWP.m_volume_m3;
 
       float Qin_m3 = GetReachInflow(pReach, subnode) * SEC_PER_DAY;
-      ASSERT(close_enough(upstream_inflow_m3, Qin_m3, 1e-4));
+      ASSERT(close_enough(upstream_inflow_m3, Qin_m3, 0.2, 1000.));
       double lateralInflow_m3 = lateralInflowWP.m_volume_m3;
       if (subnode == 0 && Qin_m3 + lateralInflow_m3 < 0. && pReach->IsHeadwaterNode())
       { // More water is leaving the subnode laterally than is entering from upstream; the volume in the subnode will be drawn down.
          float net_subnode_outflow_m3 = (float)(Qin_m3 + lateralInflow_m3);
          CString msg;
-         msg.Format("ApplyReachOutflowWP() COMID = %d, subnode = %d, Qin_m3 = %f, lateralInflow_m3 = %f, net_subnode_outflow_m3 = %f",
+         msg.Format("ApplyReachOutflowWP() COMID = %d, subnode = %d, Qin_m3 = %f, lateralInflow_m3 = %f, net_subnode_outflow_m3 = %f\n",
             pReach->m_reachID, subnode, Qin_m3, lateralInflow_m3, net_subnode_outflow_m3);        
-         msg = msg + "More water is leaving the subnode laterally than is entering from upstream; the volume in the subnode will be drawn down.";
-         msg = msg + "  This is a headwater reach.";
+         msg = msg + "More water is leaving the subnode laterally than is entering from upstream; the volume in the subnode will be drawn down.\n";
+         msg = msg + "This is a headwater reach.";
          Report::LogMsg(msg);
       }
 
@@ -469,24 +483,35 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach *pReach, int subnode, double
          H2O_to_moveWP.MixIn(WaterParcel(reach_volume_H2O_to_move_m3, pSubnode->m_waterParcel.WaterTemperature()));
          if (total_inflow_m3 > 0) pSubnode->m_waterParcel.Discharge(H2O_to_moveWP.m_volume_m3);
          else if (total_inflow_m3 < 0)
-         { // This is when the net lateral flow is out of the reach (e.g. an irrigation point of diversion) and
-            // larger than the sum of what's already in the reach and what is entering from upstream.
-            // In the real world, the reach would run dry (and the irrigation pumps would stall).
-            ASSERT(H2O_to_moveWP.m_volume_m3 < 0);
-            pSubnode->m_waterParcel.MixIn(WaterParcel(-total_inflow_m3, pSubnode->m_waterParcel.WaterTemperature()));
+         { // This is when the net lateral flow is out of the reach (e.g. an irrigation point of diversion)
+            if (total_inflow_m3 + pSubnode->m_waterParcel.m_volume_m3 < 0)
+            { // This is where there is more water leaving the reach laterally than
+               // the sum of what's already in the reach and what is entering from upstream.
+               // In the real world, the reach would run dry (and the irrigation pumps would stall).
+               // Here we add enough magic water to keep the reach from running dry.  
+               // This violates conservation of mass.
+               reach_volume_H2O_to_move_m3 = 0;
+               ASSERT(pSubnode->m_waterParcel.m_volume_m3 >= 0);
+               double min_volume_m3 = (NOMINAL_LOW_WATER_LITERS_PER_METER * pReach->m_length / pReach->GetSubnodeCount()) / LITERS_PER_M3;
+               double magic_H2O_to_add_m3 = min_volume_m3 + fabs(total_inflow_m3) - pSubnode->m_waterParcel.m_volume_m3;
+               pSubnode->m_waterParcel.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature()));
+               pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+            }
+            // else... Until the water in the reach is exhausted, we don't have to do anything.
          }
-      }
+       }
       else if (upstream_inflow_m3 <= 0. && subnode == 0 && pReach->m_pLeft == NULL && pReach->m_pRight == NULL)
       { // This is the upstream subnode of a headwater reach.
          Catchment *pCatchment = NULL;
          if (pReach->m_catchmentArray.GetSize() > 0) pCatchment = pReach->m_catchmentArray[0];
          if (pCatchment == NULL || pCatchment->m_id <= 0)
          { // This is a headwater reach which is not associated with an HRU, so there is no inflow from soil.
-            H2O_to_moveWP.MixIn(WaterParcel(NOMINAL_LOW_FLOW_CMS * SEC_PER_DAY, pSubnode->m_waterParcel.WaterTemperature()));
-// ??? track added magic water here
+            double magic_H2O_to_add_m3 = NOMINAL_LOW_FLOW_CMS * SEC_PER_DAY;
+            H2O_to_moveWP.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature()));
+            pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
             if (lateralInflow_m3 < 0.)
             { // Negative lateral inflow is probably an irrigation withdrawal.
-               CString msg; msg.Format("EstimateReachOutflow()2 Trying to withdraw water from a headwater reach which is not associated with an HRU\n"
+               CString msg; msg.Format("ApplyReachOutflow()2 Trying to withdraw water from a headwater reach which is not associated with an HRU\n"
                   "pReach->m_reachID = %d, lateralInflow_m3 = %f", pReach->m_reachID, lateralInflow_m3);
                Report::LogMsg(msg);
             }
@@ -592,7 +617,7 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
          ASSERT(pReach->m_pRight == NULL);
 
          float reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
-         ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 1e-4));
+         ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.2, 1000.));
       }
       else
       {
@@ -600,7 +625,7 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
          inflowWP.MixIn(GetReachOutflowWP(pReach->m_pRight));
 
          float reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
-         ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 1e-4));
+         ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.2, 1000.));
       }
    }
    else
@@ -612,7 +637,7 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
    }
 
    float reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
-   ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 1e-4));
+   ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.2, 1000.));
 
    return(inflowWP);
 } // end of GetReachInflowWP()
