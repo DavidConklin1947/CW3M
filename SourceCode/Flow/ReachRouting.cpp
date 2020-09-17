@@ -53,12 +53,12 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
          }
          if (pNode->m_discharge <= 0)
          {
-            float discharge_m3 = pNode->m_discharge * SEC_PER_DAY;
+            double discharge_m3 = pNode->m_discharge * SEC_PER_DAY;
             ASSERT(close_enough(discharge_m3, pNode->m_dischargeWP.m_volume_m3, 0.2, 1000.));
 
             double H2O_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
             if (pNode->m_discharge < 0) H2O_temp_degC = fabs(pNode->m_dischargeWP.WaterTemperature());
-            float node_current_added_discharge_cms = NOMINAL_LOW_FLOW_CMS - pNode->m_discharge;
+            double node_current_added_discharge_cms = NOMINAL_LOW_FLOW_CMS - pNode->m_discharge;
             pNode->m_addedDischarge_cms += node_current_added_discharge_cms;
             pNode->m_discharge = NOMINAL_LOW_FLOW_CMS;
             pNode->m_dischargeWP = WaterParcel(pNode->m_discharge * SEC_PER_DAY, H2O_temp_degC);
@@ -108,10 +108,10 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          {
          pFlowContext->pReach = pReach;
          ReachSubnode *pNode = pReach->GetReachSubnode(l);
-         float lateralInflow = GetLateralInflow(pReach);
+         double lateralInflow = GetLateralInflow(pReach);
          WaterParcel newLateralInflowWP = GetLateralInflowWP(pReach); 
-         float externalFluxes = GetReachFluxes(pFlowContext, pReach);
-         float new_lateralInflow = lateralInflow + externalFluxes;
+         double externalFluxes = GetReachFluxes(pFlowContext, pReach);
+         double new_lateralInflow = lateralInflow + externalFluxes;
 
          if (new_lateralInflow != new_lateralInflow)
             {
@@ -122,7 +122,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             new_lateralInflow = NOMINAL_LOW_FLOW_CMS;
             }
 
-         float outflow = EstimateReachOutflow(pReach, l, pFlowContext->timeStep, new_lateralInflow); // m3/day
+         double outflow = EstimateReachOutflow(pReach, l, pFlowContext->timeStep, new_lateralInflow); // m3/day
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep, newLateralInflowWP); 
          ASSERT(close_enough(outflow, outflowWP.m_volume_m3, 0.2, 1000.));
@@ -151,7 +151,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
    } // end of SolveReachKinematicWave()
 
 
-float ReachRouting::GetLateralInflow( Reach *pReach )
+double ReachRouting::GetLateralInflow( Reach *pReach )
    {
    float inflow = 0;
    inflow = pReach->GetFluxValue();
@@ -202,7 +202,7 @@ WaterParcel ReachRouting::GetLateralInflowWP(Reach* pReach)
 
 
 
-float ReachRouting::GetReachFluxes( FlowContext *pFlowContext, Reach *pReach )
+double ReachRouting::GetReachFluxes( FlowContext *pFlowContext, Reach *pReach )
    {
    float totalFlux = 0;
 
@@ -238,13 +238,13 @@ float ReachRouting::GetReachFluxes( FlowContext *pFlowContext, Reach *pReach )
 //
 // solves the KW equations for the Reach downstream from pNode
 //------------------------------------------------------------------------
-float ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double timeStep, float lateralInflow_m3)
+double ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double timeStep, double lateralInflow_m3)
    {
    // Test for the case where the reach runs dry
-   float Qin_m3 = GetReachInflow(pReach, subnode) * SEC_PER_DAY;
+   double Qin_m3 = GetReachInflow(pReach, subnode) * SEC_PER_DAY;
    if (subnode == 0 && Qin_m3 + lateralInflow_m3 < 0.f)
    { // More water is leaving the subnode laterally than is entering from upstream; the volume in the subnode will be drawn down.
-      float net_subnode_outflow_m3 = Qin_m3 + lateralInflow_m3;
+      double net_subnode_outflow_m3 = Qin_m3 + lateralInflow_m3;
       CString msg;
       msg.Format("EstimateReachOutflow()1 COMID = %d, subnode = %d, Qin_m3 = %f, lateralInflow_m3 = %f, net_subnode_outflow_m3 = %f",
          pReach->m_reachID, subnode, Qin_m3, lateralInflow_m3, net_subnode_outflow_m3);
@@ -256,16 +256,16 @@ float ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double tim
    // compute Qin for this reach
    float dx = pReach->m_deltaX;
    double dt = timeStep* SEC_PER_DAY;
-   float lateral = float( lateralInflow_m3/timeStep );//m3/d
-   float qsurface = float( lateral/dx*timeStep );  //m2
+   double lateral = lateralInflow_m3/timeStep;//m3/d
+   double qsurface = lateral/dx*timeStep;  //m2
 
-   float Qnew = 0.0f;      
-   float Qin = 0.0f;
+   double Qnew = 0.0f;      
+   double Qin = 0.0f;
 
    ReachSubnode *pSubnode = pReach->GetReachSubnode( subnode );
    ASSERT( pSubnode != NULL );
 
-   float Q = pSubnode->m_discharge;   // m3/sec
+   double Q = pSubnode->m_discharge;   // m3/sec
    ASSERT(Q > 0);
    SetGeometry(pReach, Q);
    float width = pReach->m_width;
@@ -290,7 +290,7 @@ float ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double tim
    {
       double H2O_to_move_m3 = pSubnode->m_volume - (Qin * dt + lateralInflow_m3);
       double H2O_to_move_cms = H2O_to_move_m3 / dt;
-      Qin += (float)H2O_to_move_cms;
+      Qin += H2O_to_move_cms;
       pSubnode->m_volume -= H2O_to_move_m3;
    }
 
@@ -313,7 +313,7 @@ float ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double tim
          // of one timestep's lateral inflow as if it had flowed in from an imaginary upstream reach.
          // This is to prevent the volume in this node from increasing without limit.
          double H2O_to_move_m3_per_timestep = pSubnode->m_volume - lateralInflow_m3;
-         Qin = (float)(H2O_to_move_m3_per_timestep / dt); // m3/sec
+         Qin = H2O_to_move_m3_per_timestep / dt; // m3/sec
          pSubnode->m_volume = lateralInflow_m3;
       }
       else if (lateralInflow_m3 < 0 && (fabs(lateralInflow_m3) > (pSubnode->m_volume + Qin * dt)))
@@ -329,17 +329,17 @@ float ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double tim
       }
    }
 
-   float Qstar = ( Q + Qin  ) / 2.0f;   // from Chow, eqn. 9.6.4 (m3/sec)
+   double Qstar = ( Q + Qin  ) / 2.0f;   // from Chow, eqn. 9.6.4 (m3/sec)
    if (Qstar > 0.)
    {
-      float z = alpha * beta * (float)pow(Qstar, beta - 1.0f);
+      double z = alpha * beta * pow(Qstar, beta - 1.0f);
       //// start computing new Q value ///
       // next, inflow term
-      float Qin_dx = (Qin / dx) * (float)dt;   // (m3/sec)*sec/m = m2
+      double Qin_dx = (Qin / dx) * dt;   // (m3/sec)*sec/m = m2
                                                // next, current flow rate
-      float Qcurrent_z_dt = Q * z;              // (m3/sec)*(Sec/m) = m2
+      double Qcurrent_z_dt = Q * z;              // (m3/sec)*(Sec/m) = m2
                                                 // last, divisor
-      float divisor = z + (float)dt / dx;          // sec/m ???
+      double divisor = z + dt / dx;          // sec/m ???
 
                                                    // compute new Q
       Qnew = (qsurface + Qin_dx + Qcurrent_z_dt) / divisor; // m2/(sec/m) = m3/s
@@ -363,7 +363,7 @@ float ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double tim
 
    if (isnan(Qnew) || Qnew <= 0.)
    { // Qnew should always be greater than zero.
-      float original_Qnew = Qnew;
+      double original_Qnew = Qnew;
       if (isnan(Qnew)) { pSubnode->m_nanOccurred = true; Qnew = 0.; }
       pSubnode->m_addedDischarge_cms += NOMINAL_LOW_FLOW_CMS - Qnew;
       Qnew = NOMINAL_LOW_FLOW_CMS;
@@ -380,12 +380,12 @@ float ReachRouting::EstimateReachOutflow( Reach *pReach, int subnode, double tim
 
    // Constrain the amount of water leaving the reach to no more than what is already there plus
    // what is coming in, less at least a small amount to keep the volume positive and greater than zero.
-   float min_volume_m3 = (NOMINAL_LOW_WATER_LITERS_PER_METER * pReach->m_length / pReach->GetSubnodeCount()) / LITERS_PER_M3;
+   double min_volume_m3 = (NOMINAL_LOW_WATER_LITERS_PER_METER * pReach->m_length / pReach->GetSubnodeCount()) / LITERS_PER_M3;
    double incoming_volume_m3 = Qin*dt + lateral*timeStep;
    double max_outgoing_volume_m3 = (previousVolume + incoming_volume_m3) - min_volume_m3;
    double max_Qnew_cms = max_outgoing_volume_m3 / dt;
    if (max_Qnew_cms <= 0) max_Qnew_cms = NOMINAL_LOW_FLOW_CMS;
-   if (Qnew > max_Qnew_cms) Qnew = (float)max_Qnew_cms;
+   if (Qnew > max_Qnew_cms) Qnew = max_Qnew_cms;
 
 /*
    {
@@ -445,7 +445,7 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach *pReach, int subnode, double
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, subnode);
       double upstream_inflow_m3 = upstream_inflowWP.m_volume_m3;
 
-      float Qin_m3 = GetReachInflow(pReach, subnode) * SEC_PER_DAY;
+      double Qin_m3 = GetReachInflow(pReach, subnode) * SEC_PER_DAY;
       ASSERT(close_enough(upstream_inflow_m3, Qin_m3, 0.2, 1000.));
       double lateralInflow_m3 = lateralInflowWP.m_volume_m3;
       if (subnode == 0 && Qin_m3 + lateralInflow_m3 < 0. && pReach->IsHeadwaterNode())
@@ -576,9 +576,9 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach *pReach, int subnode, double
    } // end of ApplyReachOutflowWP()
 
 
-float ReachRouting::GetReachInflow( Reach *pReach, int subNode )
+double ReachRouting::GetReachInflow( Reach *pReach, int subNode )
    {
-   float Q = 0;
+   double Q = 0;
 
    ///////
    if ( subNode == 0 )  // look upstream?
@@ -616,7 +616,7 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
          inflowWP = pRes->m_outflowWP;
          ASSERT(pReach->m_pRight == NULL);
 
-         float reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
+         double reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
          ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.2, 1000.));
       }
       else
@@ -624,7 +624,7 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
          inflowWP = GetReachOutflowWP(pReach->m_pLeft);
          inflowWP.MixIn(GetReachOutflowWP(pReach->m_pRight));
 
-         float reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
+         double reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
          ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.2, 1000.));
       }
    }
@@ -636,20 +636,20 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
       inflowWP = pNode->m_dischargeWP;
    }
 
-   float reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
+   double reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
    ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.2, 1000.));
 
    return(inflowWP);
 } // end of GetReachInflowWP()
 
-float ReachRouting::GetReachOutflow( ReachNode *pReachNode )   // recursive!!! for pahntom nodes
+double ReachRouting::GetReachOutflow( ReachNode *pReachNode )   // recursive!!! for pahntom nodes
    {
    if ( pReachNode == NULL )
       return 0;
 
    if ( pReachNode->IsPhantomNode() )
       {
-      float q = GetReachOutflow( pReachNode->m_pLeft );
+      double q = GetReachOutflow( pReachNode->m_pLeft );
       q += GetReachOutflow( pReachNode->m_pRight );
 
       return q;
@@ -683,9 +683,9 @@ WaterParcel ReachRouting::GetReachOutflowWP(ReachNode* pReachNode)
 } // end of GetReachOutflowWP()
 
 
-float ReachRouting::GetLateralSVInflow( Reach *pReach, int sv )
+double ReachRouting::GetLateralSVInflow( Reach *pReach, int sv )
    {
-   float inflow = 0;
+   double inflow = 0;
    ReachSubnode *pNode = pReach->GetReachSubnode( 0 );
    inflow=pNode->GetExtraSvFluxValue(sv);
    inflow /= pReach->GetSubnodeCount();  // kg/d
@@ -694,14 +694,14 @@ float ReachRouting::GetLateralSVInflow( Reach *pReach, int sv )
    }
 
 
-float ReachRouting::GetReachSVOutflow( ReachNode *pReachNode, int sv )   // recursive!!! for pahntom nodes
+double ReachRouting::GetReachSVOutflow( ReachNode *pReachNode, int sv )   // recursive!!! for pahntom nodes
    {
    if ( pReachNode == NULL )
       return 0;
 
    if ( pReachNode->IsPhantomNode() )
       {
-      float flux = GetReachSVOutflow( pReachNode->m_pLeft, sv );
+      double flux = GetReachSVOutflow( pReachNode->m_pLeft, sv );
       flux += GetReachSVOutflow( pReachNode->m_pRight, sv );
 
       return flux;
@@ -722,10 +722,10 @@ float ReachRouting::GetReachSVOutflow( ReachNode *pReachNode, int sv )   // recu
    }
 
 
-float ReachRouting::GetReachSVInflow( Reach *pReach, int subNode, int sv )
+double ReachRouting::GetReachSVInflow( Reach *pReach, int subNode, int sv )
    {
-    float flux=0.0f;
-    float Q=0.0f;
+    double flux = 0.0;
+    double Q = 0.0;
 
    if ( subNode == 0 )  // look upstream?
       {

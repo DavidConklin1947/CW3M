@@ -1863,8 +1863,8 @@ bool AltWaterMaster::Step(FlowContext *pFlowContext)
                Report::WarningMsg(msg);
                }
             //*/
-            float wrq = pReach->m_instreamWaterRightUse + current_rate_for_this_reach_cms;
-            float q_div_wrq = wrq > 0.f ? (pReach->GetDischarge() / wrq) : 100.f;
+            double wrq = pReach->m_instreamWaterRightUse + current_rate_for_this_reach_cms;
+            double q_div_wrq = wrq > 0.f ? (pReach->GetDischarge() / wrq) : 100.f;
             pReach->m_instreamWaterRightUse += allocation_m3_per_s;
             /*
             if (jday_1 == 1)
@@ -3883,9 +3883,9 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    float from_outside_basin_mm = (float)((from_outside_basin_accumulator_m3 / tot_area) * 1000.f);
    float to_outside_basin_mm = (float)((m_toOutsideBasinYr_m3 / tot_area) * 1000.f);
 
-   float basin_discharge_ac_ft = pFlowContext->pFlowModel->m_annualTotalDischarge;
+   double basin_discharge_ac_ft = pFlowContext->pFlowModel->m_annualTotalDischarge;
    float tot_area_ac = ((float)tot_area / 10000.f) * ACRE_PER_HA;
-   float basin_discharge_mm = (basin_discharge_ac_ft / tot_area_ac) * M_PER_FT * 1000.f;
+   float basin_discharge_mm = (float)(basin_discharge_ac_ft / tot_area_ac) * M_PER_FT * 1000.f;
 
    float tot_H2O_last_year_mm = (float)((m_totH2OlastYr_m3 / tot_area) * 1000.);
    m_totH2OlastYr_m3 = pFlowContext->pFlowModel->CalcTotH2O();
@@ -4042,11 +4042,11 @@ int AltWaterMaster::IDUatXY(double xCoord, double yCoord, MapLayer *pLayer, int 
 } // end of IDUatXY(double xCoord, double yCoord, MapLayer *pLayer, int * pNumIDUs, bool multipleFlag)
 
 
-float AltWaterMaster::GetAvailableSourceFlow(Reach *pReach)
+double AltWaterMaster::GetAvailableSourceFlow(Reach *pReach)
 	{
 	// this method calculates the amount of demand that can be extracted from this stream reach
 
-	float flow = (pReach->GetDischarge()); // m3/day
+	double flow = (pReach->GetDischarge()); // m3/day
 
 	float instreamWRUse = (float)pReach->m_instreamWaterRightUse;
 

@@ -852,7 +852,6 @@ Reach::Reach(  )
 , m_instreamWaterRightUse ( 0.0f )
 , m_currentStreamTemp( 0.0f )
 , m_availableDischarge( 0.0f )
-, m_QtoSWMM_cms(0.0f)
 , m_IDUndxForReach(-1)
 , m_addedVolume_m3(0.)
 , m_addedDischarge_cms(0.)
@@ -879,7 +878,7 @@ void Reach::SetGeometry( float wdRatio )
 
 
 //???? CHECK/DOCUMENT UNITS!!!!
-float Reach::GetDepthFromQ( float Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+float Reach::GetDepthFromQ( double Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
    {
    float depth;
    if (Q > 0.f)
@@ -894,7 +893,7 @@ float Reach::GetDepthFromQ( float Q, float wdRatio )  // ASSUMES A SPECIFIC CHAN
    } // end of GetDepthFromQ()
 
 
-float Reach::GetDischarge( int subnode /*=-1*/ )
+double Reach::GetDischarge( int subnode /*=-1*/ )
    {
    if ( subnode < 0 )
       subnode = this->GetSubnodeCount()-1;
@@ -902,7 +901,7 @@ float Reach::GetDischarge( int subnode /*=-1*/ )
    ReachSubnode *pNode = (ReachSubnode*) this->m_subnodeArray[ subnode ];
    ASSERT( pNode != NULL );
 
-   float q=pNode->m_discharge;
+   double q = pNode->m_discharge;
 
    if (q < 0.0f || q != q) // q != q detects NaNs
       q = 0.0f;
@@ -922,9 +921,9 @@ WaterParcel Reach::GetDischargeWP(int subnode)
 } // end of GetDischargeWP()
 
 
-float Reach::GetUpstreamInflow( )
+double Reach::GetUpstreamInflow( )
    {
-   float Q = 0.0f;
+   double Q = 0.0f;
    ReachSubnode *pNodeLeft = NULL;
    if (this->m_pLeft && this->m_pLeft->m_polyIndex >= 0)
       {
@@ -947,7 +946,7 @@ float Reach::GetUpstreamInflow( )
    return Q;
    }
 
-bool Reach::GetUpstreamInflow(float &QLeft, float &QRight)
+bool Reach::GetUpstreamInflow(double &QLeft, double &QRight)
 {
    ReachSubnode *pNodeLeft = NULL;
    if (this->m_pLeft && this->m_pLeft->m_polyIndex >= 0)
@@ -1406,7 +1405,7 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
    {
    ASSERT( pRes != NULL );
 
-   float outflow = 0.0f;
+   double outflow = 0.0;
 
    float currentPoolElevation = pRes->GetPoolElevationFromVolume();
    pRes->m_elevation = currentPoolElevation;
@@ -1540,13 +1539,13 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
             if (_stricmp(xlabel,"date") == 0)                           // Date based rule?  xvalue = current date.
                xvalue = (float) doy; 
             else if  (_stricmp(xlabel,"release_cms") == 0)              // Release based rule?  xvalue = release last timestep
-               xvalue = pRes->m_outflow/SEC_PER_DAY;                    // SEC_PER_DAY = cubic meters per second to cubic meters per day
+               xvalue = (float)pRes->m_outflow/SEC_PER_DAY;                    // SEC_PER_DAY = cubic meters per second to cubic meters per day
             else if  (_stricmp(xlabel,"pool_elev_m") == 0)              // Pool elevation based rule?  xvalue = pool elevation (meters)
                xvalue = pRes->m_elevation;
             else if  (_stricmp(xlabel,"inflow_cms") == 0)               // Inflow based rule?   xvalue = inflow to reservoir
-               xvalue = pRes->m_inflow/SEC_PER_DAY;               
+               xvalue = (float)pRes->m_inflow/SEC_PER_DAY;               
             else if  (_stricmp(xlabel, "Outflow_lagged_24h" ) == 0)     // 24h lagged outflow based rule?   xvalue = outflow from reservoir at last timestep
-               xvalue = pRes->m_outflow/SEC_PER_DAY;                    // placeholder for now
+               xvalue = (float)pRes->m_outflow/SEC_PER_DAY;                    // placeholder for now
             else if  (_stricmp(xlabel,"date_pool_elev_m") == 0)         // Lookup based on two values...date and pool elevation.  x value is date.  y value is pool elevation
                {
                xvalue = (float) doy;
@@ -1560,7 +1559,7 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
             else if  (_stricmp(xlabel, "date_release_cms") == 0) 
                {
                xvalue = (float) doy;
-               yvalue = pRes->m_outflow/SEC_PER_DAY;
+               yvalue = (float)pRes->m_outflow/SEC_PER_DAY;
                }
             else                                                    //Unrecognized xvalue for constraint lookup table
                { 
@@ -1621,7 +1620,7 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
    
                   if (actualRelease >= (constraintValue + pRes->m_outflow/SEC_PER_DAY))   //Is planned release more than current release + contstraint? 
                      {
-                     actualRelease = (pRes->m_outflow/SEC_PER_DAY) + constraintValue;  //If so, planned release can be no more than current release + constraint.
+                     actualRelease = (float)((pRes->m_outflow/SEC_PER_DAY) + constraintValue);  //If so, planned release can be no more than current release + constraint.
                      pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
                      }
                   }
@@ -1642,7 +1641,7 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
    
                   if (actualRelease <= (pRes->m_outflow/SEC_PER_DAY - constraintValue))    //Is planned release less than current release - contstraint?
                      {
-                     actualRelease = (pRes->m_outflow/SEC_PER_DAY) - constraintValue;     //If so, planned release can be no less than current release - constraint.
+                     actualRelease = (float)((pRes->m_outflow/SEC_PER_DAY) - constraintValue);     //If so, planned release can be no less than current release - constraint.
                      pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
                      }
                   }
@@ -1825,7 +1824,7 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
           //     actualRelease = pRes->m_minOutflow;
 
             if (pRes->m_elevation < pRes->m_inactive_elev)      //In the inactive zone, water is not accessible for release from any of the gates.
-               actualRelease = pRes->m_outflow/SEC_PER_DAY*0.5f;
+               actualRelease = (float)(pRes->m_outflow/SEC_PER_DAY*0.5f);
 
             outflow = actualRelease;
             }//end of for ( int i=0; i < pZone->m_resConstraintArray.GetSize(); i++ )
@@ -1834,7 +1833,7 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
  
    //Code here to assign total outflow to powerplant, RO and spillway (including run of river projects) 
    if (pRes->m_reservoirType == ResType_FloodControl || pRes->m_reservoirType == ResType_RiverRun )
-      AssignReservoirOutletFlows(pRes, outflow);
+      AssignReservoirOutletFlows(pRes, (float)outflow);
 
    pRes->m_power = (pRes->m_powerFlow > 0.) ? CalculateHydropowerOutput(pRes) : 0.f; // MW
 
@@ -1846,7 +1845,7 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
       Report::LogMsg(msg);
       }
 */
-   return outflow;
+   return (float)outflow;
    }
 
 
@@ -4013,7 +4012,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             ASSERT(pSubnode != NULL);
 
             //initialize the subnode volumes using mannings equation
-            float Q = pSubnode->m_discharge;
+            double Q = pSubnode->m_discharge;
             SetGeometry(pReach, Q);
             if (!m_isReadStateOK)
             {
@@ -4500,7 +4499,7 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
    {
       ReachNode *pRootNode = this->m_reachTree.GetRootNode( i );
       Reach *pReach = GetReachFromNode( pRootNode );
-      float discharge = pReach->GetDischarge();   // m3/sec
+      double discharge = pReach->GetDischarge();   // m3/sec
 
       // convert to acreft/day
       discharge *= ACREFT_PER_M3 * SEC_PER_DAY;  // convert to acreft-day
@@ -4553,8 +4552,8 @@ bool FlowModel::EndYear( FlowContext *pFlowContext )
    row[ 0 ] = (float) pFlowContext->pEnvContext->currentYear;
    row[ 1 ] = m_annualTotalET;
    row[ 2 ] = m_annualTotalPrecip;
-   row[ 3 ] = m_annualTotalDischarge;
-   row[ 4 ] = m_annualTotalPrecip - ( m_annualTotalET + m_annualTotalDischarge );
+   row[ 3 ] = (float)m_annualTotalDischarge;
+   row[ 4 ] = (float)(m_annualTotalPrecip - ( m_annualTotalET + m_annualTotalDischarge ));
    row[ 5 ] = m_annualTotalRainfall;
    row[ 6 ] = m_annualTotalSnowfall;
 
@@ -4602,13 +4601,13 @@ bool FlowModel::EndYear( FlowContext *pFlowContext )
    {
       int nan_count = 0;
       int added_volume_count = 0;
-      float added_volume_tot_m3 = 0;
+      double added_volume_tot_m3 = 0;
       int added_discharge_count = 0;
-      float added_discharge_tot_cms = 0;
+      double added_discharge_tot_cms = 0;
       int comid_of_largest_added_volume_reach = -1;
       int comid_of_largest_added_discharge_reach = -1;
-      float largest_added_volume_m3 = -1.;
-      float largest_added_discharge_cms = -1.;
+      double largest_added_volume_m3 = -1.;
+      double largest_added_discharge_cms = -1.;
       for (int reach_ndx = 0; reach_ndx < gpModel->m_reachArray.GetSize(); reach_ndx++)
       {
          Reach * pReach = m_reachArray[reach_ndx];
@@ -5338,7 +5337,7 @@ bool FlowModel::UpdateReservoirControlPoints( int doy )
          xvalue = 110;   //workaround 11_15.  Need to point to Fern Ridge pool elev.  only one control point used this xvalue
       else if (_stricmp(xlabel, "Outflow_lagged_24h" ) == 0)
          {
-         xvalue = pReach->GetDischarge();
+         xvalue = (float)pReach->GetDischarge();
         }
       else if (_stricmp(xlabel,"Inflow_cms" ) == 0)     
          {}//Code here for lagged and inflow based constraints
@@ -5358,7 +5357,7 @@ bool FlowModel::UpdateReservoirControlPoints( int doy )
       // if the reach doesn't exist, ignore this
       if ( pReach != NULL )
          {       
-         float currentdischarge = pReach->GetDischarge();    // Get current flow at reach
+         double currentdischarge = pReach->GetDischarge();    // Get current flow at reach
          /*/////////////////////////////////////////////////////////
        ///Change flows with ResSim values.  Use only for testing in conjunction with low or zero precipitation
        int flowcol = 0;
@@ -5399,7 +5398,7 @@ bool FlowModel::UpdateReservoirControlPoints( int doy )
                   if (currentdischarge > constraintValue)   //Are we above the maximum flow?   
                      {
                      for (int j=0; j < influenced; j++)
-                        resallocation[j] = (((constraintValue - currentdischarge)/ influenced));// Allocate decrease in releases (should be negative) over "controlled" reservoirs if maximum, evenly for now
+                        resallocation[j] = (float)(((constraintValue - currentdischarge)/ influenced));// Allocate decrease in releases (should be negative) over "controlled" reservoirs if maximum, evenly for now
    
                      pControl->m_pResAllocation->ClearRows();     //Clear old data.  Only keep current allocation.
                      pControl->m_pResAllocation->AppendRow(resallocation, influenced);//Populate array with flows to be allocated
@@ -5424,13 +5423,13 @@ bool FlowModel::UpdateReservoirControlPoints( int doy )
                   
                   if (pControl->m_influencedReservoirsArray[0]->m_reservoirType == ResType_CtrlPointControl)
                   {
-                     float resDischarge = pControl->m_influencedReservoirsArray[0]->m_pReach->GetDischarge();
-                     addedConstraint = resDischarge + constraintValue;
+                     double resDischarge = pControl->m_influencedReservoirsArray[0]->m_pReach->GetDischarge();
+                     addedConstraint = (float)(resDischarge + constraintValue);
                      int releaseFreq = 1;
 
                      for (int j = 0; j < influenced; j++)
                      {
-                        resallocation[j] = ((addedConstraint - currentdischarge) / influenced); // Allocate increase in releases (should be positive) over "controlled" reservoirs if maximum, evenly for now                     }
+                        resallocation[j] = (float)((addedConstraint - currentdischarge) / influenced); // Allocate increase in releases (should be positive) over "controlled" reservoirs if maximum, evenly for now                     }
 
                         releaseFreq = pControl->m_influencedReservoirsArray[j]->m_releaseFreq;
 
@@ -5447,7 +5446,7 @@ bool FlowModel::UpdateReservoirControlPoints( int doy )
                      if (currentdischarge < constraintValue)   //Are we below the minimum flow?   
                      {
                         for (int j = 0; j < influenced; j++)
-                           resallocation[j] = ((addedConstraint - currentdischarge) / influenced);// Allocate increase in releases (should be positive) over "controlled" reservoirs if maximum, evenly for now
+                           resallocation[j] = (float)((addedConstraint - currentdischarge) / influenced);// Allocate increase in releases (should be positive) over "controlled" reservoirs if maximum, evenly for now
 
                         ASSERT(pControl->m_pResAllocation != NULL);
                         pControl->m_pResAllocation->ClearRows();     //Clear old data.  Only keep current allocation.
@@ -5535,7 +5534,7 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       Reach *pRight = (Reach*) pReach->m_pRight;
 
       //set inflow, outflows
-      float inflow = 0;
+      double inflow = 0;
      
       //   To be re-implemented with remainder of FLOW hydrology - ignored currently to test ResSIMlite
       if ( pLeft != NULL )
@@ -5910,7 +5909,7 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
       ASSERT( pReach != NULL );
       if ( pReach->m_subnodeArray.GetSize() > 0 && pReach->m_polyIndex >= 0 )
          {
-         float discharge = pReach->GetDischarge();
+         double discharge = pReach->GetDischarge();
          m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colStreamReachOutput, discharge);  // m3/sec
          ASSERT(discharge > 0.);
          m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachLOG_Q, log10(discharge));  // log10(m3/sec)
@@ -11778,8 +11777,8 @@ void FlowModel::CollectData( int dayOfYear )
          float *data = new float[4];
          data[0] = (float)m_timeInRun;
          data[1] = pRes->GetPoolElevationFromVolume();
-         data[2] = pRes->m_inflow / SEC_PER_DAY;
-         data[3] = pRes->m_outflow / SEC_PER_DAY;
+         data[2] = (float)pRes->m_inflow / SEC_PER_DAY;
+         data[3] = (float)pRes->m_outflow / SEC_PER_DAY;
 
          pRes->m_pResData->AppendRow(data, 4);
 
@@ -11791,8 +11790,8 @@ void FlowModel::CollectData( int dayOfYear )
          data[0] = (float)m_timeInRun;
          data[1] = pRes->GetPoolElevationFromVolume();
          data[2] = pRes->GetTargetElevationFromRuleCurve(dayOfYear);
-         data[3] = pRes->m_inflow / SEC_PER_DAY;
-         data[4] = pRes->m_outflow / SEC_PER_DAY;
+         data[3] = (float)pRes->m_inflow / SEC_PER_DAY;
+         data[4] = (float)pRes->m_outflow / SEC_PER_DAY;
          data[5] = pRes->m_powerFlow;
          data[6] = pRes->m_RO_flow;
          data[7] = pRes->m_spillwayFlow;
@@ -14266,14 +14265,14 @@ void FlowModel::ApplyMacros( CString &str )
 /////////////////////////////////////////////////////////////////// 
 //  additional functions
 
-void SetGeometry( Reach *pReach, float discharge )
+void SetGeometry( Reach *pReach, double discharge )
    {
    ASSERT( pReach != NULL );
    pReach->m_depth = GetDepthFromQ(pReach, discharge, pReach->m_wdRatio );
    pReach->m_width = pReach->m_wdRatio * pReach->m_depth;
    }
 
-float GetDepthFromQ( Reach *pReach, float Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+float GetDepthFromQ( Reach *pReach, double Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
    {
   // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
    float wdterm = (float) pow( (wdRatio/( 2 + wdRatio )), 2.0f/3.0f)*wdRatio;

@@ -480,7 +480,7 @@ bool FluxExpr::Step( FlowContext *pFlowContext )
             Reach *pReach = pModel->GetReachFromStreamIndex( sourceIndex );
             ASSERT( pReach != NULL );
 
-            float availSourceFlow = pReach->m_availableDischarge;  // m3/sec
+            double availSourceFlow = pReach->m_availableDischarge;  // m3/sec
 
             // make sure min flows are maintained
             availSourceFlow -= minFlow;  // m3/sec
@@ -566,7 +566,7 @@ bool FluxExpr::Step( FlowContext *pFlowContext )
 
                if ( totalSinkDemand > availSourceFlow * m_withdrawalCutoffCoeff )   // 0.1 - to take care of low flow problem with stream routing
                   {
-                  totalSatisfiedDemand   = availSourceFlow * m_withdrawalCutoffCoeff;
+                  totalSatisfiedDemand   = (float)(availSourceFlow * m_withdrawalCutoffCoeff);
                   totalUnsatisfiedDemand = totalSinkDemand-totalSatisfiedDemand;
                   }
                

@@ -142,8 +142,8 @@ class ResConstraint;
 
 
 // global functions
-void SetGeometry( Reach *pReach, float discharge );
-float GetDepthFromQ( Reach *pReach, float Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+void SetGeometry( Reach *pReach, double discharge );
+float GetDepthFromQ( Reach *pReach, double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 FLUXSOURCE ParseSource( LPCTSTR sourceStr, CString &path, CString &source, HINSTANCE &hDLL, FLUXFN &fn );
 float GetVerticalDrainage( float wc );
 float GetBaseflow(float wc);
@@ -420,7 +420,7 @@ public:
 
   //  void  AddFluxFromGlobalHandler( float value ) { m_globalHandlerFluxValue += value; } 
 
-   float GetExtraSvFluxValue(int svOffset ) { return (float)m_svArrayTrans[svOffset]; } 
+   double GetExtraSvFluxValue(int svOffset ) { return m_svArrayTrans[svOffset]; } 
    void  ResetExtraSvFluxValue(int svOffset ) { m_svArrayTrans[svOffset]=0.0f; } 
    };
 
@@ -781,22 +781,22 @@ class ReachSubnode : public SubNode, public StateVarContainer
 public:
    SVTYPE m_volume;
    SVTYPE m_previousVolume;
-   float  m_lateralInflow;       // m3/day
-   float  m_discharge;           // m3/sec;
-   float  m_previousDischarge;   // m3/sec;
+   double  m_lateralInflow;       // m3/day
+   double  m_discharge;           // m3/sec;
+   double  m_previousDischarge;   // m3/sec;
    WaterParcel m_waterParcel;
    WaterParcel m_previousWP;
    WaterParcel m_lateralInflowWP;
    WaterParcel m_dischargeWP;
 
    double m_addedVolume_m3; // amount added to keep compartment from going negative
-   float m_addedDischarge_cms; // amount added to ensure discharge is always > 0
+   double m_addedDischarge_cms; // amount added to ensure discharge is always > 0
    bool m_nanOccurred;
  
    static SubNode *CreateInstance( void ) { return (SubNode*) new ReachSubnode; }
 
-      ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11f), m_dischargeWP(0.11f * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
-         m_previousDischarge(0.11f), m_volume(0.0f), m_previousVolume(0.0f), 
+      ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
+         m_previousDischarge(0.11), m_volume(0.0), m_previousVolume(0.0), 
       m_waterParcel(0, 0),
       m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }
@@ -814,11 +814,11 @@ public:
 
    Reservoir *GetReservoir( void ) { return (Reservoir*) m_pReservoir; }
    void  SetGeometry( float wdRatio );
-   float GetDepthFromQ( float Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
-   float GetDischarge( int subnode=-1 );  // -1 means last (lowest) subnode - m3/sec
+   float GetDepthFromQ( double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+   double GetDischarge( int subnode=-1 );  // -1 means last (lowest) subnode - m3/sec
    WaterParcel GetDischargeWP(int subnode = -1); // -1 means last (lowest, most downstream) subnode - m3/sec
-   float GetUpstreamInflow(); 
-   bool GetUpstreamInflow(float &QLeft, float &QRight);
+   double GetUpstreamInflow(); 
+   bool GetUpstreamInflow(double &QLeft, double &QRight);
 //x   bool GetUpstreamEnergy(SVTYPE &energyLeft, SVTYPE &energyRight);
 //x   bool GetUpstreamTemperature(float &tempLeft, float &tempRight);
    float GetCatchmentArea( void );
@@ -858,15 +858,14 @@ public:
    float m_cumUpstreamArea;   // cumulative upslope area, in map units, above this reach in the network
    float m_cumUpstreamLength;
    float m_instreamWaterRightUse;  //used to keep track of instream water right use for this reach
-   float m_availableDischarge;//keep track of the amount of water diverted from the reach during each timestep
-   float m_QtoSWMM_cms; // Flow diverted to SWMM for this time step (cms)
-	float m_currentStreamTemp;
+   double m_availableDischarge;//keep track of the amount of water diverted from the reach during each timestep
+   float m_currentStreamTemp;
 
    int m_climateIndex;
    int m_IDUndxForReach; // index to an IDU in the IDU layer which contains a vertex of this reach
 
-   float m_addedDischarge_cms;
-   float m_addedVolume_m3;
+   double m_addedDischarge_cms;
+   double m_addedVolume_m3;
 
    // kinematic wave parameters
    float m_alpha;
@@ -875,9 +874,9 @@ public:
 
    // summary variables
    //float m_lateralInflow;         // flow rate into this reach
-   float m_meanYearlyDischarge;     // ft3/sec (cfs)
-   float m_maxYearlyDischarge;    
-   float m_sumYearlyDischarge;
+   double m_meanYearlyDischarge;     // ft3/sec (cfs)
+   double m_maxYearlyDischarge;    
+   double m_sumYearlyDischarge;
 
    bool m_isMeasured;
 
@@ -967,8 +966,8 @@ public:
    int m_zone;
    int m_daysInZoneBuffer;
 
-   float   m_inflow;
-   float   m_outflow; // m3 per day
+   double   m_inflow;
+   double   m_outflow; // m3 per day
    WaterParcel m_outflowWP;
    float   m_elevation;          //current pool elevation
    float   m_power; // Current hydropower output, MW
@@ -1811,7 +1810,7 @@ public:
 
    float m_annualTotalET;           // acre-ft
    float m_annualTotalPrecip;       // acre-ft
-   float m_annualTotalDischarge;    //acre-ft
+   double m_annualTotalDischarge;    //acre-ft
    float m_annualTotalRainfall;     // acre-ft
    float m_annualTotalSnowfall;     // acre-ft
 

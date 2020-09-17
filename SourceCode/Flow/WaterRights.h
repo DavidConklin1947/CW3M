@@ -130,7 +130,7 @@ protected:
 	bool  AggregateIDU2HRU(FlowContext *pFlowContext);
    void CalculateWRattributes(FlowContext *pFlowContext, MapLayer *pLayer, MapLayer *pStreamLayer, int pouRecords);
    double CalcNetH2OfromStraws(FlowContext *pFlowContext); // Returns m3 H2O
-   float GetAvailableSourceFlow(Reach *pReach);
+   double GetAvailableSourceFlow(Reach *pReach);
 	int   LoadWRDatabase(FlowContext *pFlowContext);
 	int   LoadDynamicWRDatabase(FlowContext *pFlowContext);
    bool OpenFileInDocumentsFolder(CString fileName, FILE ** pOfile);
