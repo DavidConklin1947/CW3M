@@ -196,11 +196,15 @@ protected:
    // helper methods
 
    //bool  SolveReachDirect( void );     // high level method
+   void MoveWP(double volume_m3, WaterParcel* pFromWP, WaterParcel* pToWP);
    bool  SolveReachKinematicWave( FlowContext* );
    bool  SolveReach2KW(FlowContext*);
 
    double GetLateralInflow( Reach *pReach );
-   WaterParcel GetLateralInflowWP(Reach* pReach);
+
+   // Ultimately it should be PutLateralWP(Reach * pReach, runoffWP, withdrawalWP); in order to get the temperatures right
+   void PutLateralWP(Reach* pReach, double daily_net_lateral_flow_m3); // Allocates runoff and withdrawals to the subreaches
+
    double GetReachFluxes( FlowContext*, Reach *pReach );
 
    double GetReachInflow( Reach *pReach, int subNode );
@@ -209,7 +213,7 @@ protected:
    WaterParcel GetReachOutflowWP(ReachNode* pReachNode);
 
    double EstimateReachOutflow( Reach *pReach, int i, double timeStep, double lateralInflow);
-   WaterParcel ApplyReachOutflowWP(Reach *pReach, int subnode, double timeStep, WaterParcel lateralInflowWP); 
+   WaterParcel ApplyReachOutflowWP2(Reach* pReach, int subnode, double timeStep);
    double KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, Reach * pReach);
 
    double GetLateralSVInflow( Reach *pReach, int sv );

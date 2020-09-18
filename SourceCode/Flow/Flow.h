@@ -786,7 +786,8 @@ public:
    double  m_previousDischarge;   // m3/sec;
    WaterParcel m_waterParcel;
    WaterParcel m_previousWP;
-   WaterParcel m_lateralInflowWP;
+   WaterParcel m_runoffWP; // lateral flow into the subreach
+   WaterParcel m_withdrawalWP; // lateral flow out of the subreach
    WaterParcel m_dischargeWP;
 
    double m_addedVolume_m3; // amount added to keep compartment from going negative
