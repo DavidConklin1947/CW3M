@@ -1711,8 +1711,9 @@ public:
 
    //int m_colHruAnnualSnow;
    int m_colHruDecadalSnow;
-   int m_colStreamReachOutput;
+   int m_colReachQ;
    int m_colReachLOG_Q;
+   int m_colReachTEMP_H2O;
    int m_colReachArea;
 
    int m_colARIDITYNDX;

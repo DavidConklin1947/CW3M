@@ -2076,7 +2076,7 @@ FlowModel::FlowModel()
  , m_colIRRIGATION(-1)
  , m_colSM_DAY(-1)
  , m_colARIDITYNDX(-1)
- , m_colStreamReachOutput( -1 )
+ , m_colReachQ( -1 )
  , m_colReachLOG_Q(-1)
  , m_colResID( -1 )
  , m_colReachHRU_ID(-1)
@@ -2714,8 +2714,9 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamHYDRO_MW, _T("HYDRO_MW"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamJoin, m_streamJoinCol, TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamTMAX_H2O_Y, _T("TMAX_H2O_Y"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachTEMP_H2O, _T("TEMP_H2O"), TYPE_DOUBLE, CC_AUTOADD);
 
-   EnvExtension::CheckCol(m_pStreamLayer, m_colStreamReachOutput, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
 
    EnvExtension::CheckCol( m_pStreamLayer,    m_colStreamCumArea,       _T("CUM_AREA"), TYPE_FLOAT, CC_AUTOADD );
@@ -5909,10 +5910,12 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
       ASSERT( pReach != NULL );
       if ( pReach->m_subnodeArray.GetSize() > 0 && pReach->m_polyIndex >= 0 )
          {
-         double discharge = pReach->GetDischarge();
-         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colStreamReachOutput, discharge);  // m3/sec
-         ASSERT(discharge > 0.);
+         double discharge = pReach->GetDischarge(); ASSERT(discharge > 0.);
+         WaterParcel dischargeWP = pReach->GetDischargeWP(); ASSERT(close_enough(discharge, dischargeWP.m_volume_m3 / SEC_PER_DAY, .01, max(10, discharge / 10)));
+
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachQ, discharge);  // m3/sec        
          m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachLOG_Q, log10(discharge));  // log10(m3/sec)
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachTEMP_H2O, dischargeWP.WaterTemperature());  // degC        
 
          double reachH2O_m3 = 0.;
          for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
