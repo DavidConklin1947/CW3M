@@ -137,9 +137,11 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); 
 
-         ASSERT(close_enough(outflow, outflowWP.m_volume_m3, 0.1, 100.));
+         ASSERT(close_enough(outflow, outflowWP.m_volume_m3, 0.1, 100.) 
+            || (pReach->m_streamOrder == 1 && new_lateralInflow < 0));
          double volume_abs_tolerance = max(100., outflow / 1000.);
-         ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, volume_abs_tolerance));
+         ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, volume_abs_tolerance)
+            || (pReach->m_streamOrder == 1 && new_lateralInflow < 0));
 
          outflow = outflowWP.m_volume_m3;
          pNode->m_volume = pNode->m_waterParcel.m_volume_m3;
@@ -632,13 +634,12 @@ WaterParcel ReachRouting::ApplyReachOutflowWP2(Reach* pReach, int subnode, doubl
       } // end of block for adding magic water to the reach
    } // end of block for net lateral flow out of the reach
 
-   // If this is the uppermost subreach of a headwater reach, and the lateral flow is into the reach, and there is already more water in the reach than
-   // today's lateral inflow, treat some of it as if it were flowing in from upstream.
-   if (pReach->IsHeadwaterNode() && subnode == 0 && net_lateral_inflow_m3 > 0 && pSubnode->m_waterParcel.m_volume_m3 > net_lateral_inflow_m3)
+   // If there is more water already in this reach than the sum of what is flowing in from upstream plus the lateral inflow,
+   // then treat some of what is already in the reach as if it had flowed in from upstream.
+   if (net_lateral_inflow_m3 > 0 && pSubnode->m_waterParcel.m_volume_m3 > (net_lateral_inflow_m3 + upstream_inflowWP.m_volume_m3))
    { // Treat the excess volume in the subreach as if it were flowing in from upstream.
       // This is a gimmick to get the KinematicWave() method to work better, since it doesn't take into account how much water is already in the reach.
-      double excess_volume_m3 = pSubnode->m_waterParcel.m_volume_m3 - net_lateral_inflow_m3;
-//x      upstream_inflowWP.MixIn(excess_volumeWP); pSubnode->m_waterParcel.Discharge(excess_volumeWP);
+      double excess_volume_m3 = pSubnode->m_waterParcel.m_volume_m3 - (net_lateral_inflow_m3 + upstream_inflowWP.m_volume_m3);
       MoveWP(excess_volume_m3, &(pSubnode->m_waterParcel), &upstream_inflowWP);
    } // end of special logic for headwater reaches
 
