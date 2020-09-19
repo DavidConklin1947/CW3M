@@ -111,7 +111,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          double orig_m_volume = pNode->m_volume;
          double orig_m_volume_m3 = pNode->m_waterParcel.m_volume_m3;
-         if (false && !close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, 100.))
+         if (!close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, 100.))
          {
             CString msg; msg.Format("SolveReachKinematicWave() comid = %d, l = %d, pNode->m_volume = %f, pNode->m_waterParcel.m_volume_m3 = %f",
                pReach->m_reachID, l, pNode->m_volume, pNode->m_waterParcel.m_volume_m3);
@@ -138,10 +138,12 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); 
 
          ASSERT(close_enough(outflow, outflowWP.m_volume_m3, 0.1, 100.));
-         ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, 100.));
+         double volume_abs_tolerance = max(100., outflow / 1000.);
+         ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, volume_abs_tolerance));
 
-//         outflow = outflowWP.m_volume_m3;
-
+         outflow = outflowWP.m_volume_m3;
+         pNode->m_volume = pNode->m_waterParcel.m_volume_m3;
+         ASSERT(pNode->m_volume > 0);
 
          pNode->m_discharge = outflow / SEC_PER_DAY;  //convert units to m3/s;  
 
@@ -191,13 +193,13 @@ double ReachRouting::GetLateralInflow( Reach *pReach )
    } // end of GetLateralFlow()
 
 
-void ReachRouting::PutLateralWP(Reach* pReach, double daily_net_lateral_flow_m3) // Allocates runoff and withdrawals to the subreaches
+void ReachRouting::PutLateralWP(Reach* pReach, double daily_net_subreach_lateral_flow_m3) // Allocates runoff and withdrawals to the subreaches
 {
-   ASSERT(!isnan(daily_net_lateral_flow_m3));
+   ASSERT(!isnan(daily_net_subreach_lateral_flow_m3));
 
-   bool flow_is_into_reach = daily_net_lateral_flow_m3 >= 0;
-   double subreach_volume_in_m3 = (flow_is_into_reach ? daily_net_lateral_flow_m3 : 0) / pReach->GetSubnodeCount();
-   double subreach_volume_out_m3 = (flow_is_into_reach ? 0 : fabs(daily_net_lateral_flow_m3)) / pReach->GetSubnodeCount();
+   bool flow_is_into_reach = daily_net_subreach_lateral_flow_m3 >= 0;
+   double subreach_volume_in_m3 = flow_is_into_reach ? daily_net_subreach_lateral_flow_m3 : 0;
+   double subreach_volume_out_m3 = flow_is_into_reach ? 0 : fabs(daily_net_subreach_lateral_flow_m3);
 
    for (int i = 0; i < pReach->GetSubnodeCount(); i++)
    {
