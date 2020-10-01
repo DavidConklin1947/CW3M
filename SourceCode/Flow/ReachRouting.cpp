@@ -104,6 +104,12 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       {
       Reach *pReach = gpModel->GetReach( i );     // Note: these are guaranteed to be non-phantom
 
+      double subreach_surface_m2 = pReach->m_width * pReach->m_length / pReach->GetSubnodeCount();
+      double reach_precip_mm; pFlowContext->pFlowModel->m_pReachLayer->GetData(pReach->m_polyIndex, pFlowContext->pFlowModel->m_colStreamPRECIP, reach_precip_mm);
+      double subreach_precip_vol_m3 = subreach_surface_m2 * reach_precip_mm / 1000;
+      double air_temp_degC; pFlowContext->pFlowModel->m_pReachLayer->GetData(pReach->m_polyIndex, pFlowContext->pFlowModel->m_colStreamTEMP_AIR, air_temp_degC);
+      WaterParcel subreach_precipWP(subreach_precip_vol_m3, air_temp_degC);
+
       for (int l = 0; l < pReach->GetSubnodeCount(); l++)
          {
          pFlowContext->pReach = pReach;
@@ -135,7 +141,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          PutLateralWP(pReach, new_lateralInflow);
          WaterParcel outflowWP(0,0);
-         outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); 
+         outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_precipWP);
 
          ASSERT(close_enough(outflow, outflowWP.m_volume_m3, 0.1, 100.) 
             || (pReach->m_streamOrder == 1 && new_lateralInflow < 0));
@@ -145,6 +151,13 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          outflow = outflowWP.m_volume_m3;
          pNode->m_volume = pNode->m_waterParcel.m_volume_m3;
+
+         // This is where code will be added to represent losing water via evaporation and gaining water via precipitation.
+         // In both cases the amount of water gained or lost is proportional to the surface area of the water.
+         pNode->m_waterParcel.MixIn(subreach_precipWP); // This violates conservation of mass because IDU surface areas overlap stream surface areas.
+         WaterParcel subreach_evapWP = pReach->SubReachEvap(l); // Totals up the evap from the stream segment parts corresponding to this subreach.
+         pNode->m_waterParcel.Discharge(subreach_evapWP); // This needs to be added to ET.
+
          ASSERT(pNode->m_volume > 0);
 
          pNode->m_discharge = outflow / SEC_PER_DAY;  //convert units to m3/s;  
