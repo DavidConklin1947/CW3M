@@ -827,6 +827,7 @@ public:
    bool GetUpstreamInflow(double &QLeft, double &QRight);
    WaterParcel SubReachEvapWP(int subreachIndex); // Totals up the evap from the stream segment parts corresponding to this subreach.
    double SubReachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
+   double GetSegmentWaterTemp_degC(int segment);
    float GetCatchmentArea( void );
 
    bool  AddFluxFromGlobalHandler( float value ) 
@@ -1722,6 +1723,7 @@ public:
    int m_colReachLOG_Q;
    int m_colReachTEMP_H2O;
    int m_colReachArea;
+   int m_colReachZ_MEAN;
 
    int m_colARIDITYNDX;
   int m_colHRUPercentIrrigated;

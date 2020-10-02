@@ -141,7 +141,7 @@ class ETEquation
 
       double CalcRelHumidity(float specHumid, float tMin, float tMax, float elevation, double &ea);
       double CalcRelHumidityKP(float specHumid, float tMin, float tMax, float elevation, double &ea);
-	  double CalculateRelHumidity(float specHumid, float meanTemp, float tMax, float elevation, double &ea, double &vpd);
+	  static double CalculateRelHumidity(float specHumid, float meanTemp, float tMax, float elevation, double &ea, double &vpd);
 
 
    private:

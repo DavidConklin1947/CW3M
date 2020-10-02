@@ -106,6 +106,16 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       {
       Reach *pReach = gpModel->GetReach( i );     // Note: these are guaranteed to be non-phantom
       double subreach_surface_m2 = pReach->m_width * pReach->m_length / pReach->GetSubnodeCount();
+      float temp_air_degC = gpModel->GetTodaysReachTEMP_AIR(pReach);
+      float tmax_air_degC = gpModel->GetTodaysReachTMAX_AIR(pReach);
+      float reach_precip_mm = gpModel->GetTodaysReachPRECIP(pReach);
+      double cloudiness_frac = reach_precip_mm > 0 ? 0.5 : 0; // ??? we need a better estimate of cloudiness than this
+      double subreach_precip_vol_m3 = subreach_surface_m2 * reach_precip_mm / 1000;
+      WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
+      float sphumidity = gpModel->GetTodaysReachSPHUMIDITY(pReach);
+      double z_mean_m; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachZ_MEAN, z_mean_m);
+      double ea, vpd;
+      double RH_pct = 100 * ETEquation::CalculateRelHumidity(sphumidity, temp_air_degC, tmax_air_degC, (float)z_mean_m, ea, vpd);
 
       // Do the stuff that varies by segment first.
       int num_segments = (int)pReach->m_segmentArray.GetSize();
@@ -114,16 +124,13 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
  //        pReach->m_segmentArray[segment]->m_evapWP = ...;
 //         pReach->m_segmentArray[segment]->m_sw_kJ = ...; // incoming shortwave energy
 //         double net_lw_out_W_m2 = NetLWout_W_m2(tempAir_degC, cL, tempH2O_degC, RH_pct, theta_vts);
-         double net_lw_out_W_m2 = NetLWout_W_m2(20, 0.5, 10, 50, 0.9); 
+         double tempH2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
+         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, tempH2O_degC, 50, 0.9); 
          pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * subreach_surface_m2* SEC_PER_DAY / 1000;
       } // end of loop thru segments
 
       // Now do the stuff that varies by subreach.
 
-      double reach_precip_mm; pFlowContext->pFlowModel->m_pReachLayer->GetData(pReach->m_polyIndex, pFlowContext->pFlowModel->m_colStreamPRECIP, reach_precip_mm);
-      double subreach_precip_vol_m3 = subreach_surface_m2 * reach_precip_mm / 1000;
-      double air_temp_degC; pFlowContext->pFlowModel->m_pReachLayer->GetData(pReach->m_polyIndex, pFlowContext->pFlowModel->m_colStreamTEMP_AIR, air_temp_degC);
-      WaterParcel subreach_precipWP(subreach_precip_vol_m3, air_temp_degC);
       WaterParcel reach_evapWP(0, 0);
 
       for (int l = 0; l < pReach->GetSubnodeCount(); l++)

@@ -933,6 +933,16 @@ double Reach::SubReachNetRad_kJ(int subreachIndex)
 } // end of SubReachNetRad_kJ()
 
 
+double Reach::GetSegmentWaterTemp_degC(int segment)
+{
+   // ??? Ultimately, replace this with the logic to find the corresponding subreaches.
+   ReachSubnode* pNode = GetReachSubnode(segment);
+   double segment_H2O_temp_degC = pNode->m_waterParcel.WaterTemperature();
+
+   return(segment_H2O_temp_degC);
+} // end of GetSegmentWaterTemp_degC()
+
+
 WaterParcel Reach::GetDischargeWP(int subnode)
 {
    if (subnode < 0) subnode = this->GetSubnodeCount() - 1;
@@ -2738,6 +2748,7 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamJoin, m_streamJoinCol, TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamTMAX_H2O_Y, _T("TMAX_H2O_Y"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTEMP_H2O, _T("TEMP_H2O"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachZ_MEAN, _T("Z_MEAN"), TYPE_DOUBLE, CC_MUST_EXIST);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
