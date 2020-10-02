@@ -850,7 +850,7 @@ Reach::Reach(  )
 , m_pReservoir( NULL )
 , m_pStageDischargeTable( NULL )
 , m_instreamWaterRightUse ( 0.0f )
-, m_currentStreamTemp( 0.0f )
+//x, m_currentStreamTemp( 0.0f )
 , m_availableDischarge( 0.0f )
 , m_IDUndxForReach(-1)
 , m_addedVolume_m3(0.)
@@ -908,6 +908,29 @@ double Reach::GetDischarge( int subnode /*=-1*/ )
 
    return q;
    } // end of GetDischarge()
+
+
+WaterParcel Reach::SubReachEvapWP(int subreachIndex)
+// Totals up the evap from the stream segment parts corresponding to this subreach.
+{
+   WaterParcel subreach_evapWP(0, 0);
+
+   // ??? Ultimately, replace this with the logic to find the corresponding segments.
+   subreach_evapWP = m_segmentArray[subreachIndex]->m_evapWP;
+
+   return(subreach_evapWP);
+} // end of SubReachEvapWP()
+
+double Reach::SubReachNetRad_kJ(int subreachIndex)
+// Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
+{
+   double net_rad_kJ = 0;
+
+   // ??? Ultimately, replace this with the logic to find the corresponding segments.
+   net_rad_kJ = m_segmentArray[subreachIndex]->m_sw_kJ - m_segmentArray[subreachIndex]->m_lw_kJ;
+
+   return(net_rad_kJ);
+} // end of SubReachNetRad_kJ()
 
 
 WaterParcel Reach::GetDischargeWP(int subnode)
@@ -13568,7 +13591,7 @@ bool FlowModel::CollectModelOutput(void)
 
          // update static HRU variables
          Reach::m_mvCurrentStreamFlow = pReach->GetDischarge();
-         Reach::m_mvCurrentStreamTemp = pReach->m_currentStreamTemp;
+//x         Reach::m_mvCurrentStreamTemp = pReach->m_currentStreamTemp;
          Reach::m_mvInstreamWaterRightUse = pReach->m_instreamWaterRightUse;
 
          MapLayer* pStreamLayer = this->m_pStreamLayer;

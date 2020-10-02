@@ -801,6 +801,11 @@ public:
       m_waterParcel(0, 0),
       m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }
+
+   // ??? Segment members.  Ultimately these should be in the ReachSegment class, not the ReachSubnode class.
+   WaterParcel m_evapWP;
+   double m_sw_kJ; // today's incoming shortwave energy
+   double m_lw_kJ; // today's outgoing longwave energy
 };
 
 
@@ -820,8 +825,8 @@ public:
    WaterParcel GetDischargeWP(int subnode = -1); // -1 means last (lowest, most downstream) subnode - m3/sec
    double GetUpstreamInflow(); 
    bool GetUpstreamInflow(double &QLeft, double &QRight);
-//x   bool GetUpstreamEnergy(SVTYPE &energyLeft, SVTYPE &energyRight);
-//x   bool GetUpstreamTemperature(float &tempLeft, float &tempRight);
+   WaterParcel SubReachEvapWP(int subreachIndex); // Totals up the evap from the stream segment parts corresponding to this subreach.
+   double SubReachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
    float GetCatchmentArea( void );
 
    bool  AddFluxFromGlobalHandler( float value ) 
@@ -831,7 +836,7 @@ public:
          m_nanOccurred = true;
          return(false);
       }
-
+      
       float orig_stored_value = m_globalHandlerFluxValue;
       m_globalHandlerFluxValue += value; 
       if (isnan(m_globalHandlerFluxValue))
@@ -860,7 +865,9 @@ public:
    float m_cumUpstreamLength;
    float m_instreamWaterRightUse;  //used to keep track of instream water right use for this reach
    double m_availableDischarge;//keep track of the amount of water diverted from the reach during each timestep
-   float m_currentStreamTemp;
+//x   float m_currentStreamTemp;
+   WaterParcel m_evapWP; // today's evaporation from the reach
+   PtrArray< ReachSubnode> m_segmentArray; // ??? Ultimately these pointers should point to ReachSegments, not ReachSubnodes.
 
    int m_climateIndex;
    int m_IDUndxForReach; // index to an IDU in the IDU layer which contains a vertex of this reach

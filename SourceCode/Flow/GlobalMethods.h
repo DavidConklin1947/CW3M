@@ -222,6 +222,8 @@ protected:
 
    static void GetReachDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra );
 
+   double NetLWout_W_m2(double tempAir_degC, double cL, double tempH2O_degC, double RH_pct, double theta_vts); // net longwave radiation out of the reach
+
 };
 
 

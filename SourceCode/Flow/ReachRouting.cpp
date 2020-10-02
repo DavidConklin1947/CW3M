@@ -93,22 +93,38 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
 
 bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
    {
+   ASSERT(pFlowContext->svCount <= 0);
+
    pFlowContext->Reset();
 
    int reachCount = gpModel->GetReachCount();
 
    clock_t start = clock();
 
-   // basic idea - for each Reach, estimate it's outflow bases on lateral flows and any fluxes
+   // basic idea - for each Reach, estimate its outflow 
    for ( int i=0; i < reachCount; i++ )
       {
       Reach *pReach = gpModel->GetReach( i );     // Note: these are guaranteed to be non-phantom
-
       double subreach_surface_m2 = pReach->m_width * pReach->m_length / pReach->GetSubnodeCount();
+
+      // Do the stuff that varies by segment first.
+      int num_segments = (int)pReach->m_segmentArray.GetSize();
+      for (int segment = 0; segment < num_segments; segment++)
+      {
+ //        pReach->m_segmentArray[segment]->m_evapWP = ...;
+//         pReach->m_segmentArray[segment]->m_sw_kJ = ...; // incoming shortwave energy
+//         double net_lw_out_W_m2 = NetLWout_W_m2(tempAir_degC, cL, tempH2O_degC, RH_pct, theta_vts);
+         double net_lw_out_W_m2 = NetLWout_W_m2(20, 0.5, 10, 50, 0.9); 
+         pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * subreach_surface_m2* SEC_PER_DAY / 1000;
+      } // end of loop thru segments
+
+      // Now do the stuff that varies by subreach.
+
       double reach_precip_mm; pFlowContext->pFlowModel->m_pReachLayer->GetData(pReach->m_polyIndex, pFlowContext->pFlowModel->m_colStreamPRECIP, reach_precip_mm);
       double subreach_precip_vol_m3 = subreach_surface_m2 * reach_precip_mm / 1000;
       double air_temp_degC; pFlowContext->pFlowModel->m_pReachLayer->GetData(pReach->m_polyIndex, pFlowContext->pFlowModel->m_colStreamTEMP_AIR, air_temp_degC);
       WaterParcel subreach_precipWP(subreach_precip_vol_m3, air_temp_degC);
+      WaterParcel reach_evapWP(0, 0);
 
       for (int l = 0; l < pReach->GetSubnodeCount(); l++)
          {
@@ -139,9 +155,19 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          double outflow = EstimateReachOutflow(pReach, l, pFlowContext->timeStep, new_lateralInflow); // m3/day
 
+         // Gain water from precip and lose water via evaporation.
+         // In both cases the amount of water gained or lost is proportional to the surface area of the water.
+         pNode->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
+         WaterParcel subreach_evapWP = pReach->SubReachEvapWP(l); // SubReachEvapWP() totals up the evap from the stream segment parts corresponding to this subreach.
+         pNode->m_waterParcel.Discharge(subreach_evapWP); reach_evapWP.MixIn(subreach_evapWP);
+
+         // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
+         double subreach_net_rad_kJ = pReach->SubReachNetRad_kJ(l);
+         pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ; ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
+
          PutLateralWP(pReach, new_lateralInflow);
          WaterParcel outflowWP(0,0);
-         outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_precipWP);
+         outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);
 
          ASSERT(close_enough(outflow, outflowWP.m_volume_m3, 0.1, 100.) 
             || (pReach->m_streamOrder == 1 && new_lateralInflow < 0));
@@ -152,29 +178,25 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          outflow = outflowWP.m_volume_m3;
          pNode->m_volume = pNode->m_waterParcel.m_volume_m3;
 
-         // This is where code will be added to represent losing water via evaporation and gaining water via precipitation.
-         // In both cases the amount of water gained or lost is proportional to the surface area of the water.
-         pNode->m_waterParcel.MixIn(subreach_precipWP); // This violates conservation of mass because IDU surface areas overlap stream surface areas.
-         WaterParcel subreach_evapWP = pReach->SubReachEvap(l); // Totals up the evap from the stream segment parts corresponding to this subreach.
-         pNode->m_waterParcel.Discharge(subreach_evapWP); // This needs to be added to ET.
-
+         
          ASSERT(pNode->m_volume > 0);
 
          pNode->m_discharge = outflow / SEC_PER_DAY;  //convert units to m3/s;  
 
          if (pNode->m_discharge < 0 || pNode->m_discharge > 1.e10f || pNode->m_discharge != pNode->m_discharge)
-         {
+            {
             CString msg;
             msg.Format("*** SolveReachKinematicWave(): COMID = %d, i = %d, l = %d, m_discharge = %f",
                pReach->m_reachID, i, l, pNode->m_discharge);
             Report::LogMsg(msg);
             msg.Format("Setting pNode->m_discharge to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
             pNode->m_discharge = NOMINAL_LOW_FLOW_CMS;
-         }
+            }
+         } // end of loop through subreaches
 
-         ASSERT(pFlowContext->svCount <= 0);
-         }
-      }
+      pReach->m_evapWP = reach_evapWP;
+
+      } // end of loop through reaches
 
    clock_t finish = clock();
    double duration = (float)(finish - start) / CLOCKS_PER_SEC;   
@@ -182,6 +204,36 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
    return true;
    } // end of SolveReachKinematicWave()
+
+
+double ReachRouting::NetLWout_W_m2(double tempAir_degC, double cL, double tempH2O_degC, double RH_pct, double theta_vts)
+// Eq. numbers are from sec 2.2 (p.51) of Boyd & Kasper HeatSource 7.0 document
+// In Boyd & Kasper, positive fluxes are into the water, and negative fluxes are out of the water.
+// On return from this function (and elsewhere in CW3M), positive longwave is out of the water, and negative is into the water.
+   {
+   // 2-74 atmospheric longwave radiation flux attenuated in water column, W/m2
+   double s_b = 0.567e-7; // W/(m2*K4) Stefan-Boltzmann constant
+   double t_a_degK = tempAir_degC + 273.2;
+   double bb_atm_W_m2 = 0.96 * s_b * pow(t_a_degK, 4); // black body radiation from the atmosphere
+   double e_s_mbar = 6.1275 * exp((17.27 * tempAir_degC) / (237.3 + tempAir_degC)); // 2-79 saturation vapor pressure
+   double e_a_mbar = (RH_pct / 100.) * e_s_mbar; // 2-78 vapor pressure
+
+   double eps_atm = 1.72 * pow(((0.1 * e_a_mbar) / t_a_degK), 1 / 7) * (1 + 0.22 + cL * cL);
+   double phi_a_lw = 0.96 * eps_atm * bb_atm_W_m2; 
+
+   // 2-75 land cover longwave radiation flux attenuated in water column, W/m2
+   double phi_lc_lw = 0.96 * (1 - theta_vts) * bb_atm_W_m2; 
+
+   // 2-76 longwave radiation flux emitted from water column - back radiation, W/m2
+   double t_w_degK = tempH2O_degC + 273.2;
+   double bb_h2o_W_m2 = 0.96 * s_b * pow(t_w_degK, 4);
+   double phi_s_lw = -bb_h2o_W_m2; 
+
+   // 2-73 longwave radiation flux attenuated in water
+   double phi_longwave = phi_a_lw + phi_lc_lw + phi_s_lw; // 2-73
+
+   return(-phi_longwave); //
+   } // end of NetLW_W_m2()
 
 
 double ReachRouting::GetLateralInflow( Reach *pReach )
