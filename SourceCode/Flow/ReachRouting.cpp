@@ -127,7 +127,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 //         double net_lw_out_W_m2 = NetLWout_W_m2(tempAir_degC, cL, tempH2O_degC, RH_pct, theta_vts);
          double temp_H2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
          double vts_frac = pReach->GetSegmentViewToSky_frac(segment);
-         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, 0.9); 
+         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac); 
          pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * subreach_surface_m2 * SEC_PER_DAY / 1000; // ??? should use segment surface area, not subreach surface area
          reach_net_lw_kJ += pReach->m_segmentArray[segment]->m_lw_kJ;
       } // end of loop thru segments
@@ -220,7 +220,8 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 double ReachRouting::NetLWout_W_m2(double tempAir_degC, double cL, double tempH2O_degC, double RH_pct, double theta_vts)
 // Eq. numbers are from sec 2.2 (p.51) of Boyd & Kasper HeatSource 7.0 document
 // In Boyd & Kasper, positive fluxes are into the water, and negative fluxes are out of the water.
-// On return from this function (and elsewhere in CW3M), positive longwave is out of the water, and negative is into the water.
+// On return from this function (and elsewhere in CW3M), positive longwave is out of the water, 
+// while positive shortwave is into the water.
    {
    // 2-74 atmospheric longwave radiation flux attenuated in water column, W/m2
    double s_b = 0.567e-7; // W/(m2*K4) Stefan-Boltzmann constant
@@ -243,8 +244,8 @@ double ReachRouting::NetLWout_W_m2(double tempAir_degC, double cL, double tempH2
    // 2-73 longwave radiation flux attenuated in water
    double phi_longwave = phi_a_lw + phi_lc_lw + phi_s_lw; // 2-73
 
-   return(-phi_longwave); //
-   } // end of NetLW_W_m2()
+   return(-phi_longwave); 
+   } // end of NetLWout_W_m2()
 
 
 double ReachRouting::GetLateralInflow( Reach *pReach )

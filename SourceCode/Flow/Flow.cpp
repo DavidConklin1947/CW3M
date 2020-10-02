@@ -850,7 +850,6 @@ Reach::Reach(  )
 , m_pReservoir( NULL )
 , m_pStageDischargeTable( NULL )
 , m_instreamWaterRightUse ( 0.0f )
-//x, m_currentStreamTemp( 0.0f )
 , m_availableDischarge( 0.0f )
 , m_IDUndxForReach(-1)
 , m_addedVolume_m3(0.)
@@ -13612,7 +13611,6 @@ bool FlowModel::CollectModelOutput(void)
 
          // update static HRU variables
          Reach::m_mvCurrentStreamFlow = pReach->GetDischarge();
-//x         Reach::m_mvCurrentStreamTemp = pReach->m_currentStreamTemp;
          Reach::m_mvInstreamWaterRightUse = pReach->m_instreamWaterRightUse;
 
          MapLayer* pStreamLayer = this->m_pStreamLayer;
