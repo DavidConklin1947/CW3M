@@ -943,6 +943,16 @@ double Reach::GetSegmentWaterTemp_degC(int segment)
 } // end of GetSegmentWaterTemp_degC()
 
 
+double Reach::GetSegmentViewToSky_frac(int segment)
+{
+   double vts_frac = 0.9;
+
+   // ??? Ultimately, vts_frac should be adjusted, to take into account shading by bankside vegetation and the width of the reach.
+
+   return(vts_frac);
+} // end of GetSegmentViewToSky_frac()
+
+
 WaterParcel Reach::GetDischargeWP(int subnode)
 {
    if (subnode < 0) subnode = this->GetSubnodeCount() - 1;

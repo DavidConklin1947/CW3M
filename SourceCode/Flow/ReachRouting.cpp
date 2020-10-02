@@ -115,7 +115,8 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       float sphumidity = gpModel->GetTodaysReachSPHUMIDITY(pReach);
       double z_mean_m; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachZ_MEAN, z_mean_m);
       double ea, vpd;
-      double RH_pct = 100 * ETEquation::CalculateRelHumidity(sphumidity, temp_air_degC, tmax_air_degC, (float)z_mean_m, ea, vpd);
+      double rh_pct = 100 * ETEquation::CalculateRelHumidity(sphumidity, temp_air_degC, tmax_air_degC, (float)z_mean_m, ea, vpd);
+      double reach_net_lw_kJ = 0;
 
       // Do the stuff that varies by segment first.
       int num_segments = (int)pReach->m_segmentArray.GetSize();
@@ -124,10 +125,13 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
  //        pReach->m_segmentArray[segment]->m_evapWP = ...;
 //         pReach->m_segmentArray[segment]->m_sw_kJ = ...; // incoming shortwave energy
 //         double net_lw_out_W_m2 = NetLWout_W_m2(tempAir_degC, cL, tempH2O_degC, RH_pct, theta_vts);
-         double tempH2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
-         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, tempH2O_degC, 50, 0.9); 
-         pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * subreach_surface_m2* SEC_PER_DAY / 1000;
+         double temp_H2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
+         double vts_frac = pReach->GetSegmentViewToSky_frac(segment);
+         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, 0.9); 
+         pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * subreach_surface_m2 * SEC_PER_DAY / 1000; // ??? should use segment surface area, not subreach surface area
+         reach_net_lw_kJ += pReach->m_segmentArray[segment]->m_lw_kJ;
       } // end of loop thru segments
+      pReach->m_rad_lw_kJ = reach_net_lw_kJ;
 
       // Now do the stuff that varies by subreach.
 

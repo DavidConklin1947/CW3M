@@ -828,6 +828,7 @@ public:
    WaterParcel SubReachEvapWP(int subreachIndex); // Totals up the evap from the stream segment parts corresponding to this subreach.
    double SubReachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
    double GetSegmentWaterTemp_degC(int segment);
+   double GetSegmentViewToSky_frac(int segment);
    float GetCatchmentArea( void );
 
    bool  AddFluxFromGlobalHandler( float value ) 
@@ -867,6 +868,7 @@ public:
    float m_instreamWaterRightUse;  //used to keep track of instream water right use for this reach
    double m_availableDischarge;//keep track of the amount of water diverted from the reach during each timestep
 //x   float m_currentStreamTemp;
+   double m_rad_lw_kJ; // today's net longwave energy out (>0) or in (<0) to the reach
    WaterParcel m_evapWP; // today's evaporation from the reach
    PtrArray< ReachSubnode> m_segmentArray; // ??? Ultimately these pointers should point to ReachSegments, not ReachSubnodes.
 
