@@ -140,9 +140,9 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       } // end of loop thru segments
       pReach->m_rad_lw_kJ = reach_net_lw_kJ;
       double reach_lw_W_m2 = lw_x_surface_accum / total_surface_in_segments_m2;
-      gpModel->m_pStreamLayer->SetData(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
       double reach_sw_W_m2 = sw_x_surface_accum / total_surface_in_segments_m2;
-      gpModel->m_pStreamLayer->SetData(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_IN, reach_sw_W_m2);
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_IN, reach_sw_W_m2);
 
       // Now do the stuff that varies by subreach.
 
@@ -179,7 +179,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          // Gain water from precip and lose water via evaporation.
          // In both cases the amount of water gained or lost is proportional to the surface area of the water.
-         pNode->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
+//         pNode->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
          WaterParcel subreach_evapWP = pReach->SubReachEvapWP(l); // SubReachEvapWP() totals up the evap from the stream segment parts corresponding to this subreach.
          pNode->m_waterParcel.Discharge(subreach_evapWP); reach_evapWP.MixIn(subreach_evapWP);
 

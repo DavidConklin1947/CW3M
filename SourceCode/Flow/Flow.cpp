@@ -6196,14 +6196,16 @@ bool FlowModel::InitReaches(void)
       float Q = NOMINAL_LOW_FLOW_CMS;
       SetGeometry(pReach, Q);
       int subnodeCount = pReach->GetSubnodeCount();
+      pReach->m_segmentArray.SetSize(subnodeCount);
       for (int j = 0; j < subnodeCount; j++)
          { // Initialize state variables.
          ReachSubnode *pSubnode = pReach->GetReachSubnode(j);
          pSubnode->m_discharge = Q;
-         pSubnode->m_dischargeWP = WaterParcel(Q * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC);
+         pSubnode->m_dischargeWP = WaterParcel(Q * (double)SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC);
          pSubnode->m_volume = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
          pSubnode->m_waterParcel = WaterParcel(pSubnode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
          pSubnode->m_previousWP = WaterParcel(pSubnode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
+         pReach->m_segmentArray[j] = pSubnode;
 
          if (m_reachSvCount > 1)
             { // Initialize extra state variables
