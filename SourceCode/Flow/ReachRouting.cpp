@@ -120,18 +120,29 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
       // Do the stuff that varies by segment first.
       int num_segments = (int)pReach->m_segmentArray.GetSize();
+      double total_surface_in_segments_m2 = 0;
+      double lw_x_surface_accum = 0;
+      double sw_x_surface_accum = 0;
       for (int segment = 0; segment < num_segments; segment++)
       {
  //        pReach->m_segmentArray[segment]->m_evapWP = ...;
 //         pReach->m_segmentArray[segment]->m_sw_kJ = ...; // incoming shortwave energy
-//         double net_lw_out_W_m2 = NetLWout_W_m2(tempAir_degC, cL, tempH2O_degC, RH_pct, theta_vts);
+         pReach->m_segmentArray[segment]->m_sw_kJ = 0; // ???
          double temp_H2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
          double vts_frac = pReach->GetSegmentViewToSky_frac(segment);
          double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac); 
-         pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * subreach_surface_m2 * SEC_PER_DAY / 1000; // ??? should use segment surface area, not subreach surface area
+         double segment_surface_m2 = pReach->GetSegmentArea_m2(segment);
+         pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000; 
          reach_net_lw_kJ += pReach->m_segmentArray[segment]->m_lw_kJ;
+         total_surface_in_segments_m2 += segment_surface_m2;
+         lw_x_surface_accum += net_lw_out_W_m2 * segment_surface_m2;
+         sw_x_surface_accum += (pReach->m_segmentArray[segment]->m_sw_kJ / SEC_PER_DAY) * 1000;
       } // end of loop thru segments
       pReach->m_rad_lw_kJ = reach_net_lw_kJ;
+      double reach_lw_W_m2 = lw_x_surface_accum / total_surface_in_segments_m2;
+      gpModel->m_pStreamLayer->SetData(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
+      double reach_sw_W_m2 = sw_x_surface_accum / total_surface_in_segments_m2;
+      gpModel->m_pStreamLayer->SetData(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_IN, reach_sw_W_m2);
 
       // Now do the stuff that varies by subreach.
 

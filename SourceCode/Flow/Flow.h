@@ -829,6 +829,7 @@ public:
    double SubReachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
    double GetSegmentWaterTemp_degC(int segment);
    double GetSegmentViewToSky_frac(int segment);
+   double GetSegmentArea_m2(int segment);
    float GetCatchmentArea( void );
 
    bool  AddFluxFromGlobalHandler( float value ) 
@@ -1725,6 +1726,8 @@ public:
    int m_colReachTEMP_H2O;
    int m_colReachArea;
    int m_colReachZ_MEAN;
+   int m_colReachRAD_LW_OUT;
+   int m_colReachRAD_SW_IN;
 
    int m_colARIDITYNDX;
   int m_colHRUPercentIrrigated;

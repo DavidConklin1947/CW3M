@@ -952,6 +952,17 @@ double Reach::GetSegmentViewToSky_frac(int segment)
 } // end of GetSegmentViewToSky_frac()
 
 
+double Reach::GetSegmentArea_m2(int segment)
+{
+   double segment_area_m2;
+
+   // ??? Ultimately the segment area will vary from one segment to the next within a reach, as the length and width vary from segment to segment.
+   segment_area_m2 = m_width* m_length / GetSubnodeCount();
+
+   return(segment_area_m2);
+} // end of GetSegmentArea_m2()
+
+
 WaterParcel Reach::GetDischargeWP(int subnode)
 {
    if (subnode < 0) subnode = this->GetSubnodeCount() - 1;
@@ -2758,6 +2769,8 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamTMAX_H2O_Y, _T("TMAX_H2O_Y"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTEMP_H2O, _T("TEMP_H2O"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachZ_MEAN, _T("Z_MEAN"), TYPE_DOUBLE, CC_MUST_EXIST);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_LW_OUT, _T("RAD_LW_OUT"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_IN, _T("RAD_SW_IN"), TYPE_DOUBLE, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);

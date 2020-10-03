@@ -849,7 +849,9 @@ dynamic="0"
       <output in_use="1" name="WETL 18 outflow 23773619 McGowan Cr 539m elev" query="COMID=23773619" value="Q" type="sum" domain="reach" />
     </output_group>
 
-    <output_group name="FLOW McKenzie daily outflows at gages (cfs)" interval ="daily" >
+    <output_group name="FLOW McKenzie daily thermal energy" interval ="daily" >
+      <output in_use="1" name="RAD_LW_OUT W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_IN" type="sum" domain="reach" />
       <output in_use="1" name="TEMP_H2O degC 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach" />
       <output in_use="1" name="outflow Q cfs 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="Q*35.315" type="sum" domain="reach" obs="..\Observations\IncludingLeapDays\obs_usgs14164900.csv" format="E0" />
     </output_group>
