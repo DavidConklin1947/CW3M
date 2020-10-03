@@ -185,7 +185,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
          double subreach_net_rad_kJ = pReach->SubReachNetRad_kJ(l);
-         pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ; ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
+// not yet         pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ; ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
 
          PutLateralWP(pReach, new_lateralInflow);
          WaterParcel outflowWP(0,0);
@@ -240,9 +240,11 @@ double ReachRouting::NetLWout_W_m2(double tempAir_degC, double cL, double tempH2
    double bb_atm_W_m2 = 0.96 * s_b * pow(t_a_degK, 4); // black body radiation from the atmosphere
    double e_s_mbar = 6.1275 * exp((17.27 * tempAir_degC) / (237.3 + tempAir_degC)); // 2-79 saturation vapor pressure
    double e_a_mbar = (RH_pct / 100.) * e_s_mbar; // 2-78 vapor pressure
-
-   double eps_atm = 1.72 * pow(((0.1 * e_a_mbar) / t_a_degK), 1 / 7) * (1 + 0.22 + cL * cL);
-   double phi_a_lw = 0.96 * eps_atm * bb_atm_W_m2; 
+   double exponent = 1. /  7.;
+   double power_term = pow(((0.1 * e_a_mbar) / t_a_degK), exponent);
+   double eps_atm = 1.72 * power_term * (1 + 0.22 + cL * cL);
+   double phi_a_lw = 0.96 * eps_atm * bb_atm_W_m2; // This is what is in Boyd & Kasper.
+   phi_a_lw = 213. + 5.5 * tempAir_degC; // This is from fig. 4.10 p. 52 of Monteith & Unsworth Principles of Environmental Physics 2nd Ed.
 
    // 2-75 land cover longwave radiation flux attenuated in water column, W/m2
    double phi_lc_lw = 0.96 * (1 - theta_vts) * bb_atm_W_m2; 

@@ -127,8 +127,6 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       return -1;
       }
 
-   // AddCPLEXenvironmentVar();
-
    // start interating through the document
    // general structure is of the form:
    // <Envision ver='x.y'>

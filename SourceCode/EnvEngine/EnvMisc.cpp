@@ -19,56 +19,7 @@ bool IsDevelopmentEnvironment()
    return(debug || release);
  } // end of IsDevelopmentEnvironment()
 
-
-bool AddCPLEXenvironmentVar()
-{
-   size_t requiredSize;
-   _tgetenv_s(&requiredSize, NULL, 0, "CPLEX_STUDIO_BINARIES128");
-   
-   if (requiredSize > 0)
-   {
-      TCHAR *environ_var = new TCHAR[requiredSize + 256]; environ_var[0] = 0;
-      _tgetenv_s(&requiredSize, environ_var, requiredSize, "CPLEX_STUDIO_BINARIES128");
-      CString msg; 
-      msg.Format("AddCPLEXenvironmentVar() found CPLEX_STUDIO_BINARIES128 already set to %s", environ_var);
-      Report::LogMsg(msg);
-      delete[] environ_var;
-      return(true);
-   }
-
-   if (IsDevelopmentEnvironment())
-   {
-      CString msg;
-      msg.Format("AddCPLEXenvironmentVar(): Please install CPLEX and set system environment variables\n"
-         "Set CPLEX_STUDIO_DIR128 = C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio128\n"
-         "Set CPLEX_STUDIO_BINARIES128 = \n"
-         "  C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio128\\opl\\oplide\n"
-         "  C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio128\\opl\\bin\\x64_win64\n"
-         "  C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio128\\cpoptimizer\\bin\\x64_win64\n"
-         "  C:\\Program Files\\IBM\\ILOG\\CPLEX_Studio128\\cplex\\bin\\x64_win64");
-         Report::ErrorMsg(msg);
-      return(false);
-   }
-/*
-   CString exe_path = PathManager::GetPath(PM_ENVISION_DIR);
-   CString cplex_path = exe_path + "CPLEX";
-   int err_num = _putenv_s("CPLEX_STUDIO_BINARIES128", cplex_path);
-   if (err_num != 0)
-   {
-      CString msg;
-      msg.Format("AddCPLEXenvironmentVar() failed with err_num = %d when attempting to set CPLEX_STUDIO_BINARIES128 = %s", err_num, cplex_path);
-      Report::ErrorMsg(msg);
-      return(false);
-   }
-
-   CString msg;
-   msg.Format("AddCPLEXenvironmentVar() set CPLEX_STUDIO_BINARIES128 = %s", cplex_path);
-   Report::LogMsg(msg);
-*/
-   return(true);
-} // end of AddCPLEXenvironmentVar()
-
-
+/
 int AddGDALPath()
 {
    CString msg;

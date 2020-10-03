@@ -488,7 +488,6 @@ int CEnvDoc::StartUp()
    Report::reportFlag = RF_CALLBACK;      // disable onscreen messageboxes while loading
 
    AddGDALPath();
-   AddCPLEXenvironmentVar();
 
    bool isNewProject = false;
    bool runIniEditor = false;
