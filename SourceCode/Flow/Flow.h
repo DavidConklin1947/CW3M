@@ -484,6 +484,7 @@ public:
 //private:
    double m_volume_m3;
    double m_thermalEnergy_kJ;
+   double m_temp_degC;
 }; // end of class WaterParcel
 
 
@@ -1727,10 +1728,11 @@ public:
    int m_colReachArea;
    int m_colReachZ_MEAN;
    int m_colReachRAD_LW_OUT;
-   int m_colReachRAD_SW_IN;
+   int m_colReachRAD_SW_NET;
+   int m_colReachAREA_H2O;
 
    int m_colARIDITYNDX;
-  int m_colHRUPercentIrrigated;
+   int m_colHRUPercentIrrigated;
    int m_colHRUMeanLAI;
    int m_colMaxET_yr;
    int m_colIrrigation_yr;

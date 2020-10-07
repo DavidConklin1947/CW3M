@@ -19,7 +19,7 @@ bool IsDevelopmentEnvironment()
    return(debug || release);
  } // end of IsDevelopmentEnvironment()
 
-/
+
 int AddGDALPath()
 {
    CString msg;

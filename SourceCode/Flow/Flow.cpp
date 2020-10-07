@@ -2770,7 +2770,8 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTEMP_H2O, _T("TEMP_H2O"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachZ_MEAN, _T("Z_MEAN"), TYPE_DOUBLE, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_LW_OUT, _T("RAD_LW_OUT"), TYPE_DOUBLE, CC_AUTOADD);
-   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_IN, _T("RAD_SW_IN"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_NET, _T("RAD_SW_NET"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachAREA_H2O, _T("AREA_H2O"), TYPE_DOUBLE, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
@@ -14499,6 +14500,7 @@ WaterParcel::WaterParcel()
 { 
    m_volume_m3 = 0; 
    m_thermalEnergy_kJ = 0; 
+   m_temp_degC = 0;
 } // end of default constructor for WaterParcel objects
 
 
@@ -14506,6 +14508,7 @@ WaterParcel::WaterParcel(double volume_m3, double temperature_degC)
 {
    this->m_volume_m3 = volume_m3;
    this->m_thermalEnergy_kJ = temperature_degC * volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O;
+   this->m_temp_degC = temperature_degC;
 } // end of WaterParcel constructor
 
 

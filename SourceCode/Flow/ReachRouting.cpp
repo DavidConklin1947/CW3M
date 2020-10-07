@@ -109,6 +109,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       float temp_air_degC = gpModel->GetTodaysReachTEMP_AIR(pReach);
       float tmax_air_degC = gpModel->GetTodaysReachTMAX_AIR(pReach);
       float reach_precip_mm = gpModel->GetTodaysReachPRECIP(pReach);
+      float rad_sw_unshaded_W_m2 = gpModel->GetTodaysReachRAD_SW(pReach);
       double cloudiness_frac = reach_precip_mm > 0 ? 0.5 : 0; // ??? we need a better estimate of cloudiness than this
       double subreach_precip_vol_m3 = subreach_surface_m2 * reach_precip_mm / 1000;
       WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
@@ -125,13 +126,12 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       double sw_x_surface_accum = 0;
       for (int segment = 0; segment < num_segments; segment++)
       {
- //        pReach->m_segmentArray[segment]->m_evapWP = ...;
-//         pReach->m_segmentArray[segment]->m_sw_kJ = ...; // incoming shortwave energy
-         pReach->m_segmentArray[segment]->m_sw_kJ = 0; // ???
+         double segment_surface_m2 = pReach->GetSegmentArea_m2(segment);
+//       pReach->m_segmentArray[segment]->m_evapWP = ...;
+         pReach->m_segmentArray[segment]->m_sw_kJ = rad_sw_unshaded_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000;; // ??? this doesn't take shading into account
          double temp_H2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
          double vts_frac = pReach->GetSegmentViewToSky_frac(segment);
          double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac); 
-         double segment_surface_m2 = pReach->GetSegmentArea_m2(segment);
          pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000; 
          reach_net_lw_kJ += pReach->m_segmentArray[segment]->m_lw_kJ;
          total_surface_in_segments_m2 += segment_surface_m2;
@@ -142,7 +142,8 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       double reach_lw_W_m2 = lw_x_surface_accum / total_surface_in_segments_m2;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
       double reach_sw_W_m2 = sw_x_surface_accum / total_surface_in_segments_m2;
-      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_IN, reach_sw_W_m2);
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_NET, reach_sw_W_m2);
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_segments_m2);
 
       // Now do the stuff that varies by subreach.
 
@@ -184,10 +185,12 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          pNode->m_waterParcel.Discharge(subreach_evapWP); reach_evapWP.MixIn(subreach_evapWP);
 
          // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
+// not yet         double subreach_tempC = pNode->m_waterParcel.WaterTemperature();
+// not yet         double subreach_kJ = pNode->m_waterParcel.ThermalEnergy(subreach_tempC) + pReach->SubReachNetRad_kJ(l);
          double subreach_net_rad_kJ = pReach->SubReachNetRad_kJ(l);
-// not yet         pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ; ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
+         pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ; ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
 
-         PutLateralWP(pReach, new_lateralInflow);
+         PutLateralWP(pReach, l, new_lateralInflow);
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);
 
@@ -242,9 +245,9 @@ double ReachRouting::NetLWout_W_m2(double tempAir_degC, double cL, double tempH2
    double e_a_mbar = (RH_pct / 100.) * e_s_mbar; // 2-78 vapor pressure
    double exponent = 1. /  7.;
    double power_term = pow(((0.1 * e_a_mbar) / t_a_degK), exponent);
-   double eps_atm = 1.72 * power_term * (1 + 0.22 + cL * cL);
+   double eps_atm = 1.72 * power_term * (1 + 0.22 * cL * cL); // Boyd & Kasper have 0.22 + cL^2, but Dingman p. 196 eq. 5-39 has 0.22 * cL^2, which makes more sense
    double phi_a_lw = 0.96 * eps_atm * bb_atm_W_m2; // This is what is in Boyd & Kasper.
-   phi_a_lw = 213. + 5.5 * tempAir_degC; // This is from fig. 4.10 p. 52 of Monteith & Unsworth Principles of Environmental Physics 2nd Ed.
+//x   phi_a_lw = 213. + 5.5 * tempAir_degC; // This is from fig. 4.10 p. 52 of Monteith & Unsworth Principles of Environmental Physics 2nd Ed.
 
    // 2-75 land cover longwave radiation flux attenuated in water column, W/m2
    double phi_lc_lw = 0.96 * (1 - theta_vts) * bb_atm_W_m2; 
@@ -284,7 +287,7 @@ double ReachRouting::GetLateralInflow( Reach *pReach )
    return inflow;
    } // end of GetLateralFlow()
 
-
+/*x
 void ReachRouting::PutLateralWP(Reach* pReach, double daily_net_subreach_lateral_flow_m3) // Allocates runoff and withdrawals to the subreaches
 {
    ASSERT(!isnan(daily_net_subreach_lateral_flow_m3));
@@ -299,6 +302,21 @@ void ReachRouting::PutLateralWP(Reach* pReach, double daily_net_subreach_lateral
       pSubnode->m_runoffWP = WaterParcel(subreach_volume_in_m3, DEFAULT_SOIL_H2O_TEMP_DEGC);
       pSubnode->m_withdrawalWP = WaterParcel(subreach_volume_out_m3, pSubnode->m_waterParcel.WaterTemperature());
    }
+} // end of PutLateralWP()
+x*/
+
+void ReachRouting::PutLateralWP(Reach * pReach, int subreachNdx, double daily_net_subreach_lateral_flow_m3) // Allocates runoff and withdrawals to a subreach
+{
+   ASSERT(!isnan(daily_net_subreach_lateral_flow_m3));
+
+   ReachSubnode* pNode = pReach->GetReachSubnode(subreachNdx);
+
+   bool flow_is_into_reach = daily_net_subreach_lateral_flow_m3 >= 0;
+   double subreach_volume_in_m3 = flow_is_into_reach ? daily_net_subreach_lateral_flow_m3 : 0;
+   double subreach_volume_out_m3 = flow_is_into_reach ? 0 : fabs(daily_net_subreach_lateral_flow_m3);
+
+   pNode->m_runoffWP = WaterParcel(subreach_volume_in_m3, DEFAULT_SOIL_H2O_TEMP_DEGC); // water parcel running off the soil into the subreach
+   pNode->m_withdrawalWP = WaterParcel(subreach_volume_out_m3, pNode->m_waterParcel.WaterTemperature()); // water parcel being withdrawn from the subreach (e.g. for irrigation)
 } // end of PutLateralWP()
 
 
