@@ -957,7 +957,8 @@ double Reach::GetSegmentArea_m2(int segment)
    double segment_area_m2;
 
    // ??? Ultimately the segment area will vary from one segment to the next within a reach, as the length and width vary from segment to segment.
-   segment_area_m2 = m_width* m_length / GetSubnodeCount();
+   ReachSubnode* pNode = GetReachSubnode(segment);
+   segment_area_m2 = pNode->m_subreach_surf_area_m2;
 
    return(segment_area_m2);
 } // end of GetSegmentArea_m2()
@@ -14326,21 +14327,43 @@ void FlowModel::ApplyMacros( CString &str )
 /////////////////////////////////////////////////////////////////// 
 //  additional functions
 
-void SetGeometry( Reach *pReach, double discharge )
-   {
-   ASSERT( pReach != NULL );
-   pReach->m_depth = GetDepthFromQ(pReach, discharge, pReach->m_wdRatio );
+void SetGeometry(Reach * pReach, double discharge)
+{
+   ASSERT(pReach != NULL);
+   pReach->m_depth = GetDepthFromQ(pReach, discharge, pReach->m_wdRatio);
    pReach->m_width = pReach->m_wdRatio * pReach->m_depth;
-   }
+}
 
-float GetDepthFromQ( Reach *pReach, double Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
-   {
-  // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
-   float wdterm = (float) pow( (wdRatio/( 2 + wdRatio )), 2.0f/3.0f)*wdRatio;
-   float depth  = (float) pow(((Q*pReach->m_n)/((float)sqrt(pReach->m_slope)*wdterm)), 3.0f/8.0f);
+
+void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge)
+{
+   ASSERT(pReach != NULL);
+   ReachSubnode* pSubnode = pReach->GetReachSubnode(subreachNdx); ASSERT(pSubnode != NULL);
+   pSubnode->m_subreach_depth_m = GetDepthFromQ(discharge, pReach->m_wdRatio, pReach->m_n, pReach->m_slope);
+   pSubnode->m_subreach_width_m = pReach->m_wdRatio * pSubnode->m_subreach_depth_m;
+   int num_subreaches = pReach->GetSubnodeCount();
+   double subreach_length_m = pReach->m_length / num_subreaches;
+   pSubnode->m_subreach_surf_area_m2 = pSubnode->m_subreach_width_m * subreach_length_m;
+}
+
+float GetDepthFromQ(Reach* pReach, double Q, float wdRatio)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+{
+// from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
+   float wdterm = (float)pow((wdRatio / (2 + wdRatio)), 2.0f / 3.0f) * wdRatio;
+   float depth = (float)pow(((Q * pReach->m_n) / ((float)sqrt(pReach->m_slope) * wdterm)), 3.0f / 8.0f);
    if (depth != depth) depth = 0.00001f;
    return depth;
-   }
+}
+
+
+float GetDepthFromQ(double Q, float wdRatio, float n, float slope)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+{
+// from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
+   float wdterm = (float)pow((wdRatio / (2 + wdRatio)), 2.0f / 3.0f) * wdRatio;
+   float depth = (float)pow(((Q * n) / ((float)sqrt(slope) * wdterm)), 3.0f / 8.0f);
+   if (depth != depth) depth = 0.00001f;
+   return depth;
+} // end of GetDepthFromQ(double Q, float wdRatio, float n, float slope)
 
 
 // figure out what kind of flux it is
@@ -14530,7 +14553,10 @@ WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
    
    WaterParcel departingWP(0, 0);
    departingWP.m_volume_m3 = outflowVolume_m3;
-   departingWP.m_thermalEnergy_kJ = (outflowVolume_m3 / this->m_volume_m3)* this->m_thermalEnergy_kJ;
+   departingWP.m_thermalEnergy_kJ = (outflowVolume_m3 / this->m_volume_m3) * this->m_thermalEnergy_kJ;
+   departingWP.m_temp_degC = this->m_temp_degC;
+   ASSERT(close_enough(departingWP.m_temp_degC, WaterTemperature(departingWP.m_volume_m3, departingWP.m_thermalEnergy_kJ), 1e-4, .01));
+
    this->m_volume_m3 -= outflowVolume_m3;
    this->m_thermalEnergy_kJ -= departingWP.m_thermalEnergy_kJ;
 
@@ -14542,7 +14568,16 @@ void WaterParcel::MixIn(WaterParcel inflow)
 { // Note that this method tolerates negative values for volume and energy.
    m_volume_m3 += inflow.m_volume_m3;
    m_thermalEnergy_kJ += inflow.m_thermalEnergy_kJ;
+   m_temp_degC = WaterTemperature(m_volume_m3, m_thermalEnergy_kJ);
 } // end of MixIn()
+
+
+double WaterParcel::WaterTemperature(double volume_m3, double thermalEnergy_kJ)
+{
+   double temperature_degC = thermalEnergy_kJ / (volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O);
+   ASSERT(temperature_degC < 50. && temperature_degC >= 0.);
+   return(temperature_degC);
+} // end of static double WaterTemperature(double volume_m3, double thermalEnergy_kJ);
 
 
 double WaterParcel::WaterTemperature()

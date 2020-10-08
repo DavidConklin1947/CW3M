@@ -143,7 +143,9 @@ class ResConstraint;
 
 // global functions
 void SetGeometry( Reach *pReach, double discharge );
+void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge);
 float GetDepthFromQ( Reach *pReach, double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+float GetDepthFromQ(double Q, float wdRatio, float n, float slope);  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 FLUXSOURCE ParseSource( LPCTSTR sourceStr, CString &path, CString &source, HINSTANCE &hDLL, FLUXFN &fn );
 float GetVerticalDrainage( float wc );
 float GetBaseflow(float wc);
@@ -479,6 +481,7 @@ public:
    WaterParcel Discharge(double volume_m3);
    void MixIn(WaterParcel inflow);
    double WaterTemperature();
+   static double WaterTemperature(double volume_m3, double thermalEnergy_kJ);
    double ThermalEnergy(double temperature_degC);
 
 //private:
@@ -790,6 +793,10 @@ public:
    WaterParcel m_runoffWP; // lateral flow into the subreach
    WaterParcel m_withdrawalWP; // lateral flow out of the subreach
    WaterParcel m_dischargeWP;
+   double m_subreach_width_m;
+   double m_subreach_depth_m;
+   double m_subreach_surf_area_m2;
+
 
    double m_addedVolume_m3; // amount added to keep compartment from going negative
    double m_addedDischarge_cms; // amount added to ensure discharge is always > 0

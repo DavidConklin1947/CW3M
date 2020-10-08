@@ -105,19 +105,24 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
    for ( int i=0; i < reachCount; i++ )
       {
       Reach *pReach = gpModel->GetReach( i );     // Note: these are guaranteed to be non-phantom
-      double subreach_surface_m2 = pReach->m_width * pReach->m_length / pReach->GetSubnodeCount();
+      int num_subreaches = pReach->GetSubnodeCount();
       float temp_air_degC = gpModel->GetTodaysReachTEMP_AIR(pReach);
       float tmax_air_degC = gpModel->GetTodaysReachTMAX_AIR(pReach);
       float reach_precip_mm = gpModel->GetTodaysReachPRECIP(pReach);
-      float rad_sw_unshaded_W_m2 = gpModel->GetTodaysReachRAD_SW(pReach);
+      float rad_sw_unshaded_W_m2 = gpModel->GetTodaysReachRAD_SW(pReach); // Shortwave from the climate data takes into account cloudiness but not shading.
       double cloudiness_frac = reach_precip_mm > 0 ? 0.5 : 0; // ??? we need a better estimate of cloudiness than this
-      double subreach_precip_vol_m3 = subreach_surface_m2 * reach_precip_mm / 1000;
-      WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
       float sphumidity = gpModel->GetTodaysReachSPHUMIDITY(pReach);
       double z_mean_m; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachZ_MEAN, z_mean_m);
       double ea, vpd;
       double rh_pct = 100 * ETEquation::CalculateRelHumidity(sphumidity, temp_air_degC, tmax_air_degC, (float)z_mean_m, ea, vpd);
       double reach_net_lw_kJ = 0;
+
+      // Put this here temporarily
+      for (int subreachNdx = 0; subreachNdx < num_subreaches; subreachNdx++)
+      {
+         ReachSubnode * pReachSubnode = pReach->GetReachSubnode(subreachNdx);
+         SetSubreachGeometry(pReach, subreachNdx, pReachSubnode->m_discharge);
+      }
 
       // Do the stuff that varies by segment first.
       int num_segments = (int)pReach->m_segmentArray.GetSize();
@@ -128,7 +133,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       {
          double segment_surface_m2 = pReach->GetSegmentArea_m2(segment);
 //       pReach->m_segmentArray[segment]->m_evapWP = ...;
-         pReach->m_segmentArray[segment]->m_sw_kJ = rad_sw_unshaded_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000;; // ??? this doesn't take shading into account
+         pReach->m_segmentArray[segment]->m_sw_kJ = rad_sw_unshaded_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000; // ??? this doesn't take shading into account
          double temp_H2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
          double vts_frac = pReach->GetSegmentViewToSky_frac(segment);
          double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac); 
@@ -180,7 +185,9 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          // Gain water from precip and lose water via evaporation.
          // In both cases the amount of water gained or lost is proportional to the surface area of the water.
-//         pNode->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
+//       double subreach_precip_vol_m3 = pNode->m_subreach_surf_area_m2 * reach_precip_mm / 1000;
+//       WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
+//       pNode->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
          WaterParcel subreach_evapWP = pReach->SubReachEvapWP(l); // SubReachEvapWP() totals up the evap from the stream segment parts corresponding to this subreach.
          pNode->m_waterParcel.Discharge(subreach_evapWP); reach_evapWP.MixIn(subreach_evapWP);
 
@@ -188,7 +195,15 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 // not yet         double subreach_tempC = pNode->m_waterParcel.WaterTemperature();
 // not yet         double subreach_kJ = pNode->m_waterParcel.ThermalEnergy(subreach_tempC) + pReach->SubReachNetRad_kJ(l);
          double subreach_net_rad_kJ = pReach->SubReachNetRad_kJ(l);
-         pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ; ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
+         if ((pNode->m_waterParcel.m_thermalEnergy_kJ + subreach_net_rad_kJ) <= 0)
+         {
+            CString msg; 
+            msg.Format("SolveReachKinematicWave() thermal energy <= 0 in reach %d subreach %d: orig kJ = %f, "
+               "m_segmentArray[subreachIndex]->m_sw_kJ = %f, m_segmentArray[subreachIndex]->m_lw_kJ = %f",
+               pReach->m_reachID, l, pNode->m_waterParcel.m_thermalEnergy_kJ, pReach->m_segmentArray[l]->m_sw_kJ, pReach->m_segmentArray[l]->m_lw_kJ);
+            Report::WarningMsg(msg);
+         }
+         pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ; // ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
 
          PutLateralWP(pReach, l, new_lateralInflow);
          WaterParcel outflowWP(0,0);
@@ -287,23 +302,6 @@ double ReachRouting::GetLateralInflow( Reach *pReach )
    return inflow;
    } // end of GetLateralFlow()
 
-/*x
-void ReachRouting::PutLateralWP(Reach* pReach, double daily_net_subreach_lateral_flow_m3) // Allocates runoff and withdrawals to the subreaches
-{
-   ASSERT(!isnan(daily_net_subreach_lateral_flow_m3));
-
-   bool flow_is_into_reach = daily_net_subreach_lateral_flow_m3 >= 0;
-   double subreach_volume_in_m3 = flow_is_into_reach ? daily_net_subreach_lateral_flow_m3 : 0;
-   double subreach_volume_out_m3 = flow_is_into_reach ? 0 : fabs(daily_net_subreach_lateral_flow_m3);
-
-   for (int i = 0; i < pReach->GetSubnodeCount(); i++)
-   {
-      ReachSubnode* pSubnode = pReach->GetReachSubnode(i);
-      pSubnode->m_runoffWP = WaterParcel(subreach_volume_in_m3, DEFAULT_SOIL_H2O_TEMP_DEGC);
-      pSubnode->m_withdrawalWP = WaterParcel(subreach_volume_out_m3, pSubnode->m_waterParcel.WaterTemperature());
-   }
-} // end of PutLateralWP()
-x*/
 
 void ReachRouting::PutLateralWP(Reach * pReach, int subreachNdx, double daily_net_subreach_lateral_flow_m3) // Allocates runoff and withdrawals to a subreach
 {
@@ -562,148 +560,6 @@ double ReachRouting::KinematicWave(double oldQ_cms /* Q */, double upstreamInflo
    return(newQ_cms);
 } // end of KinematicWave()
 
-/*x
-WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double timeStep, WaterParcel lateralInflowWP)
-// WaterParcel version of EstimateReachOutflow()
-// solves the KW equations for one subreach
-{
-   ReachSubnode* pSubnode = pReach->GetReachSubnode(subnode); ASSERT(pSubnode != NULL);
-   ASSERT(pSubnode->m_waterParcel.m_volume_m3 > 0);
-
-   double original_energy_kJ = pSubnode->m_waterParcel.m_thermalEnergy_kJ;
-   WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, subnode);
-   double upstream_inflow_m3 = upstream_inflowWP.m_volume_m3;
-
-   double Qin_m3 = GetReachInflow(pReach, subnode) * SEC_PER_DAY;
-   ASSERT(close_enough(upstream_inflow_m3, Qin_m3, 0.1, 100.));
-   double lateralInflow_m3 = lateralInflowWP.m_volume_m3;
-   if (subnode == 0 && Qin_m3 + lateralInflow_m3 < 0. && pReach->IsHeadwaterNode())
-   { // More water is leaving the subnode laterally than is entering from upstream; the volume in the subnode will be drawn down.
-      float net_subnode_outflow_m3 = (float)(Qin_m3 + lateralInflow_m3);
-      CString msg;
-      msg.Format("ApplyReachOutflowWP() COMID = %d, subnode = %d, Qin_m3 = %f, lateralInflow_m3 = %f, net_subnode_outflow_m3 = %f\n",
-         pReach->m_reachID, subnode, Qin_m3, lateralInflow_m3, net_subnode_outflow_m3);
-      msg = msg + "More water is leaving the subnode laterally than is entering from upstream; the volume in the subnode will be drawn down.\n";
-      msg = msg + "This is a headwater reach.";
-      Report::LogMsg(msg);
-   }
-
-   // Use yesterday's outflow rate to determine the geometry of this subreach.
-   double old_Q_cms = pSubnode->m_dischargeWP.m_volume_m3 / SEC_PER_DAY; ASSERT(old_Q_cms > 0); // old_Q_cms is yesterday's outflow rate from this subreach.
-   SetGeometry(pReach, (float)old_Q_cms);
-   float width = pReach->m_width;
-   float depth = pReach->m_depth;
-
-   // This next section compensates for the fact that the outflow calculation doesn't take into account the water already in the reach at the beginning of the day.
-   // If there is more water already in this reach than the sum of what is flowing in from upstream plus the lateral inflow,
-   // then treat some of what is already in the reach as if it had flowed in from upstream.
-   double upstream_temp_degC = upstream_inflowWP.WaterTemperature();
-   double total_inflow_m3 = upstream_inflow_m3 + lateralInflow_m3;
-
-   WaterParcel H2O_to_moveWP(0, 0);
-   double reach_volume_H2O_to_move_m3 = 0;
-   double lateral_inflow_H2O_to_move_m3 = 0;
-
-   if (pSubnode->m_waterParcel.m_volume_m3 > total_inflow_m3)
-   {
-      reach_volume_H2O_to_move_m3 = pSubnode->m_waterParcel.m_volume_m3 - total_inflow_m3;
-      H2O_to_moveWP.MixIn(WaterParcel(reach_volume_H2O_to_move_m3, pSubnode->m_waterParcel.WaterTemperature()));
-      if (total_inflow_m3 > 0) pSubnode->m_waterParcel.Discharge(H2O_to_moveWP.m_volume_m3);
-      else if (total_inflow_m3 < 0)
-      { // This is when the net lateral flow is out of the reach (e.g. an irrigation point of diversion)
-         if (total_inflow_m3 + pSubnode->m_waterParcel.m_volume_m3 < 0)
-         { // This is where there is more water leaving the reach laterally than
-            // the sum of what's already in the reach and what is entering from upstream.
-            // In the real world, the reach would run dry (and the irrigation pumps would stall).
-            // Here we add enough magic water to keep the reach from running dry.  
-            // This violates conservation of mass.
-            reach_volume_H2O_to_move_m3 = 0;
-            ASSERT(pSubnode->m_waterParcel.m_volume_m3 >= 0);
-            double min_volume_m3 = (NOMINAL_LOW_WATER_LITERS_PER_METER * pReach->m_length / pReach->GetSubnodeCount()) / LITERS_PER_M3;
-            double magic_H2O_to_add_m3 = min_volume_m3 + fabs(total_inflow_m3) - pSubnode->m_waterParcel.m_volume_m3;
-            pSubnode->m_waterParcel.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature()));
-//x            pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
-//             pSubnode->m_magicWP.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature());
-         }
-         // else... Until the water in the reach is exhausted, we don't have to do anything.
-      }
-   }
-   else if (upstream_inflow_m3 <= 0. && subnode == 0 && pReach->m_pLeft == NULL && pReach->m_pRight == NULL)
-   { // This is the upstream subnode of a headwater reach.
-      Catchment* pCatchment = NULL;
-      if (pReach->m_catchmentArray.GetSize() > 0) pCatchment = pReach->m_catchmentArray[0];
-      if (pCatchment == NULL || pCatchment->m_id <= 0)
-      { // This is a headwater reach which is not associated with an HRU, so there is no inflow from soil.
-         double magic_H2O_to_add_m3 = NOMINAL_LOW_FLOW_CMS * SEC_PER_DAY;
-         H2O_to_moveWP.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature()));
-//x         pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
-//          pSubnode->m_magicWP.MixIn(WaterParcel(magic_H2O_to_add_m3, pSubnode->m_waterParcel.WaterTemperature());
-         if (lateralInflow_m3 < 0.)
-         { // Negative lateral inflow is probably an irrigation withdrawal.
-            CString msg; msg.Format("ApplyReachOutflow()2 Trying to withdraw water from a headwater reach which is not associated with an HRU\n"
-               "pReach->m_reachID = %d, lateralInflow_m3 = %f", pReach->m_reachID, lateralInflow_m3);
-            Report::LogMsg(msg);
-         }
-      }
-      if (lateralInflow_m3 > 0 && pSubnode->m_waterParcel.m_volume_m3 > lateralInflow_m3)
-      { // For the purpose of the outflow calculation, treat any volume in this headwater node in excess of 
-        // of one timestep's lateral inflow as if it had flowed in from an imaginary upstream reach.
-        // This is to prevent the volume in this node from increasing without limit.
-         lateral_inflow_H2O_to_move_m3 = pSubnode->m_waterParcel.m_volume_m3 - lateralInflow_m3;
-
-         H2O_to_moveWP.MixIn(WaterParcel(lateral_inflow_H2O_to_move_m3, lateralInflowWP.WaterTemperature()));
-         pSubnode->m_waterParcel.Discharge(H2O_to_moveWP);
-      }
-   }
-   upstream_inflowWP.MixIn(H2O_to_moveWP);
-
-   WaterParcel inflowWP(0, 0);
-   inflowWP.MixIn(upstream_inflowWP);
-   inflowWP.MixIn(lateralInflowWP);
-
-   double Qnew_cms = KinematicWave(old_Q_cms, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY, lateralInflow_m3 / SEC_PER_DAY, pReach);
-   if (isnan(Qnew_cms) || Qnew_cms <= 0.)
-   { // Qnew_cms should always be greater than zero.
-      float original_Qnew = (float)Qnew_cms;
-      if (isnan(Qnew_cms)) Qnew_cms = 0.;
-      double addedDischarge_cms = (float)(NOMINAL_LOW_FLOW_CMS - Qnew_cms);
-      Qnew_cms = NOMINAL_LOW_FLOW_CMS;
-      CString msg; msg.Format("ApplyReachOutflow() pReach->m_reachID = %d, original Qnew_cms = %f cms. Setting Qnew_cms = %f cms. addedDischarge_cms = %f.",
-         pReach->m_reachID, original_Qnew, Qnew_cms, addedDischarge_cms);
-      if (!isnan(original_Qnew) && original_Qnew < -0.01) Report::LogMsg(msg);
-   }
-
-   pSubnode->m_previousWP = pSubnode->m_waterParcel;
-
-   // Constrain the amount of water leaving the reach to no more than what is already there plus
-   // what is coming in, less at least a small amount to keep the volume positive and greater than zero.
-   float min_volume_m3 = (NOMINAL_LOW_WATER_LITERS_PER_METER * pReach->m_length / pReach->GetSubnodeCount()) / LITERS_PER_M3;
-   double incoming_volume_m3 = upstream_inflow_m3 + lateralInflow_m3;
-   double max_outgoing_volume_m3 = (pSubnode->m_previousWP.m_volume_m3 + incoming_volume_m3) - min_volume_m3;
-   double max_Qnew_cms = max_outgoing_volume_m3 / SEC_PER_DAY;
-   if (max_Qnew_cms < NOMINAL_LOW_FLOW_CMS) max_Qnew_cms = NOMINAL_LOW_FLOW_CMS;
-   if (Qnew_cms > max_Qnew_cms) Qnew_cms = max_Qnew_cms;
-
-   if (Qnew_cms < 0 || Qnew_cms > 1.e10f || Qnew_cms != Qnew_cms)
-   {
-      CString msg;
-      msg.Format("*** ApplyReachOutflowWP(): COMID = %d, subnode = %d, Qnew_cms = %f",
-         pReach->m_reachID, subnode, Qnew_cms);
-      Report::LogMsg(msg);
-      msg.Format("Setting Qnew_cms to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
-      Qnew_cms = NOMINAL_LOW_FLOW_CMS;
-   }
-
-   SetGeometry(pReach, (float)Qnew_cms);
-
-   pSubnode->m_waterParcel.MixIn(inflowWP); // This adjusts the temperature in the reach to reflect the temperature of the inflows.
-   double discharge_today_m3 = Qnew_cms * (double)SEC_PER_DAY;
-   pSubnode->m_dischargeWP = WaterParcel(discharge_today_m3, pSubnode->m_waterParcel.WaterTemperature());
-   pSubnode->m_waterParcel.Discharge(discharge_today_m3);
-
-   return(pSubnode->m_dischargeWP);
-} // end of ApplyReachOutflowWP()
-x*/
 
 WaterParcel ReachRouting::ApplyReachOutflowWP2(Reach* pReach, int subnode, double timeStep)
 // WaterParcel version of EstimateReachOutflow()
