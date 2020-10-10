@@ -195,16 +195,40 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 // not yet         double subreach_tempC = pNode->m_waterParcel.WaterTemperature();
 // not yet         double subreach_kJ = pNode->m_waterParcel.ThermalEnergy(subreach_tempC) + pReach->SubReachNetRad_kJ(l);
          double subreach_net_rad_kJ = pReach->SubReachNetRad_kJ(l);
-         if ((pNode->m_waterParcel.m_thermalEnergy_kJ + subreach_net_rad_kJ) <= 0)
+         if (subreach_net_rad_kJ < 0.)
+         { // Theoretically, the water is losing heat to the atmosphere by radiation.
+            double min_skin_temp_degC = 1.;
+            double skin_temp_degC = max(temp_air_degC, min_skin_temp_degC);
+            if (pNode->m_waterParcel.WaterTemperature() > skin_temp_degC)
+            { // The water is warmer than the air, so it is plausible that the water might cool down
+               // but not to a temperature less than the skin temperature (the temperature of the air in contact with the liquid water surface).
+               double temp_diff = pNode->m_waterParcel.WaterTemperature() - skin_temp_degC;
+               double max_heat_loss_kJ = WaterParcel::ThermalEnergy(pNode->m_waterParcel.m_volume_m3, temp_diff);
+               double heat_loss_kJ = min(max_heat_loss_kJ, -subreach_net_rad_kJ);
+               pNode->m_waterParcel.m_thermalEnergy_kJ -= heat_loss_kJ; 
+               pNode->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pNode->m_waterParcel.m_volume_m3, pNode->m_waterParcel.m_thermalEnergy_kJ);
+
+               ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
+            }
+         }
+         else
+         {
+            pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ;
+            pNode->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pNode->m_waterParcel.m_volume_m3, pNode->m_waterParcel.m_thermalEnergy_kJ);
+         }
+         ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
+/*x
+         if (pNode->m_waterParcel.m_thermalEnergy_kJ <= 0)
          {
             CString msg; 
-            msg.Format("SolveReachKinematicWave() thermal energy <= 0 in reach %d subreach %d: orig kJ = %f, "
-               "m_segmentArray[subreachIndex]->m_sw_kJ = %f, m_segmentArray[subreachIndex]->m_lw_kJ = %f",
-               pReach->m_reachID, l, pNode->m_waterParcel.m_thermalEnergy_kJ, pReach->m_segmentArray[l]->m_sw_kJ, pReach->m_segmentArray[l]->m_lw_kJ);
-            Report::WarningMsg(msg);
+            msg.Format("SolveReachKinematicWave() thermal energy <= 0 in reach %d subreach %d: orig kJ = %f,\n"
+               "m_segmentArray[subreachIndex]->m_sw_kJ = %f, m_segmentArray[subreachIndex]->m_lw_kJ = %f\n"
+               "m_subreach_surf_area_m2, m_volume_m3",
+               pReach->m_reachID, l, pNode->m_waterParcel.m_thermalEnergy_kJ, pReach->m_segmentArray[l]->m_sw_kJ, pReach->m_segmentArray[l]->m_lw_kJ,
+               pNode->m_subreach_surf_area_m2, pNode->m_waterParcel.m_volume_m3);
+            if (pReach->m_reachID == 23774125) Report::WarningMsg(msg);
          }
-         pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ; // ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
-
+x*/
          PutLateralWP(pReach, l, new_lateralInflow);
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);

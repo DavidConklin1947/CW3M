@@ -3959,6 +3959,7 @@ bool FlowModel::ReadState()
             WaterParcel initialWP(pNode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
             pNode->m_waterParcel = initialWP;
             pNode->m_previousWP = initialWP;
+            SetSubreachGeometry(pReach, j, pNode->m_discharge);
             } // end of subnode loop
          SetGeometry(pReach, pReach->GetDischarge());
          } // end of reach loop
@@ -14566,6 +14567,7 @@ WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
 
 void WaterParcel::MixIn(WaterParcel inflow) 
 { // Note that this method tolerates negative values for volume and energy.
+   if (inflow.m_volume_m3 == 0) return;
    m_volume_m3 += inflow.m_volume_m3;
    m_thermalEnergy_kJ += inflow.m_thermalEnergy_kJ;
    m_temp_degC = WaterTemperature(m_volume_m3, m_thermalEnergy_kJ);
@@ -14592,6 +14594,14 @@ double WaterParcel::WaterTemperature()
 
 double WaterParcel::ThermalEnergy(double temperature_degC)
 {
-   double thermalEnergy_kJ = temperature_degC * m_volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O;
+   double thermalEnergy_kJ = ThermalEnergy(m_volume_m3, temperature_degC);
    return(thermalEnergy_kJ);
 } // end of ThermalEnergy()
+
+
+double WaterParcel::ThermalEnergy(double volume_m3, double temperature_degC)
+{
+   double thermalEnergy_kJ = temperature_degC * volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O;
+   return(thermalEnergy_kJ);
+} // end of static double ThermalEnergy(double volume_m3, double temperature_degC);
+

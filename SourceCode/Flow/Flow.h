@@ -483,6 +483,7 @@ public:
    double WaterTemperature();
    static double WaterTemperature(double volume_m3, double thermalEnergy_kJ);
    double ThermalEnergy(double temperature_degC);
+   static double ThermalEnergy(double volume_m3, double temperature_degC);
 
 //private:
    double m_volume_m3;
@@ -1477,34 +1478,6 @@ protected:
    bool ResetFluxValuesForStep( EnvContext* );
    bool ResetCumulativeYearlyValues();
    bool ResetCumulativeWaterYearValues();
-
-   //  direct reach solution methods
-   //float GetLateralInflow( Reach *pReach );
-   //float GetReachInflow( Reach *pReach, int subNode );
-   //float EstimateReachOutflow( Reach *pReach, int i, float timeStep, float lateralInflow);
-
-   //float GetReachSVInflow( Reach *pReach, int subNode, int sv );
-   //float GetLateralSVInflow( Reach *pReach , int sv);
-   //float GetReachSVOutflow( ReachNode *pReachNode, int sv ) ;
-
-   //void  SetGeometry( Reach *pReach, float discharge );
-   //float GetDepthFromQ( Reach *pReach, float Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
-
-   //Default Upslope Fluxes
-   //bool  SolveHRUDirect( FlowContext* );     // high level method PLACEHOLDER
-   //float GetReachFluxes( Reach *pReach );
-   //float GetVerticalDrainage(float wc);
-   //float GetBaseflow(float wc);
-   
-   // global methods
-   //bool  SolveReachDirect( void );     // high level method
-   //bool  SolveReachKinematicWave( void );
-
-   //bool  SetGlobalHruToReachExchanges( void );  // high-level method
-   //bool  SetGlobalHruToReachExchangesLinearRes( void );
-
-   //bool  SetGlobalHruVertFluxes( void  );  // high-level method
-   //bool  SetGlobalHruVertFluxesBrooksCorey( void );
 
    bool  SetGlobalExtraSVRxn( void );
    
