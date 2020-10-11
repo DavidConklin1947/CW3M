@@ -815,6 +815,8 @@ public:
    WaterParcel m_evapWP;
    double m_sw_kJ; // today's incoming shortwave energy
    double m_lw_kJ; // today's outgoing longwave energy
+   double m_segment_surf_area_m2; // water surface area used for converting W/m2 to kJ
+   double m_segment_volume_m3;
 };
 
 

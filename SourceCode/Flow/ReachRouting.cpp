@@ -132,6 +132,9 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       for (int segment = 0; segment < num_segments; segment++)
       {
          double segment_surface_m2 = pReach->GetSegmentArea_m2(segment);
+         pReach->m_segmentArray[segment]->m_segment_surf_area_m2 = segment_surface_m2;
+         ReachSubnode* pSubreach = pReach->GetReachSubnode(segment);
+         pReach->m_segmentArray[segment]->m_segment_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
 //       pReach->m_segmentArray[segment]->m_evapWP = ...;
          pReach->m_segmentArray[segment]->m_sw_kJ = rad_sw_unshaded_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000; // ??? this doesn't take shading into account
          double temp_H2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
@@ -183,6 +186,8 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             new_lateralInflow = NOMINAL_LOW_FLOW_CMS;
             }
 
+         PutLateralWP(pReach, l, new_lateralInflow);
+
          double outflow = EstimateReachOutflow(pReach, l, pFlowContext->timeStep, new_lateralInflow); // m3/day
 
          // Gain water from precip and lose water via evaporation.
@@ -196,6 +201,8 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
 // not yet         double subreach_tempC = pNode->m_waterParcel.WaterTemperature();
 // not yet         double subreach_kJ = pNode->m_waterParcel.ThermalEnergy(subreach_tempC) + pReach->SubReachNetRad_kJ(l);
+         ASSERT(pNode->m_subreach_surf_area_m2 == pReach->m_segmentArray[l]->m_segment_surf_area_m2);
+         ASSERT(pNode->m_waterParcel.m_volume_m3 == pReach->m_segmentArray[l]->m_segment_volume_m3);
          double subreach_net_rad_kJ = pReach->SubReachNetRad_kJ(l);
          if (subreach_net_rad_kJ < 0.)
          { // Theoretically, the water is losing heat to the atmosphere by radiation.
@@ -217,7 +224,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          {
             pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ;
             pNode->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pNode->m_waterParcel.m_volume_m3, pNode->m_waterParcel.m_thermalEnergy_kJ);
-            if (l == 0 && pNode->m_waterParcel.m_temp_degC >= 1000.)
+            if (l == 0 && pNode->m_waterParcel.m_temp_degC >= 150.)
             {
                CString msg;
                msg.Format("SolveReachKinematicWave() temperature >= 50 degC in reach %d subreach %d: orig kJ = %f,\n"
@@ -241,7 +248,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             if (pReach->m_reachID == 23774125) Report::WarningMsg(msg);
          }
 x*/
-         PutLateralWP(pReach, l, new_lateralInflow);
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP2(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);
 

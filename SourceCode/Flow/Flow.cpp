@@ -14587,7 +14587,7 @@ void WaterParcel::MixIn(WaterParcel inflow)
 double WaterParcel::WaterTemperature(double volume_m3, double thermalEnergy_kJ)
 {
    double temperature_degC = thermalEnergy_kJ / (volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O);
-   ASSERT(temperature_degC < 50. && temperature_degC >= 0.);
+   ASSERT(temperature_degC < 300. && temperature_degC >= 0.);
    return(temperature_degC);
 } // end of static double WaterTemperature(double volume_m3, double thermalEnergy_kJ);
 
@@ -14597,7 +14597,7 @@ double WaterParcel::WaterTemperature()
    if (m_volume_m3 <= 0) return(0);
 
    double temperature_degC = m_thermalEnergy_kJ / (m_volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O);
-   ASSERT(temperature_degC < 50.);
+   ASSERT(temperature_degC < 300.);
    return(temperature_degC);
 } // end of WaterTemperature()
 
