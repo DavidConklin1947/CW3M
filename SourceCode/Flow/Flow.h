@@ -144,8 +144,8 @@ class ResConstraint;
 // global functions
 void SetGeometry( Reach *pReach, double discharge );
 void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge);
-float GetDepthFromQ( Reach *pReach, double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
-float GetDepthFromQ(double Q, float wdRatio, float n, float slope);  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+float GetManningDepthFromQ( Reach *pReach, double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+float GetManningDepthFromQ(double Q, float wdRatio, float n, float slope);  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 FLUXSOURCE ParseSource( LPCTSTR sourceStr, CString &path, CString &source, HINSTANCE &hDLL, FLUXFN &fn );
 float GetVerticalDrainage( float wc );
 float GetBaseflow(float wc);
@@ -795,7 +795,7 @@ public:
    WaterParcel m_withdrawalWP; // lateral flow out of the subreach
    WaterParcel m_dischargeWP;
    double m_subreach_width_m;
-   double m_subreach_depth_m;
+   double m_subreach_manning_depth_m;
    double m_subreach_surf_area_m2;
 
 
@@ -829,7 +829,7 @@ public:
 
    Reservoir *GetReservoir( void ) { return (Reservoir*) m_pReservoir; }
    void  SetGeometry( float wdRatio );
-   float GetDepthFromQ( double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+   float GetManningDepthFromQ( double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
    double GetDischarge( int subnode=-1 );  // -1 means last (lowest) subnode - m3/sec
    WaterParcel GetDischargeWP(int subnode = -1); // -1 means last (lowest, most downstream) subnode - m3/sec
    double GetUpstreamInflow(); 
@@ -1710,6 +1710,9 @@ public:
    int m_colReachRAD_LW_OUT;
    int m_colReachRAD_SW_NET;
    int m_colReachAREA_H2O;
+   int m_colReachWIDTH;
+   int m_colReachDEPTHMANNG;
+   int m_colReachTURNOVER;
 
    int m_colARIDITYNDX;
    int m_colHRUPercentIrrigated;

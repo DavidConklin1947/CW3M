@@ -870,14 +870,14 @@ void Reach::SetGeometry( float wdRatio )
    ReachSubnode *pNode = (ReachSubnode*) m_subnodeArray[ 0 ];
    ASSERT( pNode != NULL );
 
-   m_depth = GetDepthFromQ( pNode->m_discharge, wdRatio );
+   m_depth = GetManningDepthFromQ( pNode->m_discharge, wdRatio );
    m_width = wdRatio * m_depth;
    m_wdRatio = wdRatio;
    }
 
 
 //???? CHECK/DOCUMENT UNITS!!!!
-float Reach::GetDepthFromQ( double Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+float Reach::GetManningDepthFromQ( double Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
    {
    float depth;
    if (Q > 0.f)
@@ -889,7 +889,7 @@ float Reach::GetDepthFromQ( double Q, float wdRatio )  // ASSUMES A SPECIFIC CHA
       }
    else depth = 0.f;
    return depth;
-   } // end of GetDepthFromQ()
+   } // end of GetManningDepthFromQ()
 
 
 double Reach::GetDischarge( int subnode /*=-1*/ )
@@ -2773,6 +2773,9 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_LW_OUT, _T("RAD_LW_OUT"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_NET, _T("RAD_SW_NET"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachAREA_H2O, _T("AREA_H2O"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachWIDTH, _T("WIDTH"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachDEPTHMANNG, _T("DEPTHMANNG"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachTURNOVER, _T("TURNOVER"), TYPE_DOUBLE, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
@@ -4783,8 +4786,8 @@ double FlowModel::CalcTotH2OinReaches() // Returns m3 H2O
          CString msg;
          msg.Format("*** CalcTotH2OinReaches(): reach_ndx = %d, reachH2O_m3 = %f", reach_ndx, reachH2O_m3);
          Report::LogMsg(msg);
-         msg.Format("m_availableDischarge = %f, m_wdRatio = %f, m_width = %f, GetDepthFromQ() = %f",
-            pReach->m_availableDischarge, pReach->m_wdRatio, pReach->m_width, pReach->GetDepthFromQ(pReach->m_availableDischarge, pReach->m_wdRatio));
+         msg.Format("m_availableDischarge = %f, m_wdRatio = %f, m_width = %f, GetManningDepthFromQ() = %f",
+            pReach->m_availableDischarge, pReach->m_wdRatio, pReach->m_width, pReach->GetManningDepthFromQ(pReach->m_availableDischarge, pReach->m_wdRatio));
          Report::LogMsg(msg);
       }
       else totReachVol_m3 += reachH2O_m3;
@@ -14331,7 +14334,7 @@ void FlowModel::ApplyMacros( CString &str )
 void SetGeometry(Reach * pReach, double discharge)
 {
    ASSERT(pReach != NULL);
-   pReach->m_depth = GetDepthFromQ(pReach, discharge, pReach->m_wdRatio);
+   pReach->m_depth = GetManningDepthFromQ(pReach, discharge, pReach->m_wdRatio);
    pReach->m_width = pReach->m_wdRatio * pReach->m_depth;
 }
 
@@ -14340,14 +14343,21 @@ void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge)
 {
    ASSERT(pReach != NULL);
    ReachSubnode* pSubnode = pReach->GetReachSubnode(subreachNdx); ASSERT(pSubnode != NULL);
-   pSubnode->m_subreach_depth_m = GetDepthFromQ(discharge, pReach->m_wdRatio, pReach->m_n, pReach->m_slope);
-   pSubnode->m_subreach_width_m = pReach->m_wdRatio * pSubnode->m_subreach_depth_m;
+   double manning_depth_m = GetManningDepthFromQ(discharge, pReach->m_wdRatio, pReach->m_n, pReach->m_slope);
+
+   double width_from_wd_ratio_m = manning_depth_m * pReach->m_wdRatio;
+
    int num_subreaches = pReach->GetSubnodeCount();
    double subreach_length_m = pReach->m_length / num_subreaches;
+   double width_from_volume_m = pSubnode->m_waterParcel.m_volume_m3 / (manning_depth_m * subreach_length_m);
+
+   pSubnode->m_subreach_width_m = min(width_from_wd_ratio_m, width_from_volume_m);
    pSubnode->m_subreach_surf_area_m2 = pSubnode->m_subreach_width_m * subreach_length_m;
+
+   pSubnode->m_subreach_manning_depth_m = manning_depth_m;
 }
 
-float GetDepthFromQ(Reach* pReach, double Q, float wdRatio)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+float GetManningDepthFromQ(Reach* pReach, double Q, float wdRatio)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 {
 // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
    float wdterm = (float)pow((wdRatio / (2 + wdRatio)), 2.0f / 3.0f) * wdRatio;
@@ -14357,14 +14367,14 @@ float GetDepthFromQ(Reach* pReach, double Q, float wdRatio)  // ASSUMES A SPECIF
 }
 
 
-float GetDepthFromQ(double Q, float wdRatio, float n, float slope)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+float GetManningDepthFromQ(double Q, float wdRatio, float n, float slope)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 {
 // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
    float wdterm = (float)pow((wdRatio / (2 + wdRatio)), 2.0f / 3.0f) * wdRatio;
    float depth = (float)pow(((Q * n) / ((float)sqrt(slope) * wdterm)), 3.0f / 8.0f);
    if (depth != depth) depth = 0.00001f;
    return depth;
-} // end of GetDepthFromQ(double Q, float wdRatio, float n, float slope)
+} // end of GetManningDepthFromQ(double Q, float wdRatio, float n, float slope)
 
 
 // figure out what kind of flux it is

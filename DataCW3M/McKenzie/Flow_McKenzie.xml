@@ -869,8 +869,12 @@ dynamic="0"
       <output in_use="1" name="RAD_SW_NET W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW_NET" type="sum" domain="reach" />
       <output in_use="1" name="Net radiation in W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW_NET - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23774077 McKenzie R" query="COMID=23774077" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTH m 23774077 McKenzie R" query="COMID=23774077" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="DEPTHMANNG m 23774077 McKenzie R" query="COMID=23774077" value="DEPTHMANNG" type="sum" domain="reach" />
+      <output in_use="1" name="LENGTH m 23774077 McKenzie R" query="COMID=23774077" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23774077 McKenzie R" query="COMID=23774077" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="outflow Q cfs 23774077 McKenzie R" query="COMID=23774077" value="Q*35.315" type="sum" domain="reach" />
+      <output in_use="1" name="TURNOVER 23774077 McKenzie R" query="COMID=23774077" value="TURNOVER" type="sum" domain="reach" />
     </output_group>
 
     <output_group name="FLOW McKenzie wetland daily outflows (cms)" interval ="daily" >

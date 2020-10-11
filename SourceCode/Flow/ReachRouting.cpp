@@ -75,7 +75,7 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
             ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, 100.));
             double H2O_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
             if (pNode->m_volume < 0) H2O_temp_degC = fabs(pNode->m_waterParcel.WaterTemperature());
-            float depth = GetDepthFromQ(pReach, pNode->m_discharge, pReach->m_wdRatio);
+            float depth = GetManningDepthFromQ(pReach, pNode->m_discharge, pReach->m_wdRatio);
             float width = pReach->m_wdRatio * depth;
             float volume = (width * depth * pReach->m_length / subnode_count);
 
@@ -151,9 +151,11 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_segments_m2);
 
       // Now do the stuff that varies by subreach.
-
       WaterParcel reach_evapWP(0, 0);
-
+      double subreach_length_m = pReach->m_length / pReach->GetSubnodeCount();
+      double width_x_length_accum = 0.;
+      double manning_depth_x_length_accum = 0;
+      double volume_accum_m3 = 0.;
       for (int l = 0; l < pReach->GetSubnodeCount(); l++)
          {
          pFlowContext->pReach = pReach;
@@ -215,6 +217,16 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          {
             pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ;
             pNode->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pNode->m_waterParcel.m_volume_m3, pNode->m_waterParcel.m_thermalEnergy_kJ);
+            if (l == 0 && pNode->m_waterParcel.m_temp_degC >= 1000.)
+            {
+               CString msg;
+               msg.Format("SolveReachKinematicWave() temperature >= 50 degC in reach %d subreach %d: orig kJ = %f,\n"
+                  "m_segmentArray[subreachIndex]->m_sw_kJ = %f, m_segmentArray[subreachIndex]->m_lw_kJ = %f\n"
+                  "pNode->m_subreach_surf_area_m2 = %f, pNode->m_volume_m3 = %f, pNode->m_subreach_manning_depth_m = %f, pNode->m_subreach_width_m = %f, m_temp_degC = %f",
+                  pReach->m_reachID, l, pNode->m_waterParcel.m_thermalEnergy_kJ, pReach->m_segmentArray[l]->m_sw_kJ, pReach->m_segmentArray[l]->m_lw_kJ,
+                  pNode->m_subreach_surf_area_m2, pNode->m_waterParcel.m_volume_m3, pNode->m_subreach_manning_depth_m, pNode->m_subreach_width_m, pNode->m_waterParcel.m_temp_degC);
+               Report::LogMsg(msg);
+            }
          }
          ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
 /*x
@@ -246,6 +258,9 @@ x*/
          ASSERT(pNode->m_volume > 0);
 
          pNode->m_discharge = outflow / SEC_PER_DAY;  //convert units to m3/s;  
+         width_x_length_accum += pNode->m_subreach_width_m * subreach_length_m;
+         manning_depth_x_length_accum += pNode->m_subreach_manning_depth_m * subreach_length_m;
+         volume_accum_m3 += pNode->m_waterParcel.m_volume_m3;
 
          if (pNode->m_discharge < 0 || pNode->m_discharge > 1.e10f || pNode->m_discharge != pNode->m_discharge)
             {
@@ -259,6 +274,12 @@ x*/
          } // end of loop through subreaches
 
       pReach->m_evapWP = reach_evapWP;
+      double reach_width_m = width_x_length_accum / pReach->m_length;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachWIDTH, reach_width_m);
+      double reach_manning_depth_m = manning_depth_x_length_accum / pReach->m_length;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachDEPTHMANNG, reach_manning_depth_m);
+      double turnover = (pReach->GetDischarge() * SEC_PER_DAY) / volume_accum_m3;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachTURNOVER, turnover);
 
       } // end of loop through reaches
 
@@ -675,6 +696,7 @@ x*/
 x*/
 
    SetGeometry(pReach, (float)Qnew_cms);
+   SetSubreachGeometry(pReach, subnode, Qnew_cms);
 
    pSubnode->m_waterParcel.MixIn(upstream_inflowWP); 
    pSubnode->m_waterParcel.MixIn(pSubnode->m_runoffWP); 
