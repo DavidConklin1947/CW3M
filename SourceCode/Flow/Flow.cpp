@@ -3853,14 +3853,17 @@ bool FlowModel::ReadState()
 // Returns true if able to read and restore the state of the hydrology variables, false otherwise.
 {
    m_saveStateAtEndOfRun = true;
+   CString effective_IC_filename;
 
-   if (m_initConditionsFileName.GetLength() <= 0)
-   {
-      CString msg;
-      msg.Format("ReadState(): No Flow initial conditions file was specified.");
-      Report::LogMsg(msg);
-      return(false);
-   }
+   bool user_specified_a_file = m_initConditionsFileName.GetLength() > 0;
+   if (user_specified_a_file) effective_IC_filename = m_initConditionsFileName;
+   else
+      {
+      // Set the string "effective_IC_filename" equal to "flow<startYear>.ic"
+      CString year_string;
+      year_string.Format("%d", m_flowContext.pEnvContext->startYear);
+      effective_IC_filename = "flow" + year_string + ".ic";
+      }
 
    int hruCount = GetHRUCount();
    int hruLayerCount = GetHRULayerCount();
@@ -3883,12 +3886,12 @@ bool FlowModel::ReadState()
    CString tmpPath = PathManager::GetPath(PM_IDU_DIR);//directory with the idu
    int fileStateVarCount = 0;
 
-   if (PathManager::FindPath(m_initConditionsFileName, tmpPath) < 0) //the file cannot be found, so skip the read and set flag to write file at the end of the run
+
+   if (PathManager::FindPath(effective_IC_filename, tmpPath) < 0) 
       {
       CString msg;
-      msg.Format("Flow: Initial Conditions file '%s' cannot be found.", (LPCTSTR) m_initConditionsFileName);
-      Report::LogMsg(msg, RT_WARNING);
-      m_saveStateAtEndOfRun = true;
+      msg.Format("ReadState(): Initial Conditions file '%s' cannot be found.", (LPCTSTR)effective_IC_filename);
+      Report::WarningMsg(msg);
       return false;
       }
 
@@ -3898,10 +3901,15 @@ bool FlowModel::ReadState()
    if ((err = fopen_s(&fp, file, "rb")) != 0) 
       {
       CString msg;
-      msg.Format("Unable to open file %s.  Initial conditions won't be restored.  ", tmpPath);
-      Report::LogMsg(msg, RT_WARNING);
-      m_saveStateAtEndOfRun = true;
-      return false;
+      msg.Format("ReadState(): Unable to open file %s.  Initial conditions won't be restored.  ", (LPCTSTR)tmpPath);
+      Report::WarningMsg(msg);
+      if (!user_specified_a_file)
+         {
+         CString msg;
+         msg.Format("ReadState(): No Flow initial conditions file was specified by the user, and we were unable to open the default file %s.", (LPCTSTR)m_initConditionsFileName);
+         Report::LogMsg(msg);
+         }
+       return false;
       }
 
    fread(&fileStateVarCount, sizeof(int), 1, fp);
