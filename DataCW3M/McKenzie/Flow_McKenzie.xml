@@ -849,15 +849,17 @@ dynamic="0"
       <output in_use="1" name="WETL 18 outflow 23773619 McGowan Cr 539m elev" query="COMID=23773619" value="Q" type="sum" domain="reach" />
     </output_group>
 
-    <output_group name="FLOW McKenzie daily thermal energy 23772751" interval ="daily" >
-      <output in_use="1" name="TEMP_H2O degC 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach" />
+    <output_group name="FLOW 23772751 MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR USGS_14164900" interval ="daily" >
+      <output in_use="1" name="TEMP_H2O degC 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach" 
+            obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
       <output in_use="1" name="TEMP_AIR degC 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="TEMP_AIR" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW_NET W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_NET" type="sum" domain="reach" />
       <output in_use="1" name="Net radiation in W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_NET - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="AREA_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="outflow Q cfs 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="Q*35.315" type="sum" domain="reach" obs="..\Observations\IncludingLeapDays\obs_usgs14164900.csv" format="E0" />
+      <output in_use="1" name="outflow Q cfs 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="Q*35.315" type="sum" domain="reach" 
+              obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
     </output_group>
 
     <output_group name="FLOW McKenzie daily thermal energy 23774077" interval ="daily" >
@@ -897,7 +899,8 @@ dynamic="0"
     <output_group name="FLOW 23773359 MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRING USGS 14158850" interval ="daily" >
       <output in_use="1" name="PRECIP mmH2O 23773359 McKenzie R" query="COMID=23773359" value="PRECIP" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW" type="sum" domain="reach" />
-      <output in_use="1" name="TEMP_H2O degC 23773359 McKenzie R" query="COMID=23773359" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O degC 23773359 McKenzie R" query="COMID=23773359" value="TEMP_H2O" type="sum" domain="reach" 
+              obs="..\Observations\McKenzie\USGS_14158850_temp_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
       <output in_use="1" name="TEMP_AIR degC 23773359 McKenzie R" query="COMID=23773359" value="TEMP_AIR" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW_NET W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW_NET" type="sum" domain="reach" />
@@ -908,7 +911,7 @@ dynamic="0"
       <output in_use="1" name="LENGTH m 23773359 McKenzie R" query="COMID=23773359" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23773359 McKenzie R" query="COMID=23773359" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="outflow Q cfs 23773359 McKenzie R" query="COMID=23773359" value="Q*35.315" type="sum" domain="reach"
-              obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />>
+              obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
       <output in_use="1" name="TURNOVER 23773359 McKenzie R" query="COMID=23773359" value="TURNOVER" type="sum" domain="reach" />
     </output_group>
 
