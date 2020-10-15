@@ -66,16 +66,19 @@ int ReportBoxProc(  LPCTSTR hdr, LPCTSTR msg, int flags )
    dlg.m_msg = msg;
    dlg.m_hdr = hdr;
    dlg.m_noShow = 0;
-   dlg.m_output = ( Report::reportFlag & RF_CALLBACK ) ? 1 : 0;
+   dlg.m_output = 0; // (Report::reportFlag & RF_CALLBACK) ? 1 : 0;
    dlg.m_flags = flags;
    int retVal = (int) dlg.DoModal();
 
    Report::reportFlag = 0;
-   if ( ! dlg.m_noShow )
+   if (!dlg.m_noShow)
       Report::reportFlag += RF_MESSAGEBOX;
-
-   if ( dlg.m_output )
+   else
       Report::reportFlag += RF_CALLBACK;
+
+   if (dlg.m_output)
+//      Report::reportFlag += RF_CALLBACK;
+exit(0);
    
 //   retVal = AfxGetMainWnd()->MessageBox( msg, hdr, flags );
    

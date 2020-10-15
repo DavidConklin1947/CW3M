@@ -308,9 +308,9 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,196,91,61,17
     LTEXT           "Static",IDC_LIB_MSG,7,9,258,68
-    CONTROL         "Direct future reports to the output window",IDC_LIB_OUTPUT,
+    CONTROL         "Exit from CW3M",IDC_LIB_OUTPUT,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,86,157,10
-    CONTROL         "Don't show these messages in the future",IDC_LIB_NOMSGS,
+    CONTROL         "Direct future reports to the output window",IDC_LIB_NOMSGS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,102,147,10
 END
 
