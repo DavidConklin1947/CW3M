@@ -212,8 +212,7 @@ protected:
    double GetReachOutflow(ReachNode* pReachNode);
    WaterParcel GetReachOutflowWP(ReachNode* pReachNode);
 
-   double EstimateReachOutflow( Reach *pReach, int i, double timeStep, double lateralInflow);
-   WaterParcel ApplyReachOutflowWP2(Reach* pReach, int subnode, double timeStep);
+   WaterParcel ApplyReachOutflowWP(Reach* pReach, int subnode, double timeStep);
    double KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, Reach * pReach);
 
    double GetLateralSVInflow( Reach *pReach, int sv );
