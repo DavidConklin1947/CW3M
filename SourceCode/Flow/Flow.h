@@ -481,13 +481,14 @@ public:
    WaterParcel Discharge(double volume_m3);
    void MixIn(WaterParcel inflow);
    double WaterTemperature();
+   double WaterTemperature(double thermalEnergy_kJ);
    static double WaterTemperature(double volume_m3, double thermalEnergy_kJ);
+   double ThermalEnergy();
    double ThermalEnergy(double temperature_degC);
    static double ThermalEnergy(double volume_m3, double temperature_degC);
 
 //private:
    double m_volume_m3;
-   double m_thermalEnergy_kJ;
    double m_temp_degC;
 }; // end of class WaterParcel
 

@@ -212,28 +212,28 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
                double temp_diff = pNode->m_waterParcel.WaterTemperature() - skin_temp_degC;
                double max_heat_loss_kJ = WaterParcel::ThermalEnergy(pNode->m_waterParcel.m_volume_m3, temp_diff);
                double heat_loss_kJ = min(max_heat_loss_kJ, -subreach_net_rad_kJ);
-               pNode->m_waterParcel.m_thermalEnergy_kJ -= heat_loss_kJ; 
-               pNode->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pNode->m_waterParcel.m_volume_m3, pNode->m_waterParcel.m_thermalEnergy_kJ);
-
-               ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
+               double thermal_energy_kJ = pNode->m_waterParcel.ThermalEnergy() - heat_loss_kJ;
+               pNode->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pNode->m_waterParcel.m_volume_m3, thermal_energy_kJ);               
+               ASSERT(pNode->m_waterParcel.m_temp_degC >= 0);
             }
          }
          else
          {
-            pNode->m_waterParcel.m_thermalEnergy_kJ += subreach_net_rad_kJ;
-            pNode->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pNode->m_waterParcel.m_volume_m3, pNode->m_waterParcel.m_thermalEnergy_kJ);
+            double thermal_energy_kJ = pNode->m_waterParcel.ThermalEnergy() + subreach_net_rad_kJ;
+            pNode->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pNode->m_waterParcel.m_volume_m3, thermal_energy_kJ);
+
             if (l == 0 && pNode->m_waterParcel.m_temp_degC >= 150.)
             {
                CString msg;
                msg.Format("SolveReachKinematicWave() temperature >= 50 degC in reach %d subreach %d: orig kJ = %f,\n"
                   "m_segmentArray[subreachIndex]->m_sw_kJ = %f, m_segmentArray[subreachIndex]->m_lw_kJ = %f\n"
                   "pNode->m_subreach_surf_area_m2 = %f, pNode->m_volume_m3 = %f, pNode->m_subreach_manning_depth_m = %f, pNode->m_subreach_width_m = %f, m_temp_degC = %f",
-                  pReach->m_reachID, l, pNode->m_waterParcel.m_thermalEnergy_kJ, pReach->m_segmentArray[l]->m_sw_kJ, pReach->m_segmentArray[l]->m_lw_kJ,
+                  pReach->m_reachID, l, pNode->m_waterParcel.ThermalEnergy(), pReach->m_segmentArray[l]->m_sw_kJ, pReach->m_segmentArray[l]->m_lw_kJ,
                   pNode->m_subreach_surf_area_m2, pNode->m_waterParcel.m_volume_m3, pNode->m_subreach_manning_depth_m, pNode->m_subreach_width_m, pNode->m_waterParcel.m_temp_degC);
                Report::LogMsg(msg);
             }
          }
-         ASSERT(pNode->m_waterParcel.m_thermalEnergy_kJ >= 0);
+         ASSERT(pNode->m_waterParcel.m_temp_degC >= 0);
 
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);

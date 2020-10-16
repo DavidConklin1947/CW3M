@@ -14541,7 +14541,6 @@ float CalcRelHumidity(float specHumid, float tMean, float elevation)
 WaterParcel::WaterParcel() 
 { 
    m_volume_m3 = 0; 
-   m_thermalEnergy_kJ = 0; 
    m_temp_degC = 0;
 } // end of default constructor for WaterParcel objects
 
@@ -14549,7 +14548,6 @@ WaterParcel::WaterParcel()
 WaterParcel::WaterParcel(double volume_m3, double temperature_degC)
 {
    this->m_volume_m3 = volume_m3;
-   this->m_thermalEnergy_kJ = temperature_degC * volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O;
    this->m_temp_degC = temperature_degC;
 } // end of WaterParcel constructor
 
@@ -14558,11 +14556,13 @@ void WaterParcel::Discharge(WaterParcel dischargeWP)
 // This routine removes water and energy from a WaterParcel object, but it doesn't put it anywhere.
 // So for conservation of mass and energy, add the WaterParcel in somewhere else (e.g. call MixIn()) before calling Discharge(). 
 {
-   double outflowVolume_m3 = dischargeWP.m_volume_m3;
-   ASSERT(outflowVolume_m3 >= 0);
+   double departing_volume_m3 = dischargeWP.m_volume_m3;
+   ASSERT(departing_volume_m3 >= 0);
+   double departing_energy_kJ = dischargeWP.ThermalEnergy();
 
+   double new_energy_kJ = this->ThermalEnergy() - dischargeWP.ThermalEnergy(); ASSERT(new_energy_kJ >= 0);
    this->m_volume_m3 -= dischargeWP.m_volume_m3; ASSERT(this->m_volume_m3 >= 0);
-   this->m_thermalEnergy_kJ -= dischargeWP.m_thermalEnergy_kJ; ASSERT(this->m_thermalEnergy_kJ >= 0);
+   this->m_temp_degC = WaterTemperature(new_energy_kJ); ASSERT(this->m_temp_degC >= 0);
 } // end of void WaterParcel::Discharge(WaterParcel)
 
 
@@ -14570,26 +14570,27 @@ WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
 {
    ASSERT(outflowVolume_m3 >= 0 && outflowVolume_m3 <= this->m_volume_m3);
    
-   WaterParcel departingWP(0, 0);
-   departingWP.m_volume_m3 = outflowVolume_m3;
-   departingWP.m_thermalEnergy_kJ = (outflowVolume_m3 / this->m_volume_m3) * this->m_thermalEnergy_kJ;
-   departingWP.m_temp_degC = this->m_temp_degC;
-   ASSERT(close_enough(departingWP.m_temp_degC, WaterTemperature(departingWP.m_volume_m3, departingWP.m_thermalEnergy_kJ), 1e-4, .01));
-
+   WaterParcel departingWP(outflowVolume_m3, this->m_temp_degC);
    this->m_volume_m3 -= outflowVolume_m3;
-   this->m_thermalEnergy_kJ -= departingWP.m_thermalEnergy_kJ;
-
    return(departingWP);
 } // end of WaterParcel WaterParcel::Discharge(double)
 
 
-void WaterParcel::MixIn(WaterParcel inflow) 
+void WaterParcel::MixIn(WaterParcel inflowWP) 
 { // Note that this method tolerates negative values for volume and energy.
-   if (inflow.m_volume_m3 == 0) return;
-   m_volume_m3 += inflow.m_volume_m3;
-   m_thermalEnergy_kJ += inflow.m_thermalEnergy_kJ;
-   m_temp_degC = WaterTemperature(m_volume_m3, m_thermalEnergy_kJ);
+   if (inflowWP.m_volume_m3 == 0) return;
+
+   double thermal_energy_kJ = this->ThermalEnergy() + inflowWP.ThermalEnergy();
+   m_volume_m3 += inflowWP.m_volume_m3;
+   m_temp_degC = WaterTemperature(m_volume_m3, thermal_energy_kJ);
 } // end of MixIn()
+
+
+double WaterParcel::WaterTemperature(double thermalEnergy_kJ)
+{
+   double temp_degC = WaterTemperature(this->m_volume_m3, thermalEnergy_kJ);
+   return(temp_degC);
+} // end of WaterTemperature(thermalEnergy_kJ)
 
 
 double WaterParcel::WaterTemperature(double volume_m3, double thermalEnergy_kJ)
@@ -14602,19 +14603,23 @@ double WaterParcel::WaterTemperature(double volume_m3, double thermalEnergy_kJ)
 
 double WaterParcel::WaterTemperature()
 {
-   if (m_volume_m3 <= 0) return(0);
-
-   double temperature_degC = m_thermalEnergy_kJ / (m_volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O);
-   ASSERT(temperature_degC < 300.);
-   return(temperature_degC);
+   ASSERT(0 <= m_temp_degC && m_temp_degC < 300.); // ??? < 50.
+   return(m_temp_degC);
 } // end of WaterTemperature()
+
+
+double WaterParcel::ThermalEnergy()
+{
+   double thermalEnergy_kJ = ThermalEnergy(m_volume_m3, m_temp_degC);
+   return(thermalEnergy_kJ);
+} // end of ThermalEnergy()
 
 
 double WaterParcel::ThermalEnergy(double temperature_degC)
 {
    double thermalEnergy_kJ = ThermalEnergy(m_volume_m3, temperature_degC);
    return(thermalEnergy_kJ);
-} // end of ThermalEnergy()
+} // end of ThermalEnergy(temperature_degC))
 
 
 double WaterParcel::ThermalEnergy(double volume_m3, double temperature_degC)
