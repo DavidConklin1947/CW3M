@@ -908,7 +908,7 @@ double Reach::GetDischarge( int subnode /*=-1*/ )
    return q;
    } // end of GetDischarge()
 
-
+/*x
 WaterParcel Reach::SubReachEvapWP(int subreachIndex)
 // Totals up the evap from the stream segment parts corresponding to this subreach.
 {
@@ -919,6 +919,7 @@ WaterParcel Reach::SubReachEvapWP(int subreachIndex)
 
    return(subreach_evapWP);
 } // end of SubReachEvapWP()
+x*/
 
 double Reach::SubReachNetRad_kJ(int subreachIndex)
 // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
@@ -940,6 +941,46 @@ double Reach::GetSegmentWaterTemp_degC(int segment)
 
    return(segment_H2O_temp_degC);
 } // end of GetSegmentWaterTemp_degC()
+
+
+double Reach::Evap_m_s(int segment, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity)
+// returns evaporation rate in m3H2O/m2/sec, i.e. m/sec
+{ // Implements eq. 2-105 for evaporation rate on p. 61 of Boyd & Kasper
+   // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
+   // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,
+   // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
+   // aerodynamic evaporation is a function of the windspeed.
+   // Eq. 2-105 is for evap rate in m3H2O/m2/sec, i.e. m/sec
+   ReachSubnode * pSubreach = this->GetReachSubnode(segment);
+   double temp_H2O_degC = pSubreach->m_waterParcel.WaterTemperature();
+   double L_e_J_kg = LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1.e6;
+   double e_s = WaterParcel::SatVP_mbar(temp_H2O_degC);
+   double e_a = WaterParcel::SatVP_mbar(tempAir_degC);
+   double E_a = 0.; // ??? aerodynamic evaporation, m/s
+   double gamma = 66. / PA_PER_MBAR; // psychrometric constant, mbar/degC, ~= 0.066 kPa/degK = 66 Pa/degC
+   double delta = (e_s - e_a) / (temp_H2O_degC - tempAir_degC); // slope of the saturation vapor v. air temperature curve
+   double numerator = ((swIn_W_m2 - lwOut_W_m2) / (DENSITY_H2O * L_e_J_kg)) * delta + E_a * gamma;
+   double evap_m_s = numerator / (delta + gamma);
+   if (evap_m_s < 0.) evap_m_s = 0.;
+
+   return(evap_m_s);
+} // end of GetSegmentEvapWP()
+
+/*x
+double Reach::LatentHeatOfVaporization_J_kg(double temp_H2O_degC) // returns J/kg
+{ // Implements eq. 2-95 on p. 59 of Boyd & Kasper
+   double latent_heat_J_kg = 1000. * (2501.4 + (1.83 + temp_H2O_degC));
+   return(latent_heat_J_kg);
+} // end of LatentHeadOfEvaporation()
+x*/
+
+double Reach::LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC) // returns MJ/kg
+{ // Implements eq. 7-8 on p. 274 of Boyd & Kasper
+   // Eq. 2-95 on p.59 of Boyd & Kasper seems wrong. The latent heat of vaporization should decrease as water temperature increases.
+   double latent_heat_MJ_kg = 2.50 - (2.36e-3 * temp_H2O_degC);
+   return(latent_heat_MJ_kg);
+} // end of LatentHeadOfEvaporation()
+
 
 
 double Reach::GetSegmentViewToSky_frac(int segment)
@@ -14576,6 +14617,14 @@ WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
 } // end of WaterParcel WaterParcel::Discharge(double)
 
 
+void WaterParcel::Evaporate(double evap_volume_m3, double evap_energy_kJ)
+{
+   double WP_energy_kJ = this->ThermalEnergy() - evap_energy_kJ; ASSERT(WP_energy_kJ >= 0.);
+   m_volume_m3 -= evap_volume_m3; ASSERT(m_volume_m3 >= 0.);
+   m_temp_degC = WaterParcel::WaterTemperature(m_volume_m3, WP_energy_kJ);
+} // end of Evaporate()
+
+
 void WaterParcel::MixIn(WaterParcel inflowWP) 
 { // Note that this method tolerates negative values for volume and energy.
    if (inflowWP.m_volume_m3 == 0) return;
@@ -14595,6 +14644,8 @@ double WaterParcel::WaterTemperature(double thermalEnergy_kJ)
 
 double WaterParcel::WaterTemperature(double volume_m3, double thermalEnergy_kJ)
 {
+   if (volume_m3 == 0) return(0);
+
    double temperature_degC = thermalEnergy_kJ / (volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O);
    ASSERT(temperature_degC < 300. && temperature_degC >= 0.);
    return(temperature_degC);
@@ -14627,4 +14678,12 @@ double WaterParcel::ThermalEnergy(double volume_m3, double temperature_degC)
    double thermalEnergy_kJ = temperature_degC * volume_m3 * DENSITY_H2O * SPECIFIC_HEAT_H2O;
    return(thermalEnergy_kJ);
 } // end of static double ThermalEnergy(double volume_m3, double temperature_degC);
+
+
+double WaterParcel::SatVP_mbar(double tempAir_degC)
+{
+   double sat_vp_kPa = 0.611 * exp(17.3 * tempAir_degC / (tempAir_degC + 237.3)); // Eq. D-7, p. 586 in Dingman 2002
+   double sat_vp_mbar = sat_vp_kPa * PA_PER_MBAR / 1000.;
+   return(sat_vp_mbar);
+} // end of SatVP_mbar(tempAir_degC)
 

@@ -479,6 +479,7 @@ public:
 
    void Discharge(WaterParcel outflowWP);
    WaterParcel Discharge(double volume_m3);
+   void Evaporate(double evap_volume_m3, double evap_energy_kJ);
    void MixIn(WaterParcel inflow);
    double WaterTemperature();
    double WaterTemperature(double thermalEnergy_kJ);
@@ -486,6 +487,7 @@ public:
    double ThermalEnergy();
    double ThermalEnergy(double temperature_degC);
    static double ThermalEnergy(double volume_m3, double temperature_degC);
+   static double SatVP_mbar(double tempAir_degC);
 
 //private:
    double m_volume_m3;
@@ -813,11 +815,15 @@ public:
    virtual ~ReachSubnode( void ) { }
 
    // ??? Segment members.  Ultimately these should be in the ReachSegment class, not the ReachSubnode class.
-   WaterParcel m_evapWP;
+//x   WaterParcel m_evapWP;
    double m_sw_kJ; // today's incoming shortwave energy
    double m_lw_kJ; // today's outgoing longwave energy
    double m_segment_surf_area_m2; // water surface area used for converting W/m2 to kJ
    double m_segment_volume_m3;
+
+   // These next two can't be expressed as a WaterParcel because the energy includes the latent heat of vaporization.
+   double m_evap_m3;
+   double m_evap_kJ;
 };
 
 
@@ -834,8 +840,9 @@ public:
    void  SetGeometry( float wdRatio );
    float GetManningDepthFromQ( double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
    double GetDischarge( int subnode=-1 );  // -1 means last (lowest) subnode - m3/sec
-   WaterParcel GetDischargeWP(int subnode = -1); // -1 means last (lowest, most downstream) subnode - m3/sec
-   double GetUpstreamInflow(); 
+   WaterParcel GetDischargeWP(int subnode = -1); // -1 means last (lowest, most downstream) subnode 
+   double Evap_m_s(int segment, double rad_sw_net_W_m2, double net_lw_out_W_m2, double temp_air_degC, double ws_m_sec, double sphumidity);
+   double GetUpstreamInflow();
    bool GetUpstreamInflow(double &QLeft, double &QRight);
    WaterParcel SubReachEvapWP(int subreachIndex); // Totals up the evap from the stream segment parts corresponding to this subreach.
    double SubReachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
@@ -843,6 +850,9 @@ public:
    double GetSegmentViewToSky_frac(int segment);
    double GetSegmentArea_m2(int segment);
    float GetCatchmentArea( void );
+
+//x   static double LatentHeatOfVaporization_J_kg(double temp_H2O_degC);
+   static double LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC);
 
    bool  AddFluxFromGlobalHandler( float value ) 
    { 
@@ -881,7 +891,11 @@ public:
    float m_instreamWaterRightUse;  //used to keep track of instream water right use for this reach
    double m_availableDischarge;//keep track of the amount of water diverted from the reach during each timestep
    double m_rad_lw_kJ; // today's net longwave energy out (>0) or in (<0) to the reach
-   WaterParcel m_evapWP; // today's evaporation from the reach
+//x   WaterParcel m_evapWP; // today's evaporation from the reach
+   // These next two can't be expressed as a WaterParcel because the energy includes the latent heat of vaporization.
+   double m_reach_evap_m3;
+   double m_reach_evap_kJ;
+
    PtrArray< ReachSubnode> m_segmentArray; // ??? Ultimately these pointers should point to ReachSegments, not ReachSubnodes.
 
    int m_climateIndex;
