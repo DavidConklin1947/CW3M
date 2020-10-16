@@ -814,12 +814,9 @@ public:
       m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }
 
-   // ??? Segment members.  Ultimately these should be in the ReachSegment class, not the ReachSubnode class.
-//x   WaterParcel m_evapWP;
    double m_sw_kJ; // today's incoming shortwave energy
    double m_lw_kJ; // today's outgoing longwave energy
    double m_segment_surf_area_m2; // water surface area used for converting W/m2 to kJ
-   double m_segment_volume_m3;
 
    // These next two can't be expressed as a WaterParcel because the energy includes the latent heat of vaporization.
    double m_evap_m3;
@@ -851,7 +848,6 @@ public:
    double GetSegmentArea_m2(int segment);
    float GetCatchmentArea( void );
 
-//x   static double LatentHeatOfVaporization_J_kg(double temp_H2O_degC);
    static double LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC);
 
    bool  AddFluxFromGlobalHandler( float value ) 
@@ -891,7 +887,6 @@ public:
    float m_instreamWaterRightUse;  //used to keep track of instream water right use for this reach
    double m_availableDischarge;//keep track of the amount of water diverted from the reach during each timestep
    double m_rad_lw_kJ; // today's net longwave energy out (>0) or in (<0) to the reach
-//x   WaterParcel m_evapWP; // today's evaporation from the reach
    // These next two can't be expressed as a WaterParcel because the energy includes the latent heat of vaporization.
    double m_reach_evap_m3;
    double m_reach_evap_kJ;

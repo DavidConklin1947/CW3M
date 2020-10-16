@@ -135,7 +135,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          double segment_surface_m2 = pReach->GetSegmentArea_m2(segment);
          pReach->m_segmentArray[segment]->m_segment_surf_area_m2 = segment_surface_m2;
          ReachSubnode* pSubreach = pReach->GetReachSubnode(segment);
-         pReach->m_segmentArray[segment]->m_segment_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
 
          double rad_sw_net_W_m2 = rad_sw_unshaded_W_m2; // ??? s/b pReach->GetSegmentShade_a_lator(segment, rad_sw_unshaded_W_m2);
          double temp_H2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
@@ -150,7 +149,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          double evap_m3 = evap_m_s * segment_surface_m2 * SEC_PER_DAY;
          pReach->m_segmentArray[segment]->m_evap_m3 = evap_m3;
          pReach->m_segmentArray[segment]->m_evap_kJ = evap_m3 * DENSITY_H2O * pReach->LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1000.;
-//x         pReach->m_segmentArray[segment]->m_evapWP = WaterParcel(evap_volume_m3, WaterParcel::WaterTemperature(evap_volume_m3, evap_energy_kJ));
 
          pReach->m_segmentArray[segment]->m_sw_kJ = rad_sw_net_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000; 
          pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000; 
@@ -167,7 +165,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_segments_m2);
 
       // Now do the stuff that varies by subreach.
-//x      WaterParcel reach_evapWP(0, 0);
       pReach->m_reach_evap_m3 = 0.;
       pReach->m_reach_evap_kJ = 0.;
       double subreach_length_m = pReach->m_length / pReach->GetSubnodeCount();
@@ -208,8 +205,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 //       double subreach_precip_vol_m3 = pNode->m_subreach_surf_area_m2 * reach_precip_mm / 1000;
 //       WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
 //       pNode->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
-//x         WaterParcel subreach_evapWP = pReach->SubReachEvapWP(l); // SubReachEvapWP() totals up the evap from the stream segment parts corresponding to this subreach.
-//x         pNode->m_waterParcel.Discharge(subreach_evapWP); reach_evapWP.MixIn(subreach_evapWP);
          pNode->m_waterParcel.Evaporate(pNode->m_evap_m3, pNode->m_evap_kJ);
          pReach->m_reach_evap_m3 += pNode->m_evap_m3;
          pReach->m_reach_evap_kJ += pNode->m_evap_kJ;
@@ -218,7 +213,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 // not yet         double subreach_tempC = pNode->m_waterParcel.WaterTemperature();
 // not yet         double subreach_kJ = pNode->m_waterParcel.ThermalEnergy(subreach_tempC) + pReach->SubReachNetRad_kJ(l);
          ASSERT(pNode->m_subreach_surf_area_m2 == pReach->m_segmentArray[l]->m_segment_surf_area_m2);
-         ASSERT(pNode->m_waterParcel.m_volume_m3 == pReach->m_segmentArray[l]->m_segment_volume_m3);
          double subreach_net_rad_kJ = pReach->SubReachNetRad_kJ(l);
          if (subreach_net_rad_kJ < 0.)
          { // Theoretically, the water is losing heat to the atmosphere by radiation.
@@ -276,7 +270,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             }
          } // end of loop through subreaches
 
-//x      pReach->m_evapWP = reach_evapWP;
       double reach_width_m = width_x_length_accum / pReach->m_length;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachWIDTH, reach_width_m);
       double reach_manning_depth_m = manning_depth_x_length_accum / pReach->m_length;

@@ -908,18 +908,6 @@ double Reach::GetDischarge( int subnode /*=-1*/ )
    return q;
    } // end of GetDischarge()
 
-/*x
-WaterParcel Reach::SubReachEvapWP(int subreachIndex)
-// Totals up the evap from the stream segment parts corresponding to this subreach.
-{
-   WaterParcel subreach_evapWP(0, 0);
-
-   // ??? Ultimately, replace this with the logic to find the corresponding segments.
-   subreach_evapWP = m_segmentArray[subreachIndex]->m_evapWP;
-
-   return(subreach_evapWP);
-} // end of SubReachEvapWP()
-x*/
 
 double Reach::SubReachNetRad_kJ(int subreachIndex)
 // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
