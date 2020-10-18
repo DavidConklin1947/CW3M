@@ -787,7 +787,6 @@ public:
 class ReachSubnode : public SubNode, public StateVarContainer
 {
 public:
-   SVTYPE m_volume;
    SVTYPE m_previousVolume;
    double  m_lateralInflow;       // m3/day
    double  m_discharge;           // m3/sec;
@@ -809,8 +808,8 @@ public:
    static SubNode *CreateInstance( void ) { return (SubNode*) new ReachSubnode; }
 
       ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
-         m_previousDischarge(0.11), m_volume(0.0), m_previousVolume(0.0), 
-      m_waterParcel(0, 0),
+         m_previousDischarge(0.11), m_previousVolume(0.0),
+         m_waterParcel(0, 0),
       m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }
 
@@ -1689,6 +1688,7 @@ public:
    int m_colStreamQ_DIV_WRQ;
    int m_colStreamINSTRM_REQ; // regulatory flow requirement for this reach, cms (requirement of most junior instream WR, if more than one applies)
    int m_colStreamREACH_H2O; // volume of water in reach, m3
+   int m_colReachREACH_EVAP; // daily evaporation from reach, m3H2O
    int m_colStreamHYDRO_MW;
    int m_colStreamTEMP_AIR;
    int m_colStreamTMAX_AIR;

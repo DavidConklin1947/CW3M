@@ -64,25 +64,23 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
             pNode->m_dischargeWP = WaterParcel(pNode->m_discharge * SEC_PER_DAY, H2O_temp_degC);
          }
 
-         if (isnan(pNode->m_volume)) 
+         if (isnan(pNode->m_waterParcel.m_volume_m3))
          { 
             pNode->m_nanOccurred = true; 
-            pNode->m_volume = 0; 
             pNode->m_waterParcel = WaterParcel(0, 0);
          }
-         if (pNode->m_volume <= 0)
+         if (pNode->m_waterParcel.m_volume_m3 <= 0)
          {
             ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, 100.));
             double H2O_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
-            if (pNode->m_volume < 0) H2O_temp_degC = fabs(pNode->m_waterParcel.WaterTemperature());
+            if (pNode->m_waterParcel.m_volume_m3 < 0) H2O_temp_degC = fabs(pNode->m_waterParcel.WaterTemperature());
             float depth = GetManningDepthFromQ(pReach, pNode->m_discharge, pReach->m_wdRatio);
             float width = pReach->m_wdRatio * depth;
             float volume = (width * depth * pReach->m_length / subnode_count);
 
-            float node_current_added_volume_m3 = (float)(volume - pNode->m_volume);
+            float node_current_added_volume_m3 = (float)(volume - pNode->m_waterParcel.m_volume_m3);
             pNode->m_addedVolume_m3 += node_current_added_volume_m3;
-            pNode->m_volume = volume;
-            pNode->m_waterParcel = WaterParcel(pNode->m_volume, H2O_temp_degC);
+            pNode->m_waterParcel = WaterParcel(volume, H2O_temp_degC);
          }
       } // end of loop thru subnodes
    } // end of logic to ensure that every discharge is > 0 and every volume is > 0
@@ -176,15 +174,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          pFlowContext->pReach = pReach;
          ReachSubnode *pNode = pReach->GetReachSubnode(l);
 
-         double orig_m_volume = pNode->m_volume;
          double orig_m_volume_m3 = pNode->m_waterParcel.m_volume_m3;
-         if (!close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, 100.))
-         {
-            CString msg; msg.Format("SolveReachKinematicWave() comid = %d, l = %d, pNode->m_volume = %f, pNode->m_waterParcel.m_volume_m3 = %f",
-               pReach->m_reachID, l, pNode->m_volume, pNode->m_waterParcel.m_volume_m3);
-            Report::LogMsg(msg);
-         }
-
          double lateralInflow = GetLateralInflow(pReach);
          double externalFluxes = GetReachFluxes(pFlowContext, pReach);
          double new_lateralInflow = lateralInflow + externalFluxes;
@@ -249,10 +239,8 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);
-         pNode->m_volume = pNode->m_waterParcel.m_volume_m3;
-
          
-         ASSERT(pNode->m_volume > 0);
+         ASSERT(pNode->m_waterParcel.m_volume_m3 > 0);
 
          pNode->m_discharge = outflowWP.m_volume_m3 / SEC_PER_DAY;  // convert units to m3/s
          width_x_length_accum += pNode->m_subreach_width_m * subreach_length_m;
@@ -629,8 +617,8 @@ double ReachRouting::GetReachSVOutflow( ReachNode *pReachNode, int sv )   // rec
       Reach *pReach = gpModel->GetReachFromNode( pReachNode );
       ReachSubnode *pNode = (ReachSubnode*) pReach->m_subnodeArray[ 0 ]; 
 
-      if ( pReach != NULL && pNode->m_volume>0.0f)
-         return float( pNode->GetStateVar( sv ) / pNode->m_volume*pNode->m_discharge*86400.0f );//kg/d 
+      if ( pReach != NULL && pNode->m_waterParcel.m_volume_m3 > 0.0f)
+         return float( pNode->GetStateVar( sv ) / pNode->m_waterParcel.m_volume_m3 * pNode->m_discharge * 86400.0f );//kg/d 
       else
          {
          //ASSERT( 0 );
@@ -663,7 +651,7 @@ double ReachRouting::GetReachSVInflow( Reach *pReach, int subNode, int sv )
       ASSERT( pNode != NULL );
      
       if ( pNode->m_svArray != NULL)
-         flux  = float( pNode->m_svArray[sv]/pNode->m_volume*  pNode->m_discharge*86400.0f );//kg/d 
+         flux  = float( pNode->m_svArray[sv]/pNode->m_waterParcel.m_volume_m3 * pNode->m_discharge*86400.0f );//kg/d 
       }
 
    return flux; //kg/d;

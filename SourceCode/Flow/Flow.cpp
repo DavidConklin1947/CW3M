@@ -2124,6 +2124,7 @@ FlowModel::FlowModel()
  , m_colStreamQ_DIV_WRQ(-1)
  , m_colStreamINSTRM_REQ(-1)
  , m_colStreamREACH_H2O(-1)
+ , m_colReachREACH_EVAP(-1)
  , m_colStreamHYDRO_MW(-1)
     , m_colStreamTEMP_AIR(-1)
     , m_colStreamTMAX_AIR(-1)
@@ -2794,6 +2795,7 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamQ_DIV_WRQ, _T("Q_DIV_WRQ"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamINSTRM_REQ, _T("INSTRM_REQ"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamREACH_H2O, _T("REACH_H2O"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachREACH_EVAP, _T("REACH_EVAP"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamHYDRO_MW, _T("HYDRO_MW"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamJoin, m_streamJoinCol, TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamTMAX_H2O_Y, _T("TMAX_H2O_Y"), TYPE_DOUBLE, CC_AUTOADD);
@@ -3840,21 +3842,23 @@ int FlowModel::SaveState(int calendar_year)
          {
          ReachSubnode *pNode = pReach->GetReachSubnode(k);
          if (pNode->m_discharge==pNode->m_discharge && pNode->m_discharge >= -10.0f
-            && pNode->m_volume == pNode->m_volume)
+            && !isnan(pNode->m_waterParcel.m_volume_m3))
             { 
                double discharge_as_double = (double)pNode->m_discharge;
                fwrite(&discharge_as_double, sizeof(double), 1, fp);
-               fwrite(&pNode->m_volume, sizeof(double), 1, fp);
-               totReachVol += pNode->m_volume;
-               if (pNode->m_volume < -10.0f)
+               fwrite(&pNode->m_waterParcel.m_volume_m3, sizeof(double), 1, fp);
+               totReachVol += pNode->m_waterParcel.m_volume_m3;
+               if (pNode->m_waterParcel.m_volume_m3 < -10.0f)
                   { 
-                  CString msg; msg.Format("FlowModel::SaveState() m_volume < -10.f, m_volume = %f, reach = %d, subnode = %d", pNode->m_volume, i, k); Report::LogMsg(msg);
+                  CString msg; 
+                  msg.Format("FlowModel::SaveState() m_volume_m3 < -10.f, m_volume_m3 = %f, reach = %d, subnode = %d", pNode->m_waterParcel.m_volume_m3, i, k); 
+                  Report::LogMsg(msg);
                   }
          }
          else
             {
             CString msg;
-            msg.Format("FlowModel::SaveState() Bad value (%f, %f) in Reach %i, subnode %d .  Initial conditions won't be saved.  ", pNode->m_discharge, pNode->m_volume, i, k);
+            msg.Format("FlowModel::SaveState() Bad value (%f, %f) in Reach %i, subnode %d .  Initial conditions won't be saved.  ", pNode->m_discharge, pNode->m_waterParcel.m_volume_m3, i, k);
             Report::LogMsg(msg, RT_WARNING);
             fclose(fp);
             return -1;
@@ -3993,10 +3997,7 @@ bool FlowModel::ReadState()
             if (pNode->m_discharge <= 0.) pNode->m_discharge = NOMINAL_LOW_FLOW_CMS;
             pNode->m_dischargeWP = WaterParcel(SEC_PER_DAY * pNode->m_discharge, DEFAULT_REACH_H2O_TEMP_DEGC);
 
-            pNode->m_volume = subnode_volume;
-            ASSERT(pNode->m_volume > 0);
-
-            WaterParcel initialWP(pNode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
+            WaterParcel initialWP(subnode_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
             pNode->m_waterParcel = initialWP;
             pNode->m_previousWP = initialWP;
             SetSubreachGeometry(pReach, j, pNode->m_discharge);
@@ -4116,8 +4117,8 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             SetGeometry(pReach, Q);
             if (!m_isReadStateOK)
             {
-               pSubnode->m_volume = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
-               WaterParcel initial_stateWP(pSubnode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
+               double subnode_volume_m3 = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
+               WaterParcel initial_stateWP(subnode_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
                pSubnode->m_waterParcel = initial_stateWP;
                pSubnode->m_previousWP = initial_stateWP;
             }
@@ -4816,7 +4817,7 @@ double FlowModel::CalcTotH2OinReaches() // Returns m3 H2O
       for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
       {
          ReachSubnode *pNode = pReach->GetReachSubnode(j);
-         reachH2O_m3 += pNode->m_volume;
+         reachH2O_m3 += pNode->m_waterParcel.m_volume_m3;
       }
       if ((reachH2O_m3 != reachH2O_m3) || reachH2O_m3 > 1.e10)
       {
@@ -6008,7 +6009,7 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
       Reach *pReach = m_reachArray.GetAt(i);
       ASSERT( pReach != NULL );
       if ( pReach->m_subnodeArray.GetSize() > 0 && pReach->m_polyIndex >= 0 )
-         {
+      {
          double discharge = pReach->GetDischarge(); ASSERT(discharge > 0.);
          WaterParcel dischargeWP = pReach->GetDischargeWP(); ASSERT(close_enough(discharge, dischargeWP.m_volume_m3 / SEC_PER_DAY, .01, max(10, discharge / 10)));
 
@@ -6017,14 +6018,17 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
          m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachTEMP_H2O, dischargeWP.WaterTemperature());  // degC        
 
          double reachH2O_m3 = 0.;
+         double reach_evap_m3 = 0.;
          for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
          {
             ReachSubnode *pNode = pReach->GetReachSubnode(j);
-            reachH2O_m3 += pNode->m_volume;
+            reachH2O_m3 += pNode->m_waterParcel.m_volume_m3;
+            reach_evap_m3 += pNode->m_evap_m3;
          }
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colStreamREACH_H2O, reachH2O_m3);
-         }
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachREACH_EVAP, reach_evap_m3);
       }
+   }
 
    for (MapLayer::Iterator idu = m_pCatchmentLayer->Begin(); idu < m_pCatchmentLayer->End(); idu++)
    {
@@ -6245,9 +6249,9 @@ bool FlowModel::InitReaches(void)
          ReachSubnode *pSubnode = pReach->GetReachSubnode(j);
          pSubnode->m_discharge = Q;
          pSubnode->m_dischargeWP = WaterParcel(Q * (double)SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC);
-         pSubnode->m_volume = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
-         pSubnode->m_waterParcel = WaterParcel(pSubnode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
-         pSubnode->m_previousWP = WaterParcel(pSubnode->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
+         double subreach_volume_m3 = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
+         pSubnode->m_waterParcel = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
+         pSubnode->m_previousWP = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
          pReach->m_segmentArray[j] = pSubnode;
 
          if (m_reachSvCount > 1)
@@ -9492,7 +9496,7 @@ bool FlowModel::InitIntegrationBlocks( void )
           // assign state variables
           ReachSubnode *pNode = (ReachSubnode*) pReach->m_subnodeArray[j];
           pNode->m_svIndex = reachSvCount;
-          m_reachBlock.SetStateVar( &pNode->m_volume, reachSvCount++ );
+          m_reachBlock.SetStateVar( &pNode->m_waterParcel.m_volume_m3, reachSvCount++ );
 
           for ( int k=0; k < m_reachSvCount-1; k++ )
             m_reachBlock.SetStateVar( &(pNode->m_svArray[ k ]), reachSvCount++ );
@@ -13692,7 +13696,7 @@ bool FlowModel::CollectModelOutput(void)
                if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_REACH)
                   continue;
                if (pNode->m_svArray != NULL)
-                  Reach::m_mvCurrentTracer = pNode->m_svArray[pOutput->m_esvNumber] / pNode->m_volume;  // volume of water        
+                  Reach::m_mvCurrentTracer = pNode->m_svArray[pOutput->m_esvNumber] / pNode->m_waterParcel.m_volume_m3;  // volume of water        
                bool passConstraints = true;
 
                if (pOutput->m_pQuery)
