@@ -909,29 +909,16 @@ double Reach::GetDischarge( int subnode /*=-1*/ )
    } // end of GetDischarge()
 
 
-double Reach::SubReachNetRad_kJ(int subreachIndex)
+double Reach::SubreachNetRad_kJ(int subreachNdx)
 // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
 {
-   double net_rad_kJ = 0;
-
-   // ??? Ultimately, replace this with the logic to find the corresponding segments.
-   net_rad_kJ = m_segmentArray[subreachIndex]->m_sw_kJ - m_segmentArray[subreachIndex]->m_lw_kJ;
-
+   ReachSubnode* pSubreach = GetReachSubnode(subreachNdx);
+   double net_rad_kJ = pSubreach->m_sw_kJ - pSubreach->m_lw_kJ;
    return(net_rad_kJ);
 } // end of SubReachNetRad_kJ()
 
 
-double Reach::GetSegmentWaterTemp_degC(int segment)
-{
-   // ??? Ultimately, replace this with the logic to find the corresponding subreaches.
-   ReachSubnode* pNode = GetReachSubnode(segment);
-   double segment_H2O_temp_degC = pNode->m_waterParcel.WaterTemperature();
-
-   return(segment_H2O_temp_degC);
-} // end of GetSegmentWaterTemp_degC()
-
-
-double Reach::Evap_m_s(int segment, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity)
+double Reach::Evap_m_s(int subreachNdx, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity)
 // returns evaporation rate in m3H2O/m2/sec, i.e. m/sec
 { // Implements eq. 2-105 for evaporation rate on p. 61 of Boyd & Kasper
    // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
@@ -939,7 +926,7 @@ double Reach::Evap_m_s(int segment, double swIn_W_m2, double lwOut_W_m2, double 
    // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
    // aerodynamic evaporation is a function of the windspeed.
    // Eq. 2-105 is for evap rate in m3H2O/m2/sec, i.e. m/sec
-   ReachSubnode * pSubreach = this->GetReachSubnode(segment);
+   ReachSubnode * pSubreach = this->GetReachSubnode(subreachNdx);
    double temp_H2O_degC = pSubreach->m_waterParcel.WaterTemperature();
    double L_e_J_kg = LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1.e6;
    double e_s = WaterParcel::SatVP_mbar(temp_H2O_degC);
@@ -952,44 +939,38 @@ double Reach::Evap_m_s(int segment, double swIn_W_m2, double lwOut_W_m2, double 
    if (evap_m_s < 0.) evap_m_s = 0.;
 
    return(evap_m_s);
-} // end of GetSegmentEvapWP()
+} // end of Evap_m_s()
 
-/*x
+/*
 double Reach::LatentHeatOfVaporization_J_kg(double temp_H2O_degC) // returns J/kg
 { // Implements eq. 2-95 on p. 59 of Boyd & Kasper
+   // Eq. 2-95 on p.59 of Boyd & Kasper seems wrong. The latent heat of vaporization should decrease as water temperature increases.
    double latent_heat_J_kg = 1000. * (2501.4 + (1.83 + temp_H2O_degC));
    return(latent_heat_J_kg);
 } // end of LatentHeadOfEvaporation()
-x*/
+*/
 
 double Reach::LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC) // returns MJ/kg
-{ // Implements eq. 7-8 on p. 274 of Boyd & Kasper
-   // Eq. 2-95 on p.59 of Boyd & Kasper seems wrong. The latent heat of vaporization should decrease as water temperature increases.
+{ // Implements eq. 7-8 on p. 274 of Dingman
    double latent_heat_MJ_kg = 2.50 - (2.36e-3 * temp_H2O_degC);
    return(latent_heat_MJ_kg);
 } // end of LatentHeadOfEvaporation()
 
 
-
-double Reach::GetSegmentViewToSky_frac(int segment)
+double Reach::GetSubreachViewToSky_frac(int subreachNdx)
 {
    double vts_frac = 0.9;
 
    // ??? Ultimately, vts_frac should be adjusted, to take into account shading by bankside vegetation and the width of the reach.
 
    return(vts_frac);
-} // end of GetSegmentViewToSky_frac()
+} // end of GetSubreachViewToSky_frac()
 
 
-double Reach::GetSegmentArea_m2(int segment)
+double Reach::GetSubreachArea_m2(int subreachNdx)
 {
-   double segment_area_m2;
-
-   // ??? Ultimately the segment area will vary from one segment to the next within a reach, as the length and width vary from segment to segment.
-   ReachSubnode* pNode = GetReachSubnode(segment);
-   segment_area_m2 = pNode->m_subreach_surf_area_m2;
-
-   return(segment_area_m2);
+   ReachSubnode* pNode = GetReachSubnode(subreachNdx);
+   return(pNode->m_subreach_surf_area_m2);
 } // end of GetSegmentArea_m2()
 
 
@@ -5720,7 +5701,7 @@ bool FlowModel::SetGlobalFlows( void )
    // where in the reach network that flow applies.  (???Where is this coming from)
    //
    // Once the flow are set at the measured points, they are interpolated across the entire 
-   // ReachTree containing the steam segment nodes, distributed based on contributing areas.
+   // ReachTree containing the stream segment nodes, distributed based on contributing areas.
  /*
    CArray< int, int > m_globalFlowInputReachIndexArray;
 
@@ -6243,8 +6224,7 @@ bool FlowModel::InitReaches(void)
       float Q = NOMINAL_LOW_FLOW_CMS;
       SetGeometry(pReach, Q);
       int subnodeCount = pReach->GetSubnodeCount();
-      pReach->m_segmentArray.SetSize(subnodeCount);
-      for (int j = 0; j < subnodeCount; j++)
+     for (int j = 0; j < subnodeCount; j++)
          { // Initialize state variables.
          ReachSubnode *pSubnode = pReach->GetReachSubnode(j);
          pSubnode->m_discharge = Q;
@@ -6252,7 +6232,6 @@ bool FlowModel::InitReaches(void)
          double subreach_volume_m3 = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
          pSubnode->m_waterParcel = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
          pSubnode->m_previousWP = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
-         pReach->m_segmentArray[j] = pSubnode;
 
          if (m_reachSvCount > 1)
             { // Initialize extra state variables

@@ -71,7 +71,6 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
          }
          if (pNode->m_waterParcel.m_volume_m3 <= 0)
          {
-            ASSERT(close_enough(pNode->m_volume, pNode->m_waterParcel.m_volume_m3, 0.1, 100.));
             double H2O_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
             if (pNode->m_waterParcel.m_volume_m3 < 0) H2O_temp_degC = fabs(pNode->m_waterParcel.WaterTemperature());
             float depth = GetManningDepthFromQ(pReach, pNode->m_discharge, pReach->m_wdRatio);
@@ -123,46 +122,9 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          SetSubreachGeometry(pReach, subreachNdx, pReachSubnode->m_discharge);
       }
 
-      // Do the stuff that varies by segment first.
-      int num_segments = (int)pReach->m_segmentArray.GetSize();
-      double total_surface_in_segments_m2 = 0;
+      double total_surface_in_subreaches_m2 = 0;
       double lw_x_surface_accum = 0;
       double sw_x_surface_accum = 0;
-      for (int segment = 0; segment < num_segments; segment++)
-      {
-         double segment_surface_m2 = pReach->GetSegmentArea_m2(segment);
-         pReach->m_segmentArray[segment]->m_segment_surf_area_m2 = segment_surface_m2;
-         ReachSubnode* pSubreach = pReach->GetReachSubnode(segment);
-
-         double rad_sw_net_W_m2 = rad_sw_unshaded_W_m2; // ??? s/b pReach->GetSegmentShade_a_lator(segment, rad_sw_unshaded_W_m2);
-         double temp_H2O_degC = pReach->GetSegmentWaterTemp_degC(segment);
-         double vts_frac = pReach->GetSegmentViewToSky_frac(segment);
-         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac);
-
-            // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
-            // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,
-            // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
-            // aerodynamic evaporation is a function of the windspeed.
-         double evap_m_s = pReach->Evap_m_s(segment, rad_sw_net_W_m2, net_lw_out_W_m2, temp_air_degC, reach_ws_m_sec, sphumidity);
-         double evap_m3 = evap_m_s * segment_surface_m2 * SEC_PER_DAY;
-         pReach->m_segmentArray[segment]->m_evap_m3 = evap_m3;
-         pReach->m_segmentArray[segment]->m_evap_kJ = evap_m3 * DENSITY_H2O * pReach->LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1000.;
-
-         pReach->m_segmentArray[segment]->m_sw_kJ = rad_sw_net_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000; 
-         pReach->m_segmentArray[segment]->m_lw_kJ = net_lw_out_W_m2 * segment_surface_m2 * SEC_PER_DAY / 1000; 
-         reach_net_lw_kJ += pReach->m_segmentArray[segment]->m_lw_kJ;
-         total_surface_in_segments_m2 += segment_surface_m2;
-         lw_x_surface_accum += net_lw_out_W_m2 * segment_surface_m2;
-         sw_x_surface_accum += (pReach->m_segmentArray[segment]->m_sw_kJ / SEC_PER_DAY) * 1000;
-      } // end of loop thru segments
-      pReach->m_rad_lw_kJ = reach_net_lw_kJ;
-      double reach_lw_W_m2 = lw_x_surface_accum / total_surface_in_segments_m2;
-      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
-      double reach_sw_W_m2 = sw_x_surface_accum / total_surface_in_segments_m2;
-      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_NET, reach_sw_W_m2);
-      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_segments_m2);
-
-      // Now do the stuff that varies by subreach.
       pReach->m_reach_evap_m3 = 0.;
       pReach->m_reach_evap_kJ = 0.;
       double subreach_length_m = pReach->m_length / pReach->GetSubnodeCount();
@@ -173,8 +135,31 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          {
          pFlowContext->pReach = pReach;
          ReachSubnode *pNode = pReach->GetReachSubnode(l);
-
          double orig_m_volume_m3 = pNode->m_waterParcel.m_volume_m3;
+
+         double rad_sw_net_W_m2 = rad_sw_unshaded_W_m2; // ??? s/b pReach->GetSegmentShade_a_lator(segment, rad_sw_unshaded_W_m2);
+         double temp_H2O_degC = pNode->m_waterParcel.m_temp_degC;
+         double vts_frac = pReach->GetSubreachViewToSky_frac(l);
+         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac);
+
+         // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
+         // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,
+         // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
+         // aerodynamic evaporation is a function of the windspeed.
+         double evap_m_s = pReach->Evap_m_s(l, rad_sw_net_W_m2, net_lw_out_W_m2, temp_air_degC, reach_ws_m_sec, sphumidity);
+         double evap_m3 = evap_m_s * pNode->m_subreach_surf_area_m2 * SEC_PER_DAY;
+         pNode->m_evap_m3 = evap_m3;
+         pNode->m_evap_kJ = evap_m3 * DENSITY_H2O * pReach->LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1000.;
+
+         pNode->m_sw_kJ = rad_sw_net_W_m2 * pNode->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
+         pNode->m_lw_kJ = net_lw_out_W_m2 * pNode->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
+         reach_net_lw_kJ += pNode->m_lw_kJ;
+         total_surface_in_subreaches_m2 += pNode->m_subreach_surf_area_m2;
+         lw_x_surface_accum += net_lw_out_W_m2 * pNode->m_subreach_surf_area_m2;
+         sw_x_surface_accum += (pNode->m_sw_kJ / SEC_PER_DAY) * 1000;
+
+
+
          double lateralInflow = GetLateralInflow(pReach);
          double externalFluxes = GetReachFluxes(pFlowContext, pReach);
          double new_lateralInflow = lateralInflow + externalFluxes;
@@ -202,8 +187,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
 // not yet         double subreach_tempC = pNode->m_waterParcel.WaterTemperature();
 // not yet         double subreach_kJ = pNode->m_waterParcel.ThermalEnergy(subreach_tempC) + pReach->SubReachNetRad_kJ(l);
-         ASSERT(pNode->m_subreach_surf_area_m2 == pReach->m_segmentArray[l]->m_segment_surf_area_m2);
-         double subreach_net_rad_kJ = pReach->SubReachNetRad_kJ(l);
+         double subreach_net_rad_kJ = pReach->SubreachNetRad_kJ(l);
          if (subreach_net_rad_kJ < 0.)
          { // Theoretically, the water is losing heat to the atmosphere by radiation.
             double min_skin_temp_degC = 1.;
@@ -228,9 +212,9 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             {
                CString msg;
                msg.Format("SolveReachKinematicWave() temperature >= 50 degC in reach %d subreach %d: orig kJ = %f,\n"
-                  "m_segmentArray[subreachIndex]->m_sw_kJ = %f, m_segmentArray[subreachIndex]->m_lw_kJ = %f\n"
+                  "pNode->m_sw_kJ = %f, pNode->m_lw_kJ = %f\n"
                   "pNode->m_subreach_surf_area_m2 = %f, pNode->m_volume_m3 = %f, pNode->m_subreach_manning_depth_m = %f, pNode->m_subreach_width_m = %f, m_temp_degC = %f",
-                  pReach->m_reachID, l, pNode->m_waterParcel.ThermalEnergy(), pReach->m_segmentArray[l]->m_sw_kJ, pReach->m_segmentArray[l]->m_lw_kJ,
+                  pReach->m_reachID, l, pNode->m_waterParcel.ThermalEnergy(), pNode->m_sw_kJ, pNode->m_lw_kJ,
                   pNode->m_subreach_surf_area_m2, pNode->m_waterParcel.m_volume_m3, pNode->m_subreach_manning_depth_m, pNode->m_subreach_width_m, pNode->m_waterParcel.m_temp_degC);
                Report::LogMsg(msg);
             }
@@ -257,6 +241,12 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             pNode->m_discharge = NOMINAL_LOW_FLOW_CMS;
             }
          } // end of loop through subreaches
+      pReach->m_rad_lw_kJ = reach_net_lw_kJ;
+      double reach_lw_W_m2 = lw_x_surface_accum / total_surface_in_subreaches_m2;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
+      double reach_sw_W_m2 = sw_x_surface_accum / total_surface_in_subreaches_m2;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_NET, reach_sw_W_m2);
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_subreaches_m2);
 
       double reach_width_m = width_x_length_accum / pReach->m_length;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachWIDTH, reach_width_m);
