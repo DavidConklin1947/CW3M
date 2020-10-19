@@ -2105,8 +2105,11 @@ FlowModel::FlowModel()
  , m_colStreamQ_DIV_WRQ(-1)
  , m_colStreamINSTRM_REQ(-1)
  , m_colStreamREACH_H2O(-1)
- , m_colReachREACH_EVAP(-1)
- , m_colStreamHYDRO_MW(-1)
+ //x , m_colReachREACH_EVAP(-1)
+    , m_colReachEVAP_MM(-1)
+    , m_colReachRAD_LW_OUT(-1)
+    , m_colReachRAD_SW_IN(-1)
+    , m_colStreamHYDRO_MW(-1)
     , m_colStreamTEMP_AIR(-1)
     , m_colStreamTMAX_AIR(-1)
     , m_colStreamTMIN_AIR(-1)
@@ -2776,14 +2779,15 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamQ_DIV_WRQ, _T("Q_DIV_WRQ"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamINSTRM_REQ, _T("INSTRM_REQ"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamREACH_H2O, _T("REACH_H2O"), TYPE_FLOAT, CC_AUTOADD);
-   EnvExtension::CheckCol(m_pStreamLayer, m_colReachREACH_EVAP, _T("REACH_EVAP"), TYPE_DOUBLE, CC_AUTOADD);
+//x   EnvExtension::CheckCol(m_pStreamLayer, m_colReachREACH_EVAP, _T("REACH_EVAP"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachEVAP_MM, _T("EVAP_MM"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamHYDRO_MW, _T("HYDRO_MW"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamJoin, m_streamJoinCol, TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamTMAX_H2O_Y, _T("TMAX_H2O_Y"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTEMP_H2O, _T("TEMP_H2O"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachZ_MEAN, _T("Z_MEAN"), TYPE_DOUBLE, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_LW_OUT, _T("RAD_LW_OUT"), TYPE_DOUBLE, CC_AUTOADD);
-   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_NET, _T("RAD_SW_NET"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_IN, _T("RAD_SW_IN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachAREA_H2O, _T("AREA_H2O"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachWIDTH, _T("WIDTH"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachDEPTHMANNG, _T("DEPTHMANNG"), TYPE_DOUBLE, CC_AUTOADD);
@@ -6000,14 +6004,18 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
 
          double reachH2O_m3 = 0.;
          double reach_evap_m3 = 0.;
+         double reach_surf_area_m2 = 0.;
          for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
          {
             ReachSubnode *pNode = pReach->GetReachSubnode(j);
             reachH2O_m3 += pNode->m_waterParcel.m_volume_m3;
             reach_evap_m3 += pNode->m_evap_m3;
+            reach_surf_area_m2 += pNode->m_subreach_surf_area_m2;
          }
+         double reach_evap_mm = (reach_evap_m3 / reach_surf_area_m2) * MM_PER_M;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colStreamREACH_H2O, reachH2O_m3);
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachREACH_EVAP, reach_evap_m3);
+//x         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachREACH_EVAP, reach_evap_m3);
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachEVAP_MM, reach_evap_mm);
       }
    }
 

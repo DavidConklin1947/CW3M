@@ -245,7 +245,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       double reach_lw_W_m2 = lw_x_surface_accum / total_surface_in_subreaches_m2;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
       double reach_sw_W_m2 = sw_x_surface_accum / total_surface_in_subreaches_m2;
-      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_NET, reach_sw_W_m2);
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_IN, reach_sw_W_m2);
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_subreaches_m2);
 
       double reach_width_m = width_x_length_accum / pReach->m_length;

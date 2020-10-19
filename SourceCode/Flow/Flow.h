@@ -787,19 +787,30 @@ public:
 class ReachSubnode : public SubNode, public StateVarContainer
 {
 public:
+   // Values which remain the same over time
+   double m_subreach_length_m;
+   double m_min_width_m;
+   double m_min_volume_m3;
+
+   // Values which change from day to day
    SVTYPE m_previousVolume;
    double  m_lateralInflow;       // m3/day
-   double  m_discharge;           // m3/sec;
+//x   double  m_discharge;           // m3/sec;
    double  m_previousDischarge;   // m3/sec;
    WaterParcel m_waterParcel;
    WaterParcel m_previousWP;
    WaterParcel m_runoffWP; // lateral flow into the subreach
    WaterParcel m_withdrawalWP; // lateral flow out of the subreach
-   WaterParcel m_dischargeWP;
+   WaterParcel m_dischargeWP;   
    double m_subreach_width_m;
-   double m_subreach_manning_depth_m;
+   double m_manning_depth_m;
    double m_subreach_surf_area_m2; // water surface area used for converting W/m2 to kJ
+   double m_sw_kJ; // today's incoming shortwave energy, net of shading and cloudiness effects
+   double m_lw_kJ; // today's net longwave energy, positive for outgoing, negative for incoming
 
+   // These two can't be expressed as a WaterParcel because the energy includes the latent heat of vaporization.
+   double m_evap_m3;
+   double m_evap_kJ;
 
    double m_addedVolume_m3; // amount added to keep compartment from going negative
    double m_addedDischarge_cms; // amount added to ensure discharge is always > 0
@@ -807,18 +818,13 @@ public:
  
    static SubNode *CreateInstance( void ) { return (SubNode*) new ReachSubnode; }
 
-      ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
-         m_previousDischarge(0.11), m_previousVolume(0.0),
+//x   ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
+      ReachSubnode(void) : SubNode(), StateVarContainer(), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
+      m_previousDischarge(0.11), m_previousVolume(0.0),
          m_waterParcel(0, 0),
       m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }
 
-   double m_sw_kJ; // today's incoming shortwave energy
-   double m_lw_kJ; // today's outgoing longwave energy
-
-   // These next two can't be expressed as a WaterParcel because the energy includes the latent heat of vaporization.
-   double m_evap_m3;
-   double m_evap_kJ;
 };
 
 
@@ -1683,7 +1689,8 @@ public:
    int m_colStreamQ_DIV_WRQ;
    int m_colStreamINSTRM_REQ; // regulatory flow requirement for this reach, cms (requirement of most junior instream WR, if more than one applies)
    int m_colStreamREACH_H2O; // volume of water in reach, m3
-   int m_colReachREACH_EVAP; // daily evaporation from reach, m3H2O
+//x   int m_colReachREACH_EVAP; // daily evaporation from reach, m3H2O
+   int m_colReachEVAP_MM; // daily evaporation from reach, m3H2O
    int m_colStreamHYDRO_MW;
    int m_colStreamTEMP_AIR;
    int m_colStreamTMAX_AIR;
@@ -1714,8 +1721,8 @@ public:
    int m_colReachTEMP_H2O;
    int m_colReachArea;
    int m_colReachZ_MEAN;
-   int m_colReachRAD_LW_OUT;
-   int m_colReachRAD_SW_NET;
+   int m_colReachRAD_LW_OUT; // W/m2
+   int m_colReachRAD_SW_IN; // W/m2
    int m_colReachAREA_H2O;
    int m_colReachWIDTH;
    int m_colReachDEPTHMANNG;
