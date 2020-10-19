@@ -790,19 +790,29 @@ public:
    // Values which remain the same over time
    double m_subreach_length_m;
    double m_min_width_m;
+   double m_min_depth_m;
+   double m_wd_ratio;
+   double m_min_surf_area_m2;
    double m_min_volume_m3;
+   double m_midpt_elev_mASL;
+   double m_aspect_deg;
+   int m_aspect_cat;
+   double m_topo_shade;
 
    // Values which change from day to day
+   double m_veg_shade;
+   double m_bank_shade;
    SVTYPE m_previousVolume;
    double  m_lateralInflow;       // m3/day
-//x   double  m_discharge;           // m3/sec;
+   WaterParcel m_dischargeWP; // m_dischargeWP.m_volume_m3 should be maintained equal to m_discharge * SEC_PER_DAY
+   double  m_discharge;           // m3/sec; should be maintained equal to m_dischargeWP.m_volume_m3/SEC_PER_DAY 
    double  m_previousDischarge;   // m3/sec;
    WaterParcel m_waterParcel;
    WaterParcel m_previousWP;
    WaterParcel m_runoffWP; // lateral flow into the subreach
    WaterParcel m_withdrawalWP; // lateral flow out of the subreach
-   WaterParcel m_dischargeWP;   
    double m_subreach_width_m;
+   double m_subreach_depth_m;
    double m_manning_depth_m;
    double m_subreach_surf_area_m2; // water surface area used for converting W/m2 to kJ
    double m_sw_kJ; // today's incoming shortwave energy, net of shading and cloudiness effects
@@ -818,9 +828,8 @@ public:
  
    static SubNode *CreateInstance( void ) { return (SubNode*) new ReachSubnode; }
 
-//x   ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
-      ReachSubnode(void) : SubNode(), StateVarContainer(), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
-      m_previousDischarge(0.11), m_previousVolume(0.0),
+      ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
+         m_previousDischarge(0.11), m_previousVolume(0.0),
          m_waterParcel(0, 0),
       m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }

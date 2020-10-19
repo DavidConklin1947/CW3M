@@ -14382,7 +14382,7 @@ void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge)
    pSubnode->m_subreach_width_m = min(width_from_wd_ratio_m, width_from_volume_m);
    pSubnode->m_subreach_surf_area_m2 = pSubnode->m_subreach_width_m * subreach_length_m;
 
-   pSubnode->m_subreach_manning_depth_m = manning_depth_m;
+   pSubnode->m_manning_depth_m = manning_depth_m;
 }
 
 float GetManningDepthFromQ(Reach* pReach, double Q, float wdRatio)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY

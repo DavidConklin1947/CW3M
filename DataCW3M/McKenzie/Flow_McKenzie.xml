@@ -979,14 +979,14 @@ dynamic="0"
             obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
       <output in_use="1" name="TEMP_AIR degC 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="TEMP_AIR" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_LW_OUT" type="sum" domain="reach" />
-      <output in_use="1" name="RAD_SW_NET W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_NET" type="sum" domain="reach" />
-      <output in_use="1" name="Net radiation in W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_NET - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="WIDTH m 23772751 McKenzie R" query="COMID=23772751" value="WIDTH" type="sum" domain="reach" />
       <output in_use="1" name="DEPTHMANNG m 23772751 McKenzie R" query="COMID=23772751" value="DEPTHMANNG" type="sum" domain="reach" />
       <output in_use="1" name="LENGTH m 23772751 McKenzie R" query="COMID=23772751" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23772751 McKenzie R" query="COMID=23772751" value="REACH_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="REACH_EVAP m3H2O 23772751 McKenzie R" query="COMID=23772751" value="REACH_EVAP" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23772751 McKenzie R" query="COMID=23772751" value="EVAP_MM" type="sum" domain="reach" />
       <output in_use="1" name="outflow Q cfs 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="Q*35.315" type="sum" domain="reach" 
               obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
       <output in_use="1" name="TURNOVER 23772751 McKenzie R" query="COMID=23772751" value="TURNOVER" type="sum" domain="reach" />
@@ -998,14 +998,14 @@ dynamic="0"
       <output in_use="1" name="TEMP_H2O degC 23774077 McKenzie R" query="COMID=23774077" value="TEMP_H2O" type="sum" domain="reach" />
       <output in_use="1" name="TEMP_AIR degC 23774077 McKenzie R" query="COMID=23774077" value="TEMP_AIR" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_LW_OUT" type="sum" domain="reach" />
-      <output in_use="1" name="RAD_SW_NET W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW_NET" type="sum" domain="reach" />
-      <output in_use="1" name="Net radiation in W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW_NET - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23774077 McKenzie R" query="COMID=23774077" value="AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="WIDTH m 23774077 McKenzie R" query="COMID=23774077" value="WIDTH" type="sum" domain="reach" />
       <output in_use="1" name="DEPTHMANNG m 23774077 McKenzie R" query="COMID=23774077" value="DEPTHMANNG" type="sum" domain="reach" />
       <output in_use="1" name="LENGTH m 23774077 McKenzie R" query="COMID=23774077" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23774077 McKenzie R" query="COMID=23774077" value="REACH_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="REACH_EVAP m3H2O 23774077 McKenzie R" query="COMID=23774077" value="REACH_EVAP" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23774077 McKenzie R" query="COMID=23774077" value="EVAP_MM" type="sum" domain="reach" />
       <output in_use="1" name="outflow Q cfs 23774077 McKenzie R" query="COMID=23774077" value="Q*35.315" type="sum" domain="reach" />
       <output in_use="1" name="TURNOVER 23774077 McKenzie R" query="COMID=23774077" value="TURNOVER" type="sum" domain="reach" />
     </output_group>
@@ -1016,14 +1016,14 @@ dynamic="0"
       <output in_use="1" name="TEMP_H2O degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_H2O" type="sum" domain="reach" />
       <output in_use="1" name="TEMP_AIR degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_AIR" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_LW_OUT" type="sum" domain="reach" />
-      <output in_use="1" name="RAD_SW_NET W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_NET" type="sum" domain="reach" />
-      <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_NET - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23773373 McKenzie R" query="COMID=23773373" value="AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="WIDTH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTH" type="sum" domain="reach" />
       <output in_use="1" name="DEPTHMANNG m 23773373 McKenzie R" query="COMID=23773373" value="DEPTHMANNG" type="sum" domain="reach" />
       <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="REACH_EVAP m3H2O 23773373 McKenzie R" query="COMID=23773373" value="REACH_EVAP" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23773373 McKenzie R" query="COMID=23773373" value="EVAP_MM" type="sum" domain="reach" />
       <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
       <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
     </output_group>
@@ -1035,14 +1035,14 @@ dynamic="0"
               obs="..\Observations\McKenzie\USGS_14158850_temp_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
       <output in_use="1" name="TEMP_AIR degC 23773359 McKenzie R" query="COMID=23773359" value="TEMP_AIR" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_LW_OUT" type="sum" domain="reach" />
-      <output in_use="1" name="RAD_SW_NET W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW_NET" type="sum" domain="reach" />
-      <output in_use="1" name="Net radiation in W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW_NET - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23773359 McKenzie R" query="COMID=23773359" value="AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="WIDTH m 23773359 McKenzie R" query="COMID=23773359" value="WIDTH" type="sum" domain="reach" />
       <output in_use="1" name="DEPTHMANNG m 23773359 McKenzie R" query="COMID=23773359" value="DEPTHMANNG" type="sum" domain="reach" />
       <output in_use="1" name="LENGTH m 23773359 McKenzie R" query="COMID=23773359" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23773359 McKenzie R" query="COMID=23773359" value="REACH_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="REACH_EVAP m3H2O 23773359 McKenzie R" query="COMID=23773359" value="REACH_EVAP" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23773359 McKenzie R" query="COMID=23773359" value="EVAP_MM" type="sum" domain="reach" />
       <output in_use="1" name="outflow Q cfs 23773359 McKenzie R" query="COMID=23773359" value="Q*35.315" type="sum" domain="reach"
               obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
       <output in_use="1" name="TURNOVER 23773359 McKenzie R" query="COMID=23773359" value="TURNOVER" type="sum" domain="reach" />

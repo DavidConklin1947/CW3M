@@ -215,7 +215,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
                   "pNode->m_sw_kJ = %f, pNode->m_lw_kJ = %f\n"
                   "pNode->m_subreach_surf_area_m2 = %f, pNode->m_volume_m3 = %f, pNode->m_subreach_manning_depth_m = %f, pNode->m_subreach_width_m = %f, m_temp_degC = %f",
                   pReach->m_reachID, l, pNode->m_waterParcel.ThermalEnergy(), pNode->m_sw_kJ, pNode->m_lw_kJ,
-                  pNode->m_subreach_surf_area_m2, pNode->m_waterParcel.m_volume_m3, pNode->m_subreach_manning_depth_m, pNode->m_subreach_width_m, pNode->m_waterParcel.m_temp_degC);
+                  pNode->m_subreach_surf_area_m2, pNode->m_waterParcel.m_volume_m3, pNode->m_manning_depth_m, pNode->m_subreach_width_m, pNode->m_waterParcel.m_temp_degC);
                Report::LogMsg(msg);
             }
          }
@@ -228,7 +228,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          pNode->m_discharge = outflowWP.m_volume_m3 / SEC_PER_DAY;  // convert units to m3/s
          width_x_length_accum += pNode->m_subreach_width_m * subreach_length_m;
-         manning_depth_x_length_accum += pNode->m_subreach_manning_depth_m * subreach_length_m;
+         manning_depth_x_length_accum += pNode->m_manning_depth_m * subreach_length_m;
          volume_accum_m3 += pNode->m_waterParcel.m_volume_m3;
 
          if (pNode->m_discharge < 0 || pNode->m_discharge > 1.e10f || pNode->m_discharge != pNode->m_discharge)
@@ -465,8 +465,8 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
    pSubnode->m_waterParcel.MixIn(pSubnode->m_runoffWP); 
    pSubnode->m_waterParcel.Discharge(pSubnode->m_withdrawalWP);
 
-   double outflow_today_m3 = Qnew_cms * (double)SEC_PER_DAY;
-   pSubnode->m_dischargeWP = WaterParcel(outflow_today_m3, pSubnode->m_waterParcel.WaterTemperature());
+   pSubnode->m_discharge = Qnew_cms;
+   pSubnode->m_dischargeWP = WaterParcel(pSubnode->m_discharge * SEC_PER_DAY, pSubnode->m_waterParcel.WaterTemperature());
    pSubnode->m_waterParcel.Discharge(pSubnode->m_dischargeWP);
 
    return(pSubnode->m_dischargeWP);
