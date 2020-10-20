@@ -2094,6 +2094,10 @@ FlowModel::FlowModel()
  , m_colStreamLOBJECTID(-1)
  , m_colStreamROBJECTID(-1)
  , m_colReachSTRM_ORDER( -1 )
+    , m_colReachWIDTH_MIN(-1)
+    , m_colReachDEPTH_MIN(-1)
+    , m_colReachZ_MAX(-1)
+    , m_colReachZ_MIN(-1)
  , m_colStreamCOMID(-1)
  , m_colStreamCOMID_DOWN(-1)
  , m_colStreamCOMID_LEFT(-1)
@@ -2765,6 +2769,10 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamLOBJECTID, _T("LOBJECTID"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamROBJECTID, _T("ROBJECTID"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSTRM_ORDER, _T("STRM_ORDER"), TYPE_INT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachWIDTH_MIN, _T("WIDTH_MIN"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachDEPTH_MIN, _T("DEPTH_MIN"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachZ_MAX, _T("Z_MAX"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachZ_MIN, _T("Z_MIN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamCOMID, _T("COMID"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamCOMID_DOWN, _T("COMID_DOWN"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamCOMID_LEFT, _T("COMID_LEFT"), TYPE_INT, CC_AUTOADD);
@@ -6229,28 +6237,68 @@ bool FlowModel::InitReaches(void)
    for (int i = 0; i < reachCount; i++)
       {
       Reach *pReach = m_reachArray[i];
-      float Q = NOMINAL_LOW_FLOW_CMS;
+      int num_subreaches = pReach->GetSubnodeCount();
+
+      double reach_min_width_m = 0.;
+      m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH_MIN, reach_min_width_m);
+      if (reach_min_width_m <= 0.) reach_min_width_m = pReach->m_streamOrder * pReach->m_streamOrder; // ??? a placeholder
+
+      double reach_min_depth_m = 0.;
+      m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachDEPTH_MIN, reach_min_depth_m);
+      if (reach_min_depth_m <= 0.) reach_min_width_m = reach_min_width_m / pReach->m_wdRatio; 
+
+      double reach_z_min_m = 0.;
+      m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachZ_MIN, reach_z_min_m);
+      ASSERT(-100. < reach_z_min_m && reach_z_min_m < 10000.);
+      double reach_z_max_m = 0.;
+      m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachZ_MAX, reach_z_max_m);
+      ASSERT(-100. < reach_z_max_m && reach_z_max_m < 10000. && reach_z_min <= reach_z_max);
+      double subreach_rise_m = (reach_z_max_m - reach_z_min_m) / num_subreaches;
+
+      double Q = NOMINAL_LOW_FLOW_CMS * pReach->m_streamOrder * pReach->m_streamOrder * pReach->m_streamOrder;
+      double manning_depth_m = GetManningDepthFromQ(pReach, Q, pReach->m_wdRatio);
+
       SetGeometry(pReach, Q);
-      int subnodeCount = pReach->GetSubnodeCount();
-     for (int j = 0; j < subnodeCount; j++)
+
+      for (int j = 0; j < num_subreaches; j++)
          { // Initialize state variables.
-         ReachSubnode *pSubnode = pReach->GetReachSubnode(j);
-         pSubnode->m_discharge = Q;
-         pSubnode->m_dischargeWP = WaterParcel(Q * (double)SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC);
-         double subreach_volume_m3 = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
-         pSubnode->m_waterParcel = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
-         pSubnode->m_previousWP = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
+         ReachSubnode * pSubreach = pReach->GetReachSubnode(j);
+         pSubreach->m_discharge = Q;
+         pSubreach->m_dischargeWP = WaterParcel(Q * (double)SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC);
+//x         double subreach_volume_m3 = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
+//x         pSubreach->m_waterParcel = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
+//x         pSubreach->m_previousWP = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
 
          if (m_reachSvCount > 1)
             { // Initialize extra state variables
-            pSubnode->AllocateStateVars(m_reachSvCount - 1);
+            pSubreach->AllocateStateVars(m_reachSvCount - 1);
             for (int k = 0; k < m_reachSvCount - 1; k++)
                {
-               pSubnode->m_svArray[k] = 0.0f;
-               pSubnode->m_svArrayTrans[k] = 0.0f;
+               pSubreach->m_svArray[k] = 0.0f;
+               pSubreach->m_svArrayTrans[k] = 0.0f;
                }
             } // end of logic for extra state variables
-         }  // end of loop through subnodes for this reach
+
+         pSubreach->m_subreach_length_m = pReach->m_length / num_subreaches; // ??? Ultimately we'll get this from the points which define the reach?
+         pSubreach->m_min_width_m = reach_min_width_m;
+         pSubreach->m_min_depth_m = reach_min_depth_m; 
+         pSubreach->m_min_volume_m3 = pSubreach->m_subreach_length_m * pSubreach->m_min_width_m * pSubreach->m_min_depth_m;
+
+         pSubreach->m_manning_depth_m = manning_depth_m;
+         pSubreach->m_subreach_depth_m = pSubreach->m_min_depth_m + pSubreach->m_manning_depth_m;
+         pSubreach->m_subreach_width_m = pReach->m_wdRatio * pSubreach->m_subreach_depth_m;
+         pSubreach->m_subreach_surf_area_m2 = pSubreach->m_subreach_width_m * pSubreach->m_subreach_length_m;
+         double subreach_volume_m3 = pSubreach->m_subreach_length_m * pSubreach->m_subreach_width_m * pSubreach->m_subreach_depth_m;
+         pSubreach->m_waterParcel = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
+         pSubreach->m_previousWP = pSubreach->m_waterParcel;
+
+         pSubreach->m_midpt_elev_mASL = reach_z_min_m + (j + 0.5) * subreach_rise_m; // ??? placeholder
+         pSubreach->m_aspect_deg = 90.; // ??? placeholder
+         pSubreach->m_aspect_cat = 1; // ??? placeholder
+         pSubreach->m_topo_shade = 0; // ??? placeholder
+         pSubreach->m_veg_shade = 0; // ??? placeholder
+         pSubreach->m_bank_shade = 0; // ??? placeholder
+         }  // end of loop through subreaches of this reach
       } // end of loop through reaches
 
    int polyCount = m_pStreamLayer->GetPolygonCount();

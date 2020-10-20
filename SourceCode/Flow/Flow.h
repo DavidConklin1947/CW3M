@@ -39,7 +39,7 @@ using namespace std;
 #define BOX_FAST_GW 4
 #define BOX_SLOW_GW 5
 
-#define NOMINAL_LOW_FLOW_CMS 1/SEC_PER_DAY /* one cubic meter of water per day, in m3/sec */
+#define NOMINAL_LOW_FLOW_CMS 0.010 /* 10 liters of water per sec */
 #define NOMINAL_LOW_WATER_LITERS_PER_METER 1 /* one liter of water per meter of stream length*/
 #define NOMINAL_MINIMUM_SOIL_WATER_CONTENT 0.001 /* 1 mm of water content per meter of soil depth*/
 #define LITERS_PER_M3 1000
@@ -1684,6 +1684,10 @@ public:
    int m_colStreamLOBJECTID;
    int m_colStreamROBJECTID;
    int m_colReachSTRM_ORDER;
+   int m_colReachWIDTH_MIN;
+   int m_colReachDEPTH_MIN;
+   int m_colReachZ_MAX;
+   int m_colReachZ_MIN;
    int m_colStreamJoin;   
    int m_colStreamCOMID;
    int m_colStreamCOMID_DOWN;
