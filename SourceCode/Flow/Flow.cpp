@@ -3998,7 +3998,7 @@ bool FlowModel::ReadState()
                msg.Format("ReadState() i = %d, j = %d, subreach_volume (%lf) is a nan or < pSubreach->m_min_volume_m3 (= %lf),", i, j, subreach_volume, pSubreach->m_min_volume_m3);
                subreach_volume = pSubreach->m_min_volume_m3;
                CString msg2;
-               msg.Format(" replacing with %lf", subreach_volume);
+               msg2.Format(" replacing with %lf", subreach_volume);
                msg = msg + msg2;
                Report::LogMsg(msg);
             }
@@ -6224,14 +6224,14 @@ bool FlowModel::InitReaches(void)
 
       double reach_min_depth_m = 0.;
       m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachDEPTH_MIN, reach_min_depth_m);
-      if (reach_min_depth_m <= 0.) reach_min_width_m = reach_min_width_m / pReach->m_wdRatio; 
+      if (reach_min_depth_m <= 0.) reach_min_depth_m = reach_min_width_m / pReach->m_wdRatio; 
 
       double reach_z_min_m = 0.;
       m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachZ_MIN, reach_z_min_m);
       ASSERT(-100. < reach_z_min_m && reach_z_min_m < 10000.);
       double reach_z_max_m = 0.;
       m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachZ_MAX, reach_z_max_m);
-      ASSERT(-100. < reach_z_max_m && reach_z_max_m < 10000. && reach_z_min <= reach_z_max);
+      ASSERT(-100. < reach_z_max_m && reach_z_max_m < 10000. && reach_z_min_m <= reach_z_max_m);
       double subreach_rise_m = (reach_z_max_m - reach_z_min_m) / num_subreaches;
 
       double Q = pReach->NominalLowFlow_cms();
