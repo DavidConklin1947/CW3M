@@ -213,8 +213,7 @@ protected:
    WaterParcel GetReachOutflowWP(ReachNode* pReachNode);
 
    WaterParcel ApplyReachOutflowWP(Reach* pReach, int subnode, double timeStep);
-//x   double KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, Reach * pReach);
-   double KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, double manningDepth_m, double width_m, double manningN, double slope, double deltaX_m);
+   static double KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, double manningDepth_m, double width_m, double manningN, double slope, double deltaX_m);
 
    double GetLateralSVInflow( Reach *pReach, int sv );
    double GetReachSVOutflow( ReachNode *pReachNode, int sv );   // recursive!!! for pahntom nodes

@@ -113,21 +113,11 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       double ea, vpd;
       double rh_pct = 100 * ETEquation::CalculateRelHumidity(sphumidity, temp_air_degC, tmax_air_degC, (float)z_mean_m, ea, vpd);
       double reach_net_lw_kJ = 0;
-/*x
-      // Put this here temporarily
-      for (int subreachNdx = 0; subreachNdx < num_subreaches; subreachNdx++)
-      {
-         ReachSubnode * pReachSubnode = pReach->GetReachSubnode(subreachNdx);
-         SetSubreachGeometry(pReach, subreachNdx, pReachSubnode->m_discharge);
-      }
-x*/
-
       double total_surface_in_subreaches_m2 = 0;
       double lw_x_surface_accum = 0;
       double sw_x_surface_accum = 0;
       pReach->m_reach_evap_m3 = 0.;
       pReach->m_reach_evap_kJ = 0.;
-//x      double subreach_length_m = pReach->m_length / pReach->GetSubnodeCount();
       double width_x_length_accum = 0.;
       double manning_depth_x_length_accum = 0;
       double volume_accum_m3 = 0.;
@@ -378,27 +368,6 @@ double ReachRouting::GetReachFluxes( FlowContext *pFlowContext, Reach *pReach )
    }
 
 
-/*
-double ReachRouting::KinematicWave(double oldQ_cms /* Q //, double upstreamInflow_cms /* Qin //, double lateralInflow_cms, Reach* pReach)
-{
-   double beta = 3.0 / 5.0;
-   double wp = (double)(pReach->m_width + pReach->m_depth + pReach->m_depth);
-   double alph = pReach->m_n * pow((long double)wp, (long double)(2 / 3.)) / sqrt(pReach->m_slope);
-   double alpha = pow((long double)alph, (long double)0.6);
-
-   double Qstar_cms = (oldQ_cms + upstreamInflow_cms) / 2.0f; ASSERT(Qstar_cms > 0.);  // from Chow, eqn. 9.6.4 (m3/sec)
-   double z = alpha * beta * pow(Qstar_cms, beta - 1.0); // s/m
-   float dx_m = pReach->m_deltaX;
-
-   double Qin_m2 = (upstreamInflow_cms * SEC_PER_DAY) / dx_m; // inflow term
-   double Qcurrent_m2 = oldQ_cms * z; // current flow rate
-   double divisor_s_per_m = z + SEC_PER_DAY / dx_m; // divisor        
-   double qsurface_m2 = (lateralInflow_cms * SEC_PER_DAY) / dx_m;  //m2
-   double newQ_cms = (qsurface_m2 + Qin_m2 + Qcurrent_m2) / divisor_s_per_m; ASSERT(newQ_cms > 0.);
-
-   return(newQ_cms);
-} // end of KinematicWave()
-x*/
 double ReachRouting::KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, double manningDepth_m, double width_m, double manningN, double slope, double deltaX_m)
 {
    double beta = 3.0 / 5.0;
@@ -437,7 +406,6 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
 
    // Use yesterday's outflow rate to determine the geometry of this subreach.
    double old_Q_cms = pSubnode->m_dischargeWP.m_volume_m3 / SEC_PER_DAY; ASSERT(old_Q_cms > 0); // old_Q_cms is yesterday's outflow rate from this subreach.
-//x   SetGeometry(pReach, (float)old_Q_cms);
 
    double Qin_m3 = GetReachInflow(pReach, subnode) * SEC_PER_DAY;
    ASSERT(close_enough(original_upstream_inflow_volume_m3, Qin_m3, 0.1, 100.));
@@ -446,7 +414,6 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
    double net_lateral_inflow_m3 = pSubnode->m_runoffWP.m_volume_m3 - pSubnode->m_withdrawalWP.m_volume_m3;
    if (net_lateral_inflow_m3 < 0)
    { // net lateral inflow is negative, so there must be withdrawals of some sort
-//x      if ((original_volume_m3 + upstream_inflowWP.m_volume_m3 + net_lateral_inflow_m3) < 0)
       if ((original_volume_m3 + upstream_inflowWP.m_volume_m3 + net_lateral_inflow_m3) < pSubnode->m_min_volume_m3)
       { // There is not enough water to handle the withdrawals.  
          // Add some magic water. This violates conservation of mass.
@@ -465,13 +432,12 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
       MoveWP(excess_volume_m3, &(pSubnode->m_waterParcel), &upstream_inflowWP);
    } // end of special logic for headwater reaches
 
-//x   double Qnew_cms = KinematicWave(old_Q_cms, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY, net_lateral_inflow_m3 / SEC_PER_DAY, pReach); ASSERT(Qnew_cms > 0);
+
    double Qnew_cms = KinematicWave(old_Q_cms, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY, net_lateral_inflow_m3 / SEC_PER_DAY,
       pSubnode->m_manning_depth_m, pSubnode->m_subreach_width_m, pReach->m_n, pReach->m_slope, pReach->m_deltaX);
 
    // Constrain the amount of water leaving the reach to no more than what is already there plus
    // what is coming in, less the minimum volume.
-//x   float min_volume_m3 = (NOMINAL_LOW_WATER_LITERS_PER_METER * pReach->m_length / pReach->GetSubnodeCount()) / LITERS_PER_M3;
    double incoming_volume_m3 = upstream_inflowWP.m_volume_m3 + net_lateral_inflow_m3;
    double max_outgoing_volume_m3 = (pSubnode->m_waterParcel.m_volume_m3 + incoming_volume_m3) - pSubnode->m_min_volume_m3;
    double max_Qnew_cms = max_outgoing_volume_m3 / SEC_PER_DAY;
@@ -479,7 +445,6 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
    if (Qnew_cms > max_Qnew_cms) Qnew_cms = max_Qnew_cms;
    ASSERT(Qnew_cms > 0 && Qnew_cms < 1.e10);
 
-//x   SetGeometry(pReach, (float)Qnew_cms);
    SetSubreachGeometry(pReach, subnode, Qnew_cms);
 
    pSubnode->m_waterParcel.MixIn(upstream_inflowWP); 

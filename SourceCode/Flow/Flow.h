@@ -142,7 +142,6 @@ class ResConstraint;
 
 
 // global functions
-//x void SetGeometry( Reach *pReach, double discharge );
 void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge);
 float GetManningDepthFromQ( Reach *pReach, double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 float GetManningDepthFromQ(double Q, float wdRatio, float n, float slope);  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
@@ -847,7 +846,6 @@ public:
    static ReachNode *CreateInstance( void ) { return (ReachNode*) new Reach; }
 
    Reservoir *GetReservoir( void ) { return (Reservoir*) m_pReservoir; }
-//???   void  SetGeometry( float wdRatio );
    float GetManningDepthFromQ( double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
    double GetDischarge( int subnode=-1 );  // -1 means last (lowest) subnode - m3/sec
    WaterParcel GetDischargeWP(int subnode = -1); // -1 means last (lowest, most downstream) subnode 
@@ -892,8 +890,6 @@ public:
 
 public:
    // reach-level parameters
-//???   float m_width;             // width of the stream reach (m)   ASSSUMES RECTANGULAR
-//???   float m_depth;             // depth of the stream reach (m)
    double m_reach_volume_m3;
    float m_wdRatio;
    float m_cumUpstreamArea;   // cumulative upslope area, in map units, above this reach in the network

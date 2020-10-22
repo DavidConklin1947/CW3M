@@ -834,8 +834,6 @@ Catchment::Catchment( void )
   
 Reach::Reach(  )
 : ReachNode()
-//x, m_width( 5.0f )
-//x, m_depth( 0.5f )
 , m_wdRatio( 10.0f )
 , m_cumUpstreamArea( 0 )
 , m_cumUpstreamLength( 0 )
@@ -863,18 +861,6 @@ Reach::~Reach( void )
       delete m_pStageDischargeTable;
    }
 
-/*x
-void Reach::SetGeometry( float wdRatio )
-   {
-   //ASSERT( pReach->m_qArray != NULL );
-   ReachSubnode *pNode = (ReachSubnode*) m_subnodeArray[ 0 ];
-   ASSERT( pNode != NULL );
-
-   m_depth = GetManningDepthFromQ( pNode->m_discharge, wdRatio );
-   m_width = wdRatio * m_depth;
-   m_wdRatio = wdRatio;
-   }
-x*/
 
 double Reach::NominalLowFlow_cms()
 {
@@ -3994,7 +3980,7 @@ bool FlowModel::ReadState()
             {
                CString msg;
                msg.Format("ReadState() i = %d, j = %d, discharge_as_double (%lf) is a nan or <= 0,", i, j, discharge_as_double);
-               discharge_as_double = NOMINAL_LOW_FLOW_CMS * pReach->m_streamOrder * pReach->m_streamOrder * pReach->m_streamOrder;
+               discharge_as_double = pReach->NominalLowFlow_cms();
                CString msg2; 
                msg2.Format(" replacing with %lf", discharge_as_double);
                msg = msg + msg2;
@@ -4023,7 +4009,6 @@ bool FlowModel::ReadState()
             pSubreach->m_previousWP = initialWP;
             SetSubreachGeometry(pReach, j, pSubreach->m_discharge);
          } // end of subnode loop
-//x         SetGeometry(pReach, pReach->GetDischarge());
          totReachVol += pReach->m_reach_volume_m3; 
       } // end of reach loop
    
@@ -4120,35 +4105,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
    m_pIDUlayer->SetColDataU(m_colET_DAY, 0);
 
-   if (pEnvContext->yearOfRun == 0 /*&& !m_estimateParameters*/)
-   {
-      ResetStateVariables();
-      int reachCount = (int)m_reachArray.GetSize();
-/*x
-      for (int i = 0; i < reachCount; i++)
-      {
-         Reach *pReach = m_reachArray[i];
-         ASSERT(pReach != NULL);
-
-         for (int j = 0; j < pReach->GetSubnodeCount(); j++)
-         {
-            ReachSubnode *pSubnode = pReach->GetReachSubnode(j);
-            ASSERT(pSubnode != NULL);
-
-            //initialize the subnode volumes using mannings equation
-            double Q = pSubnode->m_discharge;
-            SetGeometry(pReach, Q);
-            if (!m_isReadStateOK)
-            {
-               double subnode_volume_m3 = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
-               WaterParcel initial_stateWP(subnode_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
-               pSubnode->m_waterParcel = initial_stateWP;
-               pSubnode->m_previousWP = initial_stateWP;
-            }
-         }
-      }
-x*/
-   }
+   if (pEnvContext->yearOfRun == 0) ResetStateVariables();
 
    CString msg;
 
@@ -4843,18 +4800,6 @@ double FlowModel::CalcTotH2OinReaches() // Returns m3 H2O
          ReachSubnode *pNode = pReach->GetReachSubnode(j);
          reachH2O_m3 += pNode->m_waterParcel.m_volume_m3;
       }
-/*x
-      if ((reachH2O_m3 != reachH2O_m3) || reachH2O_m3 > 1.e10)
-      {
-         CString msg;
-         msg.Format("*** CalcTotH2OinReaches(): reach_ndx = %d, reachH2O_m3 = %f", reach_ndx, reachH2O_m3);
-         Report::LogMsg(msg);
-         msg.Format("m_availableDischarge = %f, m_wdRatio = %f, m_width = %f, GetManningDepthFromQ() = %f",
-            pReach->m_availableDischarge, pReach->m_wdRatio, pReach->m_width, pReach->GetManningDepthFromQ(pReach->m_availableDischarge, pReach->m_wdRatio));
-         Report::LogMsg(msg);
-      }
-      else 
-x*/
       totReachVol_m3 += reachH2O_m3;
    } // end of loop thru reaches
 
@@ -6292,16 +6237,11 @@ bool FlowModel::InitReaches(void)
       double Q = pReach->NominalLowFlow_cms();
       double manning_depth_m = GetManningDepthFromQ(pReach, Q, pReach->m_wdRatio);
 
-//x      SetGeometry(pReach, Q);
-
       for (int j = 0; j < num_subreaches; j++)
          { // Initialize state variables.
          ReachSubnode * pSubreach = pReach->GetReachSubnode(j);
          pSubreach->m_discharge = Q;
          pSubreach->m_dischargeWP = WaterParcel(Q * (double)SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC);
-//x         double subreach_volume_m3 = pReach->m_width * pReach->m_depth * pReach->m_length / pReach->m_subnodeArray.GetSize();
-//x         pSubreach->m_waterParcel = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
-//x         pSubreach->m_previousWP = WaterParcel(subreach_volume_m3, DEFAULT_REACH_H2O_TEMP_DEGC);
 
          if (m_reachSvCount > 1)
             { // Initialize extra state variables
@@ -12431,7 +12371,6 @@ void FlowModel::GetTotalStorage(float &channel, float &terrestrial)
    for ( int i=0; i < reachCount; i++ )
       {
       Reach *pReach = m_reachArray[ i ];
-//x      SetGeometry(pReach,pReach->GetReachSubnode( 0 )->m_discharge);
       channel+=(float)(pReach->m_reach_volume_m3);
       }
    }
@@ -14441,14 +14380,6 @@ void FlowModel::ApplyMacros( CString &str )
 /////////////////////////////////////////////////////////////////// 
 //  additional functions
 
-/*x
-void SetGeometry(Reach * pReach, double discharge)
-{
-   ASSERT(pReach != NULL);
-   pReach->m_depth = GetManningDepthFromQ(pReach, discharge, pReach->m_wdRatio);
-   pReach->m_width = pReach->m_wdRatio * pReach->m_depth;
-}
-x*/
 
 void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge)
 {
