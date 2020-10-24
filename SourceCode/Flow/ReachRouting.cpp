@@ -216,7 +216,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          pSubreach->m_discharge = outflowWP.m_volume_m3 / SEC_PER_DAY;  // convert units to m3/s
          pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
-         pSubreach->SetSubreachGeometry(outflowWP.m_volume_m3, pReach->m_wdRatio);
+         pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, pReach->m_wdRatio);
          width_x_length_accum += pSubreach->m_subreach_width_m * pSubreach->m_subreach_length_m;
          manning_depth_x_length_accum += pSubreach->m_manning_depth_m * pSubreach->m_subreach_length_m;
          volume_accum_m3 += pSubreach->m_waterParcel.m_volume_m3;
@@ -370,10 +370,11 @@ double ReachRouting::GetReachFluxes( FlowContext *pFlowContext, Reach *pReach )
    }
 
 
-double ReachRouting::KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, double manningDepth_m, double width_m, double manningN, double slope, double deltaX_m)
+double ReachRouting::KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, double manningDepth_m, double wdRatio, double manningN, double slope, double deltaX_m)
 {
    double beta = 3.0 / 5.0;
-   double wp = (double)(width_m + manningDepth_m + manningDepth_m);
+   double manning_width_m = wdRatio * manningDepth_m;
+   double wp = manning_width_m + manningDepth_m + manningDepth_m; // = (2 + wdRatio) * manningDepth_m = cross-section + manningDepth_m
    double alph = manningN * pow((long double)wp, (long double)(2 / 3.)) / sqrt(slope);
    double alpha = pow((long double)alph, (long double) 0.6);
       
@@ -432,24 +433,42 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
       // This is a gimmick to get the KinematicWave() method to work better, since it doesn't take into account how much water is already in the reach.
       double excess_volume_m3 = pSubnode->m_waterParcel.m_volume_m3 - (net_lateral_inflow_m3 + upstream_inflowWP.m_volume_m3 + pSubnode->m_min_volume_m3);
       MoveWP(excess_volume_m3, &(pSubnode->m_waterParcel), &upstream_inflowWP);
-   } // end of special logic for headwater reaches
+   } // end of logic to move excess water so that it is treated as if it had flowed in from upstream
 
-
-   double Qnew_cms = KinematicWave(old_Q_cms, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY, net_lateral_inflow_m3 / SEC_PER_DAY,
-      pSubnode->m_manning_depth_m, pSubnode->m_subreach_width_m, pReach->m_n, pReach->m_slope, pReach->m_deltaX);
-
-   // Constrain the amount of water leaving the reach to no more than what is already there plus
-   // what is coming in, less the minimum volume.
-   double incoming_volume_m3 = upstream_inflowWP.m_volume_m3 + net_lateral_inflow_m3;
-   double max_outgoing_volume_m3 = (pSubnode->m_waterParcel.m_volume_m3 + incoming_volume_m3) - pSubnode->m_min_volume_m3;
-   double max_Qnew_cms = max_outgoing_volume_m3 / SEC_PER_DAY;
-   if (max_Qnew_cms < pReach->NominalLowFlow_cms()) max_Qnew_cms = NOMINAL_LOW_FLOW_CMS;
-   if (Qnew_cms > max_Qnew_cms) Qnew_cms = max_Qnew_cms;
+   // Now determine the discharge.
+   double Qnew_cms = 0.;
+   // How much water is available?
+   double available_for_discharge_m3 = pSubnode->m_waterParcel.m_volume_m3 + upstream_inflowWP.m_volume_m3 + pSubnode->m_runoffWP.m_volume_m3
+      - pSubnode->m_withdrawalWP.m_volume_m3 - pSubnode->m_min_volume_m3;
+   double available_for_discharge_cms = available_for_discharge_m3 / SEC_PER_DAY;
+   // Is there enough available to provide the minimum flow?
+   double min_Q_cms = pReach->NominalLowFlow_cms();
+   double magic_H2O_to_add_m3 = 0.;
+   if (available_for_discharge_cms < min_Q_cms)
+   { // No, not enough available to provide the minimum flow. Add some magic water.
+      magic_H2O_to_add_m3 += (min_Q_cms - available_for_discharge_cms) * SEC_PER_DAY;
+      Qnew_cms = min_Q_cms; 
+   }
+   else
+   { // Yes, available water is sufficient for the minimum discharge.  
+      // How does available water compare to the Kinematic Wave solution?
+      double KW_solution_cms = KinematicWave(old_Q_cms, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY, net_lateral_inflow_m3 / SEC_PER_DAY,
+         pSubnode->m_manning_depth_m, pReach->m_wdRatio, pReach->m_n, pReach->m_slope, pReach->m_deltaX);
+      if (KW_solution_cms <= available_for_discharge_cms) Qnew_cms = KW_solution_cms; // Use the KW solution.
+      else Qnew_cms = available_for_discharge_cms; // Maintain the minimum volume using a discharge less than the KW solution.
+   }
    ASSERT(Qnew_cms > 0 && Qnew_cms < 1.e10);
 
    pSubnode->m_waterParcel.MixIn(upstream_inflowWP); 
    pSubnode->m_waterParcel.MixIn(pSubnode->m_runoffWP); 
    pSubnode->m_waterParcel.Discharge(pSubnode->m_withdrawalWP);
+   if (magic_H2O_to_add_m3 > 0.)
+   {
+      double magic_H2O_temp_degC = pSubnode->m_waterParcel.WaterTemperature();
+      WaterParcel magicWP = WaterParcel(magic_H2O_to_add_m3, magic_H2O_temp_degC);
+      pSubnode->m_waterParcel.MixIn(magicWP);
+      pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+   }
 
    pSubnode->m_discharge = Qnew_cms;
    pSubnode->m_dischargeWP = WaterParcel(pSubnode->m_discharge * SEC_PER_DAY, pSubnode->m_waterParcel.WaterTemperature());
