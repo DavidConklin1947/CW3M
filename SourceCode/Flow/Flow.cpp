@@ -3988,7 +3988,7 @@ bool FlowModel::ReadState()
             }
             pSubreach->m_discharge = (float)discharge_as_double;
             pSubreach->m_dischargeWP = WaterParcel(SEC_PER_DAY * discharge_as_double, DEFAULT_REACH_H2O_TEMP_DEGC);
-            pSubreach->m_manning_depth_m = pReach->GetManningDepthFromQ(pSubreach->m_dischargeWP.m_volume_m3, pReach->m_wdRatio);
+            pSubreach->m_manning_depth_m = pReach->GetManningDepthFromQ(pSubreach->m_discharge, pReach->m_wdRatio);
 
             double subreach_volume;
             fread(&subreach_volume, sizeof(double), 1, fp);
@@ -4007,7 +4007,8 @@ bool FlowModel::ReadState()
             WaterParcel initialWP(subreach_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
             pSubreach->m_waterParcel = initialWP;
             pSubreach->m_previousWP = initialWP;
-            SetSubreachGeometry(pReach, j, pSubreach->m_discharge);
+            pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
+            pSubreach->SetSubreachGeometry(subreach_volume, pReach->m_wdRatio);
          } // end of subnode loop
          totReachVol += pReach->m_reach_volume_m3; 
       } // end of reach loop
@@ -6257,6 +6258,8 @@ bool FlowModel::InitReaches(void)
          pSubreach->m_min_width_m = reach_min_width_m;
          pSubreach->m_min_depth_m = reach_min_depth_m; 
          pSubreach->m_min_volume_m3 = pSubreach->m_subreach_length_m * pSubreach->m_min_width_m * pSubreach->m_min_depth_m;
+         pSubreach->m_min_surf_area_m2 = pSubreach->m_subreach_length_m * pSubreach->m_min_width_m;
+         pSubreach->m_wd_ratio = pReach->m_wdRatio;
 
          pSubreach->m_manning_depth_m = manning_depth_m;
          pSubreach->m_subreach_depth_m = pSubreach->m_min_depth_m + pSubreach->m_manning_depth_m;
@@ -14380,16 +14383,25 @@ void FlowModel::ApplyMacros( CString &str )
 /////////////////////////////////////////////////////////////////// 
 //  additional functions
 
-
+/*x
 void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge)
 {
    ASSERT(pReach != NULL);
-   ReachSubnode * pSubreach = pReach->GetReachSubnode(subreachNdx); ASSERT(pSubreach != NULL);
+   ReachSubnode* pSubreach = pReach->GetReachSubnode(subreachNdx); ASSERT(pSubreach != NULL);
 
    pSubreach->m_manning_depth_m = GetManningDepthFromQ(discharge, pReach->m_wdRatio, pReach->m_n, pReach->m_slope);
    pSubreach->m_subreach_depth_m = pSubreach->m_min_depth_m + pSubreach->m_manning_depth_m;
    pSubreach->m_subreach_width_m = pSubreach->m_subreach_depth_m * pReach->m_wdRatio;
    pSubreach->m_subreach_surf_area_m2 = pSubreach->m_subreach_width_m * pSubreach->m_subreach_length_m;
+} // end of SetSubreachGeometry()
+x*/
+
+void ReachSubnode::SetSubreachGeometry(double volume_m3, double wdRatio)
+{
+   double xsec_m2 = volume_m3 / m_subreach_length_m;
+   m_subreach_depth_m = xsec_m2 / (1. + wdRatio);
+   m_subreach_width_m = m_subreach_depth_m * wdRatio;
+   m_subreach_surf_area_m2 = m_subreach_width_m * m_subreach_length_m;
 } // end of SetSubreachGeometry()
 
 

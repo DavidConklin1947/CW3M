@@ -142,7 +142,7 @@ class ResConstraint;
 
 
 // global functions
-void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge);
+//x void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge);
 float GetManningDepthFromQ( Reach *pReach, double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 float GetManningDepthFromQ(double Q, float wdRatio, float n, float slope);  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 FLUXSOURCE ParseSource( LPCTSTR sourceStr, CString &path, CString &source, HINSTANCE &hDLL, FLUXFN &fn );
@@ -786,6 +786,8 @@ public:
 class ReachSubnode : public SubNode, public StateVarContainer
 {
 public:
+   void SetSubreachGeometry(double volume_m3, double wdRatio);
+
    // Values which remain the same over time
    double m_subreach_length_m;
    double m_min_width_m;

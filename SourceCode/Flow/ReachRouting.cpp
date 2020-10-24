@@ -211,10 +211,12 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);
-         
+
          ASSERT(pSubreach->m_waterParcel.m_volume_m3 > 0);
 
          pSubreach->m_discharge = outflowWP.m_volume_m3 / SEC_PER_DAY;  // convert units to m3/s
+         pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
+         pSubreach->SetSubreachGeometry(outflowWP.m_volume_m3, pReach->m_wdRatio);
          width_x_length_accum += pSubreach->m_subreach_width_m * pSubreach->m_subreach_length_m;
          manning_depth_x_length_accum += pSubreach->m_manning_depth_m * pSubreach->m_subreach_length_m;
          volume_accum_m3 += pSubreach->m_waterParcel.m_volume_m3;
@@ -444,8 +446,6 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
    if (max_Qnew_cms < pReach->NominalLowFlow_cms()) max_Qnew_cms = NOMINAL_LOW_FLOW_CMS;
    if (Qnew_cms > max_Qnew_cms) Qnew_cms = max_Qnew_cms;
    ASSERT(Qnew_cms > 0 && Qnew_cms < 1.e10);
-
-   SetSubreachGeometry(pReach, subnode, Qnew_cms);
 
    pSubnode->m_waterParcel.MixIn(upstream_inflowWP); 
    pSubnode->m_waterParcel.MixIn(pSubnode->m_runoffWP); 
