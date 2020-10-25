@@ -142,7 +142,6 @@ class ResConstraint;
 
 
 // global functions
-//x void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge);
 float GetManningDepthFromQ( Reach *pReach, double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 float GetManningDepthFromQ(double Q, float wdRatio, float n, float slope);  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
 FLUXSOURCE ParseSource( LPCTSTR sourceStr, CString &path, CString &source, HINSTANCE &hDLL, FLUXFN &fn );

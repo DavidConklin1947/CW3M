@@ -14383,19 +14383,6 @@ void FlowModel::ApplyMacros( CString &str )
 /////////////////////////////////////////////////////////////////// 
 //  additional functions
 
-/*x
-void SetSubreachGeometry(Reach* pReach, int subreachNdx, double discharge)
-{
-   ASSERT(pReach != NULL);
-   ReachSubnode* pSubreach = pReach->GetReachSubnode(subreachNdx); ASSERT(pSubreach != NULL);
-
-   pSubreach->m_manning_depth_m = GetManningDepthFromQ(discharge, pReach->m_wdRatio, pReach->m_n, pReach->m_slope);
-   pSubreach->m_subreach_depth_m = pSubreach->m_min_depth_m + pSubreach->m_manning_depth_m;
-   pSubreach->m_subreach_width_m = pSubreach->m_subreach_depth_m * pReach->m_wdRatio;
-   pSubreach->m_subreach_surf_area_m2 = pSubreach->m_subreach_width_m * pSubreach->m_subreach_length_m;
-} // end of SetSubreachGeometry()
-x*/
-
 void ReachSubnode::SetSubreachGeometry(double volume_m3, double wdRatio)
 {
    double xsec_m2 = volume_m3 / m_subreach_length_m;
