@@ -3441,6 +3441,7 @@ bool AltWaterMaster::EndStep(FlowContext *pFlowContext)
    return true;
    } // end of EndStep()
 
+
 	bool AltWaterMaster::StartYear(FlowContext *pFlowContext)
 		{
 
@@ -3877,7 +3878,8 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    float snow_evap_mm = (float)((snow_evap_accumulator_m3 / tot_area) * 1000.f);
    float rain_evap_mm = (float)((rain_evap_accumulator_m3 / tot_area) * 1000.f);
    float aquifer_recharge_yr_mm = (float)((aquifer_recharge_accumulator_m3 / tot_area) * 1000.f);
-   float aet_yr_mm = (float)((aet_accumulator_m3 / tot_area) * 1000.f);
+   float reach_evap_mm = (float)((pFlowContext->pFlowModel->m_totEvapFromReachesYr_m3 / tot_area) * 1000.f);
+   float aet_yr_mm = reach_evap_mm + (float)((aet_accumulator_m3 / tot_area) * 1000.f);
 
    float groundwater_pumped_mm = (float)((groundwater_accumulator_ac_ft * M3_PER_ACREFT) / tot_area) * 1000.f;
    float from_outside_basin_mm = (float)((from_outside_basin_accumulator_m3 / tot_area) * 1000.f);

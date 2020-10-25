@@ -1817,6 +1817,9 @@ public:
    double m_StartYear_totHRUs_m3;
    float m_totArea;
 
+   double CalcTotDailyEvapFromReaches(); // Returns m3 H2O
+   double m_totEvapFromReachesYr_m3;
+
    double CalcTotH2OinReaches(); // Returns m3 H2O
    double CalcTotH2OinReservoirs(); // Returns m3 H2O
    double CalcTotH2OinHRUs(); // Returns m3 H2O

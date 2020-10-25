@@ -4406,6 +4406,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
    m_annualTotalRainfall  = 0; // acre-ft
    m_annualTotalSnowfall  = 0; // acre-ft
    m_volumeMaxSWE = 0.0f; // m3 H2O
+   m_totEvapFromReachesYr_m3 = 0.; // m3 H2O
 
    m_pIDUlayer->SetColDataU(m_colSM2ATM_YR, 0.f);
 
@@ -4606,6 +4607,8 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
       m_pIDUlayer->SetDataU(idu, m_colRAD_SW_YR, rad_sw_yr);
    } // end of loop thru IDUs
 
+   m_totEvapFromReachesYr_m3 += CalcTotDailyEvapFromReaches();
+
    return true;
 } // end of FlowModel::EndStep()
 
@@ -4785,6 +4788,21 @@ bool FlowModel::EndYear( FlowContext *pFlowContext )
 
    return true;
    } // end of FlowModel::EndYear()
+
+
+   double FlowModel::CalcTotDailyEvapFromReaches() // Returns m3 H2O
+   {
+      int reachCount = GetReachCount();
+      double tot_reach_evap_m3 = 0.;
+
+      for (int reach_ndx = 0; reach_ndx < reachCount; reach_ndx++)
+      {
+         Reach* pReach = m_reachArray[reach_ndx];
+         tot_reach_evap_m3 += pReach->m_reach_evap_m3;
+      } // end of loop thru reaches
+
+      return(tot_reach_evap_m3);
+   } // end of double CalcTotDailyEvapFromReaches()
 
 
 double FlowModel::CalcTotH2OinReaches() // Returns m3 H2O
