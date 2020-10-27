@@ -868,6 +868,42 @@ dynamic="0"
            obs="..\Observations\Clackamas\USGS_14211010_temp_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000.csv" format="E0" />
     </output_group>
 
+    <output_group name="FLOW Daily Clackamas flow skill assessment" interval ="daily" >
+      <output in_use="1" name="USGS_14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706"
+              query="COMID=23810706" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706.csv" format="E0" />
+      <output in_use="1" name="USGS_14209000_flow_OAK GROVE FORK ABOVE POWERPLAND INTAKE, OR_23809432"
+              query="COMID=23809432" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14209000_flow_OAK GROVE FORK ABOVE POWERPLAND INTAKE, OR_23809432.csv" format="E0" />
+      <output in_use="1" name="USGS_14209250_flow_OAK GROVE FORK AT RIPPLEBROOK CAMPGROUND, OR_23809416"
+              query="COMID=23809416" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14209250_flow_OAK GROVE FORK AT RIPPLEBROOK CAMPGROUND, OR_23809416.csv" format="E0" />
+      <output in_use="1" name="USGS_14209500_flow_CLACKAMAS RIVER ABOVE THREE LYNX CREEK, OR_23809158"
+              query="COMID=23809158" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14209500_flow_CLACKAMAS RIVER ABOVE THREE LYNX CREEK, OR_23809158.csv" format="E0" />
+      <output in_use="1" name="USGS_14210000_flow_CLACKAMAS RIVER  AT ESTACADA, OR_23809080"
+              query="COMID=23809080" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14210000_flow_CLACKAMAS RIVER  AT ESTACADA, OR_23809080.csv" format="E0" />
+      <output in_use="1" name="USGS_14211010_flow_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000"
+              query="COMID=23809000" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14211010_flow_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Daily Clackamas temperature skill assessment" interval ="daily" >
+      <output in_use="1" name="USGS_14209500_temp_CLACKAMAS RIVER ABOVE THREE LYNX CREEK, OR_23809158"
+            query="COMID=23809158" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\Clackamas\USGS_14209500_temp_CLACKAMAS RIVER ABOVE THREE LYNX CREEK, OR_23809158.csv" format="E0" />
+      <output in_use="1" name="USGS_14209710_temp_CLACKAMAS RIVER AT CARTER BRIDGE, NEAR ESTACADA, OR_23809112"
+            query="COMID=23809112" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\Clackamas\USGS_14209710_temp_CLACKAMAS RIVER AT CARTER BRIDGE, NEAR ESTACADA, OR_23809112.csv" format="E0" />
+      <output in_use="1" name="USGS_14210000_temp_CLACKAMAS RIVER AT ESTACADA, OR_23809080"
+            query="COMID=23809080" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\Clackamas\USGS_14210000_temp_CLACKAMAS RIVER AT ESTACADA, OR_23809080.csv" format="E0" />
+      <output in_use="1" name="USGS_14211010_temp_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000"
+            query="COMID=23809000" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\Clackamas\USGS_14211010_temp_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000.csv" format="E0" />
+    </output_group>
+
     <output_group name="FLOW Clackamas wetland yearly outflows (cms)" interval ="yearly" >
       <output in_use="1" name="WETL 19-20 outflow 23809000 Clackamas R 6-12m elev" query="COMID=23809000" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 21 outflow 23809012 Clackamas R 29m elev" query="COMID=23809012" value="Q" type="sum" domain="reach" />
