@@ -61,8 +61,10 @@
              annual_idu_output="0"
              daily_reach_output="0"
              annual_reach_output="0"
+>
+  <!--
              initial_conditions="Flow_Clackamas2010.ic"
-              >
+-->              
 
   <!-- <catchment> specifies how to construct catchment structures for the model.
         Attributes include:
@@ -165,8 +167,8 @@
     GMT_ENDRUN = 512,      // called during EndRun()
     };
 -->
-    
-    <external name="HBV"   method="fn=hbv.dll:HBV_IrrigatedSoil" use="1" timing="1+16"/> 
+
+    <external name="HBV"   method="fn=hbv.dll:HBV_IrrigatedSoil" use="1" timing="1+16"/>
 
     <!--The layers tag will remove water from the layer distribution matching the query first and then remove the unmatched idus 
       using the second layer distribution tag in the percentages indicated -->
@@ -289,7 +291,7 @@ dynamic="0"
     dynamic="0"
        />
 
-<!--    
+    <!--    
     <external name="StreamTemperature"  method="fn=hbv.dll:StreamTempReg" use="1" timing="1+32"/>
     
     <external name="StreamTemperature"  method="fn=StreamTemp.dll:StreamTempEntry" use="1" timing="1+32"/>
@@ -310,7 +312,7 @@ dynamic="0"
         table="topo_shading.csv"
       />
      </StreamTemp_model>
--->    
+-->
   </global_methods>
 
   <!-- <climate> tag attributes note:
@@ -830,6 +832,42 @@ dynamic="0"
 
   <outputs>
 
+    <output_group name="FLOW Monthly Clackamas flow skill assessment" interval ="monthly" >
+      <output in_use="1" name="USGS_14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706"
+              query="COMID=23810706" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706.csv" format="E0" />
+      <output in_use="1" name="USGS_14209000_flow_OAK GROVE FORK ABOVE POWERPLAND INTAKE, OR_23809432"
+              query="COMID=23809432" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14209000_flow_OAK GROVE FORK ABOVE POWERPLAND INTAKE, OR_23809432.csv" format="E0" />
+      <output in_use="1" name="USGS_14209250_flow_OAK GROVE FORK AT RIPPLEBROOK CAMPGROUND, OR_23809416"
+              query="COMID=23809416" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14209250_flow_OAK GROVE FORK AT RIPPLEBROOK CAMPGROUND, OR_23809416.csv" format="E0" />
+      <output in_use="1" name="USGS_14209500_flow_CLACKAMAS RIVER ABOVE THREE LYNX CREEK, OR_23809158"
+              query="COMID=23809158" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14209500_flow_CLACKAMAS RIVER ABOVE THREE LYNX CREEK, OR_23809158.csv" format="E0" />
+      <output in_use="1" name="USGS_14210000_flow_CLACKAMAS RIVER  AT ESTACADA, OR_23809080"
+              query="COMID=23809080" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14210000_flow_CLACKAMAS RIVER  AT ESTACADA, OR_23809080.csv" format="E0" />
+      <output in_use="1" name="USGS_14211010_flow_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000"
+              query="COMID=23809000" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\Clackamas\USGS_14211010_flow_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Monthly Clackamas temperature skill assessment" interval ="monthly" >
+      <output in_use="1" name="USGS_14209500_temp_CLACKAMAS RIVER ABOVE THREE LYNX CREEK, OR_23809158"
+            query="COMID=23809158" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\Clackamas\USGS_14209500_temp_CLACKAMAS RIVER ABOVE THREE LYNX CREEK, OR_23809158.csv" format="E0" />
+      <output in_use="1" name="USGS_14209710_temp_CLACKAMAS RIVER AT CARTER BRIDGE, NEAR ESTACADA, OR_23809112"
+            query="COMID=23809112" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\Clackamas\USGS_14209710_temp_CLACKAMAS RIVER AT CARTER BRIDGE, NEAR ESTACADA, OR_23809112.csv" format="E0" />
+      <output in_use="1" name="USGS_14210000_temp_CLACKAMAS RIVER AT ESTACADA, OR_23809080"
+            query="COMID=23809080" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\Clackamas\USGS_14210000_temp_CLACKAMAS RIVER AT ESTACADA, OR_23809080.csv" format="E0" />
+      <output in_use="1" name="USGS_14211010_temp_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000"
+            query="COMID=23809000" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\Clackamas\USGS_14211010_temp_CLACKAMAS RIVER NEAR OREGON CITY, OR_23809000.csv" format="E0" />
+    </output_group>
+
     <output_group name="FLOW Clackamas wetland yearly outflows (cms)" interval ="yearly" >
       <output in_use="1" name="WETL 19-20 outflow 23809000 Clackamas R 6-12m elev" query="COMID=23809000" value="Q" type="sum" domain="reach" />
       <output in_use="1" name="WETL 21 outflow 23809012 Clackamas R 29m elev" query="COMID=23809012" value="Q" type="sum" domain="reach" />
@@ -875,7 +913,7 @@ dynamic="0"
     <output_group name="FLOW HBVCALIB outflows" >
       <output in_use="1" name="HBVCALIB=26 outflow 23809000 Clackamas outlet (cfs)" query="COMID=23809000" value="Q*35.3146667" type="sum" domain="reach" />
     </output_group>
-    
+
 
 
   </outputs>
@@ -888,5 +926,5 @@ dynamic="0"
     <movie col='ET'    file='\envision\studyareas\WW2100\Outputs\AVIs\et.avi' />
   </video_capture>
 -->
-  
+
 </flow_model>
