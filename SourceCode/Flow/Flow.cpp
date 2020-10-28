@@ -3274,7 +3274,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       CString msg;
       if (!InitGridIndex())
       {
-         msg.Format("FlowModel::InitRun(): InitGridIndex() failed.");
+         msg.Format("FlowModel::InitRun(): InitGridIndex() failed.  This may be because InitGridIndex() requires the use of a climate dataset with single year data files.");
          Report::ErrorMsg(msg);
       }
       if (!InitClimateMeanValues(pEnvContext))
@@ -12990,8 +12990,13 @@ bool FlowModel::GetDailyWeatherField(CDTYPE type, int tgtDoy0, int tgtYear)
          for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu < m_pIDUlayer->End(); idu++)
          {
             int grid_index; m_pIDUlayer->GetData(idu, m_colGRID_INDEX, grid_index);
-            ASSERT(grid_index >= LOWEST_POPULATED_GRIDCELL_INDEX && grid_index <= HIGHEST_POPULATED_GRIDCELL_INDEX);
-
+            if (!(grid_index >= LOWEST_POPULATED_GRIDCELL_INDEX && grid_index <= HIGHEST_POPULATED_GRIDCELL_INDEX))
+            {
+               CString msg;
+               msg.Format("GetDailyWeatherField() grid_index = %d is out of bounds. Run with years_to_run = 0 using a climate dataset with single year files to populate GRID_INDEX.",
+                  grid_index);
+               Report::FatalMsg(msg);
+            }
             if (pInfo->m_lastYear == pInfo->m_firstYear) m_pIDUlayer->SetDataU(idu, colIDU, field_vals[grid_index]);
             else
             { // Kludge to get around the fact that University of Idaho v2 climate data uses
