@@ -3992,7 +3992,7 @@ bool FlowModel::ReadState()
 
             double subreach_volume;
             fread(&subreach_volume, sizeof(double), 1, fp);
-            if (isnan(subreach_volume) || subreach_volume < pSubreach->m_min_volume_m3)
+            if (isnan(subreach_volume) || (subreach_volume < pSubreach->m_min_volume_m3 && !close_enough(subreach_volume, pSubreach->m_min_volume_m3, 0.0001)))
             {
                CString msg;
                msg.Format("ReadState() i = %d, j = %d, subreach_volume (%lf) is a nan or < pSubreach->m_min_volume_m3 (= %lf),", i, j, subreach_volume, pSubreach->m_min_volume_m3);
@@ -4000,7 +4000,7 @@ bool FlowModel::ReadState()
                CString msg2;
                msg2.Format(" replacing with %lf", subreach_volume);
                msg = msg + msg2;
-               Report::LogMsg(msg);
+               Report::WarningMsg(msg);
             }
             pReach->m_reach_volume_m3 += subreach_volume;
  
