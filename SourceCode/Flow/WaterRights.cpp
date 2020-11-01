@@ -831,23 +831,24 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
 
    // Annual Quick Check metrics
    this->m_QuickCheckMetrics.SetName("ALTWM Quick Check");
-   this->m_QuickCheckMetrics.SetSize(16, 0);
+   this->m_QuickCheckMetrics.SetSize(17, 0);
    this->m_QuickCheckMetrics.SetLabel(0, "Year");
    this->m_QuickCheckMetrics.SetLabel(1, "tot in HRUs reaches and reservoirs at end of last year (mm H2O)"); // m_totH2OlastYr (m3)
    this->m_QuickCheckMetrics.SetLabel(2, "Precip (mm H2O)"); // PRECIP_YR
    this->m_QuickCheckMetrics.SetLabel(3, "GW pumping (mm H2O)"); // IRGWAF_Y (ac-ft) + GWMUNALL_Y (m3)
    this->m_QuickCheckMetrics.SetLabel(4, "High Cascades groundwater contribution mm H2O");
    this->m_QuickCheckMetrics.SetLabel(5, "from outside the basin (mm H2O)"); // m_fromOutsideBasinYr (m3)
-   this->m_QuickCheckMetrics.SetLabel(6, "to outside the basin (mm H2O)"); // m_toOutsideBasinYr_m3 (m3)
-   this->m_QuickCheckMetrics.SetLabel(7, "AET (mm H2O)"); // ET_YR
-   this->m_QuickCheckMetrics.SetLabel(8, "SNOW_EVAP (mm H2O)"); // SNOWEVAP_Y
-   this->m_QuickCheckMetrics.SetLabel(9, "basin discharge (mm H2O)");
-   this->m_QuickCheckMetrics.SetLabel(10, "tot in HRUs reaches and reservoirs at end of this year (mm H2O)"); // CalcTotH2O()
-   this->m_QuickCheckMetrics.SetLabel(11, "irrigation (ac-ft)");
-   this->m_QuickCheckMetrics.SetLabel(12, "municipal and rural domestic (ac-ft)");
-   this->m_QuickCheckMetrics.SetLabel(13, "mass balance discrepancy (mm H2O)");
-   this->m_QuickCheckMetrics.SetLabel(14, "mass balance discrepancy (fraction)");
-   this->m_QuickCheckMetrics.SetLabel(15, "weather year");
+   this->m_QuickCheckMetrics.SetLabel(6, "water added by FlowModel (mm)");
+   this->m_QuickCheckMetrics.SetLabel(7, "to outside the basin (mm H2O)"); // m_toOutsideBasinYr_m3 (m3)
+   this->m_QuickCheckMetrics.SetLabel(8, "AET (mm H2O)"); // ET_YR
+   this->m_QuickCheckMetrics.SetLabel(9, "SNOW_EVAP (mm H2O)"); // SNOWEVAP_Y
+   this->m_QuickCheckMetrics.SetLabel(10, "basin discharge (mm H2O)");
+   this->m_QuickCheckMetrics.SetLabel(11, "tot in HRUs reaches and reservoirs at end of this year (mm H2O)"); // CalcTotH2O()
+   this->m_QuickCheckMetrics.SetLabel(12, "irrigation (ac-ft)");
+   this->m_QuickCheckMetrics.SetLabel(13, "municipal and rural domestic (ac-ft)");
+   this->m_QuickCheckMetrics.SetLabel(14, "mass balance discrepancy (mm H2O)");
+   this->m_QuickCheckMetrics.SetLabel(15, "mass balance discrepancy (fraction)");
+   this->m_QuickCheckMetrics.SetLabel(16, "weather year");
    gpFlow->AddOutputVar("ALTWM Quick Check", &m_QuickCheckMetrics, "ALTWM Quick Check");
 
    // Daily Municipal Allocations = m_ugaUWallocatedDay[uga]
@@ -3883,6 +3884,10 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
 
    float groundwater_pumped_mm = (float)((groundwater_accumulator_ac_ft * M3_PER_ACREFT) / tot_area) * 1000.f;
    float from_outside_basin_mm = (float)((from_outside_basin_accumulator_m3 / tot_area) * 1000.f);
+
+   double volume_added_by_flow_model_m3 = m_pFlowModel->MagicReachWaterReport_m3() + m_pFlowModel->MagicHRUwaterReport_m3();
+   double volume_added_by_flow_model_mm = 1000 * (volume_added_by_flow_model_m3 / tot_area);
+
    float to_outside_basin_mm = (float)((m_toOutsideBasinYr_m3 / tot_area) * 1000.f);
 
    double basin_discharge_ac_ft = pFlowContext->pFlowModel->m_annualTotalDischarge;
@@ -3905,7 +3910,7 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    float muni_ac_ft = (muni_accumulator_m3 + m_GWnoWR_Yr_m3) * ACREFT_PER_M3;
 
    CArray< float, float > rowQuickCheckMetrics;
-   rowQuickCheckMetrics.SetSize(16);
+   rowQuickCheckMetrics.SetSize(17);
    rowQuickCheckMetrics[0] = (float)time;
    rowQuickCheckMetrics[1] = tot_H2O_last_year_mm;
    rowQuickCheckMetrics[2] = precip_yr_mm;
@@ -3913,23 +3918,24 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    double tot_ground_water_to_reach_m3 = tot_ground_water_to_reach_cms * SEC_PER_DAY * pFlowContext->pEnvContext->daysInCurrentYear;
    rowQuickCheckMetrics[4] = (float)((tot_ground_water_to_reach_m3 / tot_area) * 1000.); // High Cascades groundwater contribution
    rowQuickCheckMetrics[5] = from_outside_basin_mm;
-   double year_in_mm = 0.; for (int i = 1; i <= 5; i++) year_in_mm += rowQuickCheckMetrics[i];
+   rowQuickCheckMetrics[6] = (float)volume_added_by_flow_model_mm;
+   double year_in_mm = 0.; for (int i = 1; i <= 6; i++) year_in_mm += rowQuickCheckMetrics[i];
 
-   rowQuickCheckMetrics[6] = to_outside_basin_mm;
-   rowQuickCheckMetrics[7] = aet_yr_mm;
-   rowQuickCheckMetrics[8] = snow_evap_mm;
-   rowQuickCheckMetrics[9] = basin_discharge_mm;
-   rowQuickCheckMetrics[10] = tot_H2O_this_year_mm;
-   double year_out_mm = 0.; for (int i = 6; i <= 10; i++) year_out_mm += rowQuickCheckMetrics[i];
+   rowQuickCheckMetrics[7] = to_outside_basin_mm;
+   rowQuickCheckMetrics[8] = aet_yr_mm;
+   rowQuickCheckMetrics[9] = snow_evap_mm;
+   rowQuickCheckMetrics[10] = basin_discharge_mm;
+   rowQuickCheckMetrics[11] = tot_H2O_this_year_mm;
+   double year_out_mm = 0.; for (int i = 7; i <= 11; i++) year_out_mm += rowQuickCheckMetrics[i];
 
-   rowQuickCheckMetrics[11] = m_irrigatedWaterYr; // ac-ft
-   rowQuickCheckMetrics[12] = muni_ac_ft;
+   rowQuickCheckMetrics[12] = m_irrigatedWaterYr; // ac-ft
+   rowQuickCheckMetrics[13] = muni_ac_ft;
 
    double discrepancy_mm = year_out_mm - year_in_mm;
-   rowQuickCheckMetrics[13] = (float)discrepancy_mm;
-   rowQuickCheckMetrics[14] = (float)(discrepancy_mm / year_in_mm);
+   rowQuickCheckMetrics[14] = (float)discrepancy_mm;
+   rowQuickCheckMetrics[15] = (float)(discrepancy_mm / year_in_mm);
 
-   rowQuickCheckMetrics[15] = (float)(m_pEnvContext->weatherYear);
+   rowQuickCheckMetrics[16] = (float)(m_pEnvContext->weatherYear);
 
    this->m_QuickCheckMetrics.AppendRow(rowQuickCheckMetrics);
 

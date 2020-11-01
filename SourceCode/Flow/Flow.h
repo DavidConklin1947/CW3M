@@ -1402,6 +1402,9 @@ public:
    bool DailyUpdateToSingleYearWeatherAverages(int doy, int daysInYear, int year);
    bool UpdateAgBasinClimateTemporalAverages(EnvContext * pContext);
    bool UpdateIDUclimateTemporalAverages(int tau, EnvContext * pContext);
+   double MagicReachWaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in reaches.
+   double MagicHRUwaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in HRUs.
+
 
 protected:
    bool InitClimateMeanValues(EnvContext *pContext);

@@ -4683,54 +4683,115 @@ bool FlowModel::EndYear( FlowContext *pFlowContext )
       m_pIDUlayer->SetDataU(idu, m_colAET_Y_AVG, aet_y_avg);
    } // end of loop through IDUs
 
-   // Report on NaNs and added amounts in reaches.
+   MagicReachWaterReport_m3(true); // Report on NaNs and added amounts in reaches.
+   MagicHRUwaterReport_m3(true); // Report on NaNs and added amounts in HRUs.
+
+   return true;
+} // end of FlowModel::EndYear()
+
+
+double FlowModel::MagicHRUwaterReport_m3(bool msgFlag) // Report on NaNs and added amounts in HRUs.
+{
+   int nan_count = 0;
+   int added_volume_count = 0;
+   float added_volume_tot_m3 = 0;
+   int comid_of_largest_added_volume_HRU = -1;
+   float largest_added_volume_m3 = -1.;
+   for (int hru_ndx = 0; hru_ndx < gpModel->m_hruArray.GetSize(); hru_ndx++)
    {
-      int nan_count = 0;
-      int added_volume_count = 0;
-      double added_volume_tot_m3 = 0;
-      int added_discharge_count = 0;
-      double added_discharge_tot_cms = 0;
-      int comid_of_largest_added_volume_reach = -1;
-      int comid_of_largest_added_discharge_reach = -1;
-      double largest_added_volume_m3 = -1.;
-      double largest_added_discharge_cms = -1.;
-      for (int reach_ndx = 0; reach_ndx < gpModel->m_reachArray.GetSize(); reach_ndx++)
+      HRU* pHRU = m_hruArray[hru_ndx];
+
+      pHRU->m_addedVolume_m3 = 0;
+      pHRU->m_nanOccurred = false;
+      int box_count = (int)pHRU->m_layerArray.GetSize();
+      for (int box_ndx = 0; box_ndx < box_count; box_ndx++)
       {
-         Reach * pReach = m_reachArray[reach_ndx];
+         HRULayer* pBox = pHRU->m_layerArray[box_ndx];
+         pHRU->m_addedVolume_m3 += (float)pBox->m_addedVolume_m3;
+         pHRU->m_nanOccurred = pHRU->m_nanOccurred || pBox->m_nanOccurred;
+      } // end of loop thru boxs
 
-         pReach->m_addedDischarge_cms = 0;
-         pReach->m_addedVolume_m3 = 0;
-         pReach->m_nanOccurred = false;
-         int subnode_count = pReach->GetSubnodeCount();
-         for (int subnode_ndx = 0; subnode_ndx < subnode_count; subnode_ndx++)
+      if (pHRU->m_nanOccurred) nan_count++;
+      if (pHRU->m_addedVolume_m3 > 0)
+      {
+         added_volume_count++; added_volume_tot_m3 += pHRU->m_addedVolume_m3;
+         if (pHRU->m_addedVolume_m3 > largest_added_volume_m3)
          {
-            ReachSubnode *pNode = pReach->GetReachSubnode(subnode_ndx);
-            pReach->m_addedDischarge_cms += pNode->m_addedDischarge_cms / pReach->GetSubnodeCount();
-            pReach->m_addedVolume_m3 += (float)pNode->m_addedVolume_m3;
-            pReach->m_nanOccurred = pReach->m_nanOccurred || pNode->m_nanOccurred;
-         } // end of loop thru subnodes
-
-         if (pReach->m_nanOccurred) nan_count++;
-         if (pReach->m_addedVolume_m3 > 0)
-         {
-            added_volume_count++; added_volume_tot_m3 += pReach->m_addedVolume_m3;
-            if (pReach->m_addedVolume_m3 > largest_added_volume_m3)
-            {
-               largest_added_volume_m3 = pReach->m_addedVolume_m3;
-               comid_of_largest_added_volume_reach = pReach->m_reachID;
-            }
+            largest_added_volume_m3 = pHRU->m_addedVolume_m3;
+            comid_of_largest_added_volume_HRU = pHRU->m_pCatchment->m_pReach->m_reachID;
          }
-         if (pReach->m_addedDischarge_cms > 0)
-         {
-            added_discharge_count++; added_discharge_tot_cms += pReach->m_addedDischarge_cms;
-            if (pReach->m_addedDischarge_cms > largest_added_discharge_cms)
-            {
-               largest_added_discharge_cms = pReach->m_addedDischarge_cms;
-               comid_of_largest_added_discharge_reach = pReach->m_reachID;
-            }
-         }
-      } // end of loop thru reaches
+      }
+   } // end of loop thru HRUs
 
+   if (msgFlag)
+   {
+      CString msg;
+      msg.Format("FlowModel::EndYear() HRUs... nan_count = %d, added_volume_count = %d, added_volume_tot_m3 = %f",
+         nan_count, added_volume_count, added_volume_tot_m3);
+      Report::LogMsg(msg);
+      if (nan_count > 0 || added_volume_count > 0 || added_volume_tot_m3 > 0)
+      {
+         msg.Format("comid_of_largest_added_volume_HRU = %d, largest_added_volume_m3 = %f", comid_of_largest_added_volume_HRU, largest_added_volume_m3);
+         if (comid_of_largest_added_volume_HRU > 0) Report::LogMsg(msg);
+      }
+   }
+
+   return(added_volume_tot_m3);
+} // end of MagicHRUwaterReport_m3()
+   
+   
+   double FlowModel::MagicReachWaterReport_m3(bool msgFlag) // Report on NaNs and added amounts in reaches.
+// Returns volume of added water in reaches
+{
+   int nan_count = 0;
+   int added_volume_count = 0;
+   double added_volume_tot_m3 = 0;
+   int added_discharge_count = 0;
+   double added_discharge_tot_cms = 0;
+   int comid_of_largest_added_volume_reach = -1;
+   int comid_of_largest_added_discharge_reach = -1;
+   double largest_added_volume_m3 = -1.;
+   double largest_added_discharge_cms = -1.;
+   for (int reach_ndx = 0; reach_ndx < gpModel->m_reachArray.GetSize(); reach_ndx++)
+   {
+      Reach* pReach = m_reachArray[reach_ndx];
+
+      pReach->m_addedDischarge_cms = 0;
+      pReach->m_addedVolume_m3 = 0;
+      pReach->m_nanOccurred = false;
+      int subnode_count = pReach->GetSubnodeCount();
+      for (int subnode_ndx = 0; subnode_ndx < subnode_count; subnode_ndx++)
+      {
+         ReachSubnode* pNode = pReach->GetReachSubnode(subnode_ndx);
+         pReach->m_addedDischarge_cms += pNode->m_addedDischarge_cms / pReach->GetSubnodeCount();
+         pReach->m_addedVolume_m3 += (float)pNode->m_addedVolume_m3;
+         pReach->m_nanOccurred = pReach->m_nanOccurred || pNode->m_nanOccurred;
+      } // end of loop thru subnodes
+
+      if (pReach->m_nanOccurred) nan_count++;
+      if (pReach->m_addedVolume_m3 > 0)
+      {
+         added_volume_count++; added_volume_tot_m3 += pReach->m_addedVolume_m3;
+         if (pReach->m_addedVolume_m3 > largest_added_volume_m3)
+         {
+            largest_added_volume_m3 = pReach->m_addedVolume_m3;
+            comid_of_largest_added_volume_reach = pReach->m_reachID;
+         }
+      }
+      if (pReach->m_addedDischarge_cms > 0)
+      {
+         added_discharge_count++; added_discharge_tot_cms += pReach->m_addedDischarge_cms;
+         if (pReach->m_addedDischarge_cms > largest_added_discharge_cms)
+         {
+            largest_added_discharge_cms = pReach->m_addedDischarge_cms;
+            comid_of_largest_added_discharge_reach = pReach->m_reachID;
+         }
+      }
+   } // end of loop thru reaches
+
+   if (msgFlag)
+   {
+      CString msg;
       msg.Format("FlowModel::EndYear() Reaches... nan_count = %d, added_volume_count = %d, added_volume_tot_m3 = %f, added_discharge_count = %d, added_discharge_tot_cms = %f (%f m3)",
          nan_count, added_volume_count, added_volume_tot_m3, added_discharge_count, added_discharge_tot_cms, added_discharge_tot_cms * SEC_PER_DAY);
       Report::LogMsg(msg);
@@ -4741,53 +4802,10 @@ bool FlowModel::EndYear( FlowContext *pFlowContext )
          msg.Format("comid_of_largest_added_discharge_reach = %d, largest_added_discharge_cms = %f", comid_of_largest_added_discharge_reach, largest_added_discharge_cms);
          if (comid_of_largest_added_discharge_reach > 0) Report::LogMsg(msg);
       }
-   }
-
-   // Report on NaNs and added amounts in HRUs.
-   {
-      int nan_count = 0;
-      int added_volume_count = 0;
-      float added_volume_tot_m3 = 0;
-      int comid_of_largest_added_volume_HRU = -1;
-      float largest_added_volume_m3 = -1.;
-      for (int hru_ndx = 0; hru_ndx < gpModel->m_hruArray.GetSize(); hru_ndx++)
-      {
-         HRU * pHRU = m_hruArray[hru_ndx];
-
-         pHRU->m_addedVolume_m3 = 0;
-         pHRU->m_nanOccurred = false;
-         int box_count = (int)pHRU->m_layerArray.GetSize();
-         for (int box_ndx = 0; box_ndx < box_count; box_ndx++)
-         {
-            HRULayer * pBox = pHRU->m_layerArray[box_ndx];
-            pHRU->m_addedVolume_m3 += (float)pBox->m_addedVolume_m3;
-            pHRU->m_nanOccurred = pHRU->m_nanOccurred || pBox->m_nanOccurred;
-         } // end of loop thru boxs
-
-         if (pHRU->m_nanOccurred) nan_count++;
-         if (pHRU->m_addedVolume_m3 > 0)
-         {
-            added_volume_count++; added_volume_tot_m3 += pHRU->m_addedVolume_m3;
-            if (pHRU->m_addedVolume_m3 > largest_added_volume_m3)
-            {
-               largest_added_volume_m3 = pHRU->m_addedVolume_m3;
-               comid_of_largest_added_volume_HRU = pHRU->m_pCatchment->m_pReach->m_reachID;
-            }
-         }
-      } // end of loop thru HRUs
-
-      msg.Format("FlowModel::EndYear() HRUs... nan_count = %d, added_volume_count = %d, added_volume_tot_m3 = %f",
-         nan_count, added_volume_count, added_volume_tot_m3);
-      Report::LogMsg(msg);
-      if (nan_count > 0 || added_volume_count > 0 || added_volume_tot_m3 > 0)
-      {
-         msg.Format("comid_of_largest_added_volume_HRU = %d, largest_added_volume_m3 = %f", comid_of_largest_added_volume_HRU, largest_added_volume_m3);
-         if (comid_of_largest_added_volume_HRU > 0) Report::LogMsg(msg);
-      }
-   } // end of report on mass anomalies in HRUs
-
-   return true;
-   } // end of FlowModel::EndYear()
+   } // end of if (msgFlag)
+   
+   return(added_volume_tot_m3);
+} // end of MagicReachWaterReport()
 
 
    double FlowModel::CalcTotDailyEvapFromReaches() // Returns m3 H2O
