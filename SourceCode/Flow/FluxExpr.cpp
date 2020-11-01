@@ -745,7 +745,7 @@ FluxExpr *FluxExpr::LoadXml( TiXmlElement *pXmlFluxExpr, FlowModel *pModel, MapL
 
    LPTSTR name = NULL, sourceQuery=NULL, sinkQuery=NULL, joinCol=NULL, sourceDomain=NULL, sinkDomain=NULL, value=NULL,
       layerDist=NULL, valueDomain=NULL, limitCol=NULL, dailyOutputCol=NULL, annualOutputCol=NULL, minCol=NULL,
-      startDateCol=NULL, endDateCol=NULL, unsatisfiedOutputCol=NULL;
+      startDateCol=NULL, endDateCol=NULL, unsatisfiedOutputCol=NULL, temp_C=NULL;
    
    LPTSTR valueType="expression";
 
@@ -778,6 +778,7 @@ FluxExpr *FluxExpr::LoadXml( TiXmlElement *pXmlFluxExpr, FlowModel *pModel, MapL
       { "enddate",            TYPE_INT,       &endDate,           false,   0 },
       { "withdrawal_cutoff_coeff", TYPE_FLOAT,&withdrawalCutoffCoeff, false, 0 },
       { "loss_coeff",         TYPE_FLOAT,     &lossCoeff,         false,   0 },
+      { "temp_C",         TYPE_FLOAT,     &temp_C,         false,   0 },
       { NULL,                 TYPE_NULL,      NULL,               false,   0 } };
 
    bool ok = TiXmlGetAttributes( pXmlFluxExpr, attrs, filename );

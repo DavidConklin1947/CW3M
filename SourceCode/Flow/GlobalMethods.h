@@ -614,6 +614,7 @@ protected:
 
    float m_withdrawalCutoffCoeff;  
    float m_lossCoeff;  
+   float m_temp_C;
    bool  m_collectOutput;
 
    MapLayer *m_pSourceLayer;
