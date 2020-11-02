@@ -415,7 +415,7 @@ protected:
    int m_colStreamINSTRM_REQ; // regulatory flow requirement for this reach, cms (requirement of most junior instream WR, if more than one applies)
    int m_colStreamHBVCALIB; 
    int m_colReachSUB_AREA;
-   int m_colStreamXFLUX_Y;
+   int m_colReachXFLUX_Y;
    int m_colStreamOUT_IRRIG;
    int m_colStreamOUT_MUNI;
    int m_colStreamIN_MUNI;

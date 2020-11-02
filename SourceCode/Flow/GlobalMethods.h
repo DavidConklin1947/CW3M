@@ -606,8 +606,8 @@ protected:
    int m_colMinInstreamFlow;
    int m_colDailyOutput;
    int m_colAnnualOutput;
-   int m_colSourceDailyDemand;   // m3/sec
-   int m_colSourceAnnDemand;     // m3/sec, averaged over year
+   int m_colReachXFLUX_D;   // m3/sec
+   int m_colReachXFLUX_Y;     // m3/sec, averaged over year
    int m_colSourceUnsatisfiedDemand;     // m3/sec of unsatisified demand, populated daily
    int m_startDate;     // used if column isn't specified
    int m_endDate; 

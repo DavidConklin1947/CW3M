@@ -2800,6 +2800,8 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachWIDTH, _T("WIDTH"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachDEPTHMANNG, _T("DEPTHMANNG"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTURNOVER, _T("TURNOVER"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_D, _T("XFLUX_D"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_Y, _T("XFLUX_Y"), TYPE_FLOAT, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
@@ -4411,7 +4413,8 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
    m_pIDUlayer->SetColDataU(m_colSM2ATM_YR, 0.f);
 
    // Initialize yearly values which accumulate from daily values
-   m_pIDUlayer->SetColDataU(m_colET_YR, 0); // Accumulates ET_DAY;
+   m_pIDUlayer->SetColDataU(m_colET_YR, 0); // Accumulates ET_DAY.
+   m_pReachLayer->SetColDataU(m_colReachXFLUX_Y, 0); // Accumulates XFLUX_D.
 
    GlobalMethodManager::StartYear( &m_flowContext );   // this invokes StartYear() for any internal global methods 
    
@@ -4545,6 +4548,8 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
       pHRU->m_currentGWRecharge = 0;
       }
 
+   m_pReachLayer->SetColDataU(m_colReachXFLUX_D, 0);
+
    // Make sure today's weather is loaded into the IDU and HRU layers.
    GetTodaysWeatherField(CDT_PRECIP);
    GetTodaysWeatherField(CDT_TMAX);
@@ -4608,6 +4613,20 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
    } // end of loop thru IDUs
 
    m_totEvapFromReachesYr_m3 += CalcTotDailyEvapFromReaches();
+
+   for (MapLayer::Iterator reach = m_pReachLayer->Begin(); reach < m_pReachLayer->End(); reach++)
+   {
+      float xflux_d_cms;
+      m_pReachLayer->GetData(reach, m_colReachXFLUX_D, xflux_d_cms);
+      if (xflux_d_cms != 0)
+      {
+         float xflux_y_cms;
+         m_pReachLayer->GetData(reach, m_colReachXFLUX_Y, xflux_y_cms);
+         double accum_cms_x_days = xflux_y_cms * pFlowContext->dayOfYear;
+         xflux_y_cms = (float)((accum_cms_x_days + xflux_d_cms) / (pFlowContext->dayOfYear + 1));
+         m_pReachLayer->SetDataU(reach, m_colReachXFLUX_Y, xflux_y_cms);
+      }
+   } // end of loop thru the Reach layer
 
    return true;
 } // end of FlowModel::EndStep()

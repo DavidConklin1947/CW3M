@@ -27,8 +27,8 @@ FluxExpr::FluxExpr( LPCTSTR name )
    , m_colMinInstreamFlow( -1 )
    , m_colDailyOutput( -1 )
    , m_colAnnualOutput( -1 )
-   , m_colSourceDailyDemand( -1 )
-   , m_colSourceAnnDemand( -1 )
+   , m_colReachXFLUX_D( -1 )
+   , m_colReachXFLUX_Y( -1 )
    , m_colSourceUnsatisfiedDemand( -1 )
    , m_startDate( -1 )
    , m_endDate( -1 )
@@ -130,14 +130,14 @@ bool FluxExpr::Init( FlowContext *pFlowContext )
    
    if (m_pSourceLayer == pReachLayer)
       {
-      pReachLayer->CheckCol(m_colSourceDailyDemand, "XFLUX_D", TYPE_FLOAT, CC_AUTOADD);
-      pReachLayer->CheckCol(m_colSourceAnnDemand, "XFLUX_Y", TYPE_FLOAT, CC_AUTOADD);
+      pReachLayer->CheckCol(m_colReachXFLUX_D, "XFLUX_D", TYPE_FLOAT, CC_AUTOADD);
+      pReachLayer->CheckCol(m_colReachXFLUX_Y, "XFLUX_Y", TYPE_FLOAT, CC_AUTOADD);
       }
 
    bool readOnlyFlag = m_pSourceLayer->m_readOnly;
    m_pSourceLayer->m_readOnly = false;
-   m_pSourceLayer->SetColData( m_colSourceDailyDemand, 0.0f, true );
-   m_pSourceLayer->SetColData( m_colSourceAnnDemand, 0.0f, true );
+   m_pSourceLayer->SetColData( m_colReachXFLUX_D, 0.0f, true );
+   m_pSourceLayer->SetColData( m_colReachXFLUX_Y, 0.0f, true );
 
    if ( m_dailyOutputField.GetLength() > 0 )
       {
@@ -319,11 +319,11 @@ bool FluxExpr::StartYear( FlowContext *pFlowContext )
       m_pSinkLayer->m_readOnly = readOnly;
       }
       
-   if ( m_colSourceAnnDemand >= 0 )
+   if ( m_colReachXFLUX_Y >= 0 )
       {
       bool readOnly = m_pSourceLayer->m_readOnly;
       m_pSourceLayer->m_readOnly = false;
-      m_pSourceLayer->SetColData( m_colSourceAnnDemand, 0, true );
+      m_pSourceLayer->SetColData( m_colReachXFLUX_Y, 0, true );
       m_pSourceLayer->m_readOnly = readOnly;
       }
       
@@ -632,12 +632,10 @@ bool FluxExpr::Step( FlowContext *pFlowContext )
                pReach->m_availableDischarge -= totalSatisfiedDemand_cms;     // m3/sec
 
                if (m_pSourceLayer == pReachLayer)
-               {
-                  pReachLayer->SetDataU(sourceIndex, m_colSourceDailyDemand, totalSatisfiedDemand_cms);  // cms
-                  float demandSoFar_cms = 0;
-                  pReachLayer->GetData(sourceIndex, m_colSourceAnnDemand, demandSoFar_cms);
-                  demandSoFar_cms = (demandSoFar_cms * pFlowContext->dayOfYear + totalSatisfiedDemand_cms) / (pFlowContext->dayOfYear + 1);
-                  pReachLayer->SetDataU(sourceIndex, m_colSourceAnnDemand, demandSoFar_cms);  // cms
+               { // This reach may already have been affected by another flux today.
+                  float demand_so_far_today_cms; pReachLayer->GetData(sourceIndex, m_colReachXFLUX_D, demand_so_far_today_cms);
+                  demand_so_far_today_cms += totalSatisfiedDemand_cms;
+                  pReachLayer->SetDataU(sourceIndex, m_colReachXFLUX_D, demand_so_far_today_cms);  
                }
 
                if ( m_colSourceUnsatisfiedDemand >= 0 )

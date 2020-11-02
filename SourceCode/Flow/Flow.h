@@ -1743,6 +1743,8 @@ public:
    int m_colReachWIDTH;
    int m_colReachDEPTHMANNG;
    int m_colReachTURNOVER;
+   int m_colReachXFLUX_D;
+   int m_colReachXFLUX_Y;
 
    int m_colARIDITYNDX;
    int m_colHRUPercentIrrigated;

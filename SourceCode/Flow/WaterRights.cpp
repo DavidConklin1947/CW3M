@@ -252,7 +252,7 @@ AltWaterMaster::AltWaterMaster(WaterAllocation *pWaterAllocation)
 , m_colStreamINSTRM_REQ(-1) // regulatory flow requirement for this reach, cms (requirement of most junior instream WR, if more than one applies)
 , m_colStreamHBVCALIB(-1)
 , m_colReachSUB_AREA(-1)
-, m_colStreamXFLUX_Y(-1)
+, m_colReachXFLUX_Y(-1)
 , m_colStreamOUT_IRRIG(-1)
 , m_colStreamOUT_MUNI(-1)
 , m_colStreamIN_MUNI(-1)
@@ -541,7 +541,7 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
    m_pReachLayer->SetColData(m_colStreamQ_DIV_WRQ, VData(-1.e-20), true);
    m_pReachLayer->CheckCol(m_colStreamINSTRM_REQ, _T("INSTRM_REQ"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->SetColData(m_colStreamINSTRM_REQ, VData(0), true);
-   m_pReachLayer->CheckCol(m_colStreamXFLUX_Y, "XFLUX_Y", TYPE_FLOAT, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachXFLUX_Y, "XFLUX_Y", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamOUT_IRRIG, "OUT_IRRIG", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamOUT_MUNI, "OUT_MUNI", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamIN_MUNI, "IN_MUNI", TYPE_FLOAT, CC_AUTOADD);
@@ -3600,7 +3600,7 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    double tot_ground_water_to_reach_cms = 0.;
    for (MapLayer::Iterator reach = m_pReachLayer->Begin(); reach < m_pReachLayer->End(); reach++)
       {
-      double neg_ground_water_to_reach_cms = 0.; m_pReachLayer->GetData(reach, m_colStreamXFLUX_Y, neg_ground_water_to_reach_cms);
+      double neg_ground_water_to_reach_cms = 0.; m_pReachLayer->GetData(reach, m_colReachXFLUX_Y, neg_ground_water_to_reach_cms);
       tot_ground_water_to_reach_cms -= neg_ground_water_to_reach_cms;
       }
 
