@@ -238,16 +238,26 @@
     source_domain="reach"
     source_query="COMID=23773373"
     value_domain="source"
-    value="-176152"
+    value="-2683868"
     dynamic="0"
        />
-    <flux name="Blue River Reservoir drainage additional GW" use="1"
+       
+    <flux name="Springs feeding Lookout Creek" use="1"
     source_domain="reach"
-    source_query="HBVCALIB=9"
+    source_query="COMID=23773411"
     value_domain="source"
-    value="-579"
+    value="-31218"
     dynamic="0"
        />
+
+    <flux name="Springs feeding Blue R at and above Tidbit Creek" use="1"
+    source_domain="reach"
+    source_query="COMID=23773429"
+    value_domain="source"
+    value="-138240"
+    dynamic="0"
+       />
+    <!--
     <flux name="Cougar Reservoir Drainage additional GW" use="1"
     source_domain="reach"
     source_query="HBVCALIB=8"
@@ -262,6 +272,7 @@ value_domain="source"
 value="-4939"
 dynamic="0"
        />
+       -->
   </global_methods>
 
   <!-- <climate> tag attributes note:
