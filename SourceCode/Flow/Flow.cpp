@@ -10426,13 +10426,21 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                   GlobalMethodManager::AddGlobalMethod(pMethod);
                }
             // flux (multiple entries allowed)
-            else if ( _tcsicmp( tagName, "flux") == 0 )
-               {
-               GlobalMethod *pMethod = FluxExpr::LoadXml( pXmlGlobalChild, pModel, pIDULayer, filename );
-               if (pMethod != NULL) 
+            else if (_tcsicmp(tagName, "flux") == 0)
+            {
+               GlobalMethod* pMethod = FluxExpr::LoadXml(pXmlGlobalChild, pModel, pIDULayer, filename);
+               if (pMethod != NULL)
                   GlobalMethodManager::AddGlobalMethod(pMethod);
-               }
-            
+            }
+
+            // Spring (multiple entries allowed)
+            else if (_tcsicmp(tagName, "Spring") == 0)
+            {
+               GlobalMethod * pMethod = Spring::LoadXml(pXmlGlobalChild, pModel, pIDULayer, filename);
+               if (pMethod != NULL)
+                  GlobalMethodManager::AddGlobalMethod(pMethod);
+            }
+
             // allocations (multiple entries allowed)
             else if ( _tcsicmp( tagName, "allocation") == 0 )
                {

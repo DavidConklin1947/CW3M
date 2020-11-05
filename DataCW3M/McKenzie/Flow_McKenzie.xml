@@ -233,7 +233,7 @@
             />
 
     <!-- The value field equals the number of cubic meters of water per day for each reach identified by the source query.
-    Positive values represent water withdrawn from the reaches, negative values represent water added to the reaches. -->
+    Positive values represent water withdrawn from the reaches, negative values represent water added to the reaches. --
     <flux name="Springs feeding Clear Lake" use="1"
     source_domain="reach"
     source_query="COMID=23773373"
@@ -242,7 +242,7 @@
     temp_C="4.9"
     dynamic="0"
        />
-
+-->
     <flux name="Springs feeding Lookout Creek" use="1"
      source_domain="reach"
     source_query="COMID=23773411"
@@ -297,6 +297,12 @@ source_query="COMID=23773009"
 value_domain="source"
 value="-95416"
 dynamic="0"
+       />
+    
+    <Spring name="Springs feeding Clear Lake" 
+    source_query="COMID=23773373"
+    value_cms="9.71"
+    temp_C="4.9"
        />
 
   </global_methods>

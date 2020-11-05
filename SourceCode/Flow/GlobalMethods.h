@@ -47,8 +47,8 @@ enum GM_METHOD
 	GM_URBAN_DEMAND_DY,							   			   // Daily Urban demand
    GM_WATER_RIGHTS, GM_EXPR_ALLOCATOR, GM_ALTWM,         // WaterAllocation
    GM_FLUX_EXPR,                                         // FluxExpr
+   GM_SPRING, // special case of flux expressions, for springs which flow into reaches
    GM_DEMAND_EXPR,                                       // DemandExpr
-   GM_SWMM, GM_EPANET,									 // Pipe Networks
    GM_EXTERNAL
    };
 
@@ -558,30 +558,30 @@ public:
 class FluxExpr : public GlobalMethod
 {
 public:
-   FluxExpr( LPCTSTR name );
+   FluxExpr(LPCTSTR name);
 
-   ~FluxExpr( void );
+   ~FluxExpr(void);
 
-   virtual bool Init     ( FlowContext* );
-   virtual bool InitRun  ( FlowContext* );
-   virtual bool StartYear( FlowContext* );
-   virtual bool StartStep( FlowContext* );
-   virtual bool Step     ( FlowContext* );
-   virtual bool EndStep  ( FlowContext* );   
-   virtual bool EndRun   ( FlowContext* ) { return true; }
-   virtual bool EndYear  ( FlowContext* );
+   virtual bool Init(FlowContext*);
+   virtual bool InitRun(FlowContext*);
+   virtual bool StartYear(FlowContext*);
+   virtual bool StartStep(FlowContext*);
+   virtual bool Step(FlowContext*);
+   virtual bool EndStep(FlowContext*);
+   virtual bool EndRun(FlowContext*) { return true; }
+   virtual bool EndYear(FlowContext*);
 
-   virtual bool SetMethod( GM_METHOD method ) { if ( method != GM_FLUX_EXPR ) return false; m_method=method; return true; }
+   virtual bool SetMethod(GM_METHOD method) { if (method != GM_FLUX_EXPR) return false; m_method = method; return true; }
 
-   static FluxExpr *LoadXml( TiXmlElement *pXmlEvapTrans, FlowModel*, MapLayer*, LPCTSTR path );
+   static FluxExpr* LoadXml(TiXmlElement* pXmlEvapTrans, FlowModel*, MapLayer*, LPCTSTR path);
 
 protected:
    PtrArray< FluxSourceSink > m_ssArray;
-   
+
    FLUX_TYPE m_fluxType;
 
    bool m_isDynamic;
-   int BuildSourceSinks( void );
+   int BuildSourceSinks(void);
 
    CString m_joinField;
    CString m_limitField;
@@ -610,36 +610,36 @@ protected:
    int m_colReachXFLUX_Y;     // m3/sec, averaged over year
    int m_colSourceUnsatisfiedDemand;     // m3/sec of unsatisified demand, populated daily
    int m_startDate;     // used if column isn't specified
-   int m_endDate; 
+   int m_endDate;
 
-   float m_withdrawalCutoffCoeff;  
-   float m_lossCoeff;  
+   float m_withdrawalCutoffCoeff;
+   float m_lossCoeff;
    float m_temp_C;
    bool  m_collectOutput;
 
-   MapLayer *m_pSourceLayer;
-   MapLayer *m_pSinkLayer;
-   MapLayer *m_pValueLayer;
+   MapLayer* m_pSourceLayer;
+   MapLayer* m_pSinkLayer;
+   MapLayer* m_pValueLayer;
 
-   MapExprEngine *m_pMapExprEngine;  // check memory management for expr types
-   MapExpr *m_pMapExpr;
+   MapExprEngine* m_pMapExprEngine;  // check memory management for expr types
+   MapExpr* m_pMapExpr;
 
-   FDataObj *m_pValueData;    // for time series, expression types
+   FDataObj* m_pValueData;    // for time series, expression types
 
-   QueryEngine *m_pSourceQE;
-   QueryEngine *m_pSinkQE;
+   QueryEngine* m_pSourceQE;
+   QueryEngine* m_pSinkQE;
 
    CString m_sourceQuery;
    CString m_sinkQuery;
 
-   Query *m_pSourceQuery;
-   Query *m_pSinkQuery;
+   Query* m_pSourceQuery;
+   Query* m_pSinkQuery;
 
    // layer distributions?
-	LayerDistributions *m_pLayerDists;
+   LayerDistributions* m_pLayerDists;
 
 
-   
+
    // outputs
    float m_dailySatisfiedDemand;     // m3/day
    float m_dailySinkDemand;          // m3/day
@@ -652,14 +652,70 @@ protected:
    float m_annDailyAvgFlux;         // m3/day -collected once per year, annual average
 
    //FDataObj m_annDailyAvgFluxData;  // m3/day
-   FDataObj *m_pDailyFluxData; 
-   FDataObj *m_pCumFluxData; 
+   FDataObj* m_pDailyFluxData;
+   FDataObj* m_pCumFluxData;
 
 protected:
    int m_stepCount;
 
-};
+}; // end of class FluxExpr
 
+
+class Spring : public GlobalMethod // a special case of flux expressions, tailored to representation of springs flowing to reaches
+{
+public:
+   Spring(LPCTSTR name);
+
+   ~Spring(void);
+
+   virtual bool Init(FlowContext*);
+   virtual bool InitRun(FlowContext*);
+   virtual bool StartYear(FlowContext*);
+   virtual bool StartStep(FlowContext*);
+   virtual bool Step(FlowContext*);
+   virtual bool EndStep(FlowContext*);
+   virtual bool EndRun(FlowContext*) { return true; }
+   virtual bool EndYear(FlowContext*);
+
+   virtual bool SetMethod(GM_METHOD method) { if (method != GM_SPRING) return false; m_method = method; return true; }
+
+   static Spring* LoadXml(TiXmlElement* pXmlEvapTrans, FlowModel*, MapLayer*, LPCTSTR path);
+
+protected:
+   PtrArray< FluxSourceSink > m_ssArray;
+
+   FLUX_TYPE m_fluxType;
+
+   int BuildSourceSinks(void);
+
+   CString m_expr;               // one-way straw=m3/sec, two way straw mm/day
+
+   FLUX_DOMAIN m_sourceDomain; // 0=undefined, 1=catchment, 2=reach, 3=reservoir
+   FLUX_DOMAIN m_valueDomain;
+   VALUE_TYPE m_valueType;
+
+   int m_colReachSPRING_CMS;   // m3/sec
+   float m_temp_C;
+
+   MapLayer* m_pReachLayer;
+   MapLayer* m_pSourceLayer;
+   MapLayer* m_pValueLayer;
+
+   MapExprEngine* m_pMapExprEngine;  // check memory management for expr types
+   MapExpr* m_pMapExpr;
+
+   FDataObj* m_pValueData;    // for time series, expression types
+
+   QueryEngine* m_pSourceQE;
+
+   CString m_sourceQuery;
+
+   Query* m_pSourceQuery;
+
+   // outputs
+   float m_dailySatisfiedDemand;     // m3/day
+
+}; // end of class Spring
 
 
 class ExternalMethod : public GlobalMethod
