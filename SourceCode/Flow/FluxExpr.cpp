@@ -628,6 +628,14 @@ bool FluxExpr::Step( FlowContext *pFlowContext )
 
                // remove water from reach
                pReach->CheckForNaNs("FluxExpr::Step 2", pReach->AddFluxFromGlobalHandler( -totalSatisfiedDemand ));              // m3/d, includes additional conveyance losses
+/*
+               if (-totalSatisfiedDemand > 0)
+               {
+                  FluxContainer* pFlux = (FluxContainer*)pReach;
+                  WaterParcel water_going_into_the_reachWP(-totalSatisfiedDemand, m_temp_C);
+                  pFlux->m_fluxWP.MixIn(water_going_into_the_reachWP);
+               }
+*/
                float totalSatisfiedDemand_cms = totalSatisfiedDemand / SEC_PER_DAY;
                pReach->m_availableDischarge -= totalSatisfiedDemand_cms;     // m3/sec
 
@@ -743,13 +751,14 @@ FluxExpr *FluxExpr::LoadXml( TiXmlElement *pXmlFluxExpr, FlowModel *pModel, MapL
 
    LPTSTR name = NULL, sourceQuery=NULL, sinkQuery=NULL, joinCol=NULL, sourceDomain=NULL, sinkDomain=NULL, value=NULL,
       layerDist=NULL, valueDomain=NULL, limitCol=NULL, dailyOutputCol=NULL, annualOutputCol=NULL, minCol=NULL,
-      startDateCol=NULL, endDateCol=NULL, unsatisfiedOutputCol=NULL, temp_C=NULL;
+      startDateCol=NULL, endDateCol=NULL, unsatisfiedOutputCol=NULL;
    
    LPTSTR valueType="expression";
 
    int startDate=-1, endDate=-1;
    bool use=true, dynamic=false, collectOutput=false;
    float withdrawalCutoffCoeff = 0.1f, lossCoeff = 0.0f;
+   float temp_C = DEFAULT_SOIL_H2O_TEMP_DEGC;
 
    XML_ATTR attrs[] = {
       // attr                 type          address               isReq  checkCol
@@ -931,6 +940,7 @@ FluxExpr *FluxExpr::LoadXml( TiXmlElement *pXmlFluxExpr, FlowModel *pModel, MapL
       pFluxExpr->m_withdrawalCutoffCoeff = withdrawalCutoffCoeff;  
 
    pFluxExpr->m_lossCoeff = lossCoeff;  
+   pFluxExpr->m_temp_C = temp_C;
 
    int type = 0;
    if ( sourceQuery != NULL )

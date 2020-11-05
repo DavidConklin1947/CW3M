@@ -238,7 +238,8 @@
     source_domain="reach"
     source_query="COMID=23773373"
     value_domain="source"
-    value="-2683868"
+    value="-1802735"
+    temp_C="4.9"
     dynamic="0"
        />
        
@@ -257,22 +258,31 @@
     value="-138240"
     dynamic="0"
        />
-    <!--
-    <flux name="Cougar Reservoir Drainage additional GW" use="1"
+    
+    <flux name="Springs above Smith R Reservoir" use="1"
     source_domain="reach"
-    source_query="HBVCALIB=8"
+    source_query="COMID=23773393"
     value_domain="source"
-    value="-1908"
+    value="-65323"
     dynamic="0"
        />
-    <flux name="Walterville gage additional GW" use="1"
+
+    <flux name="Springs above Cougar Reservoir" use="1"
 source_domain="reach"
-source_query="HBVCALIB=34"
+source_query="COMID=23773037"
 value_domain="source"
-value="-4939"
+value="-549936"
 dynamic="0"
        />
-       -->
+    
+    <flux name="South Fork near Rainbow" use="1"
+source_domain="reach"
+source_query="COMID=23773009"
+value_domain="source"
+value="-95416"
+dynamic="0"
+       />
+
   </global_methods>
 
   <!-- <climate> tag attributes note:

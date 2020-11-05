@@ -278,12 +278,13 @@ class FluxContainer
 friend class Flow;
 
 protected:
-    FluxContainer() : m_globalHandlerFluxValue( 0.0f ), m_nanOccurred(false) { }
+    FluxContainer() : m_globalHandlerFluxValue( 0.0f ), m_nanOccurred(false), m_fluxWP(0,0) { }
    ~FluxContainer() { }
 
 protected:
    float m_globalHandlerFluxValue;        // current value of the global flux  - m3/day
-   float m_globalHandlerEnergyFluxValue_kJperDay;  
+   WaterParcel m_fluxWP;
+//x   float m_globalHandlerEnergyFluxValue_kJperDay;  
 
 public:
    bool m_nanOccurred; // true when a not-a-number has occurred
