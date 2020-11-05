@@ -238,16 +238,32 @@
     source_domain="reach"
     source_query="COMID=23773373"
     value_domain="source"
-    value="-1802735"
+    value="-838793"
     temp_C="4.9"
     dynamic="0"
        />
-       
+
     <flux name="Springs feeding Lookout Creek" use="1"
-    source_domain="reach"
+     source_domain="reach"
     source_query="COMID=23773411"
-    value_domain="source"
+     value_domain="source"
     value="-31218"
+    dynamic="0"
+       />
+
+    <flux name="Springs below Trail Bridge Dam" use="1"
+    source_domain="reach"
+    source_query="COMID=23773359"
+    value_domain="source"
+    value="-636103"
+    dynamic="0"
+       />
+
+    <flux name="Foley Springs on West Fork" use="1"
+    source_domain="reach"
+    source_query="COMID=23773239"
+    value_domain="source"
+    value="-286247"
     dynamic="0"
        />
 

@@ -272,10 +272,35 @@ protected:
 };
 
 
+class WaterParcel
+{
+public:
+   WaterParcel();
+   WaterParcel(double volume_m3, double temperature_degC);
+   ~WaterParcel() {}
+
+   void Discharge(WaterParcel outflowWP);
+   WaterParcel Discharge(double volume_m3);
+   void Evaporate(double evap_volume_m3, double evap_energy_kJ);
+   void MixIn(WaterParcel inflow);
+   double WaterTemperature();
+   double WaterTemperature(double thermalEnergy_kJ);
+   static double WaterTemperature(double volume_m3, double thermalEnergy_kJ);
+   double ThermalEnergy();
+   double ThermalEnergy(double temperature_degC);
+   static double ThermalEnergy(double volume_m3, double temperature_degC);
+   static double SatVP_mbar(double tempAir_degC);
+
+//private:
+   double m_volume_m3;
+   double m_temp_degC;
+}; // end of class WaterParcel
+
+
 // a FluxContainer is a object (e.g. HRU, Reach) that can contain fluxes. 
 class FluxContainer
 {
-friend class Flow;
+   friend class Flow; 
 
 protected:
     FluxContainer() : m_globalHandlerFluxValue( 0.0f ), m_nanOccurred(false), m_fluxWP(0,0) { }
@@ -284,7 +309,6 @@ protected:
 protected:
    float m_globalHandlerFluxValue;        // current value of the global flux  - m3/day
    WaterParcel m_fluxWP;
-//x   float m_globalHandlerEnergyFluxValue_kJperDay;  
 
 public:
    bool m_nanOccurred; // true when a not-a-number has occurred
@@ -467,31 +491,6 @@ public:
 
    ZoneInfo( void ) : m_zone( ZONE_UNDEFINED ) { m_resConstraintArray.m_deleteOnDelete = false; }
 };
-
-
-class WaterParcel
-{
-public:
-   WaterParcel();
-   WaterParcel(double volume_m3, double temperature_degC);
-   ~WaterParcel() {}
-
-   void Discharge(WaterParcel outflowWP);
-   WaterParcel Discharge(double volume_m3);
-   void Evaporate(double evap_volume_m3, double evap_energy_kJ);
-   void MixIn(WaterParcel inflow);
-   double WaterTemperature();
-   double WaterTemperature(double thermalEnergy_kJ);
-   static double WaterTemperature(double volume_m3, double thermalEnergy_kJ);
-   double ThermalEnergy();
-   double ThermalEnergy(double temperature_degC);
-   static double ThermalEnergy(double volume_m3, double temperature_degC);
-   static double SatVP_mbar(double tempAir_degC);
-
-//private:
-   double m_volume_m3;
-   double m_temp_degC;
-}; // end of class WaterParcel
 
 
 //-----------------------------------------------------------------------------
