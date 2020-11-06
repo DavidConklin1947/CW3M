@@ -862,16 +862,16 @@ public:
 
    static double LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC);
 
-   bool  AddFluxFromGlobalHandler( float value ) 
-   { 
+   bool  AddFluxFromGlobalHandler(float value)
+   {
       if (isnan(value) || isnan(m_globalHandlerFluxValue))
       {
          m_nanOccurred = true;
          return(false);
       }
-      
+
       float orig_stored_value = m_globalHandlerFluxValue;
-      m_globalHandlerFluxValue += value; 
+      m_globalHandlerFluxValue += value;
       if (isnan(m_globalHandlerFluxValue))
       {
          m_nanOccurred = true;
@@ -880,7 +880,27 @@ public:
       }
 
       return(true);
-   }   // negative values are sinks, positive values are sources (m3/day)
+   }   // negative values are sinks (water entering the reach), positive values are sources (water leaving the reach) (m3/day)
+
+
+   bool  AddH2OfromGlobalHandlerWP(WaterParcel H2OtoAddWP) // Put water into the reach.
+   {
+      WaterParcel origWP = m_fluxWP;
+      m_fluxWP.MixIn(H2OtoAddWP);
+
+      float orig_stored_value = m_globalHandlerFluxValue;
+      m_globalHandlerFluxValue -= H2OtoAddWP.m_volume_m3; // Negative values represent water entering the reach.
+      if (isnan(m_globalHandlerFluxValue))
+      {
+         m_nanOccurred = true;
+         m_globalHandlerFluxValue = orig_stored_value;
+         m_fluxWP = origWP;
+         return(false);
+      }
+
+      return(true);
+   } // end of AddH2OfromGlobalHandlerWP()
+
 
    bool CheckForNaNs(CString callerName, bool OKflag)
       {

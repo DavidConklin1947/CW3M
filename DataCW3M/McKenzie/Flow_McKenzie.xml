@@ -231,78 +231,53 @@
                percent_IDU_POU_intersection ="15.0"
                DynamicWR_Appropriation_Date ="-1"
             />
-
-    <!-- The value field equals the number of cubic meters of water per day for each reach identified by the source query.
-    Positive values represent water withdrawn from the reaches, negative values represent water added to the reaches. --
-    <flux name="Springs feeding Clear Lake" use="1"
-    source_domain="reach"
-    source_query="COMID=23773373"
-    value_domain="source"
-    value="-838793"
-    temp_C="4.9"
-    dynamic="0"
-       />
--->
-    <flux name="Springs feeding Lookout Creek" use="1"
-     source_domain="reach"
-    source_query="COMID=23773411"
-     value_domain="source"
-    value="-31218"
-    dynamic="0"
-       />
-
-    <flux name="Springs below Trail Bridge Dam" use="1"
-    source_domain="reach"
-    source_query="COMID=23773359"
-    value_domain="source"
-    value="-636103"
-    dynamic="0"
-       />
-
-    <flux name="Foley Springs on West Fork" use="1"
-    source_domain="reach"
-    source_query="COMID=23773239"
-    value_domain="source"
-    value="-286247"
-    dynamic="0"
-       />
-
-    <flux name="Springs feeding Blue R at and above Tidbit Creek" use="1"
-    source_domain="reach"
-    source_query="COMID=23773429"
-    value_domain="source"
-    value="-138240"
-    dynamic="0"
-       />
-    
-    <flux name="Springs above Smith R Reservoir" use="1"
-    source_domain="reach"
-    source_query="COMID=23773393"
-    value_domain="source"
-    value="-65323"
-    dynamic="0"
-       />
-
-    <flux name="Springs above Cougar Reservoir" use="1"
-source_domain="reach"
-source_query="COMID=23773037"
-value_domain="source"
-value="-549936"
-dynamic="0"
-       />
-    
-    <flux name="South Fork near Rainbow" use="1"
-source_domain="reach"
-source_query="COMID=23773009"
-value_domain="source"
-value="-95416"
-dynamic="0"
-       />
-    
+ 
     <Spring name="Springs feeding Clear Lake" 
     source_query="COMID=23773373"
     value_cms="9.71"
     temp_C="4.9"
+       />
+
+    <Spring name="Springs feeding Lookout Creek" 
+     source_query="COMID=23773411"
+     value_cms="0.36"
+     temp_C="4.9"
+       />
+
+    <Spring name="Springs below Trail Bridge Dam" 
+    source_query="COMID=23773359"
+    value_cms="7.36"
+     temp_C="4.9"
+       />
+
+    <Spring name="Foley Springs on West Fork" 
+    source_query="COMID=23773239"
+    value_cms="3.31"
+      temp_C="4.9"
+       />
+
+    <Spring name="Springs feeding Blue R at and above Tidbit Creek" 
+    source_query="COMID=23773429"
+    value_cms="1.60"
+     temp_C="4.9"
+       />
+
+    <Spring name="Springs above Smith R Reservoir"
+    source_query="COMID=23773393"
+    value_cms="0.76"
+     temp_C="4.9"
+       />
+
+    <Spring name="Springs above Cougar Reservoir" 
+source_query="COMID=23773037"
+value_cms="6.37"
+     temp_C="4.9"
+       />
+
+    <Spring name="South Fork near Rainbow" 
+source_query="COMID=23773009"
+value_cms="1.10"
+     temp_C="4.9"
        />
 
   </global_methods>
