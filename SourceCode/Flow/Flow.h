@@ -862,7 +862,8 @@ public:
 
    static double LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC);
 
-   bool  AddFluxFromGlobalHandler(float value)
+   bool  AddFluxFromGlobalHandler(float value) 
+   // negative values of m_globalHandlerFluxValue are sinks (water entering the reach), positive values are sources (water leaving the reach) (m3/day)   
    {
       if (isnan(value) || isnan(m_globalHandlerFluxValue))
       {
@@ -880,7 +881,7 @@ public:
       }
 
       return(true);
-   }   // negative values are sinks (water entering the reach), positive values are sources (water leaving the reach) (m3/day)
+   } // end of AddFluxFromGlobalHandler(float) 
 
 
    bool  AddH2OfromGlobalHandlerWP(WaterParcel H2OtoAddWP) // Put water into the reach.
@@ -889,7 +890,7 @@ public:
       m_fluxWP.MixIn(H2OtoAddWP);
 
       float orig_stored_value = m_globalHandlerFluxValue;
-      m_globalHandlerFluxValue -= H2OtoAddWP.m_volume_m3; // Negative values represent water entering the reach.
+      m_globalHandlerFluxValue -= H2OtoAddWP.m_volume_m3; // Negative values of m_globalHandlerFluxValue represent water entering the reach.
       if (isnan(m_globalHandlerFluxValue))
       {
          m_nanOccurred = true;
@@ -899,7 +900,7 @@ public:
       }
 
       return(true);
-   } // end of AddH2OfromGlobalHandlerWP()
+   } // end of AddH2OfromGlobalHandlerWP(WP)
 
 
    bool CheckForNaNs(CString callerName, bool OKflag)
@@ -1765,6 +1766,7 @@ public:
    int m_colReachTURNOVER;
    int m_colReachXFLUX_D;
    int m_colReachXFLUX_Y;
+   int m_colReachSPRING_CMS;
 
    int m_colARIDITYNDX;
    int m_colHRUPercentIrrigated;

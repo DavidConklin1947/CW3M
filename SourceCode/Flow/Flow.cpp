@@ -2801,6 +2801,7 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachDEPTHMANNG, _T("DEPTHMANNG"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTURNOVER, _T("TURNOVER"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_D, _T("XFLUX_D"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachSPRING_CMS, _T("SPRING_CMS"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_Y, _T("XFLUX_Y"), TYPE_FLOAT, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
@@ -5723,10 +5724,11 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       outflow = pRes->GetResOutflow(pRes,dayOfYear);
       ASSERT(outflow >= 0);
       pRes->m_outflow = outflow*SEC_PER_DAY;    //m3 per day 
-      pRes->m_outflowWP = WaterParcel(pRes->m_outflow, DEFAULT_REACH_H2O_TEMP_DEGC);
+      int reach_ndx = m_pReachLayer->FindIndex(m_colStreamCOMID, pReach->m_reachID, 0);
+      double H2O_temp_C = -1; m_pReachLayer->GetData(reach_ndx, m_colReachTEMP_H2O, H2O_temp_C);
+      pRes->m_outflowWP = WaterParcel(pRes->m_outflow, H2O_temp_C);
 
       // Store today's hydropower generation (megawatts) for this reservoir into the reach attribute HYDRO_MW for the reach which receives the reservoir outflow.
-      int reach_ndx = m_pReachLayer->FindIndex(m_colStreamCOMID, pReach->m_reachID, 0);
       m_pReachLayer->SetDataU(reach_ndx, m_colStreamHYDRO_MW, pRes->m_power);
 
       }

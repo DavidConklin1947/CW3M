@@ -415,7 +415,7 @@ protected:
    int m_colStreamINSTRM_REQ; // regulatory flow requirement for this reach, cms (requirement of most junior instream WR, if more than one applies)
    int m_colStreamHBVCALIB; 
    int m_colReachSUB_AREA;
-   int m_colReachXFLUX_Y;
+   int m_colReachSPRING_CMS;
    int m_colStreamOUT_IRRIG;
    int m_colStreamOUT_MUNI;
    int m_colStreamIN_MUNI;
@@ -455,6 +455,7 @@ protected:
    int       m_colReachLength;                              // column number of the attrigute "LENGTH" in the stream layer
 	int       m_colNInConflict;									   // column number in stream layer for number of times reach in conflict
 	float     m_basinReachLength;										// total lenght of stream reaches in the study area
+	double m_ytd_total_spring_H2O_m3;
 	MapLayer *m_pStreamLayer;                                // study area stream layer
    CArray< int, int > m_reachDaysInConflict;						// the number of days per year a reach is in "conflic" 
 	CArray< int, int > m_dailyConflictCnt;						   // the number of times per day a reach is in "conflic" 

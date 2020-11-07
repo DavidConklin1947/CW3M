@@ -799,16 +799,12 @@ value_cms="1.10"
 
   <outputs>
 
-    <output_group name="FLOW Clear Lake Springs Daily" interval="daily" >
-      <output in_use="1" name="XFLUX_D (cms) for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="XFLUX_D" type="sum" domain="reach" />
-      <output in_use="1" name="XFLUX_Y (cms) for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="XFLUX_Y" type="sum" domain="reach" />
-      <output in_use="1" name="XFLUX_D (cms) for 23773363, the reach below the outlet" query="COMID=23773363" value="XFLUX_D" type="sum" domain="reach" />
-      <output in_use="1" name="XFLUX_Y (cms) for 23773363, the reach below the outlet" query="COMID=23773363" value="XFLUX_Y" type="sum" domain="reach" />
-      <output in_use="1" name="XFLUX_D (m3) for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="XFLUX_D*86400" type="sum" domain="reach" />
-      <output in_use="1" name="XFLUX_Y (m3) for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="XFLUX_Y*86400" type="sum" domain="reach" />
-      <output in_use="1" name="XFLUX_D (m3) for 23773363, the reach below the outlet" query="COMID=23773363" value="XFLUX_D*86400" type="sum" domain="reach" />
-      <output in_use="1" name="XFLUX_Y (m3) for 23773363, the reach below the outlet" query="COMID=23773363" value="XFLUX_Y*86400" type="sum" domain="reach" />
-      <output in_use="1" name="XFLUX_Y (m3/day) for the whole study area" query="1" value="XFLUX_Y*86400" type="sum" domain="reach" />
+    <output_group name="FLOW Clear Lake Springs Daily (cms and m3)" interval="daily" >
+      <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
       <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
     </output_group>
 

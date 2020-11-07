@@ -252,7 +252,7 @@ AltWaterMaster::AltWaterMaster(WaterAllocation *pWaterAllocation)
 , m_colStreamINSTRM_REQ(-1) // regulatory flow requirement for this reach, cms (requirement of most junior instream WR, if more than one applies)
 , m_colStreamHBVCALIB(-1)
 , m_colReachSUB_AREA(-1)
-, m_colReachXFLUX_Y(-1)
+, m_colReachSPRING_CMS(-1)
 , m_colStreamOUT_IRRIG(-1)
 , m_colStreamOUT_MUNI(-1)
 , m_colStreamIN_MUNI(-1)
@@ -541,7 +541,7 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
    m_pReachLayer->SetColData(m_colStreamQ_DIV_WRQ, VData(-1.e-20), true);
    m_pReachLayer->CheckCol(m_colStreamINSTRM_REQ, _T("INSTRM_REQ"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->SetColData(m_colStreamINSTRM_REQ, VData(0), true);
-   m_pReachLayer->CheckCol(m_colReachXFLUX_Y, "XFLUX_Y", TYPE_FLOAT, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachSPRING_CMS, "SPRING_CMS", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamOUT_IRRIG, "OUT_IRRIG", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamOUT_MUNI, "OUT_MUNI", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamIN_MUNI, "IN_MUNI", TYPE_FLOAT, CC_AUTOADD);
@@ -3294,27 +3294,35 @@ bool AltWaterMaster::EndStep(FlowContext *pFlowContext)
                pIDULayer->SetData(idu, m_colMIN_Q_WRQ, q_div_wrq);
             }
          }
-      }  // end of: for each ( idu )
+   }  // end of: for each ( idu )
 
-      pStreamLayer->m_readOnly = false;
-      float accumulator = 0.f;
-      for (MapLayer::Iterator streamNdx = pStreamLayer->Begin(); streamNdx != pStreamLayer->End(); streamNdx++)         
-      {
+   pStreamLayer->m_readOnly = false;
+   float accumulator = 0.f;
+   double todays_tot_spring_water_to_reach_cms = 0.;
+   for (MapLayer::Iterator streamNdx = pStreamLayer->Begin(); streamNdx != pStreamLayer->End(); streamNdx++)
+   {
       Reach *pReach = pFlowContext->pFlowModel->GetReachFromStreamIndex(streamNdx);
       if (pReach == NULL)
-         {
+      {
          CString msg;
          msg.Format("*** AltWaterMaster::EndStep() streamNdx = %d  pReach is NULL", streamNdx); Report::LogMsg(msg);
-         }
+         ASSERT(0);
+         continue;
+      }
       else if (pReach->m_instreamWaterRightUse != 0.f)
-         {
+      {
          // CString msg;
          // msg.Format("*** streamNdx = %d  pReach->m_instreamWaterRightUse = %f", streamNdx, pReach->m_instreamWaterRightUse);
          // Report::LogMsg(msg);
          accumulator += (float)pReach->m_instreamWaterRightUse;
          pStreamLayer->SetData(streamNdx, m_colStreamINSTRM_WRQ, pReach->m_instreamWaterRightUse);
-         }
-      } // end of loop thru the reach array
+      }
+
+      double spring_water_to_reach_cms = 0.; m_pReachLayer->GetData(streamNdx, m_colReachSPRING_CMS, spring_water_to_reach_cms);
+      todays_tot_spring_water_to_reach_cms += spring_water_to_reach_cms;
+
+   } // end of loop thru the reach array
+   m_ytd_total_spring_H2O_m3 += todays_tot_spring_water_to_reach_cms * SEC_PER_DAY;
 
    pStreamLayer->m_readOnly = true;
 
@@ -3492,6 +3500,7 @@ bool AltWaterMaster::EndStep(FlowContext *pFlowContext)
 
       for (int jday = 0; jday < 366; jday++) m_toOutsideBasinDy_m3[jday] = 0.;
       m_toOutsideBasinYr_m3 = 0.;
+      m_ytd_total_spring_H2O_m3 = 0;
 
       for (int uga = 0; uga <= MAX_UGA_NDX; uga++)
          {
@@ -3597,14 +3606,7 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
 	int iduCount = pLayer->GetRecordCount();
 	vector<int> *iduNdxVec = 0;
 
-   double tot_ground_water_to_reach_cms = 0.;
-   for (MapLayer::Iterator reach = m_pReachLayer->Begin(); reach < m_pReachLayer->End(); reach++)
-      {
-      double neg_ground_water_to_reach_cms = 0.; m_pReachLayer->GetData(reach, m_colReachXFLUX_Y, neg_ground_water_to_reach_cms);
-      tot_ground_water_to_reach_cms -= neg_ground_water_to_reach_cms;
-      }
-
-	for (int idu = 0; idu < iduCount; idu++)
+  	for (int idu = 0; idu < iduCount; idu++)
 	   {
 		float iduAreaHa = 0.f;
 		float iduAreaM2 = 0.0f;
@@ -3915,8 +3917,7 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    rowQuickCheckMetrics[1] = tot_H2O_last_year_mm;
    rowQuickCheckMetrics[2] = precip_yr_mm;
    rowQuickCheckMetrics[3] = groundwater_pumped_mm;
-   double tot_ground_water_to_reach_m3 = tot_ground_water_to_reach_cms * SEC_PER_DAY * pFlowContext->pEnvContext->daysInCurrentYear;
-   rowQuickCheckMetrics[4] = (float)((tot_ground_water_to_reach_m3 / tot_area) * 1000.); // High Cascades groundwater contribution
+   rowQuickCheckMetrics[4] = (float)((m_ytd_total_spring_H2O_m3 / tot_area) * 1000.); 
    rowQuickCheckMetrics[5] = from_outside_basin_mm;
    rowQuickCheckMetrics[6] = (float)volume_added_by_flow_model_mm;
    double year_in_mm = 0.; for (int i = 1; i <= 6; i++) year_in_mm += rowQuickCheckMetrics[i];

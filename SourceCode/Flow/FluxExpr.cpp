@@ -29,6 +29,7 @@ FluxExpr::FluxExpr( LPCTSTR name )
    , m_colAnnualOutput( -1 )
    , m_colReachXFLUX_D( -1 )
    , m_colReachXFLUX_Y( -1 )
+   , m_colReachSPRING_CMS(-1)
    , m_colSourceUnsatisfiedDemand( -1 )
    , m_startDate( -1 )
    , m_endDate( -1 )
@@ -1252,16 +1253,13 @@ bool Spring::InitRun(FlowContext* pFlowContext)
 
 bool Spring::StartYear(FlowContext* pFlowContext)
 {
- 
-
-   m_pSourceLayer->SetColDataU(m_colReachSPRING_CMS, 0);
-
    return true;
 }
 
 
 bool Spring::StartStep(FlowContext* pFlowContext)
 {
+   m_pSourceLayer->SetColDataU(m_colReachSPRING_CMS, 0);
    return true;
 }
 
@@ -1321,7 +1319,8 @@ bool Spring::Step(FlowContext* pFlowContext)
 
          // Add water to reach.
          float H2O_to_add_m3 = H2O_to_add_cms * SEC_PER_DAY;
-         pReach->CheckForNaNs("Spring::Step 2", pReach->AddFluxFromGlobalHandler(H2O_to_add_m3));              // m3/d, includes additional conveyance losses
+         WaterParcel H2O_to_addWP(H2O_to_add_m3, m_temp_C);
+         pReach->AddH2OfromGlobalHandlerWP(H2O_to_addWP);
          pReach->m_availableDischarge += H2O_to_add_cms;
 
          // This reach may already have been affected by another flux today.
