@@ -149,6 +149,17 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
          sw_x_surface_accum += (pSubreach->m_sw_kJ / SEC_PER_DAY) * 1000;
 
          double lateralInflow = GetLateralInflow(pReach);
+         if (lateralInflow != lateralInflow)
+         {
+            CString msg;
+            msg.Format("*** SolveReachKinematicWave(): i = %d, l = %d, lateralInflow = %f", i, l, lateralInflow);
+            Report::LogMsg(msg);
+            msg.Format("Setting lateralInflow to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
+            lateralInflow = NOMINAL_LOW_FLOW_CMS;
+            ASSERT(0);
+         }
+         PutLateralWP(pReach, l, lateralInflow);
+/*x
          double externalFluxes = GetReachFluxes(pFlowContext, pReach);
          double new_lateralInflow = lateralInflow + externalFluxes;
 
@@ -162,6 +173,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             }
 
          PutLateralWP(pReach, l, new_lateralInflow);
+x*/
 
          // Gain water from precip and lose water via evaporation.
          // In both cases the amount of water gained or lost is proportional to the surface area of the water.
@@ -292,7 +304,7 @@ double ReachRouting::NetLWout_W_m2(double tempAir_degC, double cL, double tempH2
 double ReachRouting::GetLateralInflow( Reach *pReach )
    {
    float inflow = 0;
-   inflow = pReach->GetFluxValue();
+   inflow = -pReach->GetFluxValue();
    inflow /= pReach->GetSubnodeCount();  // m3/day
 
    if (inflow != inflow)
@@ -310,7 +322,7 @@ double ReachRouting::GetLateralInflow( Reach *pReach )
    }
 
    return inflow;
-   } // end of GetLateralFlow()
+   } // end of GetLateralInflow()
 
 
 void ReachRouting::PutLateralWP(Reach * pReach, int subreachNdx, double daily_net_subreach_lateral_flow_m3) // Allocates runoff and withdrawals to a subreach
@@ -386,7 +398,7 @@ double ReachRouting::KinematicWave(double oldQ_cms, double upstreamInflow_cms, d
    double Qcurrent_m2 = oldQ_cms * z; // current flow rate
    double divisor_s_per_m = z + SEC_PER_DAY / dx_m; // divisor        
    double qsurface_m2 = (lateralInflow_cms * SEC_PER_DAY) / dx_m;  //m2
-   double newQ_cms = (qsurface_m2 + Qin_m2 + Qcurrent_m2) / divisor_s_per_m; ASSERT(newQ_cms > 0.);
+   double newQ_cms = (qsurface_m2 + Qin_m2 + Qcurrent_m2) / divisor_s_per_m; 
 
    return(newQ_cms);
 } // end of KinematicWave()
@@ -450,24 +462,40 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
       Qnew_cms = min_Q_cms; 
    }
    else
-   { // Yes, available water is sufficient for the minimum discharge.  
-      // How does available water compare to the Kinematic Wave solution?
+   { // Yes, available water is sufficient for the minimum discharge. Try to use the kinematic wave solution.
       double KW_solution_cms = KinematicWave(old_Q_cms, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY, net_lateral_inflow_m3 / SEC_PER_DAY,
          pSubnode->m_manning_depth_m, pReach->m_wdRatio, pReach->m_n, pReach->m_slope, pReach->m_deltaX);
-      if (KW_solution_cms <= available_for_discharge_cms) Qnew_cms = KW_solution_cms; // Use the KW solution.
-      else Qnew_cms = available_for_discharge_cms; // Maintain the minimum volume using a discharge less than the KW solution.
+      // Is the kinematic wave solution at least as large as the minimum flow?
+      if (KW_solution_cms >= min_Q_cms)
+      { // The kinematic wave solution is usable, provided there is enough water available.
+         // How does available water compare to the Kinematic Wave solution?
+         if (KW_solution_cms <= available_for_discharge_cms) Qnew_cms = KW_solution_cms; // Use the KW solution.
+         else Qnew_cms = available_for_discharge_cms; // Maintain the minimum volume using a discharge less than the KW solution.
+      }
+      else
+      { // The kinematic wave solution is not usable, because it is less than the minimum flow. It can even be negative, if the lateral
+         // flow is out of the reach and large (e.g. the irrigation pumps suck all the water out of the reach and run dry).
+         Qnew_cms = min_Q_cms;
+      }
    }
    ASSERT(Qnew_cms > 0 && Qnew_cms < 1.e10);
 
    pSubnode->m_waterParcel.MixIn(upstream_inflowWP); 
    pSubnode->m_waterParcel.MixIn(pSubnode->m_runoffWP); 
-   pSubnode->m_waterParcel.Discharge(pSubnode->m_withdrawalWP);
    if (magic_H2O_to_add_m3 > 0.)
    {
       double magic_H2O_temp_degC = pSubnode->m_waterParcel.WaterTemperature();
       WaterParcel magicWP = WaterParcel(magic_H2O_to_add_m3, magic_H2O_temp_degC);
       pSubnode->m_waterParcel.MixIn(magicWP);
       pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+   }
+
+   if (pSubnode->m_withdrawalWP.m_volume_m3 > 0)
+   { // Deal with lateral withdrawals, as for irrigation and drinking water
+      // Adjust the temperature of any water being withdrawn laterally to match the temperature of the water in the reach,
+      // now that runoff into the reach, upstream inflow, and magic water have been mixed in.
+      pSubnode->m_withdrawalWP.m_temp_degC = pSubnode->m_waterParcel.m_temp_degC;
+      pSubnode->m_waterParcel.Discharge(pSubnode->m_withdrawalWP);
    }
 
    pSubnode->m_discharge = Qnew_cms;

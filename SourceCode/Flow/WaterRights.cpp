@@ -253,6 +253,7 @@ AltWaterMaster::AltWaterMaster(WaterAllocation *pWaterAllocation)
 , m_colStreamHBVCALIB(-1)
 , m_colReachSUB_AREA(-1)
 , m_colReachSPRING_CMS(-1)
+, m_colReachXFLUX_D(-1)
 , m_colStreamOUT_IRRIG(-1)
 , m_colStreamOUT_MUNI(-1)
 , m_colStreamIN_MUNI(-1)
@@ -542,6 +543,7 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
    m_pReachLayer->CheckCol(m_colStreamINSTRM_REQ, _T("INSTRM_REQ"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->SetColData(m_colStreamINSTRM_REQ, VData(0), true);
    m_pReachLayer->CheckCol(m_colReachSPRING_CMS, "SPRING_CMS", TYPE_FLOAT, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachXFLUX_D, "XFLUX_D", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamOUT_IRRIG, "OUT_IRRIG", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamOUT_MUNI, "OUT_MUNI", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamIN_MUNI, "IN_MUNI", TYPE_FLOAT, CC_AUTOADD);
@@ -3319,7 +3321,8 @@ bool AltWaterMaster::EndStep(FlowContext *pFlowContext)
       }
 
       double spring_water_to_reach_cms = 0.; m_pReachLayer->GetData(streamNdx, m_colReachSPRING_CMS, spring_water_to_reach_cms);
-      todays_tot_spring_water_to_reach_cms += spring_water_to_reach_cms;
+      float xflux_d_cms = 0.; m_pReachLayer->GetData(streamNdx, m_colReachXFLUX_D, xflux_d_cms); // negative is into the reach, positive is out of the reach
+      todays_tot_spring_water_to_reach_cms += spring_water_to_reach_cms - xflux_d_cms;
 
    } // end of loop thru the reach array
    m_ytd_total_spring_H2O_m3 += todays_tot_spring_water_to_reach_cms * SEC_PER_DAY;

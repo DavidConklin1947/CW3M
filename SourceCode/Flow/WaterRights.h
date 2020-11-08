@@ -416,6 +416,7 @@ protected:
    int m_colStreamHBVCALIB; 
    int m_colReachSUB_AREA;
    int m_colReachSPRING_CMS;
+	int m_colReachXFLUX_D;
    int m_colStreamOUT_IRRIG;
    int m_colStreamOUT_MUNI;
    int m_colStreamIN_MUNI;

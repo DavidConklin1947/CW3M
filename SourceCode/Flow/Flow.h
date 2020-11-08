@@ -890,7 +890,7 @@ public:
       m_fluxWP.MixIn(H2OtoAddWP);
 
       float orig_stored_value = m_globalHandlerFluxValue;
-      m_globalHandlerFluxValue -= H2OtoAddWP.m_volume_m3; // Negative values of m_globalHandlerFluxValue represent water entering the reach.
+      m_globalHandlerFluxValue -= (float)H2OtoAddWP.m_volume_m3; // Negative values of m_globalHandlerFluxValue represent water entering the reach.
       if (isnan(m_globalHandlerFluxValue))
       {
          m_nanOccurred = true;

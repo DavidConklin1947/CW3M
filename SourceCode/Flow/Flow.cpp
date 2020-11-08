@@ -728,7 +728,7 @@ bool HRU::DistributeToReaches(float amount)
       int reach_layer_ndx = m_reachNdxArray[hru_reach_ndx];
       float frac = 0; gpModel->m_pReachLayer->GetData(reach_layer_ndx, gpModel->m_colReachHRU_FRAC, frac);
       Reach * pReach = gpModel->GetReachFromStreamIndex(reach_layer_ndx);
-      pReach->AddFluxFromGlobalHandler(frac * amount);
+      pReach->AddFluxFromGlobalHandler(-(frac * amount));
       frac_tot += frac;
    } // end of loop thru reaches associated with this HRU
    ASSERT(abs(1 - frac_tot) < 1e-6);
