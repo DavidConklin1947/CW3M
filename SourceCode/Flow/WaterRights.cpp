@@ -288,7 +288,7 @@ delete[] m_myGeo;
 
 
 // {EASTING, NORTHING, COMID, HBVCALIB attribute value}, 
-#define NUM_HBV_CALIB_PTS 46
+#define NUM_HBV_CALIB_PTS 47
 double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
 { // These entries should be ordered so that upstream points in a drainage come before downstream points.
 // Coast Fork Willamette basin
@@ -304,6 +304,7 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
 // McKenzie basin
    { 0, 0, 23773407, 9 }, //", 9, Blue River, ,
    { 0, 0, 0, 14 }, // now spare14 { 553414.7513, 4890138.574, 23773405, 14 }, //", 14, Blue River, 44.162500, -122.331940
+   { 0, 0, 23773373, 46 }, // Clear Lake
    { 0, 0, 0, 33 }, // now spare33 { 575933.4287, 4902090.896, -99, 33 }, //", 33, Trail Bridge, 44.268100, -122.048600
    { 0, 0, 23773011, 8 }, //", 8, Cougar, ,
    { 518418.3531, 4879673.347, 23772801, 34 }, //", 34, Walterville, 44.070000, -122.770000
@@ -603,7 +604,8 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
       { 
       m_pReachLayer->CheckCol(m_colStreamSTRMVERT0X, "STRMVERT0X", TYPE_INT, CC_MUST_EXIST);
       m_pReachLayer->CheckCol(m_colStreamSTRMVERT0Y, "STRMVERT0Y", TYPE_INT, CC_MUST_EXIST);
-      }
+      // PopulateHBVCALIB(pFlowContext);    uncomment when creating new HBVCALIB rows
+   }
 
    m_pReachLayer->m_readOnly = streamReadOnlyFlag;
 

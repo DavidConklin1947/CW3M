@@ -403,7 +403,8 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          if ( layerIndex < 0 )
             {
             CString msg;
-            msg.Format( "Bad layer in input file, %s; please fix the problem before continuing.", (LPCSTR) filename );
+            msg.Format( "Bad %s layer %s in input file, %s; please fix the problem before continuing.", 
+               (LPCSTR)name, (LPCSTR)path, (LPCSTR) filename );
             Report::ErrorMsg( msg );
             return -4;
             }

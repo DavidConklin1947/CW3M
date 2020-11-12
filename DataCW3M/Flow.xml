@@ -47,6 +47,7 @@
 -->
 <!--
                initial_conditions="flow.ic"
+             initial_conditions="Flow_WRB_31yr_spinup_2010.ic"
 -->
 <flow_model name="flow"
              time_step="1"
@@ -61,7 +62,6 @@
              annual_idu_output="0"
              daily_reach_output="0"
              annual_reach_output="0"
-             initial_conditions="Flow_WRB_31yr_spinup_2010.ic"
               >
 
   <!-- <catchment> specifies how to construct catchment structures for the model.

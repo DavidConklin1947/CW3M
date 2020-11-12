@@ -2706,6 +2706,7 @@ label:  readable field description
       <attr value="43" color="(0,0,0)" label="43 lower S. Santiam" />
       <attr value="44" color="(0,0,0)" label="44 lower N. Santiam" />
       <attr value="45" color="(0,0,0)" label="45 lower Santiam" />
+      <attr value="46" color="(0,0,0)" label="46 Clear Lake on McKenzie" />
     </attributes>
   </field>
 
