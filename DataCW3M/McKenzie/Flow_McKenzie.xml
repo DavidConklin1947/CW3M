@@ -801,6 +801,14 @@ value_cms="1.10"
     -->
 
   <outputs>
+    <output_group name="FLOW McKenzie Ditch analysis" interval="daily" >
+      <output in_use="1" name="23774421 IN_RUNOFF cms" query="COMID=23774421" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="23774421 Q_MIN cms" query="COMID=23774421" value="Q_MIN" type="sum" domain="reach" />
+      <output in_use="1" name="23774421 Q cms" query="COMID=23774421" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 IN_RUNOFF cms" query="COMID=23774417" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 Q_MIN cms" query="COMID=23774417" value="Q_MIN" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 Q cms" query="COMID=23774417" value="Q" type="sum" domain="reach" />
+    </output_group>
 
     <output_group name="FLOW Clear Lake Springs Daily (cms and m3)" interval="daily" >
       <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />

@@ -864,9 +864,10 @@ Reach::~Reach( void )
 
 double Reach::NominalLowFlow_cms()
 {
-   double reach_nominal_low_flow_cms = NOMINAL_LOW_FLOW_CMS * this->m_streamOrder * this->m_streamOrder * this->m_streamOrder; // ??? a placeholder
+   int scalar = m_streamOrder >= 2 ? m_streamOrder - 1 : 1;
+   double reach_nominal_low_flow_cms = NOMINAL_LOW_FLOW_CMS * scalar * scalar * scalar; // ??? a placeholder
    return(reach_nominal_low_flow_cms);
-} // end of NominalLowFlow()
+} // end of NominalLowFlow_cms()
 
 
 double Reach::NominalMinWidth_m()
@@ -2802,6 +2803,8 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTURNOVER, _T("TURNOVER"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_D, _T("XFLUX_D"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSPRING_CMS, _T("SPRING_CMS"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOFF, _T("IN_RUNOFF"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_MIN, _T("Q_MIN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_Y, _T("XFLUX_Y"), TYPE_FLOAT, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
@@ -3178,6 +3181,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pIDUlayer->SetColDataU(m_colSNOWPACK, 0.f);
    m_pIDUlayer->SetColDataU(m_colSNOWCANOPY, 0.f);
    m_pIDUlayer->SetColDataU(m_colSM2ATM, 0);
+   m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
    GlobalMethodManager::InitRun( &m_flowContext );
 
    m_pTotalFluxData->ClearRows();
@@ -6050,17 +6054,20 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
          double reachH2O_m3 = 0.;
          double reach_evap_m3 = 0.;
          double reach_surf_area_m2 = 0.;
+         double reach_in_runoff_m3 = 0.;
          for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
          {
             ReachSubnode *pNode = pReach->GetReachSubnode(j);
             reachH2O_m3 += pNode->m_waterParcel.m_volume_m3;
             reach_evap_m3 += pNode->m_evap_m3;
             reach_surf_area_m2 += pNode->m_subreach_surf_area_m2;
+            reach_in_runoff_m3 += pNode->m_runoffWP.m_volume_m3;
          }
          double reach_evap_mm = (reach_evap_m3 / reach_surf_area_m2) * MM_PER_M;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colStreamREACH_H2O, reachH2O_m3);
-//x         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachREACH_EVAP, reach_evap_m3);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachEVAP_MM, reach_evap_mm);
+         double reach_in_runoff_cms = reach_in_runoff_m3 / SEC_PER_DAY;
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOFF, reach_in_runoff_cms);
       }
    }
 
@@ -6278,11 +6285,19 @@ bool FlowModel::InitReaches(void)
 
       double reach_min_width_m = 0.;
       m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH_MIN, reach_min_width_m);
-      if (reach_min_width_m <= 0.) reach_min_width_m = (double)pReach->NominalMinWidth_m();
+      if (reach_min_width_m <= 0.)
+      {
+         reach_min_width_m = (double)pReach->NominalMinWidth_m();
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTH_MIN, reach_min_width_m);
+      }
 
       double reach_min_depth_m = 0.;
       m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachDEPTH_MIN, reach_min_depth_m);
-      if (reach_min_depth_m <= 0.) reach_min_depth_m = reach_min_width_m / pReach->m_wdRatio; 
+      if (reach_min_depth_m <= 0.)
+      {
+         reach_min_depth_m = reach_min_width_m / pReach->m_wdRatio;
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachDEPTH_MIN, reach_min_depth_m);
+      }
 
       double reach_z_min_m = 0.;
       m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachZ_MIN, reach_z_min_m);
@@ -6292,7 +6307,15 @@ bool FlowModel::InitReaches(void)
       ASSERT(-100. < reach_z_max_m && reach_z_max_m < 10000. && reach_z_min_m <= reach_z_max_m);
       double subreach_rise_m = (reach_z_max_m - reach_z_min_m) / num_subreaches;
 
-      double Q = pReach->NominalLowFlow_cms();
+      double reach_q_min_cms = 0.;
+      m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachQ_MIN, reach_q_min_cms);
+      if (reach_q_min_cms <= 0.)
+      {
+         reach_q_min_cms = pReach->NominalLowFlow_cms();
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachQ_MIN, reach_q_min_cms);
+      }
+
+      double Q = reach_q_min_cms;
       double manning_depth_m = GetManningDepthFromQ(pReach, Q, pReach->m_wdRatio);
 
       for (int j = 0; j < num_subreaches; j++)

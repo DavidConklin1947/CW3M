@@ -1767,6 +1767,8 @@ public:
    int m_colReachXFLUX_D;
    int m_colReachXFLUX_Y;
    int m_colReachSPRING_CMS;
+   int m_colReachIN_RUNOFF;
+   int m_colReachQ_MIN;
 
    int m_colARIDITYNDX;
    int m_colHRUPercentIrrigated;
