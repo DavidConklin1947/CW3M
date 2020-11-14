@@ -382,7 +382,8 @@ double ReachRouting::GetReachFluxes( FlowContext *pFlowContext, Reach *pReach )
    }
 
 
-double ReachRouting::KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, double manningDepth_m, double wdRatio, double manningN, double slope, double deltaX_m)
+double ReachRouting::KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, 
+   double manningDepth_m, double wdRatio, double manningN, double slope, double length_m)
 {
    double beta = 3.0 / 5.0;
    double manning_width_m = wdRatio * manningDepth_m;
@@ -392,7 +393,7 @@ double ReachRouting::KinematicWave(double oldQ_cms, double upstreamInflow_cms, d
       
    double Qstar_cms = (oldQ_cms + upstreamInflow_cms) / 2.0f; ASSERT(Qstar_cms > 0.);  // from Chow, eqn. 9.6.4 (m3/sec)
    double z = alpha * beta * pow(Qstar_cms, beta - 1.0); // s/m
-   float dx_m = (float)deltaX_m;
+   float dx_m = (float)length_m;
 
    double Qin_m2 = (upstreamInflow_cms * SEC_PER_DAY) / dx_m; // inflow term
    double Qcurrent_m2 = oldQ_cms * z; // current flow rate

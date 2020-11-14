@@ -234,7 +234,7 @@
  
     <Spring name="Springs feeding Clear Lake" 
     source_query="COMID=23773373"
-    value_cms="9.71"
+    value_cms="10.90"
     temp_C="4.9"
        />
 
@@ -381,7 +381,10 @@ value_cms="1.10"
 
     <!-- These are gridded and run from 1979 through the latest year available. The data includes leapdays. The data for all the years is combined in a single,
     separate file for each field.  The set was seeded for 1979-2018 by downloading from the MACA website at the University of Idaho in March, 2018.
-    John Dalrymple obtained the files from the MACA website. -->
+    John Dalrymple obtained the files from the MACA website. 
+                   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2019.nc"
+-->
     <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
@@ -806,6 +809,17 @@ value_cms="1.10"
       <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
       <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
       <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
+      <output in_use="1" name="ET_DAY for HBVCALIB = 46 Clear Lake drainage (mmH2O)" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+    </output_group>
+    
+    <output_group name="FLOW Clear Lake Springs Monthly (cms m3 and mm)" interval="monthly" >
+      <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
+      <output in_use="1" name="ET_DAY for HBVCALIB = 46 Clear Lake drainage (mmH2O)" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
     </output_group>
 
     <output_group name="FLOW Daily McKenzie flow skill assessment" interval ="daily" >

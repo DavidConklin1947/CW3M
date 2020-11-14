@@ -1033,17 +1033,18 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
          if (m_pSoilTable)
          {
          // get soils id from HRU
-            int soilID = -1;
-            if (pIDUlayer->GetData(idu, m_colIduSoilID, soilID))
+            int hbvcalib = -1;
+            if (pIDUlayer->GetData(idu, m_colIduSoilID, hbvcalib))
             {
 
                int colECOREGION;
                pIDUlayer->CheckCol(colECOREGION, "ECOREGION", TYPE_INT, CC_MUST_EXIST);
                int ecoregion; pIDUlayer->GetData(idu, colECOREGION, ecoregion);
-               if (ecoregion == 8 || ecoregion == 9 || ecoregion == 10) soilID = 28; // HBVCALIB==28 is ClackamasAboveRiverMill.
+               ASSERT(!((hbvcalib == 16 || hbvcalib == 25) && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)));
+               if (hbvcalib != 46 && hbvcalib != 9 && hbvcalib != 8 && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)) hbvcalib = 28; // HBVCALIB==28 is ClackamasAboveRiverMill.
 
                   // have soil ID for this HRU, find the corresponding row in the soils table
-               int row = m_pSoilTable->Find(m_colSoilTableSoilID, VData(soilID), 0);
+               int row = m_pSoilTable->Find(m_colSoilTableSoilID, VData(hbvcalib), 0);
                soilRow = row;
 
                if (row >= 0)  // found?
