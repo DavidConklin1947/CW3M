@@ -234,7 +234,7 @@
  
     <Spring name="Springs feeding Clear Lake" 
     source_query="COMID=23773373"
-    value_cms="10.90"
+    value_cms="8.52"
     temp_C="4.9"
        />
 
