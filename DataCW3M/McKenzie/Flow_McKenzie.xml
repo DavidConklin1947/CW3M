@@ -231,7 +231,7 @@
                percent_IDU_POU_intersection ="15.0"
                DynamicWR_Appropriation_Date ="-1"
             />
- 
+
     <Spring name="Springs feeding Clear Lake" 
     COMID="23773373"
     flow_cms="8.52"
@@ -279,7 +279,7 @@ COMID="23773009"
 flow_cms="1.10"
      temp_C="4.9"
        />
-
+    
   </global_methods>
 
   <!-- <climate> tag attributes note:
