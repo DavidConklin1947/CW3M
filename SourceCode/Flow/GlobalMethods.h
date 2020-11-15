@@ -665,7 +665,7 @@ protected:
 class Spring : public GlobalMethod // a special case of flux expressions, tailored to representation of springs flowing to reaches
 {
 public:
-   Spring(LPCTSTR name);
+   Spring(LPCTSTR name, int comid, double flow_cms, double temp_C);
 
    ~Spring(void);
 
@@ -689,39 +689,7 @@ protected:
    double m_temp_C;
 
    Reach* m_pReach;
-
-//x   PtrArray< FluxSourceSink > m_ssArray;
-
-   FLUX_TYPE m_fluxType;
-
-   int BuildSourceSinks(void);
-
-   CString m_expr;               // one-way straw=m3/sec, two way straw mm/day
-
-   FLUX_DOMAIN m_sourceDomain; // 0=undefined, 1=catchment, 2=reach, 3=reservoir
-   FLUX_DOMAIN m_valueDomain;
-   VALUE_TYPE m_valueType;
-
    int m_colReachSPRING_CMS;   // m3/sec
-
-   MapLayer* m_pReachLayer;
-   MapLayer* m_pSourceLayer;
-   MapLayer* m_pValueLayer;
-
-   MapExprEngine* m_pMapExprEngine;  // check memory management for expr types
-   MapExpr* m_pMapExpr;
-
-   FDataObj* m_pValueData;    // for time series, expression types
-
-   QueryEngine* m_pSourceQE;
-
-   CString m_sourceQuery;
-
-   Query* m_pSourceQuery;
-
-   // outputs
-   float m_dailySatisfiedDemand;     // m3/day
-
 }; // end of class Spring
 
 

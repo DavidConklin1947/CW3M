@@ -14769,3 +14769,21 @@ double WaterParcel::SatVP_mbar(double tempAir_degC)
    return(sat_vp_mbar);
 } // end of SatVP_mbar(tempAir_degC)
 
+
+Reach * FlowModel::GetReachFromCOMID(int comid)
+{
+   Reach* pReach = NULL;
+
+   int reach_count = (int)m_reachArray.GetSize();
+   int reach_array_ndx;
+   for (reach_array_ndx = 0; reach_array_ndx < reach_count; reach_array_ndx++)
+   {
+      pReach = m_reachArray[reach_array_ndx];
+      if (pReach->m_reachID == comid) break;
+   } // end of loop thru m_reachArray
+
+   if (reach_array_ndx >= reach_count) pReach = NULL;
+
+   return(pReach);
+} // end of GetReachPfromCOMID()
+

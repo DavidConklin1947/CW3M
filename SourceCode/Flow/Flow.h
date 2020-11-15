@@ -1372,6 +1372,7 @@ public:
    // manage global methods
    //void RunGlobalMethods( void );          
 
+   Reach* GetReachFromCOMID(int comid);
    Reach *GetReachFromStreamIndex( int index ) { return (Reach*) m_reachTree.GetReachNodeFromPolyIndex( index ); }
    Reach *GetReachFromNode( ReachNode *pNode );
    Reach *GetReach( int i )  // from internal array
