@@ -1046,6 +1046,7 @@ int FluxExpr::BuildSourceSinks( void )
 
 Spring::Spring(LPCTSTR name)
    : GlobalMethod(name, GM_FLUX_EXPR)
+   , m_springName(name)
    , m_fluxType(FT_NONE)
    , m_sourceDomain(FD_UNDEFINED)
    , m_valueType(VT_EXPR)
@@ -1088,27 +1089,29 @@ Spring::~Spring(void)
  } // end of Spring::~Spring() destructor
 
 
-Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel* pModel, MapLayer* pIDULayer, LPCTSTR filename)
-{
+Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel * pModel, MapLayer* pIDULayer, LPCTSTR filename)
+{ 
    if (pXmlFluxExpr == NULL)
       return NULL;
 
-   LPTSTR name = NULL, sourceQuery = NULL, sourceDomain = NULL, sinkDomain = NULL, value_cms = NULL,
+   LPTSTR name = NULL, sourceQuery = NULL, sourceDomain = NULL, sinkDomain = NULL,
       valueDomain = NULL;
 
    LPTSTR valueType = "expression";
 
    bool dynamic = false;
+   int spring_comid;
+   float spring_flow_cms = 0.f;
    float temp_C = DEFAULT_SOIL_H2O_TEMP_DEGC;
 
    XML_ATTR attrs[] = {
       // attr                 type          address               isReq  checkCol
       { "name",               TYPE_STRING,    &name,              true,    0 },
-      { "source_domain",      TYPE_STRING,    &sourceDomain,      false,   0 },
-      { "source_query",       TYPE_STRING,    &sourceQuery,       true,    0 },
-//x      { "value_domain",       TYPE_STRING,    &valueDomain,       true,    0 },
+//x      { "source_domain",      TYPE_STRING,    &sourceDomain,      false,   0 },
+//X      { "source_query",       TYPE_STRING,    &sourceQuery,       true,    0 },
       { "value_type",         TYPE_STRING,    &valueType,         false,    0 },
-      { "value_cms",              TYPE_STRING,    &value_cms,             true,    0 },
+      { "COMID",              TYPE_INT,    &spring_comid,             true,    0 },
+      { "flow_cms",              TYPE_FLOAT,    &spring_flow_cms,             true,    0 },
        { "temp_C",         TYPE_FLOAT,     &temp_C,         false,   0 },
       { NULL,                 TYPE_NULL,      NULL,               false,   0 } };
 
@@ -1121,14 +1124,33 @@ Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel* pModel, MapLayer
       return NULL;
    }
 
+   if (spring_flow_cms < 0.)
+   {
+      CString msg;
+      msg.Format("Spring::LoadXml() Spring %s flow = %f is negative; changing it to 0 now.", name, spring_flow_cms);
+      Report::WarningMsg(msg);
+      spring_flow_cms = 0.f;
+   }
+
+   if (temp_C < 0. || temp_C >100.)
+   {
+      CString msg;
+      msg.Format("Spring::LoadXml() Spring %s temperature = %f is out of range for liquid water; changing it to %f now.", name, temp_C, DEFAULT_SOIL_H2O_TEMP_DEGC);
+      Report::WarningMsg(msg);
+      temp_C = DEFAULT_SOIL_H2O_TEMP_DEGC;
+   }
+
    Spring * pSpring = new Spring(name);
+   pSpring->m_springCOMID = spring_comid;
+   pSpring->m_springFlow_cms = spring_flow_cms;
+   pSpring->m_temp_C = temp_C;
 
-
-   if (sourceDomain == NULL)
+/*X
+//x   if (sourceDomain == NULL)
       sourceDomain = "reach";
    //if ( sinkDomain == NULL )
    //   sinkDomain = "catchment";
-   if (valueDomain == NULL)
+//x   if (valueDomain == NULL)
       valueDomain = "sink";
 
    pSpring->m_sourceDomain = FD_REACH;
@@ -1138,8 +1160,10 @@ Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel* pModel, MapLayer
    pSpring->m_pValueLayer = pSpring->m_pSourceLayer;
 
 
-   pSpring->m_sourceQuery = sourceQuery;
-   pSpring->m_expr = value_cms;
+//x   pSpring->m_sourceQuery = sourceQuery;
+
+   pSpring->m_springCOMID = spring_comid;
+   pSpring->m_springFlow_cms = spring_flow_cms;
 
    switch (valueType[0])
    {
@@ -1163,18 +1187,42 @@ Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel* pModel, MapLayer
       type += (int)FT_SOURCE;
 
    pSpring->m_fluxType = (FLUX_TYPE)type;
+X*/
 
    return pSpring;
 } // end of Spring::LoadXml()
 
 bool Spring::Init(FlowContext* pFlowContext)
 {
-   MapLayer* pLayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+//x   MapLayer* pLayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+   FlowModel* pFlowModel = pFlowContext->pFlowModel;
+
    MapLayer* pReachLayer = (MapLayer*)pFlowContext->pEnvContext->pReachLayer;
-
-   m_pSourceLayer = pReachLayer;
-
    pReachLayer->CheckCol(m_colReachSPRING_CMS, "SPRING_CMS", TYPE_FLOAT, CC_AUTOADD);
+
+   int reach_count = (int)pFlowModel->m_reachArray.GetSize();
+   int reach_array_ndx;
+   for (reach_array_ndx = 0; reach_array_ndx < reach_count; reach_array_ndx++)
+   {
+      m_pReach = pFlowModel->m_reachArray[reach_array_ndx];
+      if (m_pReach->m_reachID == m_springCOMID) break;
+   } // end of loop thru m_reachArray
+
+   if (reach_array_ndx >= reach_count) 
+   {
+      CString msg;
+      msg.Format("Spring::Init() Unable to find reach with COMID = %d for spring %s", m_springCOMID, m_springName);
+      Report::ErrorMsg(msg);
+      return(false);
+   }
+
+
+
+
+/*X
+
+//x   m_pSourceLayer = pReachLayer;
+
 
    m_pSourceLayer->SetColDataU(m_colReachSPRING_CMS, 0.0f);
 
@@ -1240,26 +1288,29 @@ bool Spring::Init(FlowContext* pFlowContext)
 
 // Note: queries and expressions are set up in the LoadXml section
    int straws = BuildSourceSinks();
-
+X*/
    return true;
 } // end of Spring::Init()
 
 
 bool Spring::InitRun(FlowContext* pFlowContext)
 {
+   MapLayer* pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+   pIDUlayer->SetDataU(m_pReach->m_polyIndex, m_colReachSPRING_CMS, 0);
    return true;
 }
 
 
 bool Spring::StartYear(FlowContext* pFlowContext)
 {
+   MapLayer* pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+   pIDUlayer->SetDataU(m_pReach->m_polyIndex, m_colReachSPRING_CMS, 0);
    return true;
 }
 
 
 bool Spring::StartStep(FlowContext* pFlowContext)
 {
-   m_pSourceLayer->SetColDataU(m_colReachSPRING_CMS, 0);
    return true;
 }
 
@@ -1267,11 +1318,23 @@ bool Spring::StartStep(FlowContext* pFlowContext)
 bool Spring::Step(FlowContext* pFlowContext)
 {
    MapLayer* pReachLayer = (MapLayer*)pFlowContext->pEnvContext->pReachLayer;
-
-   // basic idea - iterate through the straws, allocating water based on demand
    FlowModel* pModel = pFlowContext->pFlowModel;
 
+   Reach * pReach = pModel->FindReachFromID(m_springCOMID);
 
+   // Add water to reach.
+   double H2O_to_add_m3 = m_springFlow_cms * SEC_PER_DAY;
+   WaterParcel H2O_to_addWP(H2O_to_add_m3, m_temp_C);
+   pReach->AddH2OfromGlobalHandlerWP(H2O_to_addWP);
+   pReach->m_availableDischarge += m_springFlow_cms;
+
+   // This reach may already have been affected by another flux today.
+   double spring_flow_so_far_today_cms; pReachLayer->GetData(m_pReach->m_polyIndex, m_colReachSPRING_CMS, spring_flow_so_far_today_cms);
+   spring_flow_so_far_today_cms += m_springFlow_cms;
+   pReachLayer->SetDataU(m_pReach->m_polyIndex, m_colReachSPRING_CMS, spring_flow_so_far_today_cms);
+
+
+/*x
 // start iterating through the straws
 // for each straw, see if it is connected to a source that passes the
 // sourceQuery, if defined.
@@ -1332,7 +1395,7 @@ bool Spring::Step(FlowContext* pFlowContext)
  
       }  // end of: if ( passSourceQuery )
    }  // end of: for ( each straw );
-
+x*/
    return true;
 } // end of Spring::Step()
 
@@ -1348,7 +1411,7 @@ bool Spring::EndYear(FlowContext* pFlowContext)
    return true;
 }
 
-
+/*x
 int Spring::BuildSourceSinks(void)
 {
    m_ssArray.RemoveAll();
@@ -1385,4 +1448,4 @@ int Spring::BuildSourceSinks(void)
 
    return (int)m_ssArray.GetSize();
 } // end of Spring::BuildSourceSink()
-
+x*/

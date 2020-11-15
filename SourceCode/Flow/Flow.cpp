@@ -3182,6 +3182,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pIDUlayer->SetColDataU(m_colSNOWCANOPY, 0.f);
    m_pIDUlayer->SetColDataU(m_colSM2ATM, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
+   m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
+
    GlobalMethodManager::InitRun( &m_flowContext );
 
    m_pTotalFluxData->ClearRows();
@@ -4554,6 +4556,7 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
       }
 
    m_pReachLayer->SetColDataU(m_colReachXFLUX_D, 0);
+   m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
 
    // Make sure today's weather is loaded into the IDU and HRU layers.
    GetTodaysWeatherField(CDT_PRECIP);

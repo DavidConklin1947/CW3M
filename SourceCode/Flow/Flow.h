@@ -1349,6 +1349,7 @@ friend class Reservoir;
 friend class ModelOutput;
 friend class ReachRouting;
 friend class SWMM;
+friend class Spring;
 
 public:
    FlowModel();

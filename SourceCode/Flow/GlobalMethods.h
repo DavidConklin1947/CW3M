@@ -683,7 +683,14 @@ public:
    static Spring* LoadXml(TiXmlElement* pXmlEvapTrans, FlowModel*, MapLayer*, LPCTSTR path);
 
 protected:
-   PtrArray< FluxSourceSink > m_ssArray;
+   CString m_springName;
+   int m_springCOMID;
+   double m_springFlow_cms;
+   double m_temp_C;
+
+   Reach* m_pReach;
+
+//x   PtrArray< FluxSourceSink > m_ssArray;
 
    FLUX_TYPE m_fluxType;
 
@@ -696,7 +703,6 @@ protected:
    VALUE_TYPE m_valueType;
 
    int m_colReachSPRING_CMS;   // m3/sec
-   float m_temp_C;
 
    MapLayer* m_pReachLayer;
    MapLayer* m_pSourceLayer;
