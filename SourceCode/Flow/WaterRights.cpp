@@ -2266,7 +2266,8 @@ float AltWaterMaster::AllocateIrrigationWater(WaterRight *pRight, int iduNdx, fl
       float request_from_this_WR = min(request, podRate);
 
       *pAllocated_water = min(request_from_this_WR, availSourceFlow);
-      pReach->CheckForNaNs("AllocateSWtoUGA", pReach->AddFluxFromGlobalHandler(-(*pAllocated_water * SEC_PER_DAY))); //m3/d
+//x      pReach->CheckForNaNs("AllocateSWtoUGA", pReach->AddFluxFromGlobalHandler(-(*pAllocated_water * SEC_PER_DAY))); //m3/d
+      pReach->CheckForNaNs("AllocateSWtoUGA", pReach->AddFluxFromGlobalHandler(*pAllocated_water * SEC_PER_DAY)); //m3/d
       pReach->m_availableDischarge -= *pAllocated_water;
 
       float out_muni_cms; m_pReachLayer->GetData(pReach->m_polyIndex, m_colStreamOUT_MUNI, out_muni_cms);
@@ -2425,7 +2426,8 @@ void AltWaterMaster::FateOfUGA_UrbanWaterUsingSewers()
          if (!m_POCDs[pocd_ndx]->outsideBasin_flag && m_POCDs[pocd_ndx]->reachPolyIndex >= 0) 
          {
             Reach *pReach = m_pFlowModel->FindReachFromPolyIndex(m_POCDs[pocd_ndx]->reachPolyIndex);
-            pReach->CheckForNaNs("FateOfUGA_UrbanWaterUsingSewers 2", pReach->AddFluxFromGlobalHandler((float)discharge2POCD_m3_today));
+//x            pReach->CheckForNaNs("FateOfUGA_UrbanWaterUsingSewers 2", pReach->AddFluxFromGlobalHandler((float)discharge2POCD_m3_today));
+            pReach->CheckForNaNs("FateOfUGA_UrbanWaterUsingSewers 2", pReach->AddFluxFromGlobalHandler(-((float)discharge2POCD_m3_today)));
          }
          else
          { // Even if the outsideBasin_flag is not set, the streamIndex could be missing if we're simulating a subbasin instead of the whole study area.
@@ -2504,9 +2506,10 @@ void AltWaterMaster::FateOfUGA_UrbanWaterUsingSewers()
          {
             amt_allocated_cms = AllocateIrrigationWater(pRight, iduNdx, pctPou, availSourceFlow, &unused_amt_cms);
             if (amt_allocated_cms > 0.f)
-            { // add a negative flux (sink) to the reach. converting from m3/sec to m3/day
+//x            { // add a negative flux (sink) to the reach. converting from m3/sec to m3/day
+            { // add a positive flux representing water leaving the reach, and convert from m3/sec to m3/day
                float flux = amt_allocated_cms * SEC_PER_DAY; // m3
-               pReach->CheckForNaNs("AllocateSurfaceWR 1", pReach->AddFluxFromGlobalHandler(-flux)); //m3/d
+               pReach->CheckForNaNs("AllocateSurfaceWR 1", pReach->AddFluxFromGlobalHandler(flux)); //m3/d
                pReach->m_availableDischarge -= amt_allocated_cms;
                m_SWIrrDuty += flux; // m3 
 
@@ -2582,10 +2585,12 @@ void AltWaterMaster::FateOfUGA_UrbanWaterUsingSewers()
                {
                   amt_allocated_cms = iduDemand;
 
-                  // add a negative flux (sink) to the reach. converting from m3/sec to m3/day
+//x                  // add a negative flux (sink) to the reach. converting from m3/sec to m3/day
+                  // add a positive flux representing water leaving the reach, and convert from m3/sec to m3/day
                   float flux = iduDemand * SEC_PER_DAY;
 
-                  pReach->CheckForNaNs("AllocateSurfaceWR 3", pReach->AddFluxFromGlobalHandler(-flux)); //m3/d
+//x                  pReach->CheckForNaNs("AllocateSurfaceWR 3", pReach->AddFluxFromGlobalHandler(-flux)); //m3/d
+                  pReach->CheckForNaNs("AllocateSurfaceWR 3", pReach->AddFluxFromGlobalHandler(flux)); //m3/d
                   pReach->m_availableDischarge -= iduDemand;
 
                   m_iduSWUnAllocatedArray[iduNdx] += availSourceFlow - iduDemand;  // m3/sec?
@@ -2610,14 +2615,16 @@ void AltWaterMaster::FateOfUGA_UrbanWaterUsingSewers()
                {
                   amt_allocated_cms = availSourceFlow;
 
-                  // add a negative value to the reach. converting from m3/sec to m3/day
+//x                  // add a negative value to the reach. converting from m3/sec to m3/day
+                  // add a positive flux representing water leaving the reach, and convert from m3/sec to m3/day
                   float flux = availSourceFlow * SEC_PER_DAY;
                   float ratio = 0.000001f;
 
                   if (iduDemand > 0.0)
                      ratio = availSourceFlow / iduDemand;
 
-                  pReach->CheckForNaNs("AllocateSurfaceWR 4", pReach->AddFluxFromGlobalHandler(-flux)); // m3/day
+//x                  pReach->CheckForNaNs("AllocateSurfaceWR 4", pReach->AddFluxFromGlobalHandler(-flux)); // m3/day
+                  pReach->CheckForNaNs("AllocateSurfaceWR 4", pReach->AddFluxFromGlobalHandler(flux)); // m3/day
                   pReach->m_availableDischarge = 0.0f;
 
                   m_iduSWUnsatMunDmdYr[iduNdx] += iduDemand - availSourceFlow;
