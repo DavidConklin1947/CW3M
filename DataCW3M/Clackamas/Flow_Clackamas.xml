@@ -233,28 +233,6 @@
                percent_IDU_POU_intersection ="15.0"
                DynamicWR_Appropriation_Date ="-1"
             />
-
-    <flux name="Blue River Reservoir drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=9"
-    value_domain="source"
-    value="-579"
-    dynamic="0"
-       />
-    <flux name="Cougar Reservoir Drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=8"
-    value_domain="source"
-    value="-1908"
-    dynamic="0"
-       />
-    <flux name="Walterville gage additional GW" use="1"
-source_domain="reach"
-source_query="HBVCALIB=34"
-value_domain="source"
-value="-4939"
-dynamic="0"
-       />
     <flux name="Clackamas High Cascades Groundwater contribution" use="1"
             source_domain="reach"
             source_query="(ECO = 9 or ECO = 10) and SUB_AREA =3"
@@ -262,57 +240,7 @@ dynamic="0"
             value="-7743.0"
             dynamic="0"
        />
-    <flux name="Detroit Reservoir Drainage HC GW contribution" use="1"
-     source_domain="reach"
-     source_query="HBVCALIB=12"
-     value_domain="source"
-     value="-2097"
-     dynamic="0"
-       />
-    <flux name="Hills Creek Reservoir Drainage additional GW" use="1"
-   source_domain="reach"
-   source_query="HBVCALIB=1"
-   value_domain="source"
-   value="-1546"
-   dynamic="0"
-       />
-    <flux name="Fall Creek Reservoir Drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=4"
-    value_domain="source"
-    value="-155"
-    dynamic="0"
-       />
-    <flux name="Middle Fork at Jasper additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=38"
-    value_domain="source"
-    value="-814"
-    dynamic="0"
-       />
 
-    <!--    
-    <external name="StreamTemperature"  method="fn=hbv.dll:StreamTempReg" use="1" timing="1+32"/>
-    
-    <external name="StreamTemperature"  method="fn=StreamTemp.dll:StreamTempEntry" use="1" timing="1+32"/>
-    
-    <StreamTemp_model
-      query=""
-      latitude="" longitude=""
-      deltaTGMT=""
-      start_TOD=""
-      sun_positions=""
-      start_DOY="" end_DOY=""
-      initSurfaceWaterTemp="" initGroundWaterTemp="" >
-      <topo_shading 
-        start_TOD=""
-        sun_positions=""
-        max_distance=""
-        query=""
-        table="topo_shading.csv"
-      />
-     </StreamTemp_model>
--->
   </global_methods>
 
   <!-- <climate> tag attributes note:

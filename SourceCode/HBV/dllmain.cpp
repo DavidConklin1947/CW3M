@@ -65,7 +65,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 }
 
 extern "C" float PASCAL EXPORT HBV_IrrigatedSoil(FlowContext *pFlowContext);
-extern "C" float PASCAL EXPORT HBVdailyProcess(FlowContext *pFlowContext);
+//x extern "C" float PASCAL EXPORT HBVdailyProcess(FlowContext *pFlowContext);
 extern "C" float PASCAL EXPORT InitHBV_Global( FlowContext *pFlowContext, LPCTSTR initStr );
 
 extern "C" BOOL PASCAL EXPORT CalcDailyUrbanWater(FlowContext *pFlowContext); 
@@ -73,7 +73,7 @@ extern "C" BOOL PASCAL EXPORT CalcDailyUrbanWaterInit(FlowContext *pFlowContext)
 extern "C" BOOL PASCAL EXPORT CalcDailyUrbanWaterRun(FlowContext *pFlowContext); 
 
 float PASCAL HBV_IrrigatedSoil(FlowContext *pFlowContext) { return theModel->HBV_IrrigatedSoil(pFlowContext); }
-float PASCAL HBVdailyProcess(FlowContext *pFlowContext) { return theModel->HBVdailyProcess(pFlowContext); }
+//x float PASCAL HBVdailyProcess(FlowContext *pFlowContext) { return theModel->HBVdailyProcess(pFlowContext); }
 float PASCAL InitHBV_Global( FlowContext *pFlowContext, LPCTSTR initInfo ) { return theModel->InitHBV_Global( pFlowContext, initInfo ); }
 
 BOOL PASCAL CalcDailyUrbanWater(FlowContext *pFlowContext) { return theModel->CalcDailyUrbanWater(pFlowContext); }

@@ -159,21 +159,6 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
             ASSERT(0);
          }
          PutLateralWP(pReach, l, lateralInflow);
-/*x
-         double externalFluxes = GetReachFluxes(pFlowContext, pReach);
-         double new_lateralInflow = lateralInflow + externalFluxes;
-
-         if (new_lateralInflow != new_lateralInflow)
-            {
-            CString msg;
-            msg.Format("*** SolveReachKinematicWave(): i = %d, l = %d, lateralInflow = %f, externalFluxes = %f", i, l, lateralInflow, externalFluxes);
-            Report::LogMsg(msg);
-            msg.Format("Setting new_lateralInflow to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
-            new_lateralInflow = NOMINAL_LOW_FLOW_CMS;
-            }
-
-         PutLateralWP(pReach, l, new_lateralInflow);
-x*/
 
          // Gain water from precip and lose water via evaporation.
          // In both cases the amount of water gained or lost is proportional to the surface area of the water.

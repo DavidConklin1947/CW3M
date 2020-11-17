@@ -74,7 +74,7 @@ float HBV::InitHBV_Global(FlowContext *pFlowContext, LPCTSTR inti)
 
 #define HC_ECOREGION 9
 
-
+/*x
 float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 {
    MapLayer *pIDULayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
@@ -237,7 +237,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       " hruRainEvap_liters = %f", h, massBalDiscrepancyFrac, precip_liters, hruSnowThrufall_liters, hruSnowEvap_liters, hruRainThrufall_liters, hruRainEvap_liters);
       Report::LogMsg(msg);
       }
-*/
+/*
       float rechargeToIrrigatedSoil_m3 = 0.f;
       float rechargeToNonIrrigatedSoil_m3 = 0.f;
       float rechargeToUpperGW_m3 = 0.f;
@@ -397,7 +397,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       h, mass_balance_discrep / tot_water_m3, tot_water_m3, ending_water_m3, pHRU->m_currentRunoff*natural_area_m2 / 1000.f, q0_m3, q2_m3, mass_balance_discrep,
       hruRainThrufall_liters / 1000.f, hruSnowThrufall_liters / 1000.f, natural_area_m2);
       Report::LogMsg(msg);
-*/
+/*
          for (int l = 0; l < hruLayerCount; l++)
          {
             CString msg;
@@ -421,7 +421,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 
    return 0.0f;
 } // end of HBVdailyProcess()
-
+x*/
 
 
 float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)

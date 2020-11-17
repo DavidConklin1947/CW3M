@@ -627,8 +627,8 @@ bool FluxExpr::Step( FlowContext *pFlowContext )
                      }  // end of: if ( areaArray[ i ] > 0 ) - any flux to allocate?
                   }  // end of: for each sink
 
-               // remove water from reach
-               pReach->CheckForNaNs("FluxExpr::Step 2", pReach->AddFluxFromGlobalHandler( -totalSatisfiedDemand ));              // m3/d, includes additional conveyance losses
+               // totalSatisfiedDemand < 0 means we're adding water to the reach; totalSatisfiedDemand > 0 means we're taking water out of the reach
+               pReach->CheckForNaNs("FluxExpr::Step 2", pReach->AddFluxFromGlobalHandler( totalSatisfiedDemand ));              // m3/d, includes additional conveyance losses
 /*
                if (-totalSatisfiedDemand > 0)
                {

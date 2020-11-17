@@ -102,7 +102,7 @@ public:
    float InitHBV_Global(FlowContext *pFlowContext, LPCTSTR); 
 
    float HBV_IrrigatedSoil(FlowContext *pFlowContext);
-   float HBVdailyProcess(FlowContext * pFlowContext);
+//x   float HBVdailyProcess(FlowContext * pFlowContext);
 
    float ET( float waterDepth, float fc, float lp, float wp, float temp, int month, int doy, float &etRc);
    float CalcET(  float temp, int month, int doy ) ;//hargreaves equation
