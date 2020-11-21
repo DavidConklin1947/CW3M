@@ -13061,7 +13061,6 @@ bool FlowModel::GetDailyWeatherField(CDTYPE type, int tgtDoy0, int tgtYear)
          SYSDATE tgtDate(tgt_month, tgt_day, tgtYear);
          int time_ndx = pInfo->GetTimeIndex(tgtDate, m_flowContext.pEnvContext->m_maxDaysInYear); // m_flowContext.pEnvContext->m_simDate, m_flowContext.pEnvContext->m_maxDaysInYear
 
-
          float * field_vals = new float[NUM_OF_CLIMATE_GRIDCELLS];
          const long start[3] = { time_ndx, 0, 0 };
          const long len[3] = { 1, (long)NUM_OF_CLIMATE_GRID_ROWS, (long)NUM_OF_CLIMATE_GRID_COLUMNS };
