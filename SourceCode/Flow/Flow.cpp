@@ -12739,7 +12739,7 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
 
       // Open this input file.
       CString msg;
-      msg.Format("Opening Climate file %s", filePathAndName);
+      msg.Format("Opening Climate file %s", filePathAndName.GetString());
       int rtnval = 0;
       pInfo->m_ncid = -1;
       pInfo->m_mostRecentIndexYear = -1; // A calendar year will go here
@@ -12754,13 +12754,23 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
       pInfo->m_varid_data = -1;
       rtnval = nc_inq_varid(pInfo->m_ncid, pInfo->m_varName, &pInfo->m_varid_data); if (!chk_nc(rtnval)) return(false);
 
+      pInfo->m_nctype = NC_NAT;
+      rtnval = nc_inq_vartype(pInfo->m_ncid, pInfo->m_varid_data, &pInfo->m_nctype); if (!chk_nc(rtnval)) return(false);
+      if (pInfo->m_nctype != NC_FLOAT && pInfo->m_nctype != NC_SHORT)
+      {
+         CString msg;
+         msg.Format("OpenClimateDataFiles() File %s, variable %s, has nctype = %d, which is neither NC_FLOAT nor NC_SHORT.", filePathAndName, pInfo->m_varName, pInfo->m_nctype);
+         Report::ErrorMsg(msg);
+         return(false);
+      }
+
       float scale_factor = 1.f;
       rtnval = nc_get_att_float(pInfo->m_ncid, pInfo->m_varid_data, "scale_factor", &scale_factor);
 
       if (rtnval == NC_NOERR)
       {
          CString msg;
-         msg.Format("OpenClimateDataFiles() File %s, variable %s, has scale_factor = %f", filePathAndName, pInfo->m_varName, scale_factor);
+         msg.Format("OpenClimateDataFiles() File %s, variable %s, has scale_factor = %f", filePathAndName.GetString(), pInfo->m_varName, scale_factor);
          Report::LogMsg(msg);
       }
       else if (pInfo->m_firstYear < pInfo->m_lastYear) 
@@ -12794,7 +12804,7 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
          rtnval = nc_inq_dimlen(pInfo->m_ncid, pInfo->m_dimid_time, &pInfo->m_size_time); if (!chk_nc(rtnval)) return(false);
 
          CString msg;
-         msg.Format("For tgtYear = %d, opened Grid-based Climate file %s with %d records", tgtYear, filePathAndName, pInfo->m_size_time);
+         msg.Format("For tgtYear = %d, opened Grid-based Climate file %s with %ld records", tgtYear, filePathAndName, pInfo->m_size_time);
          Report::LogMsg(msg, RT_INFO);
       }
       else
@@ -12806,11 +12816,9 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
          pInfo->m_varid_idu_id = -1;
          rtnval = nc_inq_varid(pInfo->m_ncid, "idu_id", &pInfo->m_varid_idu_id); if (!chk_nc(rtnval)) return(false);
 
-         nc_type vartype = NC_NAT;
-         rtnval = nc_inq_vartype(pInfo->m_ncid, pInfo->m_varid_data, &vartype); if (!chk_nc(rtnval)) return(false);
-         if (vartype != NC_FLOAT)
+         if (pInfo->m_nctype != NC_FLOAT)
          {
-            CString msg; msg.Format("file = %s, vartype = %d vartype is not NC_FLOAT", filePathAndName, vartype);
+            CString msg; msg.Format("file = %s, vartype = %d vartype is not NC_FLOAT", filePathAndName, pInfo->m_nctype);
             Report::ErrorMsg(msg);
             return(false);
          }
@@ -13052,11 +13060,32 @@ bool FlowModel::GetDailyWeatherField(CDTYPE type, int tgtDoy0, int tgtYear)
          int tgt_month, tgt_day; GetCalDate0(tgtDoy0, &tgt_month, &tgt_day, days_in_year);
          SYSDATE tgtDate(tgt_month, tgt_day, tgtYear);
          int time_ndx = pInfo->GetTimeIndex(tgtDate, m_flowContext.pEnvContext->m_maxDaysInYear); // m_flowContext.pEnvContext->m_simDate, m_flowContext.pEnvContext->m_maxDaysInYear
+
+
          float * field_vals = new float[NUM_OF_CLIMATE_GRIDCELLS];
          const long start[3] = { time_ndx, 0, 0 };
          const long len[3] = { 1, (long)NUM_OF_CLIMATE_GRID_ROWS, (long)NUM_OF_CLIMATE_GRID_COLUMNS };
-         bool rtnval = ncvarget(pInfo->m_ncid, pInfo->m_varid_data, start, len, field_vals);
-         if (!chk_nc(rtnval)) { delete field_vals;  return(false); }
+         int rtnval = NC_NOERR;;
+
+         switch (pInfo->m_nctype)
+         {
+            case NC_FLOAT: 
+               rtnval = ncvarget(pInfo->m_ncid, pInfo->m_varid_data, start, len, field_vals);
+               if (!chk_nc(rtnval)) { delete field_vals;  return(false); }
+               break;
+
+            case NC_SHORT:
+            {
+               __int16 * field_vals_int16 = new __int16[NUM_OF_CLIMATE_GRIDCELLS];
+               rtnval = ncvarget(pInfo->m_ncid, pInfo->m_varid_data, start, len, field_vals_int16);
+               if (!chk_nc(rtnval)) { delete field_vals_int16;  return(false); }
+               for (int i = 0; i < NUM_OF_CLIMATE_GRIDCELLS; i++) field_vals[i] = (float)field_vals_int16[i];
+               delete field_vals_int16;
+            }
+            break;
+
+            default: ASSERT(false); return(false);
+         }
 
          if (pInfo->m_scaleFactor != 1. || pInfo->m_offset != 0.) pInfo->ScaleTheValues(field_vals, NUM_OF_CLIMATE_GRIDCELLS);
 

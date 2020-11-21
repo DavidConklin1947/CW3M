@@ -1280,6 +1280,7 @@ public:
    int m_mostRecentIndexYear; // A calendar year will go here
    int m_recentYearIndex; // Offset from the beginning of the file to most recent index year
    int m_ncid, m_varid_idu_id, m_varid_data, m_dimid_idu, m_dimid_time;
+   nc_type m_nctype;
    size_t m_size_idu, m_size_time;
 
    // interpreted value = raw_value * scale_factor + offset
@@ -1294,7 +1295,7 @@ public:
    ClimateDataInfo(void) :
       m_type(CDT_UNKNOWN), m_pDataObj(NULL), m_pDataObjArray(NULL),
       m_IDUbased(false), m_firstYear(-1), m_lastYear(-1), m_mostRecentIndexYear(-1), m_recentYearIndex(-1),
-      m_ncid(-1), m_varid_idu_id(-1), m_varid_data(-1), m_size_idu(-1), m_size_time(-1), m_dimid_idu(-1), m_dimid_time(-1),
+      m_ncid(-1), m_varid_idu_id(-1), m_varid_data(-1), m_nctype(NC_NAT), m_size_idu(-1), m_size_time(-1), m_dimid_idu(-1), m_dimid_time(-1),
       m_scaleFactor(1.f), m_offset(0.f), m_units(""), m_maxDaysInClimateYear(366), m_useDelta(false), m_delta(0) { }
    ~ClimateDataInfo(void)
    { 
