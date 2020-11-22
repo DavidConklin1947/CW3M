@@ -693,7 +693,7 @@ flow_cms="1.10"
                composite_rc="Cougar_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="25.8"
                RO_rc="Cougar_RO_capacity.csv"                     spillway_rc="Cougar_spillway_capacity.csv"          cp_dir="ControlPoints\{ScenarioName}"
                rule_priorities="cougar_rule_priorities.csv"       rp_dir="Rules_Cougar\"                              tailwater_elev="408"
-               turbine_efficiency="0.9"                           td_elev="520.0"                                     fc1_elev="518.0"
+               turbine_efficiency="0.9"                           td_elev="519.68"                                     fc1_elev="517.86"
                buffer_zone="Cougar_buffer.csv"                    ressim_output_f="Cougar_ressim_flow_1935_2008.csv"  ressim_output_r="Cougar_ressim_rule_1935_2008.csv"
                inactive_elev="466.65"                             reservoir_type="FloodControl"/>
 
