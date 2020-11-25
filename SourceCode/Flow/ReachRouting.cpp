@@ -476,7 +476,11 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       float reach_precip_mm = gpModel->GetTodaysReachPRECIP(pReach);
       float reach_ws_m_sec = gpModel->GetTodaysReachWINDSPEED(pReach);
       float rad_sw_unshaded_W_m2 = gpModel->GetTodaysReachRAD_SW(pReach); // Shortwave from the climate data takes into account cloudiness but not shading.
-      double cloudiness_frac = min(1, rad_sw_unshaded_W_m2 / max_sw_W_m2[pFlowContext->dayOfYear]); // ??? we need a better estimate of cloudiness than this
+
+      // ??? we need a better estimate of cloudiness than this
+      double cloudiness_tuning_knob = 1.0;
+      double cloudiness_frac = cloudiness_tuning_knob * min(1, 1. - rad_sw_unshaded_W_m2 / max_sw_W_m2[pFlowContext->dayOfYear]); 
+
       float sphumidity = gpModel->GetTodaysReachSPHUMIDITY(pReach);
       double z_mean_m; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachZ_MEAN, z_mean_m);
       double ea, vpd;
