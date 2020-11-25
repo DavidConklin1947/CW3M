@@ -45,7 +45,7 @@ using namespace std;
 #define LITERS_PER_M3 1000
 #define SPECIFIC_HEAT_H2O 4.187 /* kJ/(kg degC) */
 #define DENSITY_H2O 998.2 /* kg/m^3 */
-#define DEFAULT_REACH_H2O_TEMP_DEGC 10.f
+#define DEFAULT_REACH_H2O_TEMP_DEGC 8.f
 #define DEFAULT_SOIL_H2O_TEMP_DEGC 5.F
 
 
