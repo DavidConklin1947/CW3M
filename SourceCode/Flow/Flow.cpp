@@ -1102,6 +1102,7 @@ Reservoir::Reservoir(void)
    , m_power( 0 )
    , m_filled( 0 )
    , m_volume( 50 )   
+   , m_resWP(50, DEFAULT_REACH_H2O_TEMP_DEGC)
    , m_pReach( NULL )
    , m_pFlowfromUpstreamReservoir( NULL )
    , m_pAreaVolCurveTable( NULL )
@@ -1466,287 +1467,289 @@ void Reservoir::UpdateMaxGateOutflows(Reservoir *pRes, float currentPoolElevatio
 }
 
 
-float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
-   {
-   ASSERT( pRes != NULL );
+float Reservoir::GetResOutflow(Reservoir* pRes, int doy)
+{
+   ASSERT(pRes != NULL);
 
    double outflow = 0.0;
 
    float currentPoolElevation = pRes->GetPoolElevationFromVolume();
    pRes->m_elevation = currentPoolElevation;
-   UpdateMaxGateOutflows( pRes, currentPoolElevation );  
+   UpdateMaxGateOutflows(pRes, currentPoolElevation);
 
    // check for river run reservoirs 
    if (pRes->m_reservoirType == ResType_RiverRun)
-      {
+   {
       outflow = pRes->m_inflow / SEC_PER_DAY;    // convert outflow to m3/day
-      pRes->m_activeRule ="RunOfRiver"; pRes->m_constraintValue = 0.f;
-      }
+      pRes->m_activeRule = "RunOfRiver"; pRes->m_constraintValue = 0.f;
+   }
    else
+   {
+      float targetPoolElevation = pRes->GetTargetElevationFromRuleCurve(doy);
+      float targetPoolVolume = pRes->GetPoolVolumeFromElevation(targetPoolElevation);
+      float currentVolume = pRes->GetPoolVolumeFromElevation(currentPoolElevation);
+      float bufferZoneElevation = pRes->GetBufferZoneElevation(doy);
+
+      if (currentVolume > pRes->m_maxVolume)
       {
-      float targetPoolElevation = pRes->GetTargetElevationFromRuleCurve( doy );
-      float targetPoolVolume    = pRes->GetPoolVolumeFromElevation(targetPoolElevation);  
-      float currentVolume       = pRes->GetPoolVolumeFromElevation(currentPoolElevation);
-      float bufferZoneElevation = pRes->GetBufferZoneElevation( doy );
-      
-      if ( currentVolume > pRes->m_maxVolume )
-         {
          currentVolume = pRes->m_maxVolume;   //Don't allow res volumes greater than max volume.  This code may be removed once hydro model is calibrated.
          pRes->m_volume = currentVolume;      //Store adjusted volume as current volume.
+         pRes->m_resWP = WaterParcel(currentVolume, pRes->m_resWP.WaterTemperature());
          currentPoolElevation = pRes->GetPoolElevationFromVolume();  //Adjust pool elevation
-         
+
          CString msgvol;
-         msgvol.Format( "Flow: Reservoir volume at '%s' on day of year %i exceeds maximum.  Volume set to maxVolume. Mass Balance not closed.", (LPCTSTR) pRes->m_name, doy);
-         Report::StatusMsg( msgvol );
+         msgvol.Format("Flow: Reservoir volume at '%s' on day of year %i exceeds maximum.  Volume set to maxVolume. Mass Balance not closed.", (LPCTSTR)pRes->m_name, doy);
+         Report::StatusMsg(msgvol);
          pRes->m_activeRule = "OverMaxVolume!"; pRes->m_constraintValue = 0.f;
 
-         }
+      }
 
       pRes->m_volume = currentVolume;
-      
-      float desiredRelease = (currentVolume - targetPoolVolume)/SEC_PER_DAY;     //This would bring pool elevation back to the rule curve in one timestep.  Converted from m3/day to m3/s  (cms).  
+      pRes->m_resWP = WaterParcel(currentVolume, pRes->m_resWP.WaterTemperature());
+
+      float desiredRelease = (currentVolume - targetPoolVolume) / SEC_PER_DAY;     //This would bring pool elevation back to the rule curve in one timestep.  Converted from m3/day to m3/s  (cms).  
                                                                    //This would be ideal if possible within the given constraints.
       if (currentVolume < targetPoolVolume) //if we want to fill the reservoir
-         desiredRelease=pRes->m_minOutflow;
+         desiredRelease = pRes->m_minOutflow;
          //desiredRelease = 0.0f;//kbv 3/16/2014
-      
+
       float actualRelease = desiredRelease;   //Before any constraints are applied
-      
-      
+
+
       pRes->m_activeRule = "GC"; pRes->m_constraintValue = 0.f; //Notation from Ressim...implies that guide curve is reached with actual release (e.g. no other constraints applied).
-       
+
       ZONE zone = ZONE_UNDEFINED;   //zone 0 = top of dam, zone 1 = flood control high, zone 2 = conservation operations, zone 3 = buffer, zone 4 = alternate flood control 1, zone 5 = alternate flood control 2.  Right now, only use 1 and 2 (mmc 3/2/2012). 
 
-      if ( currentPoolElevation > pRes->m_dam_top_elev )
-         {
+      if (currentPoolElevation > pRes->m_dam_top_elev)
+      {
          CString msgtop;
-         msgtop.Format( "Flow: Reservoir elevation at '%s' on day of year %i exceeds dam top elevation.", (LPCTSTR) pRes->m_name, doy);
-         Report::StatusMsg( msgtop );
+         msgtop.Format("Flow: Reservoir elevation at '%s' on day of year %i exceeds dam top elevation.", (LPCTSTR)pRes->m_name, doy);
+         Report::StatusMsg(msgtop);
          currentPoolElevation = pRes->m_dam_top_elev - 0.1f;    //Set just below top elev to keep from exceeding values in lookup tables
          zone = ZONE_TOP;
          pRes->m_activeRule = "OverTopElevation!"; pRes->m_constraintValue = 0.f;
-         }
+      }
 
       else if (pRes->m_reservoirType == ResType_CtrlPointControl)
-         {
+      {
          zone = ZONE_CONSERVATION;
-         }
+      }
       else if (currentPoolElevation > pRes->m_fc1_elev)
-         {
+      {
          zone = ZONE_TOP;
          pRes->m_activeRule = "OverFC1"; pRes->m_constraintValue = 0.f;
-         }
+      }
       else if (currentPoolElevation > targetPoolElevation)
-         {
+      {
          if (currentPoolElevation <= pRes->m_fc2_elev)
             zone = ZONE_ALTFLOODCONTROL1;
          else if (pRes->m_fc3_elev > 0 && currentPoolElevation > pRes->m_fc3_elev)
             zone = ZONE_ALTFLOODCONTROL2;
          else
             zone = ZONE_FLOODCONTROL;
-         }
+      }
       else if (currentPoolElevation <= targetPoolElevation)
-         {
+      {
          if (currentPoolElevation <= bufferZoneElevation) //in the buffer zone
-            {
+         {
             zone = ZONE_BUFFER;
             if (pRes->m_zone == ZONE_CONSERVATION)//if zone changed from conservation
                pRes->m_daysInZoneBuffer = 1; //reset the number of days
             else if (pRes->m_zone = ZONE_BUFFER)//if the zone did not change (you were in the buffer on the previous day)
                pRes->m_daysInZoneBuffer++; //increment the days in the buffer
 
-            }          
+         }
          else                                           //in the conservation zone
-            {
+         {
             if (pRes->m_daysInZoneBuffer > 1)
                zone = ZONE_CONSERVATION;
             else
-			   {
+            {
                zone = ZONE_BUFFER;
-			   if (pRes->m_zone != ZONE_BUFFER) //if zone changed 
-					pRes->m_daysInZoneBuffer = 1; //reset the number of days
-			   else pRes->m_daysInZoneBuffer++; //increment the days in the buffer
-               }
+               if (pRes->m_zone != ZONE_BUFFER) //if zone changed 
+                  pRes->m_daysInZoneBuffer = 1; //reset the number of days
+               else pRes->m_daysInZoneBuffer++; //increment the days in the buffer
             }
          }
+      }
       else
-         {
+      {
          CString msg;
          msg.Format("*** GetResOutflow(): We should never get here. doy = %d, pRes->m_id = %d", doy, pRes->m_id);
          Report::LogMsg(msg);
-         }
-      
-     // Once we know what zone we are in, we can access the array of appropriate constraints for the particular reservoir and zone.       
-      ZoneInfo *pZone = NULL;
-      if ( zone >= 0 && zone <pRes->m_zoneInfoArray.GetSize() )
+      }
+
+  // Once we know what zone we are in, we can access the array of appropriate constraints for the particular reservoir and zone.       
+      ZoneInfo* pZone = NULL;
+      if (zone >= 0 && zone < pRes->m_zoneInfoArray.GetSize())
          pZone = pRes->m_zoneInfoArray.GetAt(zone);
 
-      if ( pZone != NULL )
+      if (pZone != NULL)
+      {
+      // Loop through constraints and modify actual release.  Apply the flood control rules in order here.
+         for (int i = 0; i < pZone->m_resConstraintArray.GetSize(); i++)
          {
-         // Loop through constraints and modify actual release.  Apply the flood control rules in order here.
-         for ( int i=0; i < pZone->m_resConstraintArray.GetSize(); i++ ) 
-            {
-            ResConstraint *pConstraint = pZone->m_resConstraintArray.GetAt(i);
-            ASSERT( pConstraint != NULL );
+            ResConstraint* pConstraint = pZone->m_resConstraintArray.GetAt(i);
+            ASSERT(pConstraint != NULL);
 
             CString filename = pConstraint->m_constraintFileName;
-            
+
             // Get first column label and appropriate data to use for lookup
-            DataObj *pConstraintTable = pConstraint->m_pRCData;
-            ASSERT( pConstraintTable != NULL );
-            
+            DataObj* pConstraintTable = pConstraint->m_pRCData;
+            ASSERT(pConstraintTable != NULL);
+
             CString xlabel = pConstraintTable->GetLabel(0);
-            
-            int year=-1, month=1, day=-1;
+
+            int year = -1, month = 1, day = -1;
             float xvalue = 0;
             float yvalue = 0;
-   
-            if (_stricmp(xlabel,"date") == 0)                           // Date based rule?  xvalue = current date.
-               xvalue = (float) doy; 
-            else if  (_stricmp(xlabel,"release_cms") == 0)              // Release based rule?  xvalue = release last timestep
-               xvalue = (float)pRes->m_outflow/SEC_PER_DAY;                    // SEC_PER_DAY = cubic meters per second to cubic meters per day
-            else if  (_stricmp(xlabel,"pool_elev_m") == 0)              // Pool elevation based rule?  xvalue = pool elevation (meters)
-               xvalue = pRes->m_elevation;
-            else if  (_stricmp(xlabel,"inflow_cms") == 0)               // Inflow based rule?   xvalue = inflow to reservoir
-               xvalue = (float)pRes->m_inflow/SEC_PER_DAY;               
-            else if  (_stricmp(xlabel, "Outflow_lagged_24h" ) == 0)     // 24h lagged outflow based rule?   xvalue = outflow from reservoir at last timestep
-               xvalue = (float)pRes->m_outflow/SEC_PER_DAY;                    // placeholder for now
-            else if  (_stricmp(xlabel,"date_pool_elev_m") == 0)         // Lookup based on two values...date and pool elevation.  x value is date.  y value is pool elevation
-               {
-               xvalue = (float) doy;
-               yvalue = pRes->m_elevation;
-               }
-            else if  (_stricmp(xlabel,"date_water_year_type") == 0)         //Lookup based on two values...date and wateryeartype (storage in 13 USACE reservoirs on May 20th).
-               {
-               xvalue = (float) doy;
-               yvalue = gpModel->m_waterYearType;
-               }
-            else if  (_stricmp(xlabel, "date_release_cms") == 0) 
-               {
-               xvalue = (float) doy;
-               yvalue = (float)pRes->m_outflow/SEC_PER_DAY;
-               }
-            else                                                    //Unrecognized xvalue for constraint lookup table
-               { 
-               CString msg;
-               msg.Format( "Flow:  Unrecognized x value for reservoir constraint lookup '%s', %s (id:%i) in stream network", (LPCTSTR) pConstraint->m_constraintFileName, (LPCTSTR) pRes->m_name, pRes->m_id );
-               Report::WarningMsg( msg );
-               }
-   
-            RCTYPE type = pConstraint->m_type;
-            float constraintValue=0;
-   
-            ASSERT( pConstraint->m_pRCData != NULL );
 
-            switch( type )
-               {
+            if (_stricmp(xlabel, "date") == 0)                           // Date based rule?  xvalue = current date.
+               xvalue = (float)doy;
+            else if (_stricmp(xlabel, "release_cms") == 0)              // Release based rule?  xvalue = release last timestep
+               xvalue = (float)pRes->m_outflow / SEC_PER_DAY;                    // SEC_PER_DAY = cubic meters per second to cubic meters per day
+            else if (_stricmp(xlabel, "pool_elev_m") == 0)              // Pool elevation based rule?  xvalue = pool elevation (meters)
+               xvalue = pRes->m_elevation;
+            else if (_stricmp(xlabel, "inflow_cms") == 0)               // Inflow based rule?   xvalue = inflow to reservoir
+               xvalue = (float)pRes->m_inflow / SEC_PER_DAY;
+            else if (_stricmp(xlabel, "Outflow_lagged_24h") == 0)     // 24h lagged outflow based rule?   xvalue = outflow from reservoir at last timestep
+               xvalue = (float)pRes->m_outflow / SEC_PER_DAY;                    // placeholder for now
+            else if (_stricmp(xlabel, "date_pool_elev_m") == 0)         // Lookup based on two values...date and pool elevation.  x value is date.  y value is pool elevation
+            {
+               xvalue = (float)doy;
+               yvalue = pRes->m_elevation;
+            }
+            else if (_stricmp(xlabel, "date_water_year_type") == 0)         //Lookup based on two values...date and wateryeartype (storage in 13 USACE reservoirs on May 20th).
+            {
+               xvalue = (float)doy;
+               yvalue = gpModel->m_waterYearType;
+            }
+            else if (_stricmp(xlabel, "date_release_cms") == 0)
+            {
+               xvalue = (float)doy;
+               yvalue = (float)pRes->m_outflow / SEC_PER_DAY;
+            }
+            else                                                    //Unrecognized xvalue for constraint lookup table
+            {
+               CString msg;
+               msg.Format("Flow:  Unrecognized x value for reservoir constraint lookup '%s', %s (id:%i) in stream network", (LPCTSTR)pConstraint->m_constraintFileName, (LPCTSTR)pRes->m_name, pRes->m_id);
+               Report::WarningMsg(msg);
+            }
+
+            RCTYPE type = pConstraint->m_type;
+            float constraintValue = 0;
+
+            ASSERT(pConstraint->m_pRCData != NULL);
+
+            switch (type)
+            {
                case RCT_MAX:  //maximum
-                  {
-                  if ( yvalue > 0 )  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
+               {
+                  if (yvalue > 0)  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, yvalue, IM_LINEAR);
                   else             //If not, just use xvalue
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
-                  
-                  if ( actualRelease >= constraintValue )
-                     {
+
+                  if (actualRelease >= constraintValue)
+                  {
                      actualRelease = constraintValue;
                      pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
-                     }
                   }
-                  break;
+               }
+               break;
 
                case RCT_MIN:  //minimum
-                  {
+               {
                   if (yvalue > 0)  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, yvalue, IM_LINEAR);
                   else             //If not, just use xvalue
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
-   
+
                   if (actualRelease <= constraintValue)
-                     {
+                  {
                      actualRelease = constraintValue;
                      pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
-                     }
                   }
-                  break;
+               }
+               break;
 
                case RCT_INCREASINGRATE:  //Increasing Rate
-                  {
+               {
                   if (yvalue > 0)  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
-                     {
+                  {
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, yvalue, IM_LINEAR);
-                     constraintValue = constraintValue*24;   //Covert hourly to daily
-                     }
-                  else             //If not, just use xvalue
-                     {
-                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
-                     constraintValue = constraintValue*24;   //Covert hourly to daily
-                     }
-   
-                  if (actualRelease >= (constraintValue + pRes->m_outflow/SEC_PER_DAY))   //Is planned release more than current release + contstraint? 
-                     {
-                     actualRelease = (float)((pRes->m_outflow/SEC_PER_DAY) + constraintValue);  //If so, planned release can be no more than current release + constraint.
-                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
-                     }
+                     constraintValue = constraintValue * 24;   //Covert hourly to daily
                   }
-                  break;
+                  else             //If not, just use xvalue
+                  {
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     constraintValue = constraintValue * 24;   //Covert hourly to daily
+                  }
+
+                  if (actualRelease >= (constraintValue + pRes->m_outflow / SEC_PER_DAY))   //Is planned release more than current release + contstraint? 
+                  {
+                     actualRelease = (float)((pRes->m_outflow / SEC_PER_DAY) + constraintValue);  //If so, planned release can be no more than current release + constraint.
+                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
+                  }
+               }
+               break;
 
                case RCT_DECREASINGRATE:  //Decreasing Rate */
-                  {
+               {
                   if (yvalue > 0)  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
-                     {
+                  {
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, yvalue, IM_LINEAR);
-                     constraintValue = constraintValue*24;   //Covert hourly to daily
-                     }
-                  else             //If not, just use xvalue
-                     {
-                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
-                     constraintValue = constraintValue*24;   //Covert hourly to daily
-                     }
-   
-                  if (actualRelease <= (pRes->m_outflow/SEC_PER_DAY - constraintValue))    //Is planned release less than current release - contstraint?
-                     {
-                     actualRelease = (float)((pRes->m_outflow/SEC_PER_DAY) - constraintValue);     //If so, planned release can be no less than current release - constraint.
-                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
-                     }
+                     constraintValue = constraintValue * 24;   //Covert hourly to daily
                   }
-                  break;
+                  else             //If not, just use xvalue
+                  {
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     constraintValue = constraintValue * 24;   //Covert hourly to daily
+                  }
+
+                  if (actualRelease <= (pRes->m_outflow / SEC_PER_DAY - constraintValue))    //Is planned release less than current release - contstraint?
+                  {
+                     actualRelease = (float)((pRes->m_outflow / SEC_PER_DAY) - constraintValue);     //If so, planned release can be no less than current release - constraint.
+                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
+                  }
+               }
+               break;
 
                case RCT_CONTROLPOINT:  //Downstream control point 
-                  {
-                   CString filename = pConstraint->m_constraintFileName;
-                  // get control point location.  Assumes last characters of filename contain a COMID
-                  LPTSTR p = (LPTSTR) _tcsrchr( filename, '.' );
-   
-                  if ( p != NULL )
-                     {
-                     p--;
-                     while ( isdigit( *p ) )
-                        p--;
-   
-                     int comID = atoi( p+1 );
-                     pConstraint->m_comID = comID;
-                     }
-                        
-                  //Determine which control point this is.....use COMID to identify
-                  for (int k=0;  k < gpModel->m_controlPointArray.GetSize(); k++) 
-                     {
-                     ControlPoint *pControl = gpModel->m_controlPointArray.GetAt(k);
-                     ASSERT( pControl != NULL );
+               {
+                  CString filename = pConstraint->m_constraintFileName;
+                 // get control point location.  Assumes last characters of filename contain a COMID
+                  LPTSTR p = (LPTSTR)_tcsrchr(filename, '.');
 
-                     if ( pControl->InUse() )
-                        {                     
+                  if (p != NULL)
+                  {
+                     p--;
+                     while (isdigit(*p))
+                        p--;
+
+                     int comID = atoi(p + 1);
+                     pConstraint->m_comID = comID;
+                  }
+
+               //Determine which control point this is.....use COMID to identify
+                  for (int k = 0; k < gpModel->m_controlPointArray.GetSize(); k++)
+                  {
+                     ControlPoint* pControl = gpModel->m_controlPointArray.GetAt(k);
+                     ASSERT(pControl != NULL);
+
+                     if (pControl->InUse())
+                     {
                         int location = pControl->m_location;     // Get COMID of this control point
                         //if (pControl->m_location == pConstraint->m_comID)  //Do they match?
-                        if (_stricmp(pControl->m_controlPointFileName,pConstraint->m_constraintFileName) == 0)  //compare names
-                           {
-                           ASSERT( pControl->m_pResAllocation != NULL );
+                        if (_stricmp(pControl->m_controlPointFileName, pConstraint->m_constraintFileName) == 0)  //compare names
+                        {
+                           ASSERT(pControl->m_pResAllocation != NULL);
                            constraintValue = 0.0f;
                            int releaseFreq = 1;
 
-                           for ( int l=0; l < pControl->m_influencedReservoirsArray.GetSize(); l++ )
-                              {
-                              if ( pControl->m_influencedReservoirsArray[ l ] == pRes )
+                           for (int l = 0; l < pControl->m_influencedReservoirsArray.GetSize(); l++)
+                           {
+                              if (pControl->m_influencedReservoirsArray[l] == pRes)
                               {
                                  if (pRes->m_reservoirType == ResType_CtrlPointControl)
                                  {
@@ -1756,131 +1759,131 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
                                     if (releaseFreq > 1 && doy >= releaseFreq - 1)
                                     {
                                        for (int k = 1; k <= releaseFreq; k++)
-                                          {
+                                       {
                                           float tmp = pControl->m_pResAllocation->Get(l, rowCount - k);
                                           constraintValue += pControl->m_pResAllocation->Get(l, rowCount - k);
-                                          }
+                                       }
                                        constraintValue = constraintValue / releaseFreq;
                                     }
                   //                  constraintValue = pControl->m_pResAllocation->IGet(0, l);   //Flow allocated from this control point
                                  }
                                  else
-                                    constraintValue = pControl->m_pResAllocation->IGet(0, l );   //Flow allocated from this control point
-                                 
+                                    constraintValue = pControl->m_pResAllocation->IGet(0, l);   //Flow allocated from this control point
+
                                  actualRelease += constraintValue;    //constraint value will be negative if flow needs to be withheld, positive if flow needs to be augmented
-                                 
-                                 if ( constraintValue > 0.0 )         //Did this constraint affect release?  If so, save as active rule.
-                                    {
+
+                                 if (constraintValue > 0.0)         //Did this constraint affect release?  If so, save as active rule.
+                                 {
                                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = actualRelease;
-                                    }
-                                 break;
                                  }
+                                 break;
                               }
                            }
                         }
-                     }  
+                     }
                   }
-                  break;
+               }
+               break;
 
                case RCT_POWERPLANT:  //Power plant rule
-                  { //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
+               { //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
                   TCHAR powname[256];
                   lstrcpy(powname, filename);
-                  TCHAR *ruletype = NULL;
-                  TCHAR *next     = NULL;
+                  TCHAR* ruletype = NULL;
+                  TCHAR* next = NULL;
                   TCHAR delim[] = " ,_";  //allowable delimeters: , ; space ; underscore
 
                   ruletype = _tcstok_s(powname, delim, &next);  //Strip header.  should be pow_ for power plant rules
                   ruletype = _tcstok_s(NULL, delim, &next);  //Returns next string at head of file (max or min).
-               
+
                   if (_stricmp(ruletype, "Max") == 0)  //Is this a maximum power flow?  Assign m_maxPowerFlow attribute.
-                     {
-                     ASSERT(  pConstraint->m_pRCData != NULL );
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
                      pRes->m_maxPowerFlow = constraintValue;  //Just for this timestep.  m_gateMaxPowerFlow is the physical limitation for the reservoir.
-                     }
-                  else if (_stricmp(ruletype, "Min" ) == 0 )   /// bug!!! maximum) == 0)  //Is this a minimum power flow?  Assign m_minPowerFlow attribute.
-                     {
-                     ASSERT(  pConstraint->m_pRCData != NULL );
+                  }
+                  else if (_stricmp(ruletype, "Min") == 0)   /// bug!!! maximum) == 0)  //Is this a minimum power flow?  Assign m_minPowerFlow attribute.
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
                      pRes->m_minPowerFlow = constraintValue;
-                     }
-                //  pRes->m_activeRule = pConstraint->m_constraintFileName;
                   }
-                  break;
+             //  pRes->m_activeRule = pConstraint->m_constraintFileName;
+               }
+               break;
 
                case RCT_REGULATINGOUTLET:  //Regulating outlet rule
-                  {
-                  //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
+               {
+               //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
                   TCHAR roname[256];
                   lstrcpy(roname, filename);
-                  TCHAR *ruletype = NULL;
-                  TCHAR *next     = NULL;
+                  TCHAR* ruletype = NULL;
+                  TCHAR* next = NULL;
                   TCHAR delim[] = " ,_";  //allowable delimeters: , ; space ; underscore
                   ruletype = _tcstok_s(roname, delim, &next);  //Strip header.  should be pow_ for power plant rules
                   ruletype = _tcstok_s(NULL, delim, &next);  //Returns next string at head of file (max or min).
-   
+
                   if (_stricmp(ruletype, "Max") == 0)  //Is this a maximum RO flow?   Assign m_maxRO_Flow attribute.
-                     {
+                  {
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
                      pRes->m_maxRO_Flow = constraintValue;
-                     }
-                  else if (_stricmp(ruletype, "Min" ) == 0)  //Is this a minimum RO flow?   Assign m_minRO_Flow attribute.
-                     {
-                     ASSERT(  pConstraint->m_pRCData != NULL );
+                  }
+                  else if (_stricmp(ruletype, "Min") == 0)  //Is this a minimum RO flow?   Assign m_minRO_Flow attribute.
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
                      pRes->m_minRO_Flow = constraintValue;
-                     }
-                //  pRes->m_activeRule = pConstraint->m_constraintFileName;
                   }
-                  break;
+             //  pRes->m_activeRule = pConstraint->m_constraintFileName;
+               }
+               break;
 
                case RCT_SPILLWAY:   //Spillway rule
-                  {
-                  //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
+               {
+               //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
                   TCHAR spillname[256];
                   lstrcpy(spillname, filename);
-                  TCHAR *ruletype = NULL;
-                  TCHAR *next     = NULL;
+                  TCHAR* ruletype = NULL;
+                  TCHAR* next = NULL;
                   TCHAR delim[] = " ,_";  //allowable delimeters: , ; space ; underscore
 
                   ruletype = _tcstok_s(spillname, delim, &next);  //Strip header.  should be pow_ for power plant rules
-                  ruletype =_tcstok_s(NULL, delim, &next);  //Returns next string at head of file (max or min).
-               
-                  if (_stricmp(ruletype, "Max" ) == 0)  //Is this a maximum spillway flow?  Assign m_maxSpillwayFlow attribute.
-                     {
-                     ASSERT(  pConstraint->m_pRCData != NULL );
+                  ruletype = _tcstok_s(NULL, delim, &next);  //Returns next string at head of file (max or min).
+
+                  if (_stricmp(ruletype, "Max") == 0)  //Is this a maximum spillway flow?  Assign m_maxSpillwayFlow attribute.
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
                      pRes->m_maxSpillwayFlow = constraintValue;
-                     }
+                  }
                   else if (_stricmp(ruletype, "Min") == 0)  //Is this a minimum spillway flow?  Assign m_minSpillwayFlow attribute.
-                     {
-                     ASSERT(  pConstraint->m_pRCData != NULL );
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
                      constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
                      pRes->m_minSpillwayFlow = constraintValue;
-                     }
-                //  pRes->m_activeRule = pConstraint->m_constraintFileName;
                   }
-                  break;
-               }  // end of: switch( pConstraint->m_type )
-
-               /*
-            float minVolum = pRes->GetPoolVolumeFromElevation(m_inactive_elev);
-            //float targetPoolElevation = pRes->GetTargetElevationFromRuleCurve(doy);
-            float currentVolume = pRes->GetPoolVolumeFromElevation(currentPoolElevation);
-            float rc_outflowVolum = actualRelease*SEC_PER_DAY;//volume that would be drained (m3 over the day)
-         
-            
-            if (rc_outflowVolum > currentVolume - minVolum)      //In the inactive zone, water is not accessible for release from any of the gates.
-               {
-               actualRelease = (currentVolume - minVolum)/SEC_PER_DAY*0.5f;
-               CString resMsg;
-
-               resMsg.Format("Pool is only %8.1f m above inactive zone. Outflow set to drain %8.1fm above inactive zone.  RC outflow of %8.1f m3/s (from %s) would have resulted in %8.0f m3 of discharged water (over a day) but there is only %8.0f m3 above the inactive zone", pRes->m_elevation - pRes->m_inactive_elev, (pRes->m_elevation - pRes->m_inactive_elev) / 2, rc_outflowVolum / SEC_PER_DAY, pRes->m_activeRule, rc_outflowVolum, currentVolume - minVolum);
-                  pRes->m_activeRule = resMsg;
-              
+             //  pRes->m_activeRule = pConstraint->m_constraintFileName;
                }
-               */
+               break;
+            }  // end of: switch( pConstraint->m_type )
+
+            /*
+         float minVolum = pRes->GetPoolVolumeFromElevation(m_inactive_elev);
+         //float targetPoolElevation = pRes->GetTargetElevationFromRuleCurve(doy);
+         float currentVolume = pRes->GetPoolVolumeFromElevation(currentPoolElevation);
+         float rc_outflowVolum = actualRelease*SEC_PER_DAY;//volume that would be drained (m3 over the day)
+
+
+         if (rc_outflowVolum > currentVolume - minVolum)      //In the inactive zone, water is not accessible for release from any of the gates.
+            {
+            actualRelease = (currentVolume - minVolum)/SEC_PER_DAY*0.5f;
+            CString resMsg;
+
+            resMsg.Format("Pool is only %8.1f m above inactive zone. Outflow set to drain %8.1fm above inactive zone.  RC outflow of %8.1f m3/s (from %s) would have resulted in %8.0f m3 of discharged water (over a day) but there is only %8.0f m3 above the inactive zone", pRes->m_elevation - pRes->m_inactive_elev, (pRes->m_elevation - pRes->m_inactive_elev) / 2, rc_outflowVolum / SEC_PER_DAY, pRes->m_activeRule, rc_outflowVolum, currentVolume - minVolum);
+               pRes->m_activeRule = resMsg;
+
+            }
+            */
             if (actualRelease < 0.0f)
                actualRelease = 0.0f;
             pRes->m_zone = (int)zone;
@@ -1889,15 +1892,15 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
           //     actualRelease = pRes->m_minOutflow;
 
             if (pRes->m_elevation < pRes->m_inactive_elev)      //In the inactive zone, water is not accessible for release from any of the gates.
-               actualRelease = (float)(pRes->m_outflow/SEC_PER_DAY*0.5f);
+               actualRelease = (float)(pRes->m_outflow / SEC_PER_DAY * 0.5f);
 
             outflow = actualRelease;
-            }//end of for ( int i=0; i < pZone->m_resConstraintArray.GetSize(); i++ )
-         }
-      }  // end of: else (not run of river gate flow
- 
-   //Code here to assign total outflow to powerplant, RO and spillway (including run of river projects) 
-   if (pRes->m_reservoirType == ResType_FloodControl || pRes->m_reservoirType == ResType_RiverRun )
+         }//end of for ( int i=0; i < pZone->m_resConstraintArray.GetSize(); i++ )
+      }
+   }  // end of: else (not run of river gate flow
+
+//Code here to assign total outflow to powerplant, RO and spillway (including run of river projects) 
+   if (pRes->m_reservoirType == ResType_FloodControl || pRes->m_reservoirType == ResType_RiverRun)
       AssignReservoirOutletFlows(pRes, (float)outflow);
 
    pRes->m_power = (pRes->m_powerFlow > 0.) ? CalculateHydropowerOutput(pRes) : 0.f; // MW
@@ -1911,7 +1914,457 @@ float Reservoir::GetResOutflow(Reservoir *pRes, int doy)
       }
 */
    return (float)outflow;
+} // end of GetResOutflow()
+
+
+WaterParcel Reservoir::GetResOutflowWP(Reservoir* pRes, int doy)
+{
+   ASSERT(pRes != NULL);
+
+   WaterParcel outflowWP = WaterParcel(0,0);
+
+   float currentPoolElevation = pRes->GetPoolElevationFromVolume();
+   pRes->m_elevation = currentPoolElevation;
+   UpdateMaxGateOutflows(pRes, currentPoolElevation);
+
+   // check for river run reservoirs 
+   if (pRes->m_reservoirType == ResType_RiverRun)
+   {
+      outflowWP = pRes->m_inflowWP;   
+      pRes->m_activeRule = "RunOfRiver"; pRes->m_constraintValue = 0.f;
    }
+   else
+   {
+      float targetPoolElevation = pRes->GetTargetElevationFromRuleCurve(doy);
+      float targetPoolVolume = pRes->GetPoolVolumeFromElevation(targetPoolElevation);
+      float currentVolume = pRes->GetPoolVolumeFromElevation(currentPoolElevation);
+      float bufferZoneElevation = pRes->GetBufferZoneElevation(doy);
+
+      if (currentVolume > pRes->m_maxVolume)
+      {
+         currentVolume = pRes->m_maxVolume;   //Don't allow res volumes greater than max volume.  This code may be removed once hydro model is calibrated.
+         pRes->m_volume = currentVolume;      //Store adjusted volume as current volume.
+         pRes->m_resWP = WaterParcel(currentVolume, pRes->m_resWP.WaterTemperature());
+         currentPoolElevation = pRes->GetPoolElevationFromVolume();  //Adjust pool elevation
+
+         CString msgvol;
+         msgvol.Format("Flow: Reservoir volume at '%s' on day of year %i exceeds maximum.  Volume set to maxVolume. Mass Balance not closed.", (LPCTSTR)pRes->m_name, doy);
+         Report::StatusMsg(msgvol);
+         pRes->m_activeRule = "OverMaxVolume!"; pRes->m_constraintValue = 0.f;
+
+      }
+
+      pRes->m_volume = currentVolume;
+      pRes->m_resWP = WaterParcel(currentVolume, pRes->m_resWP.WaterTemperature());
+
+      float desiredRelease = (currentVolume - targetPoolVolume) / SEC_PER_DAY;     //This would bring pool elevation back to the rule curve in one timestep.  Converted from m3/day to m3/s  (cms).  
+                                                                   //This would be ideal if possible within the given constraints.
+      if (currentVolume < targetPoolVolume) //if we want to fill the reservoir
+         desiredRelease = pRes->m_minOutflow;
+         //desiredRelease = 0.0f;//kbv 3/16/2014
+
+      float actualRelease = desiredRelease;   //Before any constraints are applied
+
+
+      pRes->m_activeRule = "GC"; pRes->m_constraintValue = 0.f; //Notation from Ressim...implies that guide curve is reached with actual release (e.g. no other constraints applied).
+
+      ZONE zone = ZONE_UNDEFINED;   //zone 0 = top of dam, zone 1 = flood control high, zone 2 = conservation operations, zone 3 = buffer, zone 4 = alternate flood control 1, zone 5 = alternate flood control 2.  Right now, only use 1 and 2 (mmc 3/2/2012). 
+
+      if (currentPoolElevation > pRes->m_dam_top_elev)
+      {
+         CString msgtop;
+         msgtop.Format("Flow: Reservoir elevation at '%s' on day of year %i exceeds dam top elevation.", (LPCTSTR)pRes->m_name, doy);
+         Report::StatusMsg(msgtop);
+         currentPoolElevation = pRes->m_dam_top_elev - 0.1f;    //Set just below top elev to keep from exceeding values in lookup tables
+         zone = ZONE_TOP;
+         pRes->m_activeRule = "OverTopElevation!"; pRes->m_constraintValue = 0.f;
+      }
+
+      else if (pRes->m_reservoirType == ResType_CtrlPointControl)
+      {
+         zone = ZONE_CONSERVATION;
+      }
+      else if (currentPoolElevation > pRes->m_fc1_elev)
+      {
+         zone = ZONE_TOP;
+         pRes->m_activeRule = "OverFC1"; pRes->m_constraintValue = 0.f;
+      }
+      else if (currentPoolElevation > targetPoolElevation)
+      {
+         if (currentPoolElevation <= pRes->m_fc2_elev)
+            zone = ZONE_ALTFLOODCONTROL1;
+         else if (pRes->m_fc3_elev > 0 && currentPoolElevation > pRes->m_fc3_elev)
+            zone = ZONE_ALTFLOODCONTROL2;
+         else
+            zone = ZONE_FLOODCONTROL;
+      }
+      else if (currentPoolElevation <= targetPoolElevation)
+      {
+         if (currentPoolElevation <= bufferZoneElevation) //in the buffer zone
+         {
+            zone = ZONE_BUFFER;
+            if (pRes->m_zone == ZONE_CONSERVATION)//if zone changed from conservation
+               pRes->m_daysInZoneBuffer = 1; //reset the number of days
+            else if (pRes->m_zone = ZONE_BUFFER)//if the zone did not change (you were in the buffer on the previous day)
+               pRes->m_daysInZoneBuffer++; //increment the days in the buffer
+
+         }
+         else                                           //in the conservation zone
+         {
+            if (pRes->m_daysInZoneBuffer > 1)
+               zone = ZONE_CONSERVATION;
+            else
+            {
+               zone = ZONE_BUFFER;
+               if (pRes->m_zone != ZONE_BUFFER) //if zone changed 
+                  pRes->m_daysInZoneBuffer = 1; //reset the number of days
+               else pRes->m_daysInZoneBuffer++; //increment the days in the buffer
+            }
+         }
+      }
+      else
+      {
+         CString msg;
+         msg.Format("*** GetResOutflow(): We should never get here. doy = %d, pRes->m_id = %d", doy, pRes->m_id);
+         Report::LogMsg(msg);
+      }
+
+  // Once we know what zone we are in, we can access the array of appropriate constraints for the particular reservoir and zone.       
+      ZoneInfo* pZone = NULL;
+      if (zone >= 0 && zone < pRes->m_zoneInfoArray.GetSize())
+         pZone = pRes->m_zoneInfoArray.GetAt(zone);
+
+      if (pZone != NULL)
+      {
+      // Loop through constraints and modify actual release.  Apply the flood control rules in order here.
+         for (int i = 0; i < pZone->m_resConstraintArray.GetSize(); i++)
+         {
+            ResConstraint* pConstraint = pZone->m_resConstraintArray.GetAt(i);
+            ASSERT(pConstraint != NULL);
+
+            CString filename = pConstraint->m_constraintFileName;
+
+            // Get first column label and appropriate data to use for lookup
+            DataObj* pConstraintTable = pConstraint->m_pRCData;
+            ASSERT(pConstraintTable != NULL);
+
+            CString xlabel = pConstraintTable->GetLabel(0);
+
+            int year = -1, month = 1, day = -1;
+            float xvalue = 0;
+            float yvalue = 0;
+
+            if (_stricmp(xlabel, "date") == 0)                           // Date based rule?  xvalue = current date.
+               xvalue = (float)doy;
+            else if (_stricmp(xlabel, "release_cms") == 0)              // Release based rule?  xvalue = release last timestep
+               xvalue = (float)pRes->m_outflow / SEC_PER_DAY;                    // SEC_PER_DAY = cubic meters per second to cubic meters per day
+            else if (_stricmp(xlabel, "pool_elev_m") == 0)              // Pool elevation based rule?  xvalue = pool elevation (meters)
+               xvalue = pRes->m_elevation;
+            else if (_stricmp(xlabel, "inflow_cms") == 0)               // Inflow based rule?   xvalue = inflow to reservoir
+               xvalue = (float)pRes->m_inflow / SEC_PER_DAY;
+            else if (_stricmp(xlabel, "Outflow_lagged_24h") == 0)     // 24h lagged outflow based rule?   xvalue = outflow from reservoir at last timestep
+               xvalue = (float)pRes->m_outflow / SEC_PER_DAY;                    // placeholder for now
+            else if (_stricmp(xlabel, "date_pool_elev_m") == 0)         // Lookup based on two values...date and pool elevation.  x value is date.  y value is pool elevation
+            {
+               xvalue = (float)doy;
+               yvalue = pRes->m_elevation;
+            }
+            else if (_stricmp(xlabel, "date_water_year_type") == 0)         //Lookup based on two values...date and wateryeartype (storage in 13 USACE reservoirs on May 20th).
+            {
+               xvalue = (float)doy;
+               yvalue = gpModel->m_waterYearType;
+            }
+            else if (_stricmp(xlabel, "date_release_cms") == 0)
+            {
+               xvalue = (float)doy;
+               yvalue = (float)pRes->m_outflow / SEC_PER_DAY;
+            }
+            else                                                    //Unrecognized xvalue for constraint lookup table
+            {
+               CString msg;
+               msg.Format("Flow:  Unrecognized x value for reservoir constraint lookup '%s', %s (id:%i) in stream network", (LPCTSTR)pConstraint->m_constraintFileName, (LPCTSTR)pRes->m_name, pRes->m_id);
+               Report::WarningMsg(msg);
+            }
+
+            RCTYPE type = pConstraint->m_type;
+            float constraintValue = 0;
+
+            ASSERT(pConstraint->m_pRCData != NULL);
+
+            switch (type)
+            {
+               case RCT_MAX:  //maximum
+               {
+                  if (yvalue > 0)  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, yvalue, IM_LINEAR);
+                  else             //If not, just use xvalue
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+
+                  if (actualRelease >= constraintValue)
+                  {
+                     actualRelease = constraintValue;
+                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
+                  }
+               }
+               break;
+
+               case RCT_MIN:  //minimum
+               {
+                  if (yvalue > 0)  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, yvalue, IM_LINEAR);
+                  else             //If not, just use xvalue
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+
+                  if (actualRelease <= constraintValue)
+                  {
+                     actualRelease = constraintValue;
+                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
+                  }
+               }
+               break;
+
+               case RCT_INCREASINGRATE:  //Increasing Rate
+               {
+                  if (yvalue > 0)  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
+                  {
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, yvalue, IM_LINEAR);
+                     constraintValue = constraintValue * 24;   //Covert hourly to daily
+                  }
+                  else             //If not, just use xvalue
+                  {
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     constraintValue = constraintValue * 24;   //Covert hourly to daily
+                  }
+
+                  if (actualRelease >= (constraintValue + pRes->m_outflow / SEC_PER_DAY))   //Is planned release more than current release + contstraint? 
+                  {
+                     actualRelease = (float)((pRes->m_outflow / SEC_PER_DAY) + constraintValue);  //If so, planned release can be no more than current release + constraint.
+                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
+                  }
+               }
+               break;
+
+               case RCT_DECREASINGRATE:  //Decreasing Rate */
+               {
+                  if (yvalue > 0)  //Does the constraint depend on two values?  If so, use both xvalue and yvalue
+                  {
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, yvalue, IM_LINEAR);
+                     constraintValue = constraintValue * 24;   //Covert hourly to daily
+                  }
+                  else             //If not, just use xvalue
+                  {
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     constraintValue = constraintValue * 24;   //Covert hourly to daily
+                  }
+
+                  if (actualRelease <= (pRes->m_outflow / SEC_PER_DAY - constraintValue))    //Is planned release less than current release - contstraint?
+                  {
+                     actualRelease = (float)((pRes->m_outflow / SEC_PER_DAY) - constraintValue);     //If so, planned release can be no less than current release - constraint.
+                     pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = constraintValue;
+                  }
+               }
+               break;
+
+               case RCT_CONTROLPOINT:  //Downstream control point 
+               {
+                  CString filename = pConstraint->m_constraintFileName;
+                 // get control point location.  Assumes last characters of filename contain a COMID
+                  LPTSTR p = (LPTSTR)_tcsrchr(filename, '.');
+
+                  if (p != NULL)
+                  {
+                     p--;
+                     while (isdigit(*p))
+                        p--;
+
+                     int comID = atoi(p + 1);
+                     pConstraint->m_comID = comID;
+                  }
+
+               //Determine which control point this is.....use COMID to identify
+                  for (int k = 0; k < gpModel->m_controlPointArray.GetSize(); k++)
+                  {
+                     ControlPoint* pControl = gpModel->m_controlPointArray.GetAt(k);
+                     ASSERT(pControl != NULL);
+
+                     if (pControl->InUse())
+                     {
+                        int location = pControl->m_location;     // Get COMID of this control point
+                        //if (pControl->m_location == pConstraint->m_comID)  //Do they match?
+                        if (_stricmp(pControl->m_controlPointFileName, pConstraint->m_constraintFileName) == 0)  //compare names
+                        {
+                           ASSERT(pControl->m_pResAllocation != NULL);
+                           constraintValue = 0.0f;
+                           int releaseFreq = 1;
+
+                           for (int l = 0; l < pControl->m_influencedReservoirsArray.GetSize(); l++)
+                           {
+                              if (pControl->m_influencedReservoirsArray[l] == pRes)
+                              {
+                                 if (pRes->m_reservoirType == ResType_CtrlPointControl)
+                                 {
+                                    int rowCount = pControl->m_pResAllocation->GetRowCount();
+                                    releaseFreq = pControl->m_influencedReservoirsArray[l]->m_releaseFreq;
+
+                                    if (releaseFreq > 1 && doy >= releaseFreq - 1)
+                                    {
+                                       for (int k = 1; k <= releaseFreq; k++)
+                                       {
+                                          float tmp = pControl->m_pResAllocation->Get(l, rowCount - k);
+                                          constraintValue += pControl->m_pResAllocation->Get(l, rowCount - k);
+                                       }
+                                       constraintValue = constraintValue / releaseFreq;
+                                    }
+                  //                  constraintValue = pControl->m_pResAllocation->IGet(0, l);   //Flow allocated from this control point
+                                 }
+                                 else
+                                    constraintValue = pControl->m_pResAllocation->IGet(0, l);   //Flow allocated from this control point
+
+                                 actualRelease += constraintValue;    //constraint value will be negative if flow needs to be withheld, positive if flow needs to be augmented
+
+                                 if (constraintValue > 0.0)         //Did this constraint affect release?  If so, save as active rule.
+                                 {
+                                    pRes->m_activeRule = pConstraint->m_constraintFileName; pRes->m_constraintValue = actualRelease;
+                                 }
+                                 break;
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+               break;
+
+               case RCT_POWERPLANT:  //Power plant rule
+               { //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
+                  TCHAR powname[256];
+                  lstrcpy(powname, filename);
+                  TCHAR* ruletype = NULL;
+                  TCHAR* next = NULL;
+                  TCHAR delim[] = " ,_";  //allowable delimeters: , ; space ; underscore
+
+                  ruletype = _tcstok_s(powname, delim, &next);  //Strip header.  should be pow_ for power plant rules
+                  ruletype = _tcstok_s(NULL, delim, &next);  //Returns next string at head of file (max or min).
+
+                  if (_stricmp(ruletype, "Max") == 0)  //Is this a maximum power flow?  Assign m_maxPowerFlow attribute.
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     pRes->m_maxPowerFlow = constraintValue;  //Just for this timestep.  m_gateMaxPowerFlow is the physical limitation for the reservoir.
+                  }
+                  else if (_stricmp(ruletype, "Min") == 0)   /// bug!!! maximum) == 0)  //Is this a minimum power flow?  Assign m_minPowerFlow attribute.
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     pRes->m_minPowerFlow = constraintValue;
+                  }
+             //  pRes->m_activeRule = pConstraint->m_constraintFileName;
+               }
+               break;
+
+               case RCT_REGULATINGOUTLET:  //Regulating outlet rule
+               {
+               //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
+                  TCHAR roname[256];
+                  lstrcpy(roname, filename);
+                  TCHAR* ruletype = NULL;
+                  TCHAR* next = NULL;
+                  TCHAR delim[] = " ,_";  //allowable delimeters: , ; space ; underscore
+                  ruletype = _tcstok_s(roname, delim, &next);  //Strip header.  should be pow_ for power plant rules
+                  ruletype = _tcstok_s(NULL, delim, &next);  //Returns next string at head of file (max or min).
+
+                  if (_stricmp(ruletype, "Max") == 0)  //Is this a maximum RO flow?   Assign m_maxRO_Flow attribute.
+                  {
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     pRes->m_maxRO_Flow = constraintValue;
+                  }
+                  else if (_stricmp(ruletype, "Min") == 0)  //Is this a minimum RO flow?   Assign m_minRO_Flow attribute.
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     pRes->m_minRO_Flow = constraintValue;
+                  }
+             //  pRes->m_activeRule = pConstraint->m_constraintFileName;
+               }
+               break;
+
+               case RCT_SPILLWAY:   //Spillway rule
+               {
+               //first, we have to strip the first header to get to the 2nd, which tells us whether the rule is a min or a max 
+                  TCHAR spillname[256];
+                  lstrcpy(spillname, filename);
+                  TCHAR* ruletype = NULL;
+                  TCHAR* next = NULL;
+                  TCHAR delim[] = " ,_";  //allowable delimeters: , ; space ; underscore
+
+                  ruletype = _tcstok_s(spillname, delim, &next);  //Strip header.  should be pow_ for power plant rules
+                  ruletype = _tcstok_s(NULL, delim, &next);  //Returns next string at head of file (max or min).
+
+                  if (_stricmp(ruletype, "Max") == 0)  //Is this a maximum spillway flow?  Assign m_maxSpillwayFlow attribute.
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     pRes->m_maxSpillwayFlow = constraintValue;
+                  }
+                  else if (_stricmp(ruletype, "Min") == 0)  //Is this a minimum spillway flow?  Assign m_minSpillwayFlow attribute.
+                  {
+                     ASSERT(pConstraint->m_pRCData != NULL);
+                     constraintValue = pConstraint->m_pRCData->IGet(xvalue, 1, IM_LINEAR);
+                     pRes->m_minSpillwayFlow = constraintValue;
+                  }
+             //  pRes->m_activeRule = pConstraint->m_constraintFileName;
+               }
+               break;
+            }  // end of: switch( pConstraint->m_type )
+
+            /*
+         float minVolum = pRes->GetPoolVolumeFromElevation(m_inactive_elev);
+         //float targetPoolElevation = pRes->GetTargetElevationFromRuleCurve(doy);
+         float currentVolume = pRes->GetPoolVolumeFromElevation(currentPoolElevation);
+         float rc_outflowVolum = actualRelease*SEC_PER_DAY;//volume that would be drained (m3 over the day)
+
+
+         if (rc_outflowVolum > currentVolume - minVolum)      //In the inactive zone, water is not accessible for release from any of the gates.
+            {
+            actualRelease = (currentVolume - minVolum)/SEC_PER_DAY*0.5f;
+            CString resMsg;
+
+            resMsg.Format("Pool is only %8.1f m above inactive zone. Outflow set to drain %8.1fm above inactive zone.  RC outflow of %8.1f m3/s (from %s) would have resulted in %8.0f m3 of discharged water (over a day) but there is only %8.0f m3 above the inactive zone", pRes->m_elevation - pRes->m_inactive_elev, (pRes->m_elevation - pRes->m_inactive_elev) / 2, rc_outflowVolum / SEC_PER_DAY, pRes->m_activeRule, rc_outflowVolum, currentVolume - minVolum);
+               pRes->m_activeRule = resMsg;
+
+            }
+            */
+            if (actualRelease < 0.0f)
+               actualRelease = 0.0f;
+            pRes->m_zone = (int)zone;
+
+          // if (actualRelease < pRes->m_minOutflow)              // No release values less than the minimum
+          //     actualRelease = pRes->m_minOutflow;
+
+            if (pRes->m_elevation < pRes->m_inactive_elev)      //In the inactive zone, water is not accessible for release from any of the gates.
+               actualRelease = (float)(pRes->m_outflow / SEC_PER_DAY * 0.5f);
+
+            outflowWP = WaterParcel(actualRelease * SEC_PER_DAY, m_resWP.WaterTemperature());
+         }//end of for ( int i=0; i < pZone->m_resConstraintArray.GetSize(); i++ )
+      }
+   }  // end of: else (not run of river gate flow
+
+//Code here to assign total outflow to powerplant, RO and spillway (including run of river projects) 
+   if (pRes->m_reservoirType == ResType_FloodControl || pRes->m_reservoirType == ResType_RiverRun)
+      AssignReservoirOutletFlows(pRes, (float)outflowWP.m_volume_m3 / SEC_PER_DAY);
+
+   pRes->m_power = (pRes->m_powerFlow > 0.) ? CalculateHydropowerOutput(pRes) : 0.f; // MW
+
+   /* output activ rule to log window
+   if (true || pRes->m_id==5)
+      { // Dorena is reservoir 5
+      CString msg;
+      msg.Format("Flow: Day %i: Active Rule for Reservoir %s is %s", doy, (LPCTSTR)pRes->m_name, (LPCTSTR)pRes->m_activeRule);
+      Report::LogMsg(msg);
+      }
+*/
+   return outflowWP;
+} // end of GetResOutflowWP()
 
 
 void Reservoir::AssignReservoirOutletFlows( Reservoir *pRes, float outflow )
@@ -4027,6 +4480,7 @@ bool FlowModel::ReadState()
          {
          Reservoir *pRes = m_reservoirArray[i];
          fread(&pRes->m_volume, sizeof(double), 1, fp);
+         pRes->m_resWP = WaterParcel(pRes->m_volume, DEFAULT_REACH_H2O_TEMP_DEGC);
          if (pRes->m_volume > 0.f)
             {
             totReservoirVol += pRes->m_volume;
@@ -5664,6 +6118,7 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       if ( pReach == NULL )
          {
          pRes->m_inflow = pRes->m_outflow = 0;
+         pRes->m_inflowWP = pRes->m_outflowWP = WaterParcel(0, 0);
          continue;
          }
 
@@ -5671,20 +6126,28 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       Reach *pRight = (Reach*) pReach->m_pRight;
 
       //set inflow, outflows
-      double inflow = 0;
+      double inflow_cms = 0;
+      WaterParcel inflowWP = WaterParcel(0, 0);
      
       //   To be re-implemented with remainder of FLOW hydrology - ignored currently to test ResSIMlite
-      if ( pLeft != NULL )
-         inflow = pLeft->GetDischarge();
-      if ( pRight != NULL )
-         inflow += pRight->GetDischarge();
+      if (pLeft != NULL)
+      {
+         inflow_cms = pLeft->GetDischarge();
+         inflowWP = pLeft->GetDischargeWP();
+      }
+      if (pRight != NULL)
+      {
+         inflow_cms += pRight->GetDischarge();
+		WaterParcel rightWP = pRight->GetDischargeWP();
+         inflowWP.MixIn(rightWP);
+      }
      
 
       /*////////////////////////////////////////////////////////////////////////////////////////////
      //Get inflows exported from ResSIM model.  Used for testing in conjunction with 0 precip.
      int resID = pRes->m_id;
      
-    inflow = m_pResInflows->IGet(m_currentTime, resID);   //inflow value in cms
+    inflow_cms = m_pResInflows->IGet(m_currentTime, resID);   
      
      //Hard code here for additional inflows into Lookout, Foster, Dexter and BigCliff from upstream dam releases
 
@@ -5693,14 +6156,14 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
        {
        int HCid= 0;
         Reservoir *pHC = m_reservoirArray.GetAt(HCid);
-         inflow += pHC->m_outflow/SEC_PER_DAY; 
+         inflow_cms += pHC->m_outflow/SEC_PER_DAY; 
         }
      //Foster = Foster + Green Peter
       if (resID == 11)
        {
         int GPid = 9;
        Reservoir *pGP = m_reservoirArray.GetAt(GPid);
-         inflow += pGP->m_outflow/SEC_PER_DAY;
+         inflow_cms += pGP->m_outflow/SEC_PER_DAY;
         }
 
      //Dexter
@@ -5708,7 +6171,7 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
         {
         int LOid = 1;
         Reservoir *pLO = m_reservoirArray.GetAt(LOid);
-       inflow = pLO->m_outflow/SEC_PER_DAY;
+       inflow_cms = pLO->m_outflow/SEC_PER_DAY;
         }
 
      //Big Cliff
@@ -5716,31 +6179,31 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
        {
         int DETid = 11;
         Reservoir *pDET = m_reservoirArray.GetAt(DETid);
-       inflow = pDET->m_outflow/SEC_PER_DAY;
+       inflow_cms = pDET->m_outflow/SEC_PER_DAY;
         }
      ///////////////////////////////////////////////////////////////////////////////////////////*/ 
      
 
-      float outflow = 0;
+      float outflow_cms = 0;
 
       // rule curve stuff goes here
-      pRes->m_inflow = inflow*SEC_PER_DAY;  //m3 per day     
+      pRes->m_inflow = inflow_cms*SEC_PER_DAY;  //m3   
+      pRes->m_inflowWP = inflowWP;
           
-      outflow = pRes->GetResOutflow(pRes,dayOfYear);
-      ASSERT(outflow >= 0);
-      pRes->m_outflow = outflow*SEC_PER_DAY;    // m3 per day 
-      int reach_ndx = m_pReachLayer->FindIndex(m_colStreamCOMID, pReach->m_reachID, 0);
-//      double H2O_temp_C = -1; m_pReachLayer->GetData(reach_ndx, m_colReachTEMP_H2O, H2O_temp_C);
-//      pRes->m_outflowWP = WaterParcel(pRes->m_outflow, H2O_temp_C);
+      outflow_cms = pRes->GetResOutflow(pRes,dayOfYear);
+      ASSERT(outflow_cms >= 0);
+      pRes->m_outflow = outflow_cms*SEC_PER_DAY;    // m3 
+      pRes->m_outflowWP = pRes->GetResOutflowWP(pRes, dayOfYear);
       pRes->m_outflowWP = WaterParcel(pRes->m_outflow, DEFAULT_REACH_H2O_TEMP_DEGC);
 
       // Store today's hydropower generation (megawatts) for this reservoir into the reach attribute HYDRO_MW for the reach which receives the reservoir outflow.
-      m_pReachLayer->SetDataU(reach_ndx, m_colStreamHYDRO_MW, pRes->m_power);
+     int reach_ndx = m_pReachLayer->FindIndex(m_colStreamCOMID, pReach->m_reachID, 0);
+     m_pReachLayer->SetDataU(reach_ndx, m_colStreamHYDRO_MW, pRes->m_power);
 
-      }
+      } // end of loop through reservoirs
 
    return true;
-   }
+   } // end of SetGlobalReservoirFluxesResSimLite()
 
 
 bool FlowModel::SetGlobalFlows( void )
@@ -9608,6 +10071,7 @@ bool FlowModel::InitIntegrationBlocks( void )
       Reservoir *pRes = m_reservoirArray.GetAt(i);
       pRes->m_svIndex = resSvCount;
       m_reservoirBlock.SetStateVar(  &(pRes->m_volume), resSvCount++ );
+      pRes->m_resWP = WaterParcel(pRes->m_volume, pRes->m_resWP.WaterTemperature());
 
       for ( int k=0; k < m_reservoirSvCount-1; k++ )
          m_reservoirBlock.SetStateVar( &(pRes->m_svArray[ k ]), resSvCount++ );

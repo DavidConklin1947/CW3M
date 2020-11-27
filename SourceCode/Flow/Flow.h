@@ -1028,8 +1028,9 @@ public:
    int m_zone;
    int m_daysInZoneBuffer;
 
-   double   m_inflow;
-   double   m_outflow; // m3 per day
+   double   m_inflow; // m3 
+   WaterParcel m_inflowWP;
+   double   m_outflow; // m3 
    WaterParcel m_outflowWP;
    float   m_elevation;          //current pool elevation
    float   m_power; // Current hydropower output, MW
@@ -1046,6 +1047,7 @@ public:
    ///////////////////////////////////////////////
 
    SVTYPE m_volume;   // this is the same as m_svArray[ 0 ].
+   WaterParcel m_resWP;
 
    CString m_areaVolCurveFilename;
    CString m_ruleCurveFilename;
@@ -1059,7 +1061,11 @@ public:
    
 
    bool ProcessRulePriorityTable( void );
-	void InitializeReservoirVolume(float volume) { m_volume = volume; }
+	void InitializeReservoirVolume(float volume) 
+   { 
+      m_volume = volume; 
+      m_resWP = WaterParcel(volume, DEFAULT_REACH_H2O_TEMP_DEGC);
+   } // end of InitializeReservoirVolume()
    
    PtrArray< ZoneInfo > m_zoneInfoArray;              // (memory managed here)
    PtrArray< ResConstraint > m_resConstraintArray;    // (memory managed here)
@@ -1078,8 +1084,9 @@ protected:
    float GetPoolVolumeFromElevation(float elevation);
    float GetTargetElevationFromRuleCurve( int dayOfYear );
    float GetBufferZoneElevation( int dayOfYear );
-   float GetResOutflow( Reservoir *pRes, int dayOfYear);
-	// float GetResOutflow(Reservoir *pRes, int doy, LPCTSTR filename);
+   float GetResOutflow(Reservoir* pRes, int dayOfYear);
+   WaterParcel GetResOutflowWP(Reservoir* pRes, int dayOfYear);
+//x float GetResOutflow(Reservoir *pRes, int doy, LPCTSTR filename);
    void  AssignReservoirOutletFlows( Reservoir *pRes, float outflow );
    void  UpdateMaxGateOutflows( Reservoir *pRes, float currentPoolElevation );
    float CalculateHydropowerOutput( Reservoir *pRes );

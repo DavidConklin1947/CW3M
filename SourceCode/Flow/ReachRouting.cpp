@@ -1009,7 +1009,7 @@ double ReachRouting::GetReachSVOutflow( ReachNode *pReachNode, int sv )   // rec
       }
    }
 
-
+/*x
 double ReachRouting::GetReachSVInflow( Reach *pReach, int subNode, int sv )
    {
     double flux = 0.0;
@@ -1038,7 +1038,7 @@ double ReachRouting::GetReachSVInflow( Reach *pReach, int subNode, int sv )
 
    return flux; //kg/d;
    }
-
+x*/
 
 void ReachRouting::GetReachDerivatives( double time, double timeStep, int svCount, double *derivatives /*out*/, void *extra )
    {

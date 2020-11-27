@@ -217,7 +217,7 @@ protected:
 
    double GetLateralSVInflow( Reach *pReach, int sv );
    double GetReachSVOutflow( ReachNode *pReachNode, int sv );   // recursive!!! for pahntom nodes
-   double GetReachSVInflow( Reach *pReach, int subNode, int sv );
+//x   double GetReachSVInflow( Reach *pReach, int subNode, int sv );
 
    static void GetReachDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra );
 
