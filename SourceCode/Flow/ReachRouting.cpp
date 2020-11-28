@@ -50,6 +50,7 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
             pNode->m_nanOccurred = true; 
             pNode->m_discharge = 0; 
             pNode->m_dischargeWP = WaterParcel(0, 0);
+            pNode->m_dischargeDOY = pFlowContext->dayOfYear;
          }
          if (pNode->m_discharge <= 0)
          {
@@ -62,6 +63,7 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
             pNode->m_addedDischarge_cms += node_current_added_discharge_cms;
             pNode->m_discharge = NOMINAL_LOW_FLOW_CMS;
             pNode->m_dischargeWP = WaterParcel(pNode->m_discharge * SEC_PER_DAY, H2O_temp_degC);
+            pNode->m_dischargeDOY = pFlowContext->dayOfYear;
          }
 
          if (isnan(pNode->m_waterParcel.m_volume_m3))
@@ -471,6 +473,23 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       {
       Reach *pReach = gpModel->GetReach( i );     // Note: these are guaranteed to be non-phantom
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
+      Reach* pUpstreamLeftReach = gpModel->GetReachFromNode(pReach->m_pLeft);
+      if (pUpstreamLeftReach != NULL)
+      {
+         int final_subnode = pUpstreamLeftReach->GetSubnodeCount() - 1;
+         ReachSubnode * pNode = (ReachSubnode*)pUpstreamLeftReach->m_subnodeArray[final_subnode];
+         int upstream_discharge_doy = pNode->m_dischargeDOY;
+         ASSERT(upstream_discharge_doy == pFlowContext->dayOfYear);
+         Reach* pUpstreamRightReach = gpModel->GetReachFromNode(pReach->m_pRight);
+         if (pUpstreamRightReach != NULL)
+         {
+            int final_subnode = pUpstreamRightReach->GetSubnodeCount() - 1;
+            ReachSubnode* pNode = (ReachSubnode*)pUpstreamRightReach->m_subnodeArray[final_subnode];
+            int upstream_discharge_doy = pNode->m_dischargeDOY;
+            ASSERT(upstream_discharge_doy == pFlowContext->dayOfYear);
+         }
+      }
+
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachQ_UPSTREAM, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY);
 
       int num_subreaches = pReach->GetSubnodeCount();
@@ -584,6 +603,8 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
          WaterParcel outflowWP(0,0);
          outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);
+         ASSERT(pSubreach->m_dischargeDOY == (pFlowContext->dayOfYear - 1));
+         pSubreach->m_dischargeDOY = pFlowContext->dayOfYear;
 
          ASSERT(pSubreach->m_waterParcel.m_volume_m3 > 0);
 

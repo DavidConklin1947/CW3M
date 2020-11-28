@@ -1183,7 +1183,7 @@ void Reservoir::InitDataCollection( void )
       if (m_reservoirType == ResType_CtrlPointControl)
          m_pResData = new FDataObj(4, 0);
       else
-         m_pResData = new FDataObj(13, 0);
+         m_pResData = new FDataObj(14, 0);
 
       ASSERT( m_pResData != NULL );
       }
@@ -1209,11 +1209,12 @@ void Reservoir::InitDataCollection( void )
       m_pResData->SetLabel(5, "Powerhouse Flow (m3/s)");
       m_pResData->SetLabel(6, "Regulating Outlet Flow (m3/s)");
       m_pResData->SetLabel(7, "Spillway Flow (m3/s)");
-	  m_pResData->SetLabel(8, "Zone");
-	  m_pResData->SetLabel(9, "Days in Buffer Zone");
-	  m_pResData->SetLabel(10, "Buffer Zone Elevation (m)");
-	  m_pResData->SetLabel(11, "Water Year Type");
-	  m_pResData->SetLabel(12, "Constraint Value");
+	   m_pResData->SetLabel(8, "Zone");
+	   m_pResData->SetLabel(9, "Days in Buffer Zone");
+	   m_pResData->SetLabel(10, "Buffer Zone Elevation (m)");
+	   m_pResData->SetLabel(11, "Water Year Type");
+	   m_pResData->SetLabel(12, "Constraint Value");
+      m_pResData->SetLabel(13, "Volume (m3)");
       }
 
    gpFlow->AddOutputVar( name, m_pResData, "" );
@@ -4452,6 +4453,7 @@ bool FlowModel::ReadState()
             }
             pSubreach->m_discharge = (float)discharge_as_double;
             pSubreach->m_dischargeWP = WaterParcel(SEC_PER_DAY * discharge_as_double, DEFAULT_REACH_H2O_TEMP_DEGC);
+            pSubreach->m_dischargeDOY = -1;
             pSubreach->m_manning_depth_m = pReach->GetManningDepthFromQ(pSubreach->m_discharge, pReach->m_wdRatio);
 
             double subreach_volume;
@@ -4900,6 +4902,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
          pNode->m_addedDischarge_cms = 0.;
          pNode->m_addedVolume_m3 = 0.;
          pNode->m_nanOccurred = false;
+         pNode->m_dischargeDOY = -1;
       } // end of loop thru subnodes
    } // end of loop thru reaches
 
@@ -6790,6 +6793,7 @@ bool FlowModel::InitReaches(void)
          ReachSubnode * pSubreach = pReach->GetReachSubnode(j);
          pSubreach->m_discharge = Q;
          pSubreach->m_dischargeWP = WaterParcel(Q * (double)SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC);
+         pSubreach->m_dischargeDOY = -1;
 
          if (m_reachSvCount > 1)
             { // Initialize extra state variables
@@ -12462,7 +12466,7 @@ void FlowModel::CollectData( int dayOfYear )
       }
       else
       {
-         float *data = new float[13];
+         float *data = new float[14];
          data[0] = (float)m_timeInRun;
          data[1] = pRes->GetPoolElevationFromVolume();
          data[2] = pRes->GetTargetElevationFromRuleCurve(dayOfYear);
@@ -12476,8 +12480,9 @@ void FlowModel::CollectData( int dayOfYear )
 		 data[10] = pRes->GetBufferZoneElevation(dayOfYear);
 		 data[11] = gpModel->m_waterYearType;
 		 data[12] = pRes->m_constraintValue;
+       data[13] = (float)pRes->m_volume;
 
-         pRes->m_pResData->AppendRow(data, 13);
+         pRes->m_pResData->AppendRow(data, 14);
 
          delete[] data;
       }

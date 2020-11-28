@@ -806,6 +806,7 @@ public:
    double  m_lateralInflow;       // m3/day
    WaterParcel m_dischargeWP; // m_dischargeWP.m_volume_m3 should be maintained equal to m_discharge * SEC_PER_DAY
    double  m_discharge;           // m3/sec; should be maintained equal to m_dischargeWP.m_volume_m3/SEC_PER_DAY 
+   int m_dischargeDOY; // day index of day to which this discharge applies (Jan 1 = 0)
    double  m_previousDischarge;   // m3/sec;
    WaterParcel m_waterParcel;
    WaterParcel m_previousWP;
