@@ -470,6 +470,9 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
    for ( int i=0; i < reachCount; i++ )
       {
       Reach *pReach = gpModel->GetReach( i );     // Note: these are guaranteed to be non-phantom
+      WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachQ_UPSTREAM, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY);
+
       int num_subreaches = pReach->GetSubnodeCount();
       float temp_air_degC = gpModel->GetTodaysReachTEMP_AIR(pReach);
       float tmax_air_degC = gpModel->GetTodaysReachTMAX_AIR(pReach);

@@ -801,6 +801,19 @@ flow_cms="1.10"
     -->
 
   <outputs>
+    <output_group name="FLOW BLU analysis" interval="daily" >
+      <output in_use="1" name="Q from 23773403 upstream into BLU outfall reach" query="COMID=23773403" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="Q from 23773407 upstream into BLU outfall reach" query="COMID=23773407" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="Q_UPSTREAM into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOFF into BLU outfall reach" query="COMID=23773405" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM from BLU outfall reach" query="COMID=23773405" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 of BLU outfall reach" query="COMID=23773405" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 in BLU outfall reach" query="COMID=23773405" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Q from BLU outfall reach" query="COMID=23773405" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="total cms into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM + IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="total cms out of BLU outfall reach" query="COMID=23773405" value="Q + (EVAP_MM/1000)*AREA_H2O/86400" type="sum" domain="reach" />
+    </output_group>
+    
     <output_group name="FLOW McKenzie Ditch analysis" interval="daily" >
       <output in_use="1" name="23774421 IN_RUNOFF cms" query="COMID=23774421" value="IN_RUNOFF" type="sum" domain="reach" />
       <output in_use="1" name="23774421 Q_MIN cms" query="COMID=23774421" value="Q_MIN" type="sum" domain="reach" />
@@ -1191,14 +1204,5 @@ flow_cms="1.10"
       <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
     </output_group>
   </outputs>
-  <!--
-  <video_capture use='0' frameRate='30'>
-    <movie col='TEMP'   file='\envision\studyareas\WW2100\Outputs\AVIs\Temp.avi' />
-    <movie col='PRECIP' file='\envision\studyareas\WW2100\Outputs\AVIs\Precip.avi' />
-    <movie col='SNOW'   file='\envision\studyareas\WW2100\Outputs\AVIs\Snow.avi' />
-    <movie col='SWC'    file='\envision\studyareas\WW2100\Outputs\AVIs\swc.avi' />
-    <movie col='ET'    file='\envision\studyareas\WW2100\Outputs\AVIs\et.avi' />
-  </video_capture>
--->
   
 </flow_model>

@@ -3257,6 +3257,7 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_D, _T("XFLUX_D"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSPRING_CMS, _T("SPRING_CMS"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOFF, _T("IN_RUNOFF"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_UPSTREAM, _T("Q_UPSTREAM"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_MIN, _T("Q_MIN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_Y, _T("XFLUX_Y"), TYPE_FLOAT, CC_AUTOADD);
 
@@ -3635,6 +3636,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pIDUlayer->SetColDataU(m_colSNOWCANOPY, 0.f);
    m_pIDUlayer->SetColDataU(m_colSM2ATM, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
+   m_pReachLayer->SetColDataU(m_colReachQ_UPSTREAM, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
 
    GlobalMethodManager::InitRun( &m_flowContext );
