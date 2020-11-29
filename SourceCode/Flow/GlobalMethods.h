@@ -193,12 +193,12 @@ public:
    float m_reachTimeStep;
    
 protected:
-   // helper methods
-
-   //bool  SolveReachDirect( void );     // high level method
    void MoveWP(double volume_m3, WaterParcel* pFromWP, WaterParcel* pToWP);
    bool  SolveReachKinematicWave( FlowContext* );
-   bool  SolveReach2KW(FlowContext*);
+   WaterParcel ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double unshadedSW_W_m2,
+      double H2Otemp_degC, double airTemp_degC, double VTSfrac, double cloudinessFrac, double windspeed_m_sec, double spHumidity, double RHpct,
+      double& rEvap_m3, double& rEvap_kJ, double& rSW_kJ, double& rLW_kj);
+   //x   bool SolveReach2KW(FlowContext*);
 
    double GetLateralInflow( Reach *pReach );
 

@@ -460,11 +460,121 @@ float max_sw_W_m2[366] = // Represents an estimate of clear sky shortwave in the
 };
 
 
-/*
-void ApplyEnergyFluxes(Reach * pReach, int subreachNdx)
+WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double unshadedSW_W_m2, 
+   double H2Otemp_degC, double airTemp_degC, double VTSfrac, double cloudinessFrac, double windspeed_m_sec, double spHumidity, double RHpct, 
+   double & rEvap_m3, double & rEvap_kJ, double & rSW_kJ, double & rLW_kj)
 {
+   WaterParcel rtnWP = origWP;
+//x   pFlowContext->pReach = pReach;
+//x   ReachSubnode * pSubreach = pReach->GetReachSubnode(subreachNdx);
+//x   double orig_m_volume_m3 = origWP.m_volume_m3;
+
+   double rad_sw_net_W_m2 = unshadedSW_W_m2; // ??? s/b pReach->GetSegmentShade_a_lator(segment, rad_sw_unshaded_W_m2);
+   double net_lw_out_W_m2 = NetLWout_W_m2(airTemp_degC, cloudinessFrac, H2Otemp_degC, RHpct, VTSfrac);
+
+   // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
+   // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,
+   // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
+   // aerodynamic evaporation is a function of the windspeed.
+   double evap_m_s = Reach::Evap_m_s(rtnWP.WaterTemperature(), rad_sw_net_W_m2, net_lw_out_W_m2, airTemp_degC, windspeed_m_sec, spHumidity);
+   double evap_m3 = evap_m_s * H2Oarea_m2 * SEC_PER_DAY;
+   double evap_kJ = evap_m3 * DENSITY_H2O * Reach::LatentHeatOfVaporization_MJ_kg(H2Otemp_degC) * 1000.;
+
+   double sw_kJ = rad_sw_net_W_m2 * H2Oarea_m2 * SEC_PER_DAY / 1000;
+   double lw_kJ = net_lw_out_W_m2 * H2Oarea_m2 * SEC_PER_DAY / 1000;
+
+   // Lose water via evaporation.
+   // The amount of water lost is proportional to the surface area of the water.
+//       double subreach_precip_vol_m3 = pSubreach->m_subreach_surf_area_m2 * reach_precip_mm / 1000;
+//       WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
+//       pSubreach->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
+   rtnWP.Evaporate(evap_m3, evap_kJ);
+
+   // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
+// not yet         double subreach_tempC = pSubreach->m_waterParcel.WaterTemperature();
+// not yet         double subreach_kJ = pSubreach->m_waterParcel.ThermalEnergy(subreach_tempC) + pReach->SubReachNetRad_kJ(l);
+   double net_rad_kJ = sw_kJ - lw_kJ;
+   if (net_rad_kJ < 0.)
+   { // Theoretically, the water is losing heat to the atmosphere by radiation.
+      double min_skin_temp_degC = 1.;
+      double skin_temp_degC = max(airTemp_degC, min_skin_temp_degC);
+      if (rtnWP.WaterTemperature() > skin_temp_degC)
+      { // The water is warmer than the air, so it is plausible that the water might cool down
+         // but not to a temperature less than the skin temperature (the temperature of the air in contact with the liquid water surface).
+         double temp_diff = rtnWP.WaterTemperature() - skin_temp_degC;
+         double max_heat_loss_kJ = WaterParcel::ThermalEnergy(rtnWP.m_volume_m3, temp_diff);
+         double heat_loss_kJ = min(max_heat_loss_kJ, -net_rad_kJ);
+         double thermal_energy_kJ = rtnWP.ThermalEnergy() - heat_loss_kJ;
+         rtnWP.m_temp_degC = WaterParcel::WaterTemperature(rtnWP.m_volume_m3, thermal_energy_kJ);
+         ASSERT(rtnWP.m_temp_degC >= 0);
+      }
+   }
+   else
+   {
+      double thermal_energy_kJ = rtnWP.ThermalEnergy() + net_rad_kJ;
+      rtnWP.m_temp_degC = WaterParcel::WaterTemperature(rtnWP.m_volume_m3, thermal_energy_kJ);
+/*x
+      if (rtnWP.m_temp_degC >= 50.)
+      {
+         CString msg;
+         msg.Format("ApplyEnergyFluxes() temperature >= 50 degC in reach %d: orig kJ = %f,\n"
+            "sw_kJ = %f, lw_kJ = %f\n"
+            "areaH2O_m2 = %f, rtnWP.m_volume_m3 = %f, rtnWP.temp_degC = %f",
+            pReach->m_reachID, origWP.ThermalEnergy(), sw_kJ, lw_kJ,
+            H2Oarea_m2, rtnWP.m_volume_m3, rtnWP.m_temp_degC);
+         Report::LogMsg(msg);
+         ASSERT(0);
+      }
+x*/
+   }
+
+   ASSERT(rtnWP.m_temp_degC >= 0);
+   
+   /* 
+before calling
+      double lateralInflow = GetLateralInflow(pReach);
+   if (lateralInflow != lateralInflow)
+   {
+      CString msg;
+      msg.Format("*** SolveReachKinematicWave(): i = %d, l = %d, lateralInflow = %f", i, l, lateralInflow);
+      Report::LogMsg(msg);
+      msg.Format("Setting lateralInflow to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
+      lateralInflow = NOMINAL_LOW_FLOW_CMS;
+      ASSERT(0);
+   }
+   PutLateralWP(pReach, l, lateralInflow);
+
+on return
+      if (rtnWP.m_temp_degC >= 50.)
+      {
+         CString msg;
+         msg.Format("ApplyEnergyFluxes() temperature >= 50 degC in reach %d: orig kJ = %f,\n"
+            "sw_kJ = %f, lw_kJ = %f\n"
+            "areaH2O_m2 = %f, rtnWP.m_volume_m3 = %f, rtnWP.temp_degC = %f",
+            pReach->m_reachID, origWP.ThermalEnergy(), sw_kJ, lw_kJ,
+            H2Oarea_m2, rtnWP.m_volume_m3, rtnWP.m_temp_degC);
+         Report::LogMsg(msg);
+         ASSERT(0);
+      }
+
+   pSubreach->m_evap_m3 = evap_m3;
+   pSubreach->m_evap_kJ = evap_m3 * DENSITY_H2O * pReach->LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1000.;
+   pSubreach->m_sw_kJ = rad_sw_net_W_m2 * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
+   pSubreach->m_lw_kJ = net_lw_out_W_m2 * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
+   reach_net_lw_kJ += pSubreach->m_lw_kJ;
+   total_surface_in_subreaches_m2 += pSubreach->m_subreach_surf_area_m2;
+   lw_x_surface_accum += net_lw_out_W_m2 * pSubreach->m_subreach_surf_area_m2;
+   sw_x_surface_accum += (pSubreach->m_sw_kJ / SEC_PER_DAY) * 1000;
+   pReach->m_reach_evap_m3 += pSubreach->m_evap_m3;
+   pReach->m_reach_evap_kJ += pSubreach->m_evap_kJ;
+   */
+   rEvap_m3 = evap_m3;
+   rEvap_kJ = evap_kJ;
+   rSW_kJ = sw_kJ;
+   rLW_kj = lw_kJ;
+   return(rtnWP);
 } // end of ApplyEnergyFluxes()
-*/
+
 
 bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
    {
@@ -529,13 +639,62 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       for (int l = 0; l < pReach->GetSubnodeCount(); l++) // ??? ApplyEnergyFluxes(pReach, l)
          {
          pFlowContext->pReach = pReach;
-         ReachSubnode * pSubreach = pReach->GetReachSubnode(l);
+         ReachSubnode* pSubreach = pReach->GetReachSubnode(l);
+
+         double vts_frac = pReach->GetSubreachViewToSky_frac(l);
+
+
+   /*x
+before calling
+      double lateralInflow = GetLateralInflow(pReach);
+   if (lateralInflow != lateralInflow)
+   {
+      CString msg;
+      msg.Format("*** SolveReachKinematicWave(): i = %d, l = %d, lateralInflow = %f", i, l, lateralInflow);
+      Report::LogMsg(msg);
+      msg.Format("Setting lateralInflow to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
+      lateralInflow = NOMINAL_LOW_FLOW_CMS;
+      ASSERT(0);
+   }
+   PutLateralWP(pReach, l, lateralInflow);
+x*/
+/*
+         ApplyEnergyFluxes(pFlowContext, pSubreach->m_waterParcel, pSubreach->m_subreach_surf_area_m2, pReach, 
+            rad_sw_unshaded_W_m2, pSubreach->m_waterParcel.WaterTemperature(), temp_air_degC, vts_frac, cloudiness_frac, reach_ws_m_sec, sphumidity, rh_pct,
+            pSubreach->m_evap_m3, pSubreach->m_evap_kJ, pSubreach->m_sw_kJ, pSubreach->m_lw_kJ);
+*/
+/*x
+on return
+      if (rtnWP.m_temp_degC >= 50.)
+      {
+         CString msg;
+         msg.Format("ApplyEnergyFluxes() temperature >= 50 degC in reach %d: orig kJ = %f,\n"
+            "sw_kJ = %f, lw_kJ = %f\n"
+            "areaH2O_m2 = %f, rtnWP.m_volume_m3 = %f, rtnWP.temp_degC = %f",
+            pReach->m_reachID, origWP.ThermalEnergy(), sw_kJ, lw_kJ,
+            H2Oarea_m2, rtnWP.m_volume_m3, rtnWP.m_temp_degC);
+         Report::LogMsg(msg);
+         ASSERT(0);
+      }
+
+   pSubreach->m_evap_m3 = evap_m3;
+   pSubreach->m_evap_kJ = evap_m3 * DENSITY_H2O * pReach->LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1000.;
+   pSubreach->m_sw_kJ = rad_sw_net_W_m2 * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
+   pSubreach->m_lw_kJ = net_lw_out_W_m2 * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
+   reach_net_lw_kJ += pSubreach->m_lw_kJ;
+   total_surface_in_subreaches_m2 += pSubreach->m_subreach_surf_area_m2;
+   lw_x_surface_accum += net_lw_out_W_m2 * pSubreach->m_subreach_surf_area_m2;
+   sw_x_surface_accum += (pSubreach->m_sw_kJ / SEC_PER_DAY) * 1000;
+   pReach->m_reach_evap_m3 += pSubreach->m_evap_m3;
+   pReach->m_reach_evap_kJ += pSubreach->m_evap_kJ;
+x*/
+
+
          double orig_m_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
 
          double rad_sw_net_W_m2 = rad_sw_unshaded_W_m2; // ??? s/b pReach->GetSegmentShade_a_lator(segment, rad_sw_unshaded_W_m2);
          double temp_H2O_degC = pSubreach->m_waterParcel.m_temp_degC;
-         double vts_frac = pReach->GetSubreachViewToSky_frac(l);
-         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac);
+        double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac);
 
          // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
          // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,

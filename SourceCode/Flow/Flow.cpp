@@ -886,7 +886,7 @@ float Reach::GetManningDepthFromQ( double Q, float wdRatio )  // ASSUMES A SPECI
       // Q=m3/sec
       // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
       float wdterm = (float)pow((wdRatio / (2 + wdRatio)), 2.0f / 3.0f)*wdRatio;
-      depth = (float)pow(((Q*m_n) / ((float)sqrt(m_slope)*wdterm)), 3.0f / 8.0f);
+      depth = (float)pow(((Q*m_n) / ((double)sqrt(m_slope)*wdterm)), 3.0 / 8.0);
       }
    else depth = 0.f;
    return depth;
@@ -941,6 +941,29 @@ double Reach::Evap_m_s(int subreachNdx, double swIn_W_m2, double lwOut_W_m2, dou
 
    return(evap_m_s);
 } // end of Evap_m_s()
+
+
+double Reach::Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity)
+// returns evaporation rate in m3H2O/m2/sec, i.e. m/sec
+{ // Implements eq. 2-105 for evaporation rate on p. 61 of Boyd & Kasper
+   // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
+   // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,
+   // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
+   // aerodynamic evaporation is a function of the windspeed.
+   // Eq. 2-105 is for evap rate in m3H2O/m2/sec, i.e. m/sec
+   double L_e_J_kg = LatentHeatOfVaporization_MJ_kg(tempH2O_degC) * 1.e6;
+   double e_s = WaterParcel::SatVP_mbar(tempH2O_degC);
+   double e_a = WaterParcel::SatVP_mbar(tempAir_degC);
+   double E_a = 0.; // ??? aerodynamic evaporation, m/s
+   double gamma = 66. / PA_PER_MBAR; // psychrometric constant, mbar/degC, ~= 0.066 kPa/degK = 66 Pa/degC
+   double delta = (e_s - e_a) / (tempH2O_degC - tempAir_degC); // slope of the saturation vapor v. air temperature curve
+   double numerator = ((swIn_W_m2 - lwOut_W_m2) / (DENSITY_H2O * L_e_J_kg)) * delta + E_a * gamma;
+   double evap_m_s = numerator / (delta + gamma);
+   if (evap_m_s < 0.) evap_m_s = 0.;
+
+   return(evap_m_s);
+} // end of Evap_m_s(tempH2O_degC, ...)
+
 
 /*
 double Reach::LatentHeatOfVaporization_J_kg(double temp_H2O_degC) // returns J/kg

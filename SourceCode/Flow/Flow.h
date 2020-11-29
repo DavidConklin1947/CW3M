@@ -862,6 +862,7 @@ public:
    double NominalMinWidth_m();
 
    static double LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC);
+   static double Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity);
 
    bool  AddFluxFromGlobalHandler(float value) 
    // negative values of m_globalHandlerFluxValue are sinks (water entering the reach), positive values are sources (water leaving the reach) (m3/day)   
