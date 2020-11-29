@@ -1085,9 +1085,7 @@ protected:
    float GetPoolVolumeFromElevation(float elevation);
    float GetTargetElevationFromRuleCurve( int dayOfYear );
    float GetBufferZoneElevation( int dayOfYear );
-   float GetResOutflow(Reservoir* pRes, int dayOfYear);
    WaterParcel GetResOutflowWP(Reservoir* pRes, int dayOfYear);
-//x float GetResOutflow(Reservoir *pRes, int doy, LPCTSTR filename);
    void  AssignReservoirOutletFlows( Reservoir *pRes, float outflow );
    void  UpdateMaxGateOutflows( Reservoir *pRes, float currentPoolElevation );
    float CalculateHydropowerOutput( Reservoir *pRes );

@@ -798,7 +798,6 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
 
    double original_temp_degC = pSubnode->m_waterParcel.WaterTemperature();
    double original_volume_m3 = pSubnode->m_waterParcel.m_volume_m3;
-//x   double lateral_inflow_m3 = lateralInflowWP.m_volume_m3;
    WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, subnode);
    double original_upstream_inflow_volume_m3 = upstream_inflowWP.m_volume_m3;
 
@@ -943,7 +942,7 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
    }
    else
    {
-      ReachSubnode* pNode = (ReachSubnode*)pReach->m_subnodeArray[subNode - 1];  ///->GetReachSubnode( subNode-1 );
+      ReachSubnode* pNode = (ReachSubnode*)pReach->m_subnodeArray[(long int)subNode - 1];  ///->GetReachSubnode( subNode-1 );
       ASSERT(pNode != NULL);
       inflowWP = pNode->m_dischargeWP;
    }
