@@ -459,6 +459,13 @@ float max_sw_W_m2[366] = // Represents an estimate of clear sky shortwave in the
 81.7f
 };
 
+
+/*
+void ApplyEnergyFluxes(Reach * pReach, int subreachNdx)
+{
+} // end of ApplyEnergyFluxes()
+*/
+
 bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
    {
    ASSERT(pFlowContext->svCount <= 0);
@@ -500,8 +507,11 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       float rad_sw_unshaded_W_m2 = gpModel->GetTodaysReachRAD_SW(pReach); // Shortwave from the climate data takes into account cloudiness but not shading.
 
       // ??? we need a better estimate of cloudiness than this
+      double frac_of_max_sw = rad_sw_unshaded_W_m2 / max_sw_W_m2[pFlowContext->dayOfYear];
+      if (frac_of_max_sw > 1.) frac_of_max_sw = 1.;
+      if (frac_of_max_sw < 0.) frac_of_max_sw = 0.;
       double cloudiness_tuning_knob = 1.0;
-      double cloudiness_frac = cloudiness_tuning_knob * min(1, 1. - rad_sw_unshaded_W_m2 / max_sw_W_m2[pFlowContext->dayOfYear]); 
+      double cloudiness_frac = cloudiness_tuning_knob * (1. - frac_of_max_sw);
 
       float sphumidity = gpModel->GetTodaysReachSPHUMIDITY(pReach);
       double z_mean_m; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachZ_MEAN, z_mean_m);
@@ -516,7 +526,7 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       double width_x_length_accum = 0.;
       double manning_depth_x_length_accum = 0;
       double volume_accum_m3 = 0.;
-      for (int l = 0; l < pReach->GetSubnodeCount(); l++)
+      for (int l = 0; l < pReach->GetSubnodeCount(); l++) // ??? ApplyEnergyFluxes(pReach, l)
          {
          pFlowContext->pReach = pReach;
          ReachSubnode * pSubreach = pReach->GetReachSubnode(l);
