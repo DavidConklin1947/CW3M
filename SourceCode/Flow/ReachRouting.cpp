@@ -465,9 +465,6 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
    double & rEvap_m3, double & rEvap_kJ, double & rSW_kJ, double & rLW_kj)
 {
    WaterParcel rtnWP = origWP;
-//x   pFlowContext->pReach = pReach;
-//x   ReachSubnode * pSubreach = pReach->GetReachSubnode(subreachNdx);
-//x   double orig_m_volume_m3 = origWP.m_volume_m3;
 
    double rad_sw_net_W_m2 = unshadedSW_W_m2; // ??? s/b pReach->GetSegmentShade_a_lator(segment, rad_sw_unshaded_W_m2);
    double net_lw_out_W_m2 = NetLWout_W_m2(airTemp_degC, cloudinessFrac, H2Otemp_degC, RHpct, VTSfrac);
@@ -491,8 +488,6 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
    rtnWP.Evaporate(evap_m3, evap_kJ);
 
    // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
-// not yet         double subreach_tempC = pSubreach->m_waterParcel.WaterTemperature();
-// not yet         double subreach_kJ = pSubreach->m_waterParcel.ThermalEnergy(subreach_tempC) + pReach->SubReachNetRad_kJ(l);
    double net_rad_kJ = sw_kJ - lw_kJ;
    if (net_rad_kJ < 0.)
    { // Theoretically, the water is losing heat to the atmosphere by radiation.
@@ -513,61 +508,11 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
    {
       double thermal_energy_kJ = rtnWP.ThermalEnergy() + net_rad_kJ;
       rtnWP.m_temp_degC = WaterParcel::WaterTemperature(rtnWP.m_volume_m3, thermal_energy_kJ);
-/*x
-      if (rtnWP.m_temp_degC >= 50.)
-      {
-         CString msg;
-         msg.Format("ApplyEnergyFluxes() temperature >= 50 degC in reach %d: orig kJ = %f,\n"
-            "sw_kJ = %f, lw_kJ = %f\n"
-            "areaH2O_m2 = %f, rtnWP.m_volume_m3 = %f, rtnWP.temp_degC = %f",
-            pReach->m_reachID, origWP.ThermalEnergy(), sw_kJ, lw_kJ,
-            H2Oarea_m2, rtnWP.m_volume_m3, rtnWP.m_temp_degC);
-         Report::LogMsg(msg);
-         ASSERT(0);
-      }
-x*/
+      ASSERT(rtnWP.m_temp_degC < 50.);
    }
 
    ASSERT(rtnWP.m_temp_degC >= 0);
    
-   /* 
-before calling
-      double lateralInflow = GetLateralInflow(pReach);
-   if (lateralInflow != lateralInflow)
-   {
-      CString msg;
-      msg.Format("*** SolveReachKinematicWave(): i = %d, l = %d, lateralInflow = %f", i, l, lateralInflow);
-      Report::LogMsg(msg);
-      msg.Format("Setting lateralInflow to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
-      lateralInflow = NOMINAL_LOW_FLOW_CMS;
-      ASSERT(0);
-   }
-   PutLateralWP(pReach, l, lateralInflow);
-
-on return
-      if (rtnWP.m_temp_degC >= 50.)
-      {
-         CString msg;
-         msg.Format("ApplyEnergyFluxes() temperature >= 50 degC in reach %d: orig kJ = %f,\n"
-            "sw_kJ = %f, lw_kJ = %f\n"
-            "areaH2O_m2 = %f, rtnWP.m_volume_m3 = %f, rtnWP.temp_degC = %f",
-            pReach->m_reachID, origWP.ThermalEnergy(), sw_kJ, lw_kJ,
-            H2Oarea_m2, rtnWP.m_volume_m3, rtnWP.m_temp_degC);
-         Report::LogMsg(msg);
-         ASSERT(0);
-      }
-
-   pSubreach->m_evap_m3 = evap_m3;
-   pSubreach->m_evap_kJ = evap_m3 * DENSITY_H2O * pReach->LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1000.;
-   pSubreach->m_sw_kJ = rad_sw_net_W_m2 * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
-   pSubreach->m_lw_kJ = net_lw_out_W_m2 * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
-   reach_net_lw_kJ += pSubreach->m_lw_kJ;
-   total_surface_in_subreaches_m2 += pSubreach->m_subreach_surf_area_m2;
-   lw_x_surface_accum += net_lw_out_W_m2 * pSubreach->m_subreach_surf_area_m2;
-   sw_x_surface_accum += (pSubreach->m_sw_kJ / SEC_PER_DAY) * 1000;
-   pReach->m_reach_evap_m3 += pSubreach->m_evap_m3;
-   pReach->m_reach_evap_kJ += pSubreach->m_evap_kJ;
-   */
    rEvap_m3 = evap_m3;
    rEvap_kJ = evap_kJ;
    rSW_kJ = sw_kJ;
@@ -576,8 +521,8 @@ on return
 } // end of ApplyEnergyFluxes()
 
 
-bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
-   {
+bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
+{
    ASSERT(pFlowContext->svCount <= 0);
 
    pFlowContext->Reset();
@@ -586,15 +531,15 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
 
    clock_t start = clock();
 
-   for ( int i=0; i < reachCount; i++ )
-      {
-      Reach *pReach = gpModel->GetReach( i );     // Note: these are guaranteed to be non-phantom
+   for (int i = 0; i < reachCount; i++)
+   {
+      Reach* pReach = gpModel->GetReach(i);     // Note: these are guaranteed to be non-phantom
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
       Reach* pUpstreamLeftReach = gpModel->GetReachFromNode(pReach->m_pLeft);
       if (pUpstreamLeftReach != NULL)
       {
          int final_subnode = pUpstreamLeftReach->GetSubnodeCount() - 1;
-         ReachSubnode * pNode = (ReachSubnode*)pUpstreamLeftReach->m_subnodeArray[final_subnode];
+         ReachSubnode* pNode = (ReachSubnode*)pUpstreamLeftReach->m_subnodeArray[final_subnode];
          int upstream_discharge_doy = pNode->m_dischargeDOY;
          ASSERT(upstream_discharge_doy == pFlowContext->dayOfYear);
          Reach* pUpstreamRightReach = gpModel->GetReachFromNode(pReach->m_pRight);
@@ -637,69 +582,22 @@ bool ReachRouting::SolveReachKinematicWave( FlowContext *pFlowContext )
       double manning_depth_x_length_accum = 0;
       double volume_accum_m3 = 0.;
       for (int l = 0; l < pReach->GetSubnodeCount(); l++) // ??? ApplyEnergyFluxes(pReach, l)
-         {
+      {
          pFlowContext->pReach = pReach;
          ReachSubnode* pSubreach = pReach->GetReachSubnode(l);
 
          double vts_frac = pReach->GetSubreachViewToSky_frac(l);
 
-
-   /*x
-before calling
-      double lateralInflow = GetLateralInflow(pReach);
-   if (lateralInflow != lateralInflow)
-   {
-      CString msg;
-      msg.Format("*** SolveReachKinematicWave(): i = %d, l = %d, lateralInflow = %f", i, l, lateralInflow);
-      Report::LogMsg(msg);
-      msg.Format("Setting lateralInflow to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
-      lateralInflow = NOMINAL_LOW_FLOW_CMS;
-      ASSERT(0);
-   }
-   PutLateralWP(pReach, l, lateralInflow);
-x*/
-/*
-         ApplyEnergyFluxes(pFlowContext, pSubreach->m_waterParcel, pSubreach->m_subreach_surf_area_m2, pReach, 
-            rad_sw_unshaded_W_m2, pSubreach->m_waterParcel.WaterTemperature(), temp_air_degC, vts_frac, cloudiness_frac, reach_ws_m_sec, sphumidity, rh_pct,
-            pSubreach->m_evap_m3, pSubreach->m_evap_kJ, pSubreach->m_sw_kJ, pSubreach->m_lw_kJ);
-*/
-/*x
-on return
-      if (rtnWP.m_temp_degC >= 50.)
-      {
-         CString msg;
-         msg.Format("ApplyEnergyFluxes() temperature >= 50 degC in reach %d: orig kJ = %f,\n"
-            "sw_kJ = %f, lw_kJ = %f\n"
-            "areaH2O_m2 = %f, rtnWP.m_volume_m3 = %f, rtnWP.temp_degC = %f",
-            pReach->m_reachID, origWP.ThermalEnergy(), sw_kJ, lw_kJ,
-            H2Oarea_m2, rtnWP.m_volume_m3, rtnWP.m_temp_degC);
-         Report::LogMsg(msg);
-         ASSERT(0);
-      }
-
-   pSubreach->m_evap_m3 = evap_m3;
-   pSubreach->m_evap_kJ = evap_m3 * DENSITY_H2O * pReach->LatentHeatOfVaporization_MJ_kg(temp_H2O_degC) * 1000.;
-   pSubreach->m_sw_kJ = rad_sw_net_W_m2 * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
-   pSubreach->m_lw_kJ = net_lw_out_W_m2 * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY / 1000;
-   reach_net_lw_kJ += pSubreach->m_lw_kJ;
-   total_surface_in_subreaches_m2 += pSubreach->m_subreach_surf_area_m2;
-   lw_x_surface_accum += net_lw_out_W_m2 * pSubreach->m_subreach_surf_area_m2;
-   sw_x_surface_accum += (pSubreach->m_sw_kJ / SEC_PER_DAY) * 1000;
-   pReach->m_reach_evap_m3 += pSubreach->m_evap_m3;
-   pReach->m_reach_evap_kJ += pSubreach->m_evap_kJ;
-x*/
-
-
          double orig_m_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
 
          double rad_sw_net_W_m2 = rad_sw_unshaded_W_m2; // ??? s/b pReach->GetSegmentShade_a_lator(segment, rad_sw_unshaded_W_m2);
          double temp_H2O_degC = pSubreach->m_waterParcel.m_temp_degC;
-        double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac);
+         double net_lw_out_W_m2 = NetLWout_W_m2(temp_air_degC, cloudiness_frac, temp_H2O_degC, rh_pct, vts_frac);
 
-         // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
-         // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,
-         // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
-         // aerodynamic evaporation is a function of the windspeed.
+          // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
+          // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,
+          // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
+          // aerodynamic evaporation is a function of the windspeed.
          double evap_m_s = pReach->Evap_m_s(l, rad_sw_net_W_m2, net_lw_out_W_m2, temp_air_degC, reach_ws_m_sec, sphumidity);
          double evap_m3 = evap_m_s * pSubreach->m_subreach_surf_area_m2 * SEC_PER_DAY;
          pSubreach->m_evap_m3 = evap_m3;
@@ -748,7 +646,7 @@ x*/
                double max_heat_loss_kJ = WaterParcel::ThermalEnergy(pSubreach->m_waterParcel.m_volume_m3, temp_diff);
                double heat_loss_kJ = min(max_heat_loss_kJ, -subreach_net_rad_kJ);
                double thermal_energy_kJ = pSubreach->m_waterParcel.ThermalEnergy() - heat_loss_kJ;
-               pSubreach->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pSubreach->m_waterParcel.m_volume_m3, thermal_energy_kJ);               
+               pSubreach->m_waterParcel.m_temp_degC = WaterParcel::WaterTemperature(pSubreach->m_waterParcel.m_volume_m3, thermal_energy_kJ);
                ASSERT(pSubreach->m_waterParcel.m_temp_degC >= 0);
             }
          }
@@ -770,7 +668,7 @@ x*/
          }
          ASSERT(pSubreach->m_waterParcel.m_temp_degC >= 0);
 
-         WaterParcel outflowWP(0,0);
+         WaterParcel outflowWP(0, 0);
          outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);
          ASSERT(pSubreach->m_dischargeDOY == (pFlowContext->dayOfYear - 1));
          pSubreach->m_dischargeDOY = pFlowContext->dayOfYear;
@@ -785,15 +683,15 @@ x*/
          volume_accum_m3 += pSubreach->m_waterParcel.m_volume_m3;
 
          if (pSubreach->m_discharge < 0 || pSubreach->m_discharge > 1.e10f || pSubreach->m_discharge != pSubreach->m_discharge)
-            {
+         {
             CString msg;
             msg.Format("*** SolveReachKinematicWave(): COMID = %d, i = %d, l = %d, m_discharge = %f",
                pReach->m_reachID, i, l, pSubreach->m_discharge);
             Report::LogMsg(msg);
             msg.Format("Setting pSubreach->m_discharge to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
             pSubreach->m_discharge = NOMINAL_LOW_FLOW_CMS;
-            }
-         } // end of loop through subreaches
+         }
+      } // end of loop through subreaches
       pReach->m_reach_volume_m3 = volume_accum_m3;
       pReach->m_rad_lw_kJ = reach_net_lw_kJ;
       double reach_lw_W_m2 = lw_x_surface_accum / total_surface_in_subreaches_m2;
@@ -809,15 +707,158 @@ x*/
       double turnover = (pReach->GetDischarge() * SEC_PER_DAY) / volume_accum_m3;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachTURNOVER, turnover);
 
-      } // end of loop through reaches
+   } // end of loop through reaches
 
    clock_t finish = clock();
-   double duration = (float)(finish - start) / CLOCKS_PER_SEC;   
-   gpModel->m_reachFluxFnRunTime += (float) duration;   
+   double duration = (float)(finish - start) / CLOCKS_PER_SEC;
+   gpModel->m_reachFluxFnRunTime += (float)duration;
 
    return true;
-   } // end of SolveReachKinematicWave()
+} // end of SolveReachKinematicWave()
 
+
+/*
+bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
+{
+   ASSERT(pFlowContext->svCount <= 0);
+   pFlowContext->Reset();
+   int reachCount = gpModel->GetReachCount();
+   clock_t start = clock();
+
+   for (int i = 0; i < reachCount; i++)
+   {
+      Reach* pReach = gpModel->GetReach(i);     // Note: these are guaranteed to be non-phantom
+      WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
+      Reach* pUpstreamLeftReach = gpModel->GetReachFromNode(pReach->m_pLeft);
+      if (pUpstreamLeftReach != NULL)
+      {
+         int final_subnode = pUpstreamLeftReach->GetSubnodeCount() - 1;
+         ReachSubnode* pNode = (ReachSubnode*)pUpstreamLeftReach->m_subnodeArray[final_subnode];
+         int upstream_discharge_doy = pNode->m_dischargeDOY;
+         ASSERT(upstream_discharge_doy == pFlowContext->dayOfYear);
+         Reach* pUpstreamRightReach = gpModel->GetReachFromNode(pReach->m_pRight);
+         if (pUpstreamRightReach != NULL)
+         {
+            int final_subnode = pUpstreamRightReach->GetSubnodeCount() - 1;
+            ReachSubnode* pNode = (ReachSubnode*)pUpstreamRightReach->m_subnodeArray[final_subnode];
+            int upstream_discharge_doy = pNode->m_dischargeDOY;
+            ASSERT(upstream_discharge_doy == pFlowContext->dayOfYear);
+         }
+      }
+
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachQ_UPSTREAM, upstream_inflowWP.m_volume_m3 / SEC_PER_DAY);
+
+      int num_subreaches = pReach->GetSubnodeCount();
+      float temp_air_degC = gpModel->GetTodaysReachTEMP_AIR(pReach);
+      float tmax_air_degC = gpModel->GetTodaysReachTMAX_AIR(pReach);
+      float reach_precip_mm = gpModel->GetTodaysReachPRECIP(pReach);
+      float reach_ws_m_sec = gpModel->GetTodaysReachWINDSPEED(pReach);
+      float rad_sw_unshaded_W_m2 = gpModel->GetTodaysReachRAD_SW(pReach); // Shortwave from the climate data takes into account cloudiness but not shading.
+
+      // ??? we need a better estimate of cloudiness than this
+      double frac_of_max_sw = rad_sw_unshaded_W_m2 / max_sw_W_m2[pFlowContext->dayOfYear];
+      if (frac_of_max_sw > 1.) frac_of_max_sw = 1.;
+      if (frac_of_max_sw < 0.) frac_of_max_sw = 0.;
+      double cloudiness_tuning_knob = 1.0;
+      double cloudiness_frac = cloudiness_tuning_knob * (1. - frac_of_max_sw);
+
+      float sphumidity = gpModel->GetTodaysReachSPHUMIDITY(pReach);
+      double z_mean_m; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachZ_MEAN, z_mean_m);
+      double ea, vpd;
+      double rh_pct = 100 * ETEquation::CalculateRelHumidity(sphumidity, temp_air_degC, tmax_air_degC, (float)z_mean_m, ea, vpd);
+      double reach_net_lw_kJ = 0;
+      double total_surface_in_subreaches_m2 = 0;
+      double lw_x_surface_accum_W = 0;
+      double sw_x_surface_accum_W = 0;
+      pReach->m_reach_evap_m3 = 0.;
+      pReach->m_reach_evap_kJ = 0.;
+      double width_x_length_accum = 0.;
+      double manning_depth_x_length_accum = 0;
+      double volume_accum_m3 = 0.;
+      for (int l = 0; l < pReach->GetSubnodeCount(); l++) // ??? ApplyEnergyFluxes(pReach, l)
+      {
+         pFlowContext->pReach = pReach;
+         ReachSubnode* pSubreach = pReach->GetReachSubnode(l);
+         ASSERT(pSubreach->m_dischargeDOY == (pFlowContext->dayOfYear - 1));
+
+         double orig_m_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
+         double vts_frac = pReach->GetSubreachViewToSky_frac(l);
+
+//x
+         double lateralInflow = GetLateralInflow(pReach);
+         ASSERT(!isnan(lateralInflow));
+         PutLateralWP(pReach, l, lateralInflow);
+
+         double evap_m3, evap_kJ, sw_kJ, lw_kJ;
+         WaterParcel adjustedWP = ApplyEnergyFluxes(pSubreach->m_waterParcel, pSubreach->m_subreach_surf_area_m2, rad_sw_unshaded_W_m2, 
+            pSubreach->m_waterParcel.WaterTemperature(), temp_air_degC, vts_frac, cloudiness_frac, reach_ws_m_sec, sphumidity, rh_pct,
+            evap_m3, evap_kJ, sw_kJ, lw_kJ);
+         ASSERT(adjustedWP.WaterTemperature() < 50.);
+         pSubreach->m_evap_m3 = evap_m3;
+         pSubreach->m_evap_kJ = evap_kJ;
+         pSubreach->m_sw_kJ = sw_kJ;
+         pSubreach->m_lw_kJ = lw_kJ;
+
+         double in_net_sw_W_m2 = (pSubreach->m_sw_kJ / SEC_PER_DAY) * pSubreach->m_subreach_surf_area_m2;
+         sw_x_surface_accum_W += in_net_sw_W_m2;
+
+         double out_net_lw_W_m2 = (pSubreach->m_lw_kJ / SEC_PER_DAY) * pSubreach->m_subreach_surf_area_m2;
+         lw_x_surface_accum_W += out_net_lw_W_m2;
+         reach_net_lw_kJ += pSubreach->m_lw_kJ;
+
+         total_surface_in_subreaches_m2 += pSubreach->m_subreach_surf_area_m2;
+         pReach->m_reach_evap_m3 += pSubreach->m_evap_m3;
+         pReach->m_reach_evap_kJ += pSubreach->m_evap_kJ;
+//x
+
+         WaterParcel outflowWP(0, 0);
+         outflowWP = ApplyReachOutflowWP(pReach, l, pFlowContext->timeStep); // s/b DailySubreachFlow(pReach, l, subreach_evapWP, subreach_precipWP);
+         ASSERT(pSubreach->m_dischargeDOY == (pFlowContext->dayOfYear - 1));
+         pSubreach->m_dischargeDOY = pFlowContext->dayOfYear;
+
+         ASSERT(pSubreach->m_waterParcel.m_volume_m3 > 0);
+
+         pSubreach->m_discharge = outflowWP.m_volume_m3 / SEC_PER_DAY;  // convert units to m3/s
+         pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
+         pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, pReach->m_wdRatio);
+         width_x_length_accum += pSubreach->m_subreach_width_m * pSubreach->m_subreach_length_m;
+         manning_depth_x_length_accum += pSubreach->m_manning_depth_m * pSubreach->m_subreach_length_m;
+         volume_accum_m3 += pSubreach->m_waterParcel.m_volume_m3;
+
+         if (pSubreach->m_discharge < 0 || pSubreach->m_discharge > 1.e10f || pSubreach->m_discharge != pSubreach->m_discharge)
+         {
+            CString msg;
+            msg.Format("*** SolveReachKinematicWave(): COMID = %d, i = %d, l = %d, m_discharge = %f",
+               pReach->m_reachID, i, l, pSubreach->m_discharge);
+            Report::LogMsg(msg);
+            msg.Format("Setting pSubreach->m_discharge to %f cms and continuing.", NOMINAL_LOW_FLOW_CMS); Report::LogMsg(msg);
+            pSubreach->m_discharge = NOMINAL_LOW_FLOW_CMS;
+         }
+      } // end of loop through subreaches
+      pReach->m_reach_volume_m3 = volume_accum_m3;
+      pReach->m_rad_lw_kJ = reach_net_lw_kJ;
+      double reach_lw_W_m2 = lw_x_surface_accum_W / total_surface_in_subreaches_m2;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
+      double reach_sw_W_m2 = sw_x_surface_accum_W / total_surface_in_subreaches_m2;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_IN, reach_sw_W_m2);
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_subreaches_m2);
+
+      double reach_width_m = width_x_length_accum / pReach->m_length;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachWIDTH, reach_width_m);
+      double reach_manning_depth_m = manning_depth_x_length_accum / pReach->m_length;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachDEPTHMANNG, reach_manning_depth_m);
+      double turnover = (pReach->GetDischarge() * SEC_PER_DAY) / volume_accum_m3;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachTURNOVER, turnover);
+
+   } // end of loop through reaches
+
+   clock_t finish = clock();
+   double duration = (float)(finish - start) / CLOCKS_PER_SEC;
+   gpModel->m_reachFluxFnRunTime += (float)duration;
+
+   return true;
+} // end of SolveReachKinematicWave()
+*/
 
 double ReachRouting::NetLWout_W_m2(double tempAir_degC, double cL, double tempH2O_degC, double RH_pct, double theta_vts)
 // Eq. numbers are from sec 2.2 (p.51) of Boyd & Kasper HeatSource 7.0 document
