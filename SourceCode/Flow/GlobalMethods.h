@@ -198,7 +198,6 @@ protected:
    WaterParcel ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double unshadedSW_W_m2,
       double H2Otemp_degC, double airTemp_degC, double VTSfrac, double cloudinessFrac, double windspeed_m_sec, double spHumidity, double RHpct,
       double& rEvap_m3, double& rEvap_kJ, double& rSW_kJ, double& rLW_kj);
-   //x   bool SolveReach2KW(FlowContext*);
 
    double GetLateralInflow( Reach *pReach );
 
@@ -217,8 +216,6 @@ protected:
 
    double GetLateralSVInflow( Reach *pReach, int sv );
    double GetReachSVOutflow( ReachNode *pReachNode, int sv );   // recursive!!! for pahntom nodes
-//x   double GetReachSVInflow( Reach *pReach, int subNode, int sv );
-
    static void GetReachDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra );
 
    double NetLWout_W_m2(double tempAir_degC, double cL, double tempH2O_degC, double RH_pct, double theta_vts); // net longwave radiation out of the reach
