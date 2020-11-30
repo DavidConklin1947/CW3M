@@ -459,6 +459,17 @@ float max_sw_W_m2[366] = // Represents an estimate of clear sky shortwave in the
 81.7f
 };
 
+double ReachRouting::Cloudiness(double SWunshaded_W_m2, int dayOfYear)
+// ??? we need a better estimate of cloudiness than this
+{
+   double frac_of_max_sw = SWunshaded_W_m2 / max_sw_W_m2[dayOfYear];
+   if (frac_of_max_sw > 1.) frac_of_max_sw = 1.;
+   if (frac_of_max_sw < 0.) frac_of_max_sw = 0.;
+   double cloudiness_tuning_knob = 1.0;
+   double cloudiness_frac = cloudiness_tuning_knob * (1. - frac_of_max_sw);
+   return(cloudiness_frac);
+} // end of Cloudiness()
+
 
 WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double unshadedSW_W_m2, 
    double H2Otemp_degC, double airTemp_degC, double VTSfrac, double cloudinessFrac, double windspeed_m_sec, double spHumidity, double RHpct, 
@@ -587,7 +598,6 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
          double orig_m_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
          double vts_frac = pReach->GetSubreachViewToSky_frac(l);
 
-//x
          double lateralInflow = GetLateralInflow(pReach);
          ASSERT(!isnan(lateralInflow));
          PutLateralWP(pReach, l, lateralInflow);
@@ -1189,3 +1199,4 @@ ReachRouting *ReachRouting::LoadXml( TiXmlElement *pXmlReachRouting, LPCTSTR fil
    return pRouting;
    }
    
+

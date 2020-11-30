@@ -188,6 +188,10 @@ public:
    virtual bool SetMethod( GM_METHOD method ) { if ( method != GM_EULER && method != GM_RK4 && method != GM_RKF && method != GM_KINEMATIC && method != GM_EXTERNAL ) return false;  m_method = method; return true; }
 
    static ReachRouting* LoadXml( TiXmlElement *pXmlReachRouting, LPCTSTR filename );
+   static double Cloudiness(double SWunshaded_W_m2, int dayOfYear);
+   static WaterParcel ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double unshadedSW_W_m2,
+      double H2Otemp_degC, double airTemp_degC, double VTSfrac, double cloudinessFrac, double windspeed_m_sec, double spHumidity, double RHpct,
+      double& rEvap_m3, double& rEvap_kJ, double& rSW_kJ, double& rLW_kj);
 
 public:
    float m_reachTimeStep;
@@ -195,9 +199,6 @@ public:
 protected:
    void MoveWP(double volume_m3, WaterParcel* pFromWP, WaterParcel* pToWP);
    bool  SolveReachKinematicWave( FlowContext* );
-   WaterParcel ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double unshadedSW_W_m2,
-      double H2Otemp_degC, double airTemp_degC, double VTSfrac, double cloudinessFrac, double windspeed_m_sec, double spHumidity, double RHpct,
-      double& rEvap_m3, double& rEvap_kJ, double& rSW_kJ, double& rLW_kj);
 
    double GetLateralInflow( Reach *pReach );
 
@@ -218,7 +219,7 @@ protected:
    double GetReachSVOutflow( ReachNode *pReachNode, int sv );   // recursive!!! for pahntom nodes
    static void GetReachDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra );
 
-   double NetLWout_W_m2(double tempAir_degC, double cL, double tempH2O_degC, double RH_pct, double theta_vts); // net longwave radiation out of the reach
+   static double NetLWout_W_m2(double tempAir_degC, double cL, double tempH2O_degC, double RH_pct, double theta_vts); // net longwave radiation out of the reach
 }; // end of class ReachRouting
 
 

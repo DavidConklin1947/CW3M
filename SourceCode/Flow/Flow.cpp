@@ -1432,6 +1432,16 @@ float Reservoir::GetPoolElevationFromVolume()
    }
 
 
+float Reservoir::GetPoolSurfaceAreaFromVolume_ha() // Returns reservoir water surface area in hectares..
+{
+   if (m_pAreaVolCurveTable == NULL) return (0);
+
+   float volume = (float)m_volume;
+   float pool_area_m2 = m_pAreaVolCurveTable->IGet(volume, 1, 2, IM_LINEAR);  
+   return(pool_area_m2);
+} // end of GetPoolSurfaceAreaFromVolume()
+
+
 // get pool volume from elevation - units returned are meters cubed
 float Reservoir::GetPoolVolumeFromElevation(float elevation)
    {
@@ -1496,6 +1506,28 @@ WaterParcel Reservoir::GetResOutflowWP(Reservoir* pRes, int doy)
    ASSERT(pRes != NULL);
 
    pRes->m_resWP.MixIn(pRes->m_inflowWP);
+   float h2o_area_m2 = GetPoolSurfaceAreaFromVolume_ha() * M2_PER_HA;
+
+   Reach* pReach = pRes->m_pReach;
+   float temp_air_degC = gpModel->GetTodaysReachTEMP_AIR(pReach);
+   float tmax_air_degC = gpModel->GetTodaysReachTMAX_AIR(pReach);
+   float reach_precip_mm = gpModel->GetTodaysReachPRECIP(pReach);
+   float reach_ws_m_s = gpModel->GetTodaysReachWINDSPEED(pReach);
+   float sw_unshaded_W_m2 = gpModel->GetTodaysReachRAD_SW(pReach); // Shortwave from the climate data takes into account cloudiness but not shading.
+
+   double cloudiness_frac = ReachRouting::Cloudiness(sw_unshaded_W_m2, gpModel->m_flowContext.dayOfYear);
+   float sphumidity = gpModel->GetTodaysReachSPHUMIDITY(pReach);
+   double vts_frac = pReach->GetSubreachViewToSky_frac(0);
+   double z_mean_m; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachZ_MEAN, z_mean_m);
+   double ea, vpd;
+   double rh_pct = 100 * ETEquation::CalculateRelHumidity(sphumidity, temp_air_degC, tmax_air_degC, (float)z_mean_m, ea, vpd);
+
+   double evap_m3, evap_kJ, sw_kJ, lw_kJ;
+   WaterParcel adjustedWP = ReachRouting::ApplyEnergyFluxes(pRes->m_resWP, h2o_area_m2, sw_unshaded_W_m2,
+         pRes->m_resWP.WaterTemperature(), temp_air_degC, vts_frac, cloudiness_frac, reach_ws_m_s, sphumidity, rh_pct,
+         evap_m3, evap_kJ, sw_kJ, lw_kJ);
+   pRes->m_resWP = adjustedWP;
+   pRes->m_volume = pRes->m_resWP.m_volume_m3;
 
    double outflow = 0.0;
 
@@ -1601,7 +1633,7 @@ WaterParcel Reservoir::GetResOutflowWP(Reservoir* pRes, int doy)
       else
       {
          CString msg;
-         msg.Format("*** GetResOutflow(): We should never get here. doy = %d, pRes->m_id = %d", doy, pRes->m_id);
+         msg.Format("*** GetResOutflowWP(): We should never get here. doy = %d, pRes->m_id = %d", doy, pRes->m_id);
          Report::LogMsg(msg);
       }
 
@@ -5771,8 +5803,8 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       pRes->m_inflowWP = inflowWP;
           
       pRes->m_outflowWP = pRes->GetResOutflowWP(pRes, dayOfYear);
-      ASSERT(outflow_cms >= 0);
       pRes->m_outflow = pRes->m_outflowWP.m_volume_m3;    // m3 
+      ASSERT(pRes->m_outflow >= 0);
 
       // Store today's hydropower generation (megawatts) for this reservoir into the reach attribute HYDRO_MW for the reach which receives the reservoir outflow.
      int reach_ndx = m_pReachLayer->FindIndex(m_colStreamCOMID, pReach->m_reachID, 0);

@@ -1083,6 +1083,7 @@ protected:
    void CollectData();
    
    float GetPoolElevationFromVolume();
+   float GetPoolSurfaceAreaFromVolume_ha();
    float GetPoolVolumeFromElevation(float elevation);
    float GetTargetElevationFromRuleCurve( int dayOfYear );
    float GetBufferZoneElevation( int dayOfYear );
