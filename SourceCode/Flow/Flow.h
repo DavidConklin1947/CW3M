@@ -855,6 +855,7 @@ public:
    double GetUpstreamInflow();
    bool GetUpstreamInflow(double &QLeft, double &QRight);
    double SubreachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from this subreach.
+   double GetSubreachShade_a_lator_W_m2(int subreach_ndx, double SW_unshaded_W_m2);
    double GetSubreachViewToSky_frac(int subreachNdx);
    double GetSubreachArea_m2(int subreachNdx);
    float GetCatchmentArea( void );
@@ -1040,6 +1041,7 @@ public:
    int     m_filled;  // -1 means never reached, updated annually
 
    float m_probMaintenance;
+   float m_resSWmult; // tuning knob for average topographic shading
 
    /////////////////////Read in from ResSIM output files for model comparison.  mmc 5/22/2013///////////
    float m_resSimInflow;

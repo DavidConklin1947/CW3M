@@ -189,7 +189,7 @@ public:
 
    static ReachRouting* LoadXml( TiXmlElement *pXmlReachRouting, LPCTSTR filename );
    static double Cloudiness(double SWunshaded_W_m2, int dayOfYear);
-   static WaterParcel ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double unshadedSW_W_m2,
+   static WaterParcel ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double netSW_W_m2,
       double H2Otemp_degC, double airTemp_degC, double VTSfrac, double cloudinessFrac, double windspeed_m_sec, double spHumidity, double RHpct,
       double& rEvap_m3, double& rEvap_kJ, double& rSW_kJ, double& rLW_kj);
 

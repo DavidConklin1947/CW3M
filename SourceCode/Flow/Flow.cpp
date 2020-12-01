@@ -981,6 +981,14 @@ double Reach::LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC) // returns MJ
 } // end of LatentHeadOfEvaporation()
 
 
+double Reach::GetSubreachShade_a_lator_W_m2(int subreach_ndx, double SW_unshaded_W_m2)
+{
+   double shade_a_lator_guess = 1.;
+   double sw_shaded_W_m2 = shade_a_lator_guess * SW_unshaded_W_m2;
+   return(sw_shaded_W_m2);
+} // end of GetSubreachShade_a_lator_W_m2()
+
+
 double Reach::GetSubreachViewToSky_frac(int subreachNdx)
 {
    double vts_frac = 0.9;
@@ -1514,6 +1522,7 @@ WaterParcel Reservoir::GetResOutflowWP(Reservoir* pRes, int doy)
    float reach_precip_mm = gpModel->GetTodaysReachPRECIP(pReach);
    float reach_ws_m_s = gpModel->GetTodaysReachWINDSPEED(pReach);
    float sw_unshaded_W_m2 = gpModel->GetTodaysReachRAD_SW(pReach); // Shortwave from the climate data takes into account cloudiness but not shading.
+   double rad_sw_net_W_m2 = sw_unshaded_W_m2 * pRes->m_resSWmult;
 
    double cloudiness_frac = ReachRouting::Cloudiness(sw_unshaded_W_m2, gpModel->m_flowContext.dayOfYear);
    float sphumidity = gpModel->GetTodaysReachSPHUMIDITY(pReach);
@@ -1523,7 +1532,7 @@ WaterParcel Reservoir::GetResOutflowWP(Reservoir* pRes, int doy)
    double rh_pct = 100 * ETEquation::CalculateRelHumidity(sphumidity, temp_air_degC, tmax_air_degC, (float)z_mean_m, ea, vpd);
 
    double evap_m3, evap_kJ, sw_kJ, lw_kJ;
-   WaterParcel adjustedWP = ReachRouting::ApplyEnergyFluxes(pRes->m_resWP, h2o_area_m2, sw_unshaded_W_m2,
+   WaterParcel adjustedWP = ReachRouting::ApplyEnergyFluxes(pRes->m_resWP, h2o_area_m2, rad_sw_net_W_m2,
          pRes->m_resWP.WaterTemperature(), temp_air_degC, vts_frac, cloudiness_frac, reach_ws_m_s, sphumidity, rh_pct,
          evap_m3, evap_kJ, sw_kJ, lw_kJ);
    pRes->m_resWP = adjustedWP;
@@ -10857,6 +10866,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
             LPCSTR reservoirType = NULL;
            
             float volume=0.0f;
+            pRes->m_resSWmult = 1.f;
             XML_ATTR resAttrs[] = {
                // attr                  type          address                           isReq  checkCol
                { "id",               TYPE_INT,      &(pRes->m_id),                      true,   0 },
@@ -10889,7 +10899,8 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                { "inactive_elev",    TYPE_FLOAT,    &(pRes->m_inactive_elev),           true,    0 },
                { "reservoir_type",   TYPE_STRING,   &(reservoirType),                   true,    0 },
                { "release_freq",       TYPE_INT,      &(pRes->m_releaseFreq),           false,    0 },
-               { "probabilityOfMaintenance", TYPE_FLOAT, &(pRes->m_probMaintenance),    false, 0 },              
+               { "probabilityOfMaintenance", TYPE_FLOAT, &(pRes->m_probMaintenance),    false, 0 },
+               { "solar_radiation_multiplier", TYPE_FLOAT, &(pRes->m_resSWmult),    false, 0 },
                { NULL,               TYPE_NULL,     NULL,                               false,   0 } };
 
             
@@ -10902,6 +10913,15 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                delete pRes;
                pRes = NULL;
                }
+
+            if (pRes->m_resSWmult <= 0 || pRes->m_resSWmult > 1)
+            {
+               CString msg;
+               msg.Format("Flow: solar radiation multiplier for reservoir %s is <= 0 or > 1. Setting it to 1.0 now.",
+                  pRes->m_name);
+               Report::WarningMsg(msg);
+               pRes->m_resSWmult = 1.f;
+            }
            
             switch (reservoirType[0])
             {

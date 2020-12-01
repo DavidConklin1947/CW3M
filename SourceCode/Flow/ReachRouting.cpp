@@ -471,13 +471,13 @@ double ReachRouting::Cloudiness(double SWunshaded_W_m2, int dayOfYear)
 } // end of Cloudiness()
 
 
-WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double unshadedSW_W_m2, 
+WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m2, double netSW_W_m2, 
    double H2Otemp_degC, double airTemp_degC, double VTSfrac, double cloudinessFrac, double windspeed_m_sec, double spHumidity, double RHpct, 
    double & rEvap_m3, double & rEvap_kJ, double & rSW_kJ, double & rLW_kj)
 {
    WaterParcel rtnWP = origWP;
 
-   double rad_sw_net_W_m2 = unshadedSW_W_m2; // ??? s/b pReach->GetSegmentShade_a_lator(segment, rad_sw_unshaded_W_m2);
+   double rad_sw_net_W_m2 = netSW_W_m2; 
    double net_lw_out_W_m2 = NetLWout_W_m2(airTemp_degC, cloudinessFrac, H2Otemp_degC, RHpct, VTSfrac);
 
    // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
@@ -516,7 +516,7 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
       }
    }
    else
-   {
+   { // The water is gaining energy from the atmosphere.
       double thermal_energy_kJ = rtnWP.ThermalEnergy() + net_rad_kJ;
       rtnWP.m_temp_degC = WaterParcel::WaterTemperature(rtnWP.m_volume_m3, thermal_energy_kJ);
       ASSERT(rtnWP.m_temp_degC < 50.);
@@ -589,7 +589,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       double width_x_length_accum = 0.;
       double manning_depth_x_length_accum = 0;
       double volume_accum_m3 = 0.;
-      for (int l = 0; l < pReach->GetSubnodeCount(); l++) // ??? ApplyEnergyFluxes(pReach, l)
+      for (int l = 0; l < pReach->GetSubnodeCount(); l++) 
       {
          pFlowContext->pReach = pReach;
          ReachSubnode* pSubreach = pReach->GetReachSubnode(l);
@@ -597,13 +597,14 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
 
          double orig_m_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
          double vts_frac = pReach->GetSubreachViewToSky_frac(l);
+         double rad_sw_net_W_m2 = pReach->GetSubreachShade_a_lator_W_m2(l, rad_sw_unshaded_W_m2);
 
          double lateralInflow = GetLateralInflow(pReach);
          ASSERT(!isnan(lateralInflow));
          PutLateralWP(pReach, l, lateralInflow);
 
          double evap_m3, evap_kJ, sw_kJ, lw_kJ;
-         WaterParcel adjustedWP = ApplyEnergyFluxes(pSubreach->m_waterParcel, pSubreach->m_subreach_surf_area_m2, rad_sw_unshaded_W_m2, 
+         WaterParcel adjustedWP = ApplyEnergyFluxes(pSubreach->m_waterParcel, pSubreach->m_subreach_surf_area_m2, rad_sw_net_W_m2, 
             pSubreach->m_waterParcel.WaterTemperature(), temp_air_degC, vts_frac, cloudiness_frac, reach_ws_m_sec, sphumidity, rh_pct,
             evap_m3, evap_kJ, sw_kJ, lw_kJ);
          ASSERT(adjustedWP.WaterTemperature() < 50.);
