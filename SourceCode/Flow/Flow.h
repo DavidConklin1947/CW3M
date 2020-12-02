@@ -1783,6 +1783,7 @@ public:
    int m_colReachIN_RUNOFF;
    int m_colReachQ_UPSTREAM;
    int m_colReachQ_MIN;
+   int m_colReachHBVCALIB;
 
    int m_colARIDITYNDX;
    int m_colHRUPercentIrrigated;

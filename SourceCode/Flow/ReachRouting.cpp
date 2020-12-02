@@ -542,6 +542,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
    for (int i = 0; i < reachCount; i++)
    {
       Reach* pReach = gpModel->GetReach(i);     // Note: these are guaranteed to be non-phantom
+      int hbvcalib; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalib);
+
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
       Reach* pUpstreamLeftReach = gpModel->GetReachFromNode(pReach->m_pLeft);
       if (pUpstreamLeftReach != NULL)
@@ -589,6 +591,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       double width_x_length_accum = 0.;
       double manning_depth_x_length_accum = 0;
       double volume_accum_m3 = 0.;
+      double temp_h2o_air_slope = 0;
+      double temp_h2o_air_intercept = 0;
       for (int l = 0; l < pReach->GetSubnodeCount(); l++) 
       {
          pFlowContext->pReach = pReach;
@@ -599,9 +603,23 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
          double vts_frac = pReach->GetSubreachViewToSky_frac(l);
          double rad_sw_net_W_m2 = pReach->GetSubreachShade_a_lator_W_m2(l, rad_sw_unshaded_W_m2);
 
-         double lateralInflow = GetLateralInflow(pReach);
-         ASSERT(!isnan(lateralInflow));
-         PutLateralWP(pReach, l, lateralInflow);
+         double lateralInflow_m3 = GetLateralInflow(pReach);
+         ASSERT(!isnan(lateralInflow_m3));
+         WaterParcel lateralInflowWP(0, 0);
+         if (lateralInflow_m3 > 0)
+         { // The net lateral flow is into the reach. Assign a temperature to it.
+            lateralInflowWP.m_volume_m3 = lateralInflow_m3;
+            double temp_h2o_degC = DEFAULT_SOIL_H2O_TEMP_DEGC;
+            if (hbvcalib == 10)
+            { // BLU drainage
+               temp_h2o_air_slope = 0.5858;
+               temp_h2o_air_intercept = 3.2949;
+               temp_h2o_degC = temp_h2o_air_slope * temp_air_degC + temp_h2o_air_intercept;
+            }
+            lateralInflowWP.m_temp_degC = temp_h2o_degC;
+            PutLateralWP(pReach, l, lateralInflowWP, 0);
+         }
+         else PutLateralWP(pReach, l, lateralInflow_m3); // The net lateral inflow is <= 0 representing water leaving the reach.
 
          double evap_m3, evap_kJ, sw_kJ, lw_kJ;
          WaterParcel adjustedWP = ApplyEnergyFluxes(pSubreach->m_waterParcel, pSubreach->m_subreach_surf_area_m2, rad_sw_net_W_m2, 
@@ -743,7 +761,19 @@ void ReachRouting::PutLateralWP(Reach * pReach, int subreachNdx, double daily_ne
 
    pNode->m_runoffWP = WaterParcel(subreach_volume_in_m3, DEFAULT_SOIL_H2O_TEMP_DEGC); // water parcel running off the soil into the subreach
    pNode->m_withdrawalWP = WaterParcel(subreach_volume_out_m3, pNode->m_waterParcel.WaterTemperature()); // water parcel being withdrawn from the subreach (e.g. for irrigation)
-} // end of PutLateralWP()
+} // end of PutLateralWP(pReach, subreachNdx, daily_net_subreach_lateral_flow_m3)
+
+
+void ReachRouting::PutLateralWP(Reach* pReach, int subreachNdx, WaterParcel runoffWP, double withdrawal_m3)
+{
+   ReachSubnode* pNode = pReach->GetReachSubnode(subreachNdx);
+
+   pNode->m_runoffWP = runoffWP;
+
+   WaterParcel mixWP = pNode->m_waterParcel;
+   mixWP.MixIn(runoffWP);
+   pNode->m_withdrawalWP = WaterParcel(withdrawal_m3, mixWP.WaterTemperature());
+} // end of PutLateralWP(pReach, subreachNdx, runoffWP, withdrawal_m3)
 
 
 void ReachRouting::MoveWP(double volume_m3, WaterParcel* pFromWP, WaterParcel* pToWP)

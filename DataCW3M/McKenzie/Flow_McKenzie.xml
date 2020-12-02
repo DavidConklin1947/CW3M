@@ -815,7 +815,7 @@ flow_cms="1.10"
             query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
            obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
       <output in_use="1" name="Air temp at S Fork abv CGR degC"
-           query="COMID=23773037" value="TEMP" type="sum" domain="idu" />
+           query="COMID=23773037" value="TEMP" type="areawtmean" domain="idu" />
       
    </output_group>
 

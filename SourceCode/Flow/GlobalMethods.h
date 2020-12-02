@@ -202,8 +202,8 @@ protected:
 
    double GetLateralInflow( Reach *pReach );
 
-   // Ultimately it should be PutLateralWP(Reach * pReach, runoffWP, withdrawalWP); in order to get the temperatures right
    void PutLateralWP(Reach* pReach, int subreachNdx, double daily_net_subreach_lateral_flow_m3); // Allocates runoff and withdrawals to a subreach
+   void PutLateralWP(Reach* pReach, int subreachNdx, WaterParcel runoffWP, double withdrawal_m3); 
 
    double GetReachFluxes( FlowContext*, Reach *pReach );
 

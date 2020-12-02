@@ -2879,6 +2879,7 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOFF, _T("IN_RUNOFF"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_UPSTREAM, _T("Q_UPSTREAM"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_MIN, _T("Q_MIN"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachHBVCALIB, _T("HBVCALIB"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_Y, _T("XFLUX_Y"), TYPE_FLOAT, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
