@@ -802,47 +802,22 @@ flow_cms="1.10"
     -->
 
   <outputs>
-    <output_group name="FLOW BLU analysis" interval="daily" >
-      <output in_use="1" name="Q from 23773403 upstream into BLU outfall reach" query="COMID=23773403" value="Q" type="sum" domain="reach" />
-      <output in_use="1" name="Q from 23773407 upstream into BLU outfall reach" query="COMID=23773407" value="Q" type="sum" domain="reach" />
-      <output in_use="1" name="Q_UPSTREAM into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM" type="sum" domain="reach" />
-      <output in_use="1" name="IN_RUNOFF into BLU outfall reach" query="COMID=23773405" value="IN_RUNOFF" type="sum" domain="reach" />
-      <output in_use="1" name="EVAP_MM from BLU outfall reach" query="COMID=23773405" value="EVAP_MM" type="sum" domain="reach" />
-      <output in_use="1" name="AREA_H2O m2 of BLU outfall reach" query="COMID=23773405" value="AREA_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="REACH_H2O m3 in BLU outfall reach" query="COMID=23773405" value="REACH_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="Q from BLU outfall reach" query="COMID=23773405" value="Q" type="sum" domain="reach" />
-      <output in_use="1" name="total cms into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM + IN_RUNOFF" type="sum" domain="reach" />
-      <output in_use="1" name="total cms out of BLU outfall reach" query="COMID=23773405" value="Q + (EVAP_MM/1000)*AREA_H2O/86400" type="sum" domain="reach" />
+    <output_group name="FLOW Tidbit Cr Stream Temp Analysis" interval ="monthly" >
+      <output in_use="1" name="Stream temp in Blue R below Tidbits Cr degC"
+              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
+      <output in_use="1" name="Air temp at Blue R below Tidbits Cr deg C"
+              query="COMID=23773429" value="TEMP" type="areawtmean" domain="idu" />
     </output_group>
     
-    <output_group name="FLOW McKenzie Ditch analysis" interval="daily" >
-      <output in_use="1" name="23774421 IN_RUNOFF cms" query="COMID=23774421" value="IN_RUNOFF" type="sum" domain="reach" />
-      <output in_use="1" name="23774421 Q_MIN cms" query="COMID=23774421" value="Q_MIN" type="sum" domain="reach" />
-      <output in_use="1" name="23774421 Q cms" query="COMID=23774421" value="Q" type="sum" domain="reach" />
-      <output in_use="1" name="23774417 IN_RUNOFF cms" query="COMID=23774417" value="IN_RUNOFF" type="sum" domain="reach" />
-      <output in_use="1" name="23774417 Q_MIN cms" query="COMID=23774417" value="Q_MIN" type="sum" domain="reach" />
-      <output in_use="1" name="23774417 Q cms" query="COMID=23774417" value="Q" type="sum" domain="reach" />
-    </output_group>
-
-    <output_group name="FLOW Clear Lake Springs Daily (cms and m3)" interval="daily" >
-      <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
-      <output in_use="1" name="SPRING_CMS for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS" type="sum" domain="reach" />
-      <output in_use="1" name="SPRING_CMS in m3 for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS*86400" type="sum" domain="reach" />
-      <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
-      <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
-      <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
-      <output in_use="1" name="ET_DAY for HBVCALIB = 46 Clear Lake drainage (mmH2O)" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
-    </output_group>
-    
-    <output_group name="FLOW Clear Lake Springs Monthly (cms m3 and mm)" interval="monthly" >
-      <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
-      <output in_use="1" name="SPRING_CMS for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS" type="sum" domain="reach" />
-      <output in_use="1" name="SPRING_CMS in m3 for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS*86400" type="sum" domain="reach" />
-      <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
-      <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
-      <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
-      <output in_use="1" name="ET_DAY for HBVCALIB = 46 Clear Lake drainage (mmH2O)" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
-    </output_group>
+    <output_group name="FLOW S Fork Abv CGR Stream Temp Analysis" interval ="monthly" >
+      <output in_use="1" name="Stream temp in S Fork abv CGR degC"
+            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="Air temp at S Fork abv CGR degC"
+           query="COMID=23773037" value="TEMP" type="sum" domain="idu" />
+      
+   </output_group>
 
     <output_group name="FLOW Daily McKenzie flow skill assessment" interval ="daily" >
       <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
@@ -1042,6 +1017,48 @@ flow_cms="1.10"
              obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
     </output_group>
 
+<!-- 
+    <output_group name="FLOW BLU analysis" interval="daily" >
+      <output in_use="1" name="Q from 23773403 upstream into BLU outfall reach" query="COMID=23773403" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="Q from 23773407 upstream into BLU outfall reach" query="COMID=23773407" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="Q_UPSTREAM into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOFF into BLU outfall reach" query="COMID=23773405" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM from BLU outfall reach" query="COMID=23773405" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 of BLU outfall reach" query="COMID=23773405" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 in BLU outfall reach" query="COMID=23773405" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Q from BLU outfall reach" query="COMID=23773405" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="total cms into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM + IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="total cms out of BLU outfall reach" query="COMID=23773405" value="Q + (EVAP_MM/1000)*AREA_H2O/86400" type="sum" domain="reach" />
+    </output_group>
+    
+    <output_group name="FLOW McKenzie Ditch analysis" interval="daily" >
+      <output in_use="1" name="23774421 IN_RUNOFF cms" query="COMID=23774421" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="23774421 Q_MIN cms" query="COMID=23774421" value="Q_MIN" type="sum" domain="reach" />
+      <output in_use="1" name="23774421 Q cms" query="COMID=23774421" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 IN_RUNOFF cms" query="COMID=23774417" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 Q_MIN cms" query="COMID=23774417" value="Q_MIN" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 Q cms" query="COMID=23774417" value="Q" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW Clear Lake Springs Daily (cms and m3)" interval="daily" >
+      <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
+      <output in_use="1" name="ET_DAY for HBVCALIB = 46 Clear Lake drainage (mmH2O)" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+    </output_group>
+    
+    <output_group name="FLOW Clear Lake Springs Monthly (cms m3 and mm)" interval="monthly" >
+      <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
+      <output in_use="1" name="ET_DAY for HBVCALIB = 46 Clear Lake drainage (mmH2O)" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+    </output_group>
 
     <output_group name="FLOW McKenzie wetland yearly outflows (cms)" interval ="yearly" >
       <output in_use="1" name="WETL 1 outflow 23765583 McKenzie R outlet 113m elev" query="COMID=23765583" value="Q" type="sum" domain="reach" />
@@ -1204,6 +1221,7 @@ flow_cms="1.10"
       <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
     </output_group>
+-->
   </outputs>
-  
+ 
 </flow_model>
