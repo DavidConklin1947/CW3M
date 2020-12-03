@@ -50,7 +50,8 @@ using namespace std;
 #define SPECIFIC_HEAT_H2O 4.187 /* kJ/(kg degC) */
 #define DENSITY_H2O 998.2 /* kg/m^3 */
 #define DEFAULT_REACH_H2O_TEMP_DEGC 8.f
-#define DEFAULT_SOIL_H2O_TEMP_DEGC 5.F
+#define DEFAULT_SOIL_H2O_TEMP_DEGC 5.f
+#define DEFAULT_MIN_SKIN_TEMP_DEGC 1.f /* minimum temperature of liquid stream water in contact with the air (the air temp itself may be much colder) */
 
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision

@@ -11355,7 +11355,21 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
     
          pXmlTable = pXmlTable->NextSiblingElement( "table" );
          }
-      }
+
+         gpModel->m_colHbvW2A_SLP = gpModel->m_colHbvW2A_INT = -1;
+         ParamTable* pHBVtable = gpModel->GetTable("HBV");
+         if (pHBVtable != NULL)
+         {
+            gpModel->m_colHbvW2A_SLP = (pHBVtable->GetDataObj())->GetCol("W2A_SLP");
+            gpModel->m_colHbvW2A_INT = (pHBVtable->GetDataObj())->GetCol("W2A_INT");
+         }
+         if (gpModel->m_colHbvW2A_SLP < 0 || gpModel->m_colHbvW2A_INT < 0)
+         {
+            CString msg;
+            msg.Format("FlowProcess::LoadXml() Could not locate the W2A_SLP or W2A_INT columns in the HBV XML file .");
+            Report::WarningMsg(msg);
+         }
+   }
 
 // Parameter Estimation 
    TiXmlElement *pXmlParameters = pXmlRoot->FirstChildElement( "parameterEstimation" ); 
