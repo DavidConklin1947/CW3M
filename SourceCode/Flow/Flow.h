@@ -31,9 +31,20 @@ using namespace std;
 #define FLOWAPI __declspec( dllimport )
 #endif
 
-/* reservoir ID numbers */
+/* reservoir ID numbers and USGS three letter codes */
+#define HCR 1
+#define LOP 1
+#define DEX 3
+#define FAL 4
+#define DOR 5
+#define COT 6
+#define FRN 7
 #define CGR 8
 #define BLU 9
+#define GPR 10
+#define FOS 11
+#define DET 12
+#define BCL 13
 
 #define BOX_SNOWPACK 0
 #define BOX_SNOW 0
