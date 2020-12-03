@@ -31,6 +31,10 @@ using namespace std;
 #define FLOWAPI __declspec( dllimport )
 #endif
 
+/* reservoir ID numbers */
+#define CGR 8
+#define BLU 9
+
 #define BOX_SNOWPACK 0
 #define BOX_SNOW 0
 #define BOX_MELT 1
@@ -1784,6 +1788,9 @@ public:
    int m_colReachQ_UPSTREAM;
    int m_colReachQ_MIN;
    int m_colReachHBVCALIB;
+
+   int m_colHbvW2A_SLP;
+   int m_colHbvW2A_INT;
 
    int m_colARIDITYNDX;
    int m_colHRUPercentIrrigated;

@@ -542,7 +542,22 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
    for (int i = 0; i < reachCount; i++)
    {
       Reach* pReach = gpModel->GetReach(i);     // Note: these are guaranteed to be non-phantom
+
+      ParamTable* pHBVtable = gpModel->GetTable("HBV");
+      gpModel->m_colHbvW2A_SLP = (pHBVtable->GetDataObj())->GetCol("W2A_SLP");
+      gpModel->m_colHbvW2A_INT = (pHBVtable->GetDataObj())->GetCol("W2A_INT");
+
       int hbvcalib; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalib);
+      float w2a_slp = 0, w2a_int = 0;
+      if (gpModel->m_colHbvW2A_SLP < 0 || !gpModel->GetTableValue("HBV", gpModel->m_colHbvW2A_SLP, hbvcalib, w2a_slp) || w2a_slp == 0
+         || gpModel->m_colHbvW2A_INT < 0 || !gpModel->GetTableValue("HBV", gpModel->m_colHbvW2A_INT, hbvcalib, w2a_int) || w2a_int == 0)
+      {
+         CString msg;
+         msg.Format("SolveReachKinematicWave() For hbvcalib = %d, w2a_slope = %f and w2a_intercept = %f.  "
+            "Will use DEFAULT_SOIL_H2O_TEMP_DEGC = %f for the temperature of runoff water going into the streams.",
+            hbvcalib, w2a_slp, w2a_int, DEFAULT_SOIL_H2O_TEMP_DEGC);
+         Report::WarningMsg(msg);
+      }
 
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
       Reach* pUpstreamLeftReach = gpModel->GetReachFromNode(pReach->m_pLeft);
@@ -609,13 +624,22 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
          if (lateralInflow_m3 > 0)
          { // The net lateral flow is into the reach. Assign a temperature to it.
             lateralInflowWP.m_volume_m3 = lateralInflow_m3;
-            double temp_h2o_degC = DEFAULT_SOIL_H2O_TEMP_DEGC;
-            if (hbvcalib == 10)
+            double temp_h2o_degC = (w2a_slp == 0 || w2a_int == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
+               : w2a_slp * temp_air_degC + w2a_int;
+/*x
+            if (hbvcalib == BLU)
             { // BLU drainage
                temp_h2o_air_slope = 0.5858;
                temp_h2o_air_intercept = 3.2949;
                temp_h2o_degC = temp_h2o_air_slope * temp_air_degC + temp_h2o_air_intercept;
             }
+            else if (hbvcalib == CGR)
+            { 
+               temp_h2o_air_slope = 0.3502;
+               temp_h2o_air_intercept = 3.9246;
+               temp_h2o_degC = temp_h2o_air_slope * temp_air_degC + temp_h2o_air_intercept;
+            }
+x*/
             lateralInflowWP.m_temp_degC = temp_h2o_degC;
             PutLateralWP(pReach, l, lateralInflowWP, 0);
          }
