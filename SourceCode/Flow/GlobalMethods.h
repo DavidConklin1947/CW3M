@@ -24,6 +24,7 @@ using namespace std;
 class WaterMaster;
 class AltWaterMaster;
 class WaterParcel;
+class ParamTable;
 
 enum IrrigationState
    {
@@ -180,7 +181,8 @@ class ReachRouting : public GlobalMethod
 public:
     ReachRouting( LPCTSTR name ) : GlobalMethod( name, GM_KINEMATIC ), m_reachTimeStep( 1.0f ) {  m_timing = GMT_REACH; }
 
-   virtual bool Step( FlowContext *pFlowContext );
+    virtual bool Init(FlowContext* pFlowContext);
+    virtual bool Step( FlowContext *pFlowContext );
 
    virtual bool SetTimeStep( float timestep ) { m_reachTimeStep = timestep;  return true; }
 
@@ -195,8 +197,10 @@ public:
 
 public:
    float m_reachTimeStep;
-   
+
 protected:
+   ParamTable* m_pHBVtable;
+
    void MoveWP(double volume_m3, WaterParcel* pFromWP, WaterParcel* pToWP);
    bool  SolveReachKinematicWave( FlowContext* );
 

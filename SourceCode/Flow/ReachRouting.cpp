@@ -14,7 +14,15 @@
 extern FlowProcess *gpFlow;
 extern FlowModel *gpModel;
 
+bool ReachRouting::Init(FlowContext* pFlowContext)
+{
+   m_pHBVtable = gpModel->GetTable("HBV");
+   ASSERT(m_pHBVtable != NULL);
+   gpModel->m_colHbvW2A_SLP = m_pHBVtable->GetFieldCol("W2A_SLP");          
+   gpModel->m_colHbvW2A_INT = m_pHBVtable->GetFieldCol("W2A_INT");   
 
+   return(m_pHBVtable != NULL && gpModel->m_colHbvW2A_SLP > 0 && gpModel->m_colHbvW2A_INT > 0);
+} // end of ReachRouting::Init()
 
 bool ReachRouting::Step( FlowContext *pFlowContext )
 {    
@@ -542,29 +550,19 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
    int reachCount = gpModel->GetReachCount();
    clock_t start = clock();
 
-   ParamTable* pHBVtable = gpModel->GetTable("HBV");
-//x   FDataObj* pHBVdata = (FDataObj *)pHBVtable->GetDataObj();
-//x   ASSERT(pHBVdata != NULL);
    int prev_hbvcalib = -1;
    for (int i = 0; i < reachCount; i++)
    {
       Reach* pReach = gpModel->GetReach(i);     // Note: these are guaranteed to be non-phantom
 
       int hbvcalib; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalib);
-      float w2a_slp = 0, w2a_int = 0;
-      pHBVtable->Lookup(hbvcalib, gpModel->m_colHbvW2A_SLP, w2a_slp);
-      pHBVtable->Lookup(hbvcalib, gpModel->m_colHbvW2A_INT, w2a_int);
-/*x
-//x      if (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalib != prev_hbvcalib &&
-//x        (gpModel->m_colHbvW2A_SLP < 0 || !gpModel->GetTableValue("HBV", gpModel->m_colHbvW2A_SLP, hbvcalib, w2a_slp) || w2a_slp == 0
-//x            || gpModel->m_colHbvW2A_INT < 0 || !gpModel->GetTableValue("HBV", gpModel->m_colHbvW2A_INT, hbvcalib, w2a_int) || w2a_int == 0))
-      if (gpModel->m_colHbvW2A_SLP >= 0 && gpModel->m_colHbvW2A_INT >= 0)
-      {
-         w2a_slp = pHBVdata->IGet((float)hbvcalib, 1, gpModel->m_colHbvW2A_SLP, IM_LINEAR);
-         w2a_slp = pHBVdata->IGet((float)hbvcalib, 1, gpModel->m_colHbvW2A_INT, IM_LINEAR);
-      }
-x*/
-      if ((w2a_slp <= 0) &&
+      VData hbvcalibV = hbvcalib;
+      hbvcalibV.ChangeType(TYPE_FLOAT);
+      float w2a_slp = 0; float& r_w2a_slp = w2a_slp;
+      float w2a_int = 0; float& r_w2a_int = w2a_int;
+      bool ok = m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_SLP, r_w2a_slp);
+      ok &= m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_INT, r_w2a_int);
+      if ((!ok || w2a_slp <= 0) &&
          (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalib != prev_hbvcalib))
       {
          CString msg;
