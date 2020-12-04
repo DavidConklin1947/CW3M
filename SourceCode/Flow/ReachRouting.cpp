@@ -4,6 +4,9 @@
 
 #include "GlobalMethods.h"
 #include "Flow.h"
+#include <dataobj.h>
+//x #include <idataobj.H>
+//x #include <fdataobj.h>
 
 #include <UNITCONV.H>
 #include <omp.h>
@@ -539,6 +542,9 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
    int reachCount = gpModel->GetReachCount();
    clock_t start = clock();
 
+   ParamTable* pHBVtable = gpModel->GetTable("HBV");
+//x   FDataObj* pHBVdata = (FDataObj *)pHBVtable->GetDataObj();
+//x   ASSERT(pHBVdata != NULL);
    int prev_hbvcalib = -1;
    for (int i = 0; i < reachCount; i++)
    {
@@ -546,9 +552,20 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
 
       int hbvcalib; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalib);
       float w2a_slp = 0, w2a_int = 0;
-      if (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalib != prev_hbvcalib &&
-         (gpModel->m_colHbvW2A_SLP < 0 || !gpModel->GetTableValue("HBV", gpModel->m_colHbvW2A_SLP, hbvcalib, w2a_slp) || w2a_slp == 0
-         || gpModel->m_colHbvW2A_INT < 0 || !gpModel->GetTableValue("HBV", gpModel->m_colHbvW2A_INT, hbvcalib, w2a_int) || w2a_int == 0))
+      pHBVtable->Lookup(hbvcalib, gpModel->m_colHbvW2A_SLP, w2a_slp);
+      pHBVtable->Lookup(hbvcalib, gpModel->m_colHbvW2A_INT, w2a_int);
+/*x
+//x      if (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalib != prev_hbvcalib &&
+//x        (gpModel->m_colHbvW2A_SLP < 0 || !gpModel->GetTableValue("HBV", gpModel->m_colHbvW2A_SLP, hbvcalib, w2a_slp) || w2a_slp == 0
+//x            || gpModel->m_colHbvW2A_INT < 0 || !gpModel->GetTableValue("HBV", gpModel->m_colHbvW2A_INT, hbvcalib, w2a_int) || w2a_int == 0))
+      if (gpModel->m_colHbvW2A_SLP >= 0 && gpModel->m_colHbvW2A_INT >= 0)
+      {
+         w2a_slp = pHBVdata->IGet((float)hbvcalib, 1, gpModel->m_colHbvW2A_SLP, IM_LINEAR);
+         w2a_slp = pHBVdata->IGet((float)hbvcalib, 1, gpModel->m_colHbvW2A_INT, IM_LINEAR);
+      }
+x*/
+      if ((w2a_slp <= 0) &&
+         (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalib != prev_hbvcalib))
       {
          CString msg;
          msg.Format("SolveReachKinematicWave() For hbvcalib = %d, w2a_slope = %f and w2a_intercept = %f.  "
@@ -556,6 +573,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
             hbvcalib, w2a_slp, w2a_int, DEFAULT_SOIL_H2O_TEMP_DEGC);
          Report::WarningMsg(msg);
       }
+   
       prev_hbvcalib = hbvcalib;
 
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
@@ -623,8 +641,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
          if (lateralInflow_m3 > 0)
          { // The net lateral flow is into the reach. Assign a temperature to it.
             lateralInflowWP.m_volume_m3 = lateralInflow_m3;
-            double temp_h2o_degC = (w2a_slp == 0 || w2a_int == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
-               : w2a_slp * temp_air_degC + w2a_int;
+            double temp_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
+               : w2a_slp * max(0, temp_air_degC) + w2a_int;
             temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
             lateralInflowWP.m_temp_degC = temp_h2o_degC;
             PutLateralWP(pReach, l, lateralInflowWP, 0);
