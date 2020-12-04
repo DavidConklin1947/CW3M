@@ -621,6 +621,7 @@ flow_cms="1.10"
 
 
   <reservoirs col="RES_ID">
+  
     <reservoir id="1"   name="Hills Creek Reservoir (USACE)"      path="Reservoirs\"                                  initVolume="209709507"
                area_vol_curve="hills_creek_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="11"
                rule_curve="hills_creek_rule_curve.csv"            rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="461075511"
@@ -695,7 +696,7 @@ flow_cms="1.10"
                rule_priorities="cougar_rule_priorities.csv"       rp_dir="Rules_Cougar\"                              tailwater_elev="408"
                turbine_efficiency="0.9"                           td_elev="519.68"                                     fc1_elev="517.86"
                buffer_zone="Cougar_buffer.csv"                    ressim_output_f="Cougar_ressim_flow_1935_2008.csv"  ressim_output_r="Cougar_ressim_rule_1935_2008.csv"
-               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="0.65" />
+               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="0.45" />
 
     <reservoir id="9"   name="Blue River Reservoir (USACE)"       path="Reservoirs\"     initVolume="5063443"
                area_vol_curve="blue_river_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1.417"
@@ -705,7 +706,7 @@ flow_cms="1.10"
                rule_priorities="blue_river_rule_priorities.csv"   rp_dir="Rules_BR\"                                  td_elev="415.0"
                fc1_elev="414.0"                                   buffer_zone="BR_buffer.csv"                         ressim_output_f="BR_ressim_flow_1935_2008.csv"
                ressim_output_r="BR_ressim_rule_1935_2008.csv"     inactive_elev="359.66"                              reservoir_type="FloodControl"
-               solar_radiation_multiplier="0.30" />
+               solar_radiation_multiplier="0.15" />
 
     <reservoir id="10"  name="Green Peter Reservoir (USACE)"      path="Reservoirs\"     initVolume="197233746"
                area_vol_curve="green_peter_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="22.6"
@@ -742,6 +743,7 @@ flow_cms="1.10"
                composite_rc="BC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="79.6"
                RO_rc="BC_RO_capacity.csv"                         spillway_rc="BC_spillway_capacity.csv"              tailwater_elev="342"
                turbine_efficiency="0.9"                           inactive_elev="353.99"                              reservoir_type="RiverRun"/>
+  
   </reservoirs>
 
   <fluxes>
