@@ -804,7 +804,35 @@ flow_cms="1.10"
     -->
 
   <outputs>
-    <output_group name="FLOW daily thermal energy OUTLET OF CLEAR LAKE, OR_23773373 USGS_14158500" interval ="daily" >
+    <output_group name="FLOW McKenzie elevations by HBVCALIB" interval="yearly" >
+      <output in_use="1" name="46 Clear Lake" query="HBVCALIB=46" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="8 CGR" query="HBVCALIB=8" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="9 BLU" query="HBVCALIB=9" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="34 McKenzie above Walterville" query="HBVCALIB=34" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="25 Mohawk" query="HBVCALIB=25" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="16 McKenzie outlet" query="HBVCALIB=16" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie Stream Temperatures deg C" interval ="monthly" >
+      <output in_use="1" name="Blue R above BLU" query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Blue R below BLU" query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="S Fork above CGR" query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="S Fork below CGR" query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Vida" query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Walterville" query="COMID=23772801" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Mohawk" query="COMID=23773507" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="McKenzie outlet" query="COMID=23765583" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Blue R above BLU" query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Blue R below BLU" query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="S Fork above CGR" query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="S Fork below CGR" query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Vida" query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Walterville" query="COMID=23772801" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Mohawk" query="COMID=23773507" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="McKenzie outlet" query="COMID=23765583" value="TEMP_H2O" type="sum" domain="reach" />
+    </output_group>
+    
+      <output_group name="FLOW daily thermal energy OUTLET OF CLEAR LAKE, OR_23773373 USGS_14158500" interval ="daily" >
       <output in_use="1" name="PRECIP mmH2O 23773373 McKenzie R" query="COMID=23773373" value="PRECIP" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW" type="sum" domain="reach" />
       <output in_use="1" name="TEMP_H2O degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_H2O" type="sum" domain="reach" />
