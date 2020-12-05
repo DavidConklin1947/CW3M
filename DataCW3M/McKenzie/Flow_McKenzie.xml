@@ -840,12 +840,34 @@ flow_cms="1.10"
       <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
     </output_group>
 
+    <output_group name="FLOW Vida Stream Temp Analysis" interval ="monthly" >
+      <output in_use="1" name="Stream temp in Blue R near Vida degC"
+              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
+              obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="Air temp at Blue R near Vida deg C"
+              query="COMID=23772909" value="TEMP" type="areawtmean" domain="idu" />
+      <output in_use="1" name="Air temp for HBVCALIB=34 McKenzie above Walterville deg C"
+              query="HBVCALIB=34" value="TEMP" type="areawtmean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW S Hayden Br Stream Temp Analysis" interval ="monthly" >
+      <output in_use="1" name="Stream temp abv Hayden Br degC"
+            query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
+            obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+      <output in_use="1" name="Air temp at the McKenzie outlet degC"
+           query="COMID=23765583" value="TEMP" type="areawtmean" domain="idu" />
+      <output in_use="1" name="Air temp for HBVCALIB=16 McKenzie outlet degC"
+           query="HBVCALIB=16" value="TEMP" type="areawtmean" domain="idu" />
+    </output_group>
+
     <output_group name="FLOW Tidbit Cr Stream Temp Analysis" interval ="monthly" >
       <output in_use="1" name="Stream temp in Blue R below Tidbits Cr degC"
               query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
       <output in_use="1" name="Air temp at Blue R below Tidbits Cr deg C"
               query="COMID=23773429" value="TEMP" type="areawtmean" domain="idu" />
+      <output in_use="1" name="Air temp for HBVCALIB=9 BLU deg C"
+              query="HBVCALIB=9" value="TEMP" type="areawtmean" domain="idu" />
     </output_group>
 
     <output_group name="FLOW S Fork Abv CGR Stream Temp Analysis" interval ="monthly" >
@@ -854,15 +876,8 @@ flow_cms="1.10"
            obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
       <output in_use="1" name="Air temp at S Fork abv CGR degC"
            query="COMID=23773037" value="TEMP" type="areawtmean" domain="idu" />
-    </output_group>
-    
-    <output_group name="FLOW Mohawk Stream Temp Analysis" interval ="monthly" >
-      <output in_use="1" name="Stream temp in Mohawk degC"
-            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
-           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-      <output in_use="1" name="Air temp at S Fork abv CGR degC"
-           query="COMID=23773037" value="TEMP" type="areawtmean" domain="idu" />
-
+      <output in_use="1" name="Air temp for HBVCALIB=8 CGR degC"
+           query="HBVCALIB=8" value="TEMP" type="areawtmean" domain="idu" />
     </output_group>
 
     <output_group name="FLOW Daily McKenzie flow skill assessment" interval ="daily" >
