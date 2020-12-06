@@ -10737,7 +10737,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                {
                ClimateDataInfo *pInfo = new ClimateDataInfo;
                pInfo->m_varName = varName;
-               pInfo->m_units = units;
+               pInfo->m_unitsAttribute = units;
                pInfo->m_firstYear = pScenario->m_firstYear;
                pInfo->m_lastYear = pScenario->m_lastYear;
                pInfo->m_maxDaysInClimateYear = pScenario->m_maxDaysInClimateYear;
@@ -12864,7 +12864,14 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
       pInfo->m_recentYearIndex = 0;
 
       pInfo->m_varid_data = -1;
-      rtnval = nc_inq_varid(pInfo->m_ncid, pInfo->m_varName, &pInfo->m_varid_data); if (!chk_nc(rtnval)) return(false);
+      rtnval = nc_inq_varid(pInfo->m_ncid, pInfo->m_varName, &pInfo->m_varid_data); 
+      if (!chk_nc(rtnval))
+      {
+         CString msg;
+         msg.Format("OpenClimateDataFiles() File %s does not contain variable %s.", filePathAndName, pInfo->m_varName);
+         Report::LogError(msg);
+         return(false);
+      }
 
       pInfo->m_nctype = NC_NAT;
       rtnval = nc_inq_vartype(pInfo->m_ncid, pInfo->m_varid_data, &pInfo->m_nctype); if (!chk_nc(rtnval)) return(false);
@@ -12872,20 +12879,19 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
       {
          CString msg;
          msg.Format("OpenClimateDataFiles() File %s, variable %s, has nctype = %d, which is neither NC_FLOAT nor NC_SHORT.", filePathAndName, pInfo->m_varName, pInfo->m_nctype);
-         Report::ErrorMsg(msg);
+         Report::LogError(msg);
          return(false);
       }
 
       float scale_factor = 1.f;
       rtnval = nc_get_att_float(pInfo->m_ncid, pInfo->m_varid_data, "scale_factor", &scale_factor);
-
       if (rtnval == NC_NOERR)
       {
          CString msg;
          msg.Format("OpenClimateDataFiles() File %s, variable %s, has scale_factor = %f", filePathAndName.GetString(), pInfo->m_varName, scale_factor);
          Report::LogMsg(msg);
       }
-      else if (pInfo->m_firstYear < pInfo->m_lastYear) 
+      else if (pInfo->m_firstYear < pInfo->m_lastYear)
       { // We only write this for multiyear files; single year files aren't expected to have scale factors.
          CString msg;
          msg.Format("OpenClimateDataFiles() Unable to read scale_factor attribute for file %s, variable %s.  Setting m_scaleFactor = 1.",
@@ -12893,8 +12899,19 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
          Report::LogMsg(msg);
          scale_factor = 1.f;
       }
+      pInfo->m_scaleFactorAttribute = scale_factor;
+      pInfo->m_scaleFactor = pInfo->m_scaleFactorAttribute;
 
-      pInfo->m_scaleFactor = scale_factor;
+      float add_offset_attribute = 0.f;
+      rtnval = nc_get_att_float(pInfo->m_ncid, pInfo->m_varid_data, "add_offset", &add_offset_attribute);
+      if (rtnval == NC_NOERR)
+      {
+         CString msg;
+         msg.Format("OpenClimateDataFiles() File %s, variable %s, has 'add_offset' attribute = %f", filePathAndName.GetString(), pInfo->m_varName, add_offset_attribute);
+         Report::LogMsg(msg);
+      }
+      pInfo->m_addOffsetAttribute = add_offset_attribute;
+      // pInfo->m_offset is set in FlowModel::LoadXml() and is used for converting from input units to model units (e.g. from deg K to deg C)
 
       // Is this netCDF file grid-based or polygon-based?
       // Does it have an "idu" dimension?
@@ -12931,7 +12948,7 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
          if (pInfo->m_nctype != NC_FLOAT)
          {
             CString msg; msg.Format("file = %s, vartype = %d vartype is not NC_FLOAT", filePathAndName, pInfo->m_nctype);
-            Report::ErrorMsg(msg);
+            Report::LogError(msg);
             return(false);
          }
 
@@ -12946,7 +12963,7 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
          if (pInfo->m_size_time != 360 && pInfo->m_size_time != 365 && pInfo->m_size_time != 366)
          {
             CString msg; msg.Format("file = %s, size_time = %d time dimension is none of 360, 365, 366", pInfo->m_size_time);
-            Report::ErrorMsg(msg);
+            Report::LogError(msg);
             return(false);
          }
 
@@ -12973,19 +12990,21 @@ void FlowModel::CloseClimateData( void )
    }
 
 
-void ClimateDataInfo::ScaleTheValues(float * fieldVals, size_t numVals)
+void ClimateDataInfo::ScaleTheValues(float * fieldVals, size_t numVals) // Converts from the form of the data on disk to the form and units used by the model
 {
-   if (m_scaleFactor != 1. && m_offset == 0.) for (int space_ndx = 0; space_ndx < numVals; space_ndx++)
+   float net_offset = m_addOffsetAttribute + m_offset;
+
+   if (m_scaleFactor != 1. && net_offset == 0.) for (int space_ndx = 0; space_ndx < numVals; space_ndx++)
       fieldVals[space_ndx] *= m_scaleFactor;
 
-   else if (m_scaleFactor != 1. && m_offset != 0.) for (int space_ndx = 0; space_ndx < numVals; space_ndx++)
+   else if (m_scaleFactor != 1. && net_offset != 0.) for (int space_ndx = 0; space_ndx < numVals; space_ndx++)
    {
       float raw_val = fieldVals[space_ndx];
-      fieldVals[space_ndx] = m_scaleFactor * raw_val + m_offset;
+      fieldVals[space_ndx] = m_scaleFactor * raw_val + net_offset;
    }
 
-   else if (m_scaleFactor == 1.f && m_offset != 0.f) for (int space_ndx = 0; space_ndx < numVals; space_ndx++)
-      fieldVals[space_ndx] += m_offset;
+   else if (m_scaleFactor == 1.f && net_offset != 0.f) for (int space_ndx = 0; space_ndx < numVals; space_ndx++)
+      fieldVals[space_ndx] += net_offset;
 } // end of ScaleTheValues()
 
 
@@ -13130,7 +13149,7 @@ bool FlowModel::GetDailyWeatherField(CDTYPE type, int tgtDoy0, int tgtYear)
          int rtnval = ncvarget(pInfo->m_ncid, pInfo->m_varid_data, start, len, field_vals);
          if (!chk_nc(rtnval)) return(false);
 
-         if (pInfo->m_scaleFactor != 1. || pInfo->m_offset != 0.) pInfo->ScaleTheValues(field_vals, pInfo->m_size_idu);
+         if (pInfo->m_scaleFactor != 1. || pInfo->m_addOffsetAttribute != 0 || pInfo->m_offset != 0.) pInfo->ScaleTheValues(field_vals, pInfo->m_size_idu);
 
          if (pNdx_array->IsEmpty())
          { // initialize the index array
@@ -13198,7 +13217,7 @@ bool FlowModel::GetDailyWeatherField(CDTYPE type, int tgtDoy0, int tgtYear)
             default: ASSERT(false); return(false);
          }
 
-         if (pInfo->m_scaleFactor != 1. || pInfo->m_offset != 0.) pInfo->ScaleTheValues(field_vals, NUM_OF_CLIMATE_GRIDCELLS);
+         if (pInfo->m_scaleFactor != 1. || pInfo->m_addOffsetAttribute != 0 || pInfo->m_offset != 0.) pInfo->ScaleTheValues(field_vals, NUM_OF_CLIMATE_GRIDCELLS);
 
          for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu < m_pIDUlayer->End(); idu++)
          {
@@ -13339,7 +13358,7 @@ bool FlowModel::GetWeatherField(CDTYPE type, int tgtDoy0, int tgtYear, float fie
    bool rtnval = ncvarget(pInfo->m_ncid, pInfo->m_varid_data, start, len, field_vals);
    if (!chk_nc(rtnval)) return(false); 
 
-   if (pInfo->m_scaleFactor != 1. || pInfo->m_offset != 0.) pInfo->ScaleTheValues(field_vals, NUM_OF_CLIMATE_GRIDCELLS);
+   if (pInfo->m_scaleFactor != 1. || pInfo->m_addOffsetAttribute != 0 || pInfo->m_offset != 0.) pInfo->ScaleTheValues(field_vals, NUM_OF_CLIMATE_GRIDCELLS);
 
    return(true);
 } // end of GetWeatherField()

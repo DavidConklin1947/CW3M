@@ -1309,10 +1309,19 @@ public:
    nc_type m_nctype;
    size_t m_size_idu, m_size_time;
 
-   // interpreted value = raw_value * scale_factor + offset
-   float m_scaleFactor;
-   float m_offset;
-   CString m_units;
+   // for converting from the form of the raw data to floats
+//x   // e.g. float = (int16 + m_addOffsetAttribute) * m_scaleFactorAttribute
+   // e.g. float = int16 * m_scaleFactorAttribute + m_addOffsetAttribute
+   float m_scaleFactorAttribute; // This value is from the "scale_factor" attribute in the NetCDF file, used for converting INT16 values back to floats.
+   float m_addOffsetAttribute; // This value is from the "add_offset" attribute in the NetCDF file, used for converting INT16 values back to floats.
+
+   // for converting from the units of the input file to the units used by the model aka the interpreted value
+   // interpreted value = raw_value_as_float * m_scale_factor + m_offset
+   // e.g. deg C = deg K * 1.0 - 273.15
+   CString m_unitsAttribute;;
+   float m_scaleFactor; // This value is the final scale factor to be used in calculating the interpreted value.
+   float m_offset; // This is the final offset to be used in calculating the interpreted value (e.g. for converting deg K to deg C).
+
    int m_maxDaysInClimateYear;
 
    bool  m_useDelta;
@@ -1322,7 +1331,7 @@ public:
       m_type(CDT_UNKNOWN), m_pDataObj(NULL), m_pDataObjArray(NULL),
       m_IDUbased(false), m_firstYear(-1), m_lastYear(-1), m_mostRecentIndexYear(-1), m_recentYearIndex(-1),
       m_ncid(-1), m_varid_idu_id(-1), m_varid_data(-1), m_nctype(NC_NAT), m_size_idu(-1), m_size_time(-1), m_dimid_idu(-1), m_dimid_time(-1),
-      m_scaleFactor(1.f), m_offset(0.f), m_units(""), m_maxDaysInClimateYear(366), m_useDelta(false), m_delta(0) { }
+      m_scaleFactor(1.f), m_scaleFactorAttribute(1.f), m_offset(0.f), m_addOffsetAttribute(0.f), m_unitsAttribute(""), m_maxDaysInClimateYear(366), m_useDelta(false), m_delta(0) { }
    ~ClimateDataInfo(void)
    { 
       if (m_pDataObj) delete m_pDataObj; 
