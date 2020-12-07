@@ -12913,6 +12913,32 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
       pInfo->m_addOffsetAttribute = add_offset_attribute;
       // pInfo->m_offset is set in FlowModel::LoadXml() and is used for converting from input units to model units (e.g. from deg K to deg C)
 
+      char units_attribute_str[81]; for (int i = 0; i < 81; i++) units_attribute_str[i] = 0;
+      rtnval = nc_get_att_text(pInfo->m_ncid, pInfo->m_varid_data, "units", units_attribute_str);
+      if (rtnval == NC_NOERR && strlen(units_attribute_str) > 0)
+      {
+         CString msg;
+         msg.Format("OpenClimateDataFiles() File %s, variable %s, has 'units' attribute = %s", filePathAndName.GetString(), pInfo->m_varName, CString(units_attribute_str));
+         Report::LogMsg(msg);
+
+         if (pInfo->m_unitsAttribute.GetLength() > 0 && pInfo->m_unitsAttribute != units_attribute_str)
+         {
+            CString msg;
+            msg.Format("OpenClimateDataFiles() Units mismatch in file %s, variable %s. Units specified in XML are %s. Units attribute in the NC file is %s.",
+               filePathAndName.GetString(), pInfo->m_varName, pInfo->m_unitsAttribute.GetString(), units_attribute_str);
+            Report::LogError(msg);
+            return(false);
+         }
+         pInfo->m_unitsAttribute = units_attribute_str;
+      }
+      else if (pInfo->m_unitsAttribute.GetLength() > 0)
+      {
+         CString msg;
+         msg.Format("OpenClimateDataFiles() XML specified units as %s, while the NC file does not have a units attribute.",
+            pInfo->m_unitsAttribute.GetString());
+         Report::LogMsg(msg);
+      }
+
       // Is this netCDF file grid-based or polygon-based?
       // Does it have an "idu" dimension?
       pInfo->m_dimid_idu = -1;
