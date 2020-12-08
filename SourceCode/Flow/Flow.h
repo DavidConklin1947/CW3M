@@ -1500,6 +1500,7 @@ protected:
    CArray< FILE*, FILE* > m_reachDailyFilePtrArray;   // list of file pointers
    
    bool m_saveStateAtEndOfRun;
+   bool m_ICincludesWP;
       
    int  MoveCatchments( Reach *pToReach, ReachNode *pStartNode, bool recurse );  // recursive
    int  CombineCatchments( Catchment *pTargetCatchment, Catchment *pSourceCatchment, bool deleteSource ); // copy the HRUs from one catchment to another, optionally deleting the source Catchment
