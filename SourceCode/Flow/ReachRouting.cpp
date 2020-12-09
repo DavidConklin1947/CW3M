@@ -562,16 +562,19 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       float w2a_int = 0; float& r_w2a_int = w2a_int;
       bool ok = m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_SLP, r_w2a_slp);
       ok &= m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_INT, r_w2a_int);
-      if ((!ok || w2a_slp <= 0) &&
-         (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalib != prev_hbvcalib))
+      if (!ok || (w2a_slp == 0 && w2a_int == 0))
       {
-         CString msg;
-         msg.Format("SolveReachKinematicWave() For hbvcalib = %d, w2a_slope = %f and w2a_intercept = %f.  "
-            "Will use DEFAULT_SOIL_H2O_TEMP_DEGC = %f for the temperature of runoff water going into the streams.",
-            hbvcalib, w2a_slp, w2a_int, DEFAULT_SOIL_H2O_TEMP_DEGC);
-         Report::WarningMsg(msg);
+         if (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalib != prev_hbvcalib)
+         {
+            CString msg;
+            msg.Format("SolveReachKinematicWave() For hbvcalib = %d, w2a_slp = %f and w2a_int = %f.  "
+               "Will use DEFAULT_SOIL_H2O_TEMP_DEGC = %f for the temperature of runoff water going into the streams.",
+               hbvcalib, w2a_slp, w2a_int, DEFAULT_SOIL_H2O_TEMP_DEGC);
+            Report::WarningMsg(msg);
+         }
+         w2a_int = DEFAULT_SOIL_H2O_TEMP_DEGC;
+         w2a_slp = 0;
       }
-   
       prev_hbvcalib = hbvcalib;
 
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);

@@ -877,22 +877,6 @@ double Reach::NominalMinWidth_m()
 } // end of SetNominalSubreachGeometry()
 
 
-//???? CHECK/DOCUMENT UNITS!!!!
-float Reach::GetManningDepthFromQ( double Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
-   {
-   float depth;
-   if (Q > 0.f)
-      {
-      // Q=m3/sec
-      // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
-      float wdterm = (float)pow((wdRatio / (2 + wdRatio)), 2.0f / 3.0f)*wdRatio;
-      depth = (float)pow(((Q*m_n) / ((double)sqrt(m_slope)*wdterm)), 3.0 / 8.0);
-      }
-   else depth = 0.f;
-   return depth;
-   } // end of GetManningDepthFromQ()
-
-
 double Reach::GetDischarge( int subnode /*=-1*/ )
    {
    if ( subnode < 0 )
@@ -14695,8 +14679,55 @@ void FlowModel::ApplyMacros( CString &str )
    }
    
 
-/////////////////////////////////////////////////////////////////// 
+/* Here is what was in WW2100 ver. 471 ReachRouting.cpp on 12/8/20
+
+void Reach::SetGeometry( float wdRatio )
+   {
+   //ASSERT( pReach->m_qArray != NULL );
+   ReachSubnode *pNode = (ReachSubnode*) m_subnodeArray[ 0 ];
+   ASSERT( pNode != NULL );
+
+   m_depth = GetDepthFromQ( pNode->m_discharge, wdRatio );
+   m_width = wdRatio * m_depth;
+   m_wdRatio = wdRatio;
+   }
+
+
+//???? CHECK/DOCUMENT UNITS!!!!
+float Reach::GetDepthFromQ( float Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+   {
+   float depth;
+   if (Q > 0.f)
+      {
+      // Q=m3/sec
+      // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
+      float wdterm = (float)pow((wdRatio / (2 + wdRatio)), 2.0f / 3.0f)*wdRatio;
+      depth = (float)pow(((Q*m_n) / ((float)sqrt(m_slope)*wdterm)), 3.0f / 8.0f);
+      }
+   else depth = 0.f;
+   return depth;
+   } // end of GetDepthFromQ()
+
+///////////////////////////////////////////////////////////////////
 //  additional functions
+
+void SetGeometry( Reach *pReach, float discharge )
+   {
+   ASSERT( pReach != NULL );
+   pReach->m_depth = GetDepthFromQ(pReach, discharge, pReach->m_wdRatio );
+   pReach->m_width = pReach->m_wdRatio * pReach->m_depth;
+   }
+
+float GetDepthFromQ( Reach *pReach, float Q, float wdRatio )  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+   {
+  // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
+   float wdterm = (float) pow( (wdRatio/( 2 + wdRatio )), 2.0f/3.0f)*wdRatio;
+   float depth  = (float) pow(((Q*pReach->m_n)/((float)sqrt(pReach->m_slope)*wdterm)), 3.0f/8.0f);
+   if (depth != depth) depth = 0.00001f;
+   return depth;
+   }
+
+*/
 
 void ReachSubnode::SetSubreachGeometry(double volume_m3, double wdRatio)
 {
@@ -14705,6 +14736,21 @@ void ReachSubnode::SetSubreachGeometry(double volume_m3, double wdRatio)
    m_subreach_width_m = m_subreach_depth_m * wdRatio;
    m_subreach_surf_area_m2 = m_subreach_width_m * m_subreach_length_m;
 } // end of SetSubreachGeometry()
+
+
+float Reach::GetManningDepthFromQ(double Q, float wdRatio)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
+{
+   float depth;
+   if (Q > 0.f)
+   {
+   // Q=m3/sec
+   // from kellie:  d = ( 5/9 Q n s^2 ) ^ 3/8   -- assumes width = 3*depth, rectangular channel
+      float wdterm = (float)pow((wdRatio / (2 + wdRatio)), 2.0f / 3.0f) * wdRatio;
+      depth = (float)pow(((Q * m_n) / ((double)sqrt(m_slope) * wdterm)), 3.0 / 8.0);
+   }
+   else depth = 0.f;
+   return depth;
+} // end of GetManningDepthFromQ()
 
 
 float GetManningDepthFromQ(Reach* pReach, double Q, float wdRatio)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
