@@ -1,0 +1,8 @@
+; MCfire.def : Declares the module parameters for the DLL.
+
+LIBRARY
+
+EXPORTS
+    ; Explicit exports can go here
+
+WWMfire_DailyProcess @11
