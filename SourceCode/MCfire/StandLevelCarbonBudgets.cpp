@@ -1619,39 +1619,52 @@ For the initial exercise, forest stands were classified as 1) conifer, hardwood,
 The 3 forest vegetation classes were consistent with VDDT forest vegetation classes.
 
 In each IDU, stand age was set in the year 2010 and based on the VDDT classification.
-
 The mid - point of the age range for the VDDT class was assigned to the IDU as the stand age of the IDU.
 0 - 20 = 10, 21 - 40 = 30, 41 - 60 = 50, 61 - 80 = 70, 81 - 120 = 100, 120 - 2000 = 160, 200 + = 260
 
-Stands >= 80 years of age were assumed to originate from fire and those less than 80 were assumed to originate from clear - cut harvest.In the projection years, the type of stand origin was prescribed within ENVISION(from the fire model and management model).
+Stands >= 80 years of age were assumed to originate from fire and those less than 80 were assumed to originate 
+from clear - cut harvest. In the projection years, the type of stand origin was prescribed within ENVISION
+(from the fire model and management model).
 
-For each fire origin case, Biome - BGC was run over a 460 yr period to create a reference stand level carbon budget(SLCB) that runs to 2100.  The climate was a 28 - year time series of Daymet data that was recycled as needed.The model was spun up to create a stable soil carbon pool, a fire was prescribed in 1540 and 100 years later another fire was prescribed.The following 350 yrs of model output was saved(so if 260 at 2010 can grow 90 yrs to 2100).
+For each fire origin case, Biome - BGC was run over a 460 yr period to create a reference stand level carbon budget(SLCB) 
+that runs to 2100.  The climate was a 28 - year time series of Daymet data that was recycled as needed.
 
-For each harvest origin case, Biome - BGC was run over a 380 yr period to create a reference stand level carbon budget(SLCB) that runs to 2100.  A fire was prescribed in 1730 and 100 yrs later a clear - cut was prescribed.The following 170 yrs of model output was saved(so if 80 in 2010 can grow 90 yrs to 2100).
+The model was spun up to create a stable soil carbon pool, a fire was prescribed in 1540 and 100 years later another 
+fire was prescribed.The following 350 yrs of model output was saved(so if 260 at 2010 can grow 90 yrs to 2100).
+
+For each harvest origin case, Biome - BGC was run over a 380 yr period to create a reference stand level carbon budget(SLCB) 
+that runs to 2100.  A fire was prescribed in 1730 and 100 yrs later a clear - cut was prescribed.
+The following 170 yrs of model output was saved (so if 80 in 2010 can grow 90 yrs to 2100).
 
 The reference location was HJA for the conifer stands and Macdonald - Dunn Forest near Corvallis for the hardwood and mixed stands.
 
-The outputs consisted of all(8) carbon stocks(stem, leaf, coarse root, fine root, CWD, snag, litter, and soil – units are kgC / m2) and 3 carbon fluxes(NPP, NEP, stem production - units are kgC / m2 / yr).
+The outputs consisted of all (8) carbon stocks(stem, leaf, coarse root, fine root, CWD, snag, litter, and soil – units are kgC / m2) 
+and 3 carbon fluxes(NPP, NEP, stem production - units are kgC / m2 / yr).
 
-Using the SLCBs, the carbon stocks are initialized based on stand age.Values are then incremented each year based on the specific SLCB.
+Using the SLCBs, the carbon stocks are initialized based on stand age. Values are then incremented each year based on the specific SLCB.
 
-To track the harvest removals and the carbon emissions associated with fire during an ENVISION run, a table of proportional dispositions was established(dispositions.txt).In the case of fire, the proportion of each C pool that was burned was specified.In the case of harvest, the proportion of the stem carbon that was removed was specified.Values are included for Low, Medium, and High Intensity if that information is available.Otherwise run as High.
+To track the harvest removals and the carbon emissions associated with fire during an ENVISION run, 
+a table of proportional dispositions was established(dispositions.txt).  In the case of fire, the proportion of each C pool that was burned 
+was specified. In the case of harvest, the proportion of the stem carbon that was removed was specified. Values are included for Low, Medium, 
+and High Intensity if that information is available. Otherwise run as High.
 
-For reporting purposes, the area weighted means for total C stocks(kgC / m2), NPP, and NEP are reported on an annual basis throughout the projections, along with the sums(TgC / yr) for NPP, NEP, harvest removals, and fire emissions.
+For reporting purposes, the area weighted means for total C stocks(kgC / m2), NPP, and NEP are reported 
+on an annual basis throughout the projections, along with the sums(TgC / yr) for NPP, NEP, harvest removals, and fire emissions.
 _____________________________________________________________________________
-To simulate the potential impacts of climate change on the Basin wide carbon balance, a new set of SLCBs was generated.In this case, the climate data was 30 years(1971 - 2000, recycled for spin - up) of data based on observations, followed by 100 yrs of projected climate data(MACA downscaling of CMIP5 GCM output).
-
-A new level of stratification was introduced based on age of stand origin.The whole range from 1750 to 2100 was divided into 20 year intervals.There are 7 age classes from VDDT so 7 relevant intervals before 2010 and 5 intervals beginning 2011.
+To simulate the potential impacts of climate change on the Basin wide carbon balance, a new set of SLCBs was generated.In this case, 
+the climate data was 30 years (1971 - 2000, recycled for spin - up) of data based on observations, followed by 100 yrs of projected climate data
+(MACA downscaling of CMIP5 GCM output). A new level of stratification was introduced based on age of stand origin. The whole range 
+from 1750 to 2100 was divided into 20 year intervals. There are 7 age classes from VDDT so 7 relevant intervals before 2010 and 5 intervals beginning 2011.
 
 1750 - 1769, 1830 - 1849, 1890 - 1909, 1930 - 1949, 1950 - 1969, 1970 - 1989, 1990 - 2009, 2010 - 2029, 2030 - 2049, 2050 - 2069, 2070 - 2089, 2090 - 2109.
-
-The idea is that stands existing in 2010 can thus grow forward into the new climate and new stands can begin in the new climate and grow forward into it as well.All stands are run to 2100.
+The idea is that stands existing in 2010 can thus grow forward into the new climate and new stands can begin in the new climate and grow forward into it as well.
+All stands are run to 2100.
 
 SLCBs could be designated by 3 descriptors, e.g. (C, F, 1750) refers to conifer, fire origin, stand origin in 1750)
 
 For the BGC runs, first create a climate file running from 1650 to 2100.
 
-The base run is for a 260 yr old stand(fire in 1650, fire in 1750)
+The base run is for a 260 yr old stand (fire in 1650, fire in 1750)
 
 For 160 yr old stand, go back to yr of stand origin, 1850, then do a simulation that has a fire in 1750 and a fire in 1850 = (C, F, L, 1850)
 
