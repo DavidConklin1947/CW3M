@@ -61,7 +61,7 @@
              annual_idu_output="0"
              daily_reach_output="0"
              annual_reach_output="0"
-             initial_conditions="flow.ic"
+             initial_conditions=""
               >
 
   <!-- <catchment> specifies how to construct catchment structures for the model.

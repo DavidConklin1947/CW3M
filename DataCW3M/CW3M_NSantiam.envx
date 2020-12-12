@@ -393,7 +393,7 @@ timing       ='1'
 freq         ='10'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='Reporter.xml'
+initInfo     ='NSantiam\Reporter_NSantiam.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
