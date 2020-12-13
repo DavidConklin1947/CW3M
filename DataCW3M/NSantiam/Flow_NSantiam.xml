@@ -390,28 +390,73 @@ dynamic="0"
 
     <!-- These are gridded and run from 1979 through the latest year available. The data includes leapdays. The data for all the years is combined in a single,
     separate file for each field.  The set was seeded for 1979-2018 by downloading from the MACA website at the University of Idaho in March, 2018.
-    John Dalrymple obtained the files from the MACA website. -->
-    <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" >
+    John Dalrymple obtained the files from the MACA website. 
+                   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2019.nc"
+
+               <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" >
+                 <climate type="precip"
+                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
+                          var_name="precipitation_amount" units="mm" />
+                 <climate type="tmax"
+                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_max_air_temperature_1979-2018.nc"
+                          var_name="max_air_temperature" units="K" />
+                 <climate type="tmin"
+                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_min_air_temperature_1979-2018.nc"
+                          var_name="min_air_temperature" units="K" />
+                 <climate type="humidity"
+                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_specific_humidity_1979-2018.nc"
+                          var_name="specific_humidity" units="kg/kg" />
+                 <climate type="solrad"
+                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_1979-2018.nc"
+                          var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
+                 <climate type="windspd"
+                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2018.nc"
+                          var_name="wind_speed" units="m/s" />
+               </climate_scenario>
+-->
+    <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="2000" lastYear="2009" >
       <climate type="precip"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_precipitation_amount_2000-2009.nc"
                var_name="precipitation_amount" units="mm" />
       <climate type="tmax"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_max_air_temperature_1979-2018.nc"
-               var_name="max_air_temperature" units="K" />
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_max_air_temperature_2000-2009.nc"
+               var_name="air_temperature" units="K" />
       <climate type="tmin"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_min_air_temperature_1979-2018.nc"
-               var_name="min_air_temperature" units="K" />
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_min_air_temperature_2000-2009.nc"
+               var_name="air_temperature" units="K" />
       <climate type="humidity"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_specific_humidity_1979-2018.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_specific_humidity_2000-2009.nc"
                var_name="specific_humidity" units="kg/kg" />
       <climate type="solrad"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_1979-2018.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_2000-2009.nc"
                var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
       <climate type="windspd"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2018.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_wind_speed_2000-2009.nc"
                var_name="wind_speed" units="m/s" />
     </climate_scenario>
-
+    <!--
+    <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="2003" lastYear="2005" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_precipitation_amount_2003-2005.nc"
+               var_name="precipitation_amount" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_max_air_temperature_2003-2005.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_min_air_temperature_2003-2005.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_specific_humidity_2003-2005.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_2003-2005.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
+      <climate type="windspd"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_wind_speed_2003-2005.nc"
+               var_name="wind_speed" units="m/s" />
+    </climate_scenario>
+-->
   </climate_scenarios>
 
   <controlPoints>
