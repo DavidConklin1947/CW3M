@@ -63,7 +63,18 @@ using namespace std;
 #define DEFAULT_REACH_H2O_TEMP_DEGC 8.f
 #define DEFAULT_SOIL_H2O_TEMP_DEGC 5.f
 #define DEFAULT_MIN_SKIN_TEMP_DEGC 1.f /* minimum temperature of liquid stream water in contact with the air (the air temp itself may be much colder) */
-#define DEFAULT_MANNING_N 0.04f /* s/m^(1/3), = 0.059 s/ft^(1/3) */
+
+// Default value of Manning roughness coefficient
+// from Table 9-6 in S.L. Dingman Physical Hydrology 2nd ed. (2002) (p.428)
+// originally from V.T. Chow Open Channel Hydraulics (1959)
+// 0.030 is the normal value in s/ft^(1/3) for 
+// "Minor streams (top width at flood stage < 100 ft)
+// Streams on plain
+// 1. Clean, straight, full stage, no riffles or deep pools"
+// Our units are s/m^(1/3) instead of s/ft^(1/3)
+// 1 ft^(1/3) = 0.673 m^(1/3)
+// 0.030 s/ft^(1/3) = 0.030 / 0.673 = 0.045 s/m^(1/3)
+#define DEFAULT_MANNING_N 0.045f /* s/m^(1/3), = 0.030 s/ft^(1/3) */
 
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
