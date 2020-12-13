@@ -63,6 +63,7 @@ using namespace std;
 #define DEFAULT_REACH_H2O_TEMP_DEGC 8.f
 #define DEFAULT_SOIL_H2O_TEMP_DEGC 5.f
 #define DEFAULT_MIN_SKIN_TEMP_DEGC 1.f /* minimum temperature of liquid stream water in contact with the air (the air temp itself may be much colder) */
+#define DEFAULT_MANNING_N 0.04f /* s/m^(1/3), = 0.059 s/ft^(1/3) */
 
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
