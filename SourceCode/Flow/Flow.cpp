@@ -965,10 +965,53 @@ double Reach::LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC) // returns MJ
 } // end of LatentHeadOfEvaporation()
 
 
-double Reach::GetSubreachShade_a_lator_W_m2(int subreach_ndx, double SW_unshaded_W_m2)
+void VegCharacteristics(int vegclass, int ageclass, double& height_m, double& overhang_m, double& densityFrac)
 {
-   double shade_a_lator_guess = 1.;
-   double sw_shaded_W_m2 = shade_a_lator_guess * SW_unshaded_W_m2;
+   // ??? placeholder
+   height_m = 10;
+   overhang_m = 2;
+   densityFrac = 0.7;
+} // end of VegCharacteristics()
+
+
+double VegShade(double streamWidth_m, double angleFromBankAcrossStream_deg, double height_m, double overhang_m, double densityFrac, int julianDay)
+{
+   // ??? placeholder
+   double shade_frac_guess = 0.25;
+   return(shade_frac_guess);
+} // end of VegShade()
+
+
+double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
+{
+   ReachSubnode* pSubreach = pReach->GetReachSubnode(subreachNdx);
+   double subreach_orientation_deg = 180.; // ??? = pReach->SubreachDirection_deg(subreachNdx);
+   int jday = m_flowContext.dayOfYear;
+   double subreach_width_m = pSubreach->m_subreach_width_m;
+   double veg_height_m = 0; double& rVeg_height_m = veg_height_m;
+   double veg_overhang_m = 0; double& rVeg_overhang_m = veg_overhang_m;
+   double veg_density_frac = 0; double& rVeg_density_frac = veg_density_frac;
+   double shade_frac = 0;
+
+   int bank_l_idu_id; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_id);
+   int bank_l_idu_ndx = m_pIDUlayer->FindIndex(m_colIDU_ID, bank_l_idu_id);
+   int vegclass_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
+   int ageclass_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
+   VegCharacteristics(vegclass_l, ageclass_l, rVeg_height_m, rVeg_overhang_m, rVeg_density_frac);
+   double angle_from_bank_across_reach_deg = subreach_orientation_deg + 90.;
+   double shade_frac_l = VegShade(subreach_width_m, angle_from_bank_across_reach_deg, veg_height_m, veg_overhang_m, veg_density_frac, jday);
+
+   int bank_r_idu_id; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_id);
+   int bank_r_idu_ndx = m_pIDUlayer->FindIndex(m_colIDU_ID, bank_r_idu_id);
+   int vegclass_r = -1;  m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
+   int ageclass_r = -1; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
+   VegCharacteristics(vegclass_r, ageclass_r, rVeg_height_m, rVeg_overhang_m, rVeg_density_frac);
+   angle_from_bank_across_reach_deg = subreach_orientation_deg - 90.;
+   double shade_frac_r = VegShade(subreach_width_m, angle_from_bank_across_reach_deg, veg_height_m, veg_overhang_m, veg_density_frac, jday);
+
+   double sw_shaded_W_m2 = (1 - (shade_frac_l + shade_frac_r)) * SW_unshaded_W_m2;
+   if (sw_shaded_W_m2 < 0) sw_shaded_W_m2 = 0;
+
    return(sw_shaded_W_m2);
 } // end of GetSubreachShade_a_lator_W_m2()
 
@@ -2727,6 +2770,8 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colLulcB,                _T("LULC_B"),       TYPE_INT, CC_AUTOADD );
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colLulcA, _T("LULC_A"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colPVT, _T("PVT"), TYPE_INT, CC_MUST_EXIST);
+   EnvExtension::CheckCol(m_pCatchmentLayer, m_colVEGCLASS, _T("VEGCLASS"), TYPE_INT, CC_MUST_EXIST);
+   EnvExtension::CheckCol(m_pCatchmentLayer, m_colAGECLASS, _T("AGECLASS"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colCatchmentJoin, m_catchmentJoinCol, TYPE_INT, CC_MUST_EXIST);
 
    EnvExtension::CheckCol(m_pIDUlayer, m_colPRECIP_YR, "PRECIP_YR", TYPE_FLOAT, CC_AUTOADD);
@@ -2770,6 +2815,9 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pIDUlayer, m_colPRCPJUNAVG, "PRCPJUNAVG", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colPRCPJULAVG, "PRCPJULAVG", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colPRCPAUGAVG, "PRCPAUGAVG", TYPE_FLOAT, CC_AUTOADD);
+
+   EnvExtension::CheckCol(m_pIDUlayer, m_colCENTROIDX, "CENTROIDX", TYPE_LONG, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pIDUlayer, m_colCENTROIDY, "CENTROIDY", TYPE_LONG, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruTEMP, "TEMP", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruTMAX, "TMAX", TYPE_FLOAT, CC_AUTOADD);
@@ -2868,6 +2916,8 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_MIN, _T("Q_MIN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachHBVCALIB, _T("HBVCALIB"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_Y, _T("XFLUX_Y"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_L_IDU, _T("BANK_L_IDU"), TYPE_INT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_R_IDU, _T("BANK_R_IDU"), TYPE_INT, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
@@ -2921,6 +2971,7 @@ bool FlowModel::Init( EnvContext *pContext )
    Report::LogMsg( "Flow: Building topology" );
    if (m_flowContext.pEnvContext->coldStartFlag) ConnectCatchmentsToReaches();
    AssignReachesToHRUs();
+   AssignIDUsToStreamBanks();
    
    PopulateCatchmentCumulativeAreas();
 
@@ -7945,11 +7996,86 @@ bool FlowModel::ConnectCatchmentsToReaches(void)
    return true;
 }
 
+
+bool FlowModel::AssignIDUsToStreamBanks() // Populate reach attributes BANK_L_IDU and BANK_R_IDU
+{
+   m_pReachLayer->SetColDataU(m_colReachBANK_L_IDU, -1);
+   m_pReachLayer->SetColDataU(m_colReachBANK_R_IDU, -1);
+
+   for (INT_PTR reach_ndx = 0; reach_ndx < m_reachArray.GetSize(); reach_ndx++)
+   {
+      Reach* pReach = m_reachArray[reach_ndx];
+      int hru_id = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachHRU_ID, hru_id);
+      int hru_ndx = m_pHRUlayer->FindIndex(m_colhruHRU_ID, hru_id);
+      HRU* pHRU = m_hruArray[hru_ndx];
+
+      // Find the IDU in the HRU closest to the right and left banks of the downstream end of the reach.
+/*x   Could also try these
+      int   GetNearestPoly(REAL x, REAL y) const;
+      int   GetNearestPoly(Poly *pPoly, float maxDistance, SI_METHOD method = SIM_NEAREST, MapLayer *pToLayer = NULL) const;
+
+      int   GetNearbyPolys(Poly *pPoly, int *neighbors, float *distances, int maxCount, float maxDistance,
+         SI_METHOD method = SIM_NEAREST, MapLayer *pToLayer = NULL) const;
+
+      int   GetNearbyPolysFromIndex(Poly *pPoly, int *neighbors, float *distances, int maxCount, float maxDistance,
+         SI_METHOD method = SIM_NEAREST, MapLayer *pToLayer = NULL, void** ex = NULL) const;
+
+      float ComputeAdjacentLength(Poly *pThisPoly, Poly *pSourcePoly);
+x*/
+      int idu_id_closest_left = -1, idu_id_closest_right = -1;
+      Poly * pReachPoly = m_pReachLayer->GetPolygon(pReach->m_polyIndex);
+      int num_pts_in_reach = (int)pReachPoly->m_vertexArray.GetSize();
+
+      Vertex downstream_end_of_reach = pReachPoly->m_vertexArray[num_pts_in_reach - 1]; 
+      int num_idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize();
+      int closest_left_idu_id = -1, closest_right_idu_id = -1;
+      REAL d_closest_left_idu = 1e9, d_closest_right_idu = 1e9;
+
+      for (int idu_in_hru_ndx = 0; idu_in_hru_ndx < num_idus_in_hru; idu_in_hru_ndx++)
+      {
+         int idu_poly_ndx = pHRU->m_polyIndexArray[idu_in_hru_ndx];
+         int idu_id = -1; m_pIDUlayer->GetData(idu_poly_ndx, m_colIDU_ID, idu_id);
+
+         // Calculate the distance from the centroid of the IDU to downstream end of the reach.
+         REAL centroidx = 0.; m_pIDUlayer->GetData(idu_poly_ndx, m_colCENTROIDX, centroidx);
+         REAL centroidy = 0.; m_pIDUlayer->GetData(idu_poly_ndx, m_colCENTROIDY, centroidy);
+         Vertex idu_centroid(centroidx, centroidy);
+         ASSERT(!isnan(idu_centroid.x) && !isnan(idu_centroid.y));
+         REAL dx = idu_centroid.x - downstream_end_of_reach.x;
+         REAL dy = idu_centroid.y - downstream_end_of_reach.y;
+         REAL d_idu2reach = sqrt(dx * dx + dy * dy);
+
+         // Looking downstream, which side of the reach is this IDU on?
+         // Note that if the IDU straddles the reach, then it is on both sides.
+         bool left_bank_idu = true;
+         bool right_bank_idu = true;
+
+         if (left_bank_idu && d_idu2reach < d_closest_left_idu)
+         {
+            idu_id_closest_left = idu_id;
+            d_closest_left_idu = d_idu2reach;
+         }
+         if (right_bank_idu && d_idu2reach < d_closest_right_idu)
+         {
+            idu_id_closest_right = idu_id;
+            d_closest_right_idu = d_idu2reach;
+         }
+      } // end of loop thru IDUs in HRU
+      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachBANK_L_IDU, idu_id_closest_left);
+      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachBANK_R_IDU, idu_id_closest_right);
+
+   } // end of loop thru reaches
+
+   return(true);
+} // end of AssignIDUsToStreamBanks()
+
+
 bool FlowModel::AssignReachesToHRUs() // Populate reach attributes HRU_ID and HRU_FRAC.
 {
    // An "orphan reach" is a reach whose comid is not associated with any IDU.
    // First loop thru HRUs, fill in the HRU_ID for the reaches with the same COMID as the HRU, and add the reach index to the m_reachNdxArray for the HRU.
-   // Then find the orphan reaches, set their HRU_IDs to the HRU_ID of the first downstream reach that is already associated with an HRU, and add the reach layer index to the m_reachNdxArray for the HRU.
+   // Then find the orphan reaches, set their HRU_IDs to the HRU_ID of the first downstream reach that is already associated with an HRU, and 
+   // add the reach layer index to the m_reachNdxArray for the HRU.
    // Then loop thru all the reaches and populate an array of total reach lengths by HRU.
    // Finally, loop thru all the reaches one more time, and populate their HRU_FRAC attributes.
 

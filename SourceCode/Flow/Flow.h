@@ -1475,6 +1475,7 @@ public:
    bool UpdateIDUclimateTemporalAverages(int tau, EnvContext * pContext);
    double MagicReachWaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in reaches.
    double MagicHRUwaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in HRUs.
+   double GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreach_ndx, double SW_unshaded_W_m2);
 
 
 protected:
@@ -1548,6 +1549,7 @@ protected:
    int  ParseHRULayerDetails(CString &aggCols, int detail);
    bool ConnectCatchmentsToReaches( void );
    bool AssignReachesToHRUs();
+   bool AssignIDUsToStreamBanks();
    //void UpdateCatchmentFluxes( float time, float timeStep, FlowContext *pFlowContext );
 
    //float GetReachOutflow( ReachNode *pReachNode );
@@ -1674,6 +1676,8 @@ public:
    int m_colLulcB;
    int m_colLulcA;
    int m_colPVT;
+   int m_colVEGCLASS;
+   int m_colAGECLASS;
 
    int m_colCatchmentReachIndex;
    int m_colCatchmentCatchID;
@@ -1722,6 +1726,9 @@ public:
    int m_colPRCPJUNAVG;
    int m_colPRCPJULAVG;
    int m_colPRCPAUGAVG;
+
+   int m_colCENTROIDX;
+   int m_colCENTROIDY;
 
    int m_colHruTEMP;
    int m_colHruTMAX;
@@ -1822,6 +1829,8 @@ public:
    int m_colReachQ_UPSTREAM;
    int m_colReachQ_MIN;
    int m_colReachHBVCALIB;
+   int m_colReachBANK_L_IDU;
+   int m_colReachBANK_R_IDU;
 
    int m_colHbvW2A_SLP;
    int m_colHbvW2A_INT;

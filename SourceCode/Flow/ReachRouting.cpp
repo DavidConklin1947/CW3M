@@ -634,7 +634,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
 
          double orig_m_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
          double vts_frac = pReach->GetSubreachViewToSky_frac(l);
-         double rad_sw_net_W_m2 = pReach->GetSubreachShade_a_lator_W_m2(l, rad_sw_unshaded_W_m2);
+         double rad_sw_net_W_m2 = pFlowContext->pFlowModel->GetSubreachShade_a_lator_W_m2(pReach, l, rad_sw_unshaded_W_m2);
 
          double lateralInflow_m3 = GetLateralInflow(pReach);
          ASSERT(!isnan(lateralInflow_m3));
