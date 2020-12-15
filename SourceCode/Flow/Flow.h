@@ -1829,8 +1829,9 @@ public:
    int m_colReachQ_UPSTREAM;
    int m_colReachQ_MIN;
    int m_colReachHBVCALIB;
-   int m_colReachBANK_L_IDU;
-   int m_colReachBANK_R_IDU;
+   int m_colReachDIRECTION;
+   int m_colReachBANK_L_IDU; // IDU index of IDU representative of the left bank of the reach
+   int m_colReachBANK_R_IDU; // IDU index of IDU representative of the right bank of the reach
 
    int m_colHbvW2A_SLP;
    int m_colHbvW2A_INT;

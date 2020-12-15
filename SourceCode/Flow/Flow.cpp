@@ -985,7 +985,8 @@ double VegShade(double streamWidth_m, double angleFromBankAcrossStream_deg, doub
 double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
 {
    ReachSubnode* pSubreach = pReach->GetReachSubnode(subreachNdx);
-   double subreach_orientation_deg = 180.; // ??? = pReach->SubreachDirection_deg(subreachNdx);
+   // ??? For now, we're approximating the direction of the subreach by the net direction of the reach itself.
+   double subreach_orientation_deg = 0; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, subreach_orientation_deg);
    int jday = m_flowContext.dayOfYear;
    double subreach_width_m = pSubreach->m_subreach_width_m;
    double veg_height_m = 0; double& rVeg_height_m = veg_height_m;
@@ -993,16 +994,14 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
    double veg_density_frac = 0; double& rVeg_density_frac = veg_density_frac;
    double shade_frac = 0;
 
-   int bank_l_idu_id; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_id);
-   int bank_l_idu_ndx = m_pIDUlayer->FindIndex(m_colIDU_ID, bank_l_idu_id);
+   int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
    int vegclass_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
    int ageclass_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
    VegCharacteristics(vegclass_l, ageclass_l, rVeg_height_m, rVeg_overhang_m, rVeg_density_frac);
    double angle_from_bank_across_reach_deg = subreach_orientation_deg + 90.;
    double shade_frac_l = VegShade(subreach_width_m, angle_from_bank_across_reach_deg, veg_height_m, veg_overhang_m, veg_density_frac, jday);
 
-   int bank_r_idu_id; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_id);
-   int bank_r_idu_ndx = m_pIDUlayer->FindIndex(m_colIDU_ID, bank_r_idu_id);
+   int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
    int vegclass_r = -1;  m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
    int ageclass_r = -1; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
    VegCharacteristics(vegclass_r, ageclass_r, rVeg_height_m, rVeg_overhang_m, rVeg_density_frac);
@@ -2916,6 +2915,7 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_MIN, _T("Q_MIN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachHBVCALIB, _T("HBVCALIB"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_Y, _T("XFLUX_Y"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachDIRECTION, _T("DIRECTION"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_L_IDU, _T("BANK_L_IDU"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_R_IDU, _T("BANK_R_IDU"), TYPE_INT, CC_AUTOADD);
 
@@ -7997,7 +7997,7 @@ bool FlowModel::ConnectCatchmentsToReaches(void)
 }
 
 
-bool FlowModel::AssignIDUsToStreamBanks() // Populate reach attributes BANK_L_IDU and BANK_R_IDU
+bool FlowModel::AssignIDUsToStreamBanks() // Populate reach attributes BANK_L_IDU, BANK_R_IDU, and DIRECTION
 {
    m_pReachLayer->SetColDataU(m_colReachBANK_L_IDU, -1);
    m_pReachLayer->SetColDataU(m_colReachBANK_R_IDU, -1);
@@ -8008,6 +8008,25 @@ bool FlowModel::AssignIDUsToStreamBanks() // Populate reach attributes BANK_L_ID
       int hru_id = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachHRU_ID, hru_id);
       int hru_ndx = m_pHRUlayer->FindIndex(m_colhruHRU_ID, hru_id);
       HRU* pHRU = m_hruArray[hru_ndx];
+
+      // Calculate net compass direction of flow in deg, North = 0 
+      double direction_deg = 0; 
+      Poly* pReachPoly = m_pReachLayer->GetPolygon(pReach->m_polyIndex);
+      Vertex upstream_end = pReachPoly->m_vertexArray[0];
+      int ndx_of_downstream_end = pReachPoly->m_vertexArray.GetSize() - 1; ASSERT(ndx_of_downstream_end > 0);
+      Vertex downstream_end = pReachPoly->m_vertexArray[ndx_of_downstream_end];
+      double easting = downstream_end.x - upstream_end.x;
+      double northing = downstream_end.y - upstream_end.y;
+      ASSERT(easting != 0 || northing != 0);
+      if (easting == 0) direction_deg = northing > 0 ? 0 : 180;
+      else
+      {
+         double radius = sqrt(northing * northing + easting * easting);
+         double direction_rad = asin(easting / radius);
+         direction_deg = (direction_rad / (2 * PI)) * 360;
+         ASSERT(!isnan(direction_deg));
+      }
+      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachDIRECTION, direction_deg);
 
       // Find the IDU in the HRU closest to the right and left banks of the downstream end of the reach.
 /*x   Could also try these
@@ -8022,27 +8041,21 @@ bool FlowModel::AssignIDUsToStreamBanks() // Populate reach attributes BANK_L_ID
 
       float ComputeAdjacentLength(Poly *pThisPoly, Poly *pSourcePoly);
 x*/
-      int idu_id_closest_left = -1, idu_id_closest_right = -1;
-      Poly * pReachPoly = m_pReachLayer->GetPolygon(pReach->m_polyIndex);
-      int num_pts_in_reach = (int)pReachPoly->m_vertexArray.GetSize();
-
-      Vertex downstream_end_of_reach = pReachPoly->m_vertexArray[num_pts_in_reach - 1]; 
-      int num_idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize();
-      int closest_left_idu_id = -1, closest_right_idu_id = -1;
+      int num_idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize(); ASSERT(num_idus_in_hru > 0);
+      int closest_left_idu_ndx = -1, closest_right_idu_ndx = -1;
       REAL d_closest_left_idu = 1e9, d_closest_right_idu = 1e9;
 
       for (int idu_in_hru_ndx = 0; idu_in_hru_ndx < num_idus_in_hru; idu_in_hru_ndx++)
       {
          int idu_poly_ndx = pHRU->m_polyIndexArray[idu_in_hru_ndx];
-         int idu_id = -1; m_pIDUlayer->GetData(idu_poly_ndx, m_colIDU_ID, idu_id);
 
          // Calculate the distance from the centroid of the IDU to downstream end of the reach.
          REAL centroidx = 0.; m_pIDUlayer->GetData(idu_poly_ndx, m_colCENTROIDX, centroidx);
          REAL centroidy = 0.; m_pIDUlayer->GetData(idu_poly_ndx, m_colCENTROIDY, centroidy);
          Vertex idu_centroid(centroidx, centroidy);
          ASSERT(!isnan(idu_centroid.x) && !isnan(idu_centroid.y));
-         REAL dx = idu_centroid.x - downstream_end_of_reach.x;
-         REAL dy = idu_centroid.y - downstream_end_of_reach.y;
+         REAL dx = idu_centroid.x - downstream_end.x;
+         REAL dy = idu_centroid.y - downstream_end.y;
          REAL d_idu2reach = sqrt(dx * dx + dy * dy);
 
          // Looking downstream, which side of the reach is this IDU on?
@@ -8052,17 +8065,17 @@ x*/
 
          if (left_bank_idu && d_idu2reach < d_closest_left_idu)
          {
-            idu_id_closest_left = idu_id;
+            closest_left_idu_ndx = idu_poly_ndx;
             d_closest_left_idu = d_idu2reach;
          }
          if (right_bank_idu && d_idu2reach < d_closest_right_idu)
          {
-            idu_id_closest_right = idu_id;
+            closest_right_idu_ndx = idu_poly_ndx;
             d_closest_right_idu = d_idu2reach;
          }
       } // end of loop thru IDUs in HRU
-      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachBANK_L_IDU, idu_id_closest_left);
-      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachBANK_R_IDU, idu_id_closest_right);
+      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachBANK_L_IDU, closest_left_idu_ndx);
+      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachBANK_R_IDU, closest_right_idu_ndx);
 
    } // end of loop thru reaches
 
