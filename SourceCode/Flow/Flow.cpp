@@ -7997,6 +7997,27 @@ bool FlowModel::ConnectCatchmentsToReaches(void)
 }
 
 
+double Direction_deg(Vertex fromPt, Vertex toPt) // Returns compass direction from the first point to the second point in degrees.
+{ 
+   double direction_deg = 0;
+   double easting = toPt.x - fromPt.x;
+   double northing = toPt.y - fromPt.y;
+
+   if (easting == 0 && northing == 0) direction_deg = 0; // the toPt is the same as the fromPt
+   else if (easting == 0) direction_deg = northing > 0 ? 0 : 180;
+   else
+   {
+      double radius = sqrt(northing * northing + easting * easting);
+      double direction_rad = asin(easting / radius);
+      direction_deg = (direction_rad / (2 * PI)) * 360;
+      if (direction_deg < 0) direction_deg += 360;
+      ASSERT(!isnan(direction_deg) && 0 <= direction_deg && direction_deg < 360);
+   }
+
+   return(direction_deg);
+} // end of Direction_deg()
+
+
 bool FlowModel::AssignIDUsToStreamBanks() // Populate reach attributes BANK_L_IDU, BANK_R_IDU, and DIRECTION
 {
    m_pReachLayer->SetColDataU(m_colReachBANK_L_IDU, -1);
@@ -8010,23 +8031,13 @@ bool FlowModel::AssignIDUsToStreamBanks() // Populate reach attributes BANK_L_ID
       HRU* pHRU = m_hruArray[hru_ndx];
 
       // Calculate net compass direction of flow in deg, North = 0 
-      double direction_deg = 0; 
       Poly* pReachPoly = m_pReachLayer->GetPolygon(pReach->m_polyIndex);
       Vertex upstream_end = pReachPoly->m_vertexArray[0];
-      int ndx_of_downstream_end = pReachPoly->m_vertexArray.GetSize() - 1; ASSERT(ndx_of_downstream_end > 0);
+      int ndx_of_downstream_end = (int)pReachPoly->m_vertexArray.GetSize() - 1; ASSERT(ndx_of_downstream_end > 0);
       Vertex downstream_end = pReachPoly->m_vertexArray[ndx_of_downstream_end];
-      double easting = downstream_end.x - upstream_end.x;
-      double northing = downstream_end.y - upstream_end.y;
-      ASSERT(easting != 0 || northing != 0);
-      if (easting == 0) direction_deg = northing > 0 ? 0 : 180;
-      else
-      {
-         double radius = sqrt(northing * northing + easting * easting);
-         double direction_rad = asin(easting / radius);
-         direction_deg = (direction_rad / (2 * PI)) * 360;
-         ASSERT(!isnan(direction_deg));
-      }
-      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachDIRECTION, direction_deg);
+      Vertex nominal_midpt = Vertex((downstream_end.x + upstream_end.x) / 2, (downstream_end.y + upstream_end.y) / 2);
+      double flow_direction_deg = Direction_deg(upstream_end, downstream_end);
+      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachDIRECTION, flow_direction_deg);
 
       // Find the IDU in the HRU closest to the right and left banks of the downstream end of the reach.
 /*x   Could also try these
@@ -8049,19 +8060,21 @@ x*/
       {
          int idu_poly_ndx = pHRU->m_polyIndexArray[idu_in_hru_ndx];
 
-         // Calculate the distance from the centroid of the IDU to downstream end of the reach.
+         // Calculate the distance from the centroid of the IDU to nominal midpoint of the reach.
          REAL centroidx = 0.; m_pIDUlayer->GetData(idu_poly_ndx, m_colCENTROIDX, centroidx);
          REAL centroidy = 0.; m_pIDUlayer->GetData(idu_poly_ndx, m_colCENTROIDY, centroidy);
          Vertex idu_centroid(centroidx, centroidy);
          ASSERT(!isnan(idu_centroid.x) && !isnan(idu_centroid.y));
-         REAL dx = idu_centroid.x - downstream_end.x;
-         REAL dy = idu_centroid.y - downstream_end.y;
+         REAL dx = idu_centroid.x - nominal_midpt.x;
+         REAL dy = idu_centroid.y - nominal_midpt.y;
          REAL d_idu2reach = sqrt(dx * dx + dy * dy);
 
          // Looking downstream, which side of the reach is this IDU on?
          // Note that if the IDU straddles the reach, then it is on both sides.
-         bool left_bank_idu = true;
-         bool right_bank_idu = true;
+         // ??? but this logic doesn't recognize that it might be on both sides
+         double direction_to_idu = Direction_deg(nominal_midpt, idu_centroid);
+         bool left_bank_idu = direction_to_idu > flow_direction_deg && direction_to_idu < (flow_direction_deg + 180);
+         bool right_bank_idu = !left_bank_idu;
 
          if (left_bank_idu && d_idu2reach < d_closest_left_idu)
          {
@@ -8074,6 +8087,9 @@ x*/
             d_closest_right_idu = d_idu2reach;
          }
       } // end of loop thru IDUs in HRU
+      ASSERT(closest_left_idu_ndx >= 0 || closest_right_idu_ndx >= 0);
+      if (closest_right_idu_ndx < 0) closest_right_idu_ndx = closest_left_idu_ndx;
+      if (closest_left_idu_ndx < 0) closest_left_idu_ndx = closest_right_idu_ndx;
       m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachBANK_L_IDU, closest_left_idu_ndx);
       m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachBANK_R_IDU, closest_right_idu_ndx);
 
