@@ -1778,6 +1778,9 @@ public:
    int m_colReachHRU_ID;
    int m_colReachHRU_FRAC;
    int m_colStreamRES_ID;
+   int m_colReachRESAREA_HA;
+   int m_colReachRES_H2O;
+   int m_colReachRES_TEMP;
    int m_colStreamRESOUTFALL;
    int m_colStreamSTRMVERT0X;
    int m_colStreamSTRMVERT0Y;
@@ -1824,8 +1827,10 @@ public:
    int m_colReachTURNOVER;
    int m_colReachXFLUX_D;
    int m_colReachXFLUX_Y;
-   int m_colReachSPRING_CMS;
+   int m_colReachSPRING_CMS; // flow rate of spring discharge, cms
+   int m_colReachSPRINGTEMP; // temperature of spring discharge, deg C
    int m_colReachIN_RUNOFF;
+   int m_colReachIN_RUNOF_C; // temperature of water running off the land into the reach, deg C
    int m_colReachQ_UPSTREAM;
    int m_colReachQ_MIN;
    int m_colReachHBVCALIB;

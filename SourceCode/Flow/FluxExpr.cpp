@@ -1129,6 +1129,7 @@ bool Spring::Init(FlowContext* pFlowContext)
 
    MapLayer* pReachLayer = (MapLayer*)pFlowContext->pEnvContext->pReachLayer;
    pReachLayer->CheckCol(m_colReachSPRING_CMS, "SPRING_CMS", TYPE_FLOAT, CC_AUTOADD);
+   pReachLayer->CheckCol(m_colReachSPRINGTEMP, "SPRINGTEMP", TYPE_FLOAT, CC_AUTOADD);
 
    m_pReach = pFlowModel->GetReachFromCOMID(m_springCOMID);
    if (m_pReach == NULL)
@@ -1174,8 +1175,12 @@ bool Spring::Step(FlowContext* pFlowContext)
 
    // This reach may already have been affected by another flux today.
    double spring_flow_so_far_today_cms; pReachLayer->GetData(m_pReach->m_polyIndex, m_colReachSPRING_CMS, spring_flow_so_far_today_cms);
-   spring_flow_so_far_today_cms += m_springFlow_cms;
-   pReachLayer->SetDataU(m_pReach->m_polyIndex, m_colReachSPRING_CMS, spring_flow_so_far_today_cms);
+   double spring_temp_so_far_today_degC = 0.;
+   if (spring_flow_so_far_today_cms > 0) pReachLayer->GetData(m_pReach->m_polyIndex, m_colReachSPRINGTEMP, spring_temp_so_far_today_degC);
+   WaterParcel cumulative_spring_water_todayWP(spring_flow_so_far_today_cms * SEC_PER_DAY, spring_temp_so_far_today_degC);
+   cumulative_spring_water_todayWP.MixIn(H2O_to_addWP);
+   pReachLayer->SetDataU(m_pReach->m_polyIndex, m_colReachSPRING_CMS, cumulative_spring_water_todayWP.m_volume_m3 / SEC_PER_DAY);
+   pReachLayer->SetDataU(m_pReach->m_polyIndex, m_colReachSPRINGTEMP, cumulative_spring_water_todayWP.WaterTemperature());
 
    return true;
 } // end of Spring::Step()

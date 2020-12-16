@@ -203,7 +203,6 @@ AltWaterMaster::AltWaterMaster(WaterAllocation *pWaterAllocation)
 , m_colDynamIsLease(-1)					// column if water right is a lease specified in dynamic WR input file
 , m_DynamicWRs(false)				   // a dynamic water rights input file has loaded
 , m_colWRZone(-1) 				      // column number of WRZONE in IDU layer
-, m_colDSReservoir(-1)              // 1- yes, 0-no reach is downstream from reservoir
 , m_colCOMID(-1)					      // column ID of COMID in IDU layer
 , m_colSTRM_INDEX(-1)					
 , m_dynamicWRType(0)						// input variable index
@@ -657,7 +656,7 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
 	m_pIDUlayer->CheckCol(m_colWRShortG, "WR_SHORTG", TYPE_INT, CC_AUTOADD);
 	m_pIDUlayer->CheckCol(m_colWRShutOff, "WR_SHUTOFF", TYPE_INT, CC_AUTOADD);
    m_pIDUlayer->CheckCol(m_colWR_SH_DAY, "WR_SH_DAY", TYPE_INT, CC_AUTOADD);
-	m_pReachLayer->CheckCol( m_colDSReservoir, "DS_RES", TYPE_INT, CC_MUST_EXIST);            
+
 	// Other attributes in the IDU and stream layers used in the AltWaterMaster Method
 	m_pIDUlayer->CheckCol(m_colAREA, "AREA", TYPE_FLOAT, CC_MUST_EXIST);	
    m_pIDUlayer->CheckCol(m_colPOP, "POP", TYPE_FLOAT, CC_MUST_EXIST);

@@ -385,27 +385,48 @@ flow_cms="1.10"
                    path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2019.nc"
 -->
-               <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" >
-                 <climate type="precip"
-                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
-                          var_name="precipitation_amount" units="mm" />
-                 <climate type="tmax"
-                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_max_air_temperature_1979-2018.nc"
-                          var_name="max_air_temperature" units="K" />
-                 <climate type="tmin"
-                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_min_air_temperature_1979-2018.nc"
-                          var_name="min_air_temperature" units="K" />
-                 <climate type="humidity"
-                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_specific_humidity_1979-2018.nc"
-                          var_name="specific_humidity" units="kg/kg" />
-                 <climate type="solrad"
-                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_1979-2018.nc"
-                          var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
-                 <climate type="windspd"
-                          path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2018.nc"
-                          var_name="wind_speed" units="m/s" />
-               </climate_scenario>
-<!--
+    <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="2010" lastYear="2019" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_precipitation_amount_2010-2019.nc"
+               var_name="precipitation_amount" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_max_air_temperature_2010-2019.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_min_air_temperature_2010-2019.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_specific_humidity_2010-2019.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_2010-2019.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
+      <climate type="windspd"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_wind_speed_2010-2019.nc"
+               var_name="wind_speed" units="m/s" />
+    </climate_scenario>
+    <!--
+    <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
+               var_name="precipitation_amount" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_max_air_temperature_1979-2018.nc"
+               var_name="max_air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_min_air_temperature_1979-2018.nc"
+               var_name="min_air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_specific_humidity_1979-2018.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_1979-2018.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
+      <climate type="windspd"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2018.nc"
+               var_name="wind_speed" units="m/s" />
+    </climate_scenario>
+    
     <climate_scenario name="BaselineGridMultiyearFiles" id="8" maxDaysInClimateYear="366" firstYear="2000" lastYear="2009" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_precipitation_amount_2000-2009.nc"
@@ -846,6 +867,28 @@ flow_cms="1.10"
     -->
 
   <outputs>
+    <output_group name="FLOW Daily Thermal Energy Budget for McKenzie basin streams" interval="daily" >
+      <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RES_H2O (m3 H2O)" query="1" value="RES_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187" type="sum" domain="reach" />
+      <output in_use="1" name="RESAREA_HA (ha)" query="1" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="insolation (MJ)" query="1" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out (MJ)" query="1" value="AREA_H2O*RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation (MJ)" query="1" value="EVAP_MM*AREA_H2O*(2.5-0.00236*TEMP_H2O)/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (MJ)" query="1" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="RAD_SW over entire basin (W per m2)" query="1" value="RAD_SW" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
     
     <output_group name="FLOW McKenzie basin daily weather" interval="daily" >
       <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />

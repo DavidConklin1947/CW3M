@@ -334,7 +334,6 @@ protected:
 	int   m_colExcessIrrDy;					// (m3/sec)
    int   m_colExcessIrrYr;					// (acre-ft)
 	int   m_colIrrExceedMaxDutyYr;      // 1- yes, 0-no IDU exceeded maximum annual irrigation duty 0-no
-	int   m_colDSReservoir;             // 1- yes, 0-no reach is downstream from reservoir
    int m_colWREXISTS; // col for bit-mapped water rights for this IDU
    int m_colWR_MUNI; // col for 1=> municipal water right
    int m_colWR_INSTRM; // col for 1=> instream water right

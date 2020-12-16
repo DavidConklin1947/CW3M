@@ -977,6 +977,13 @@ void VegCharacteristics(int vegclass, int ageclass, double& height_m, double& ov
 double VegShade(double streamWidth_m, double angleFromBankAcrossStream_deg, double height_m, double overhang_m, double densityFrac, int julianDay)
 {
    // ??? placeholder
+   // Do the math for the case where the reach runs N-S, the veg is on the east bank, the veg height is the same as the stream width, and the density fraction is 1.
+   // When the sun is due east and 45 deg above the eastern horizon, then the veg shadow extends just across to the other bank.
+   // When the sun rises to 60 deg above the horizon, then the shadow extends only sin(30 deg) = 0.5 halfway across the stream.
+   // So the shadow extends sin(90 - sun_angle_above_horizon) * veg_height.
+   // What about if the veg is shorter than the width of the stream?
+   // Heuristic: downscale the shade by veg_ht / stream_width.
+
    double shade_frac_guess = 0.25;
    return(shade_frac_guess);
 } // end of VegShade()
@@ -2887,6 +2894,15 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamCOMID_RT, _T("COMID_RT"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamRES_ID, _T("RES_ID"), TYPE_INT, CC_MUST_EXIST);
 
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRESAREA_HA, _T("RESAREA_HA"), TYPE_DOUBLE, CC_AUTOADD);
+   m_pStreamLayer->SetColDataU(m_colReachRESAREA_HA, 0);
+
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRES_H2O, _T("RES_H2O"), TYPE_DOUBLE, CC_AUTOADD);
+   m_pStreamLayer->SetColDataU(m_colReachRES_H2O, 0);
+
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRES_TEMP, _T("RES_TEMP"), TYPE_DOUBLE, CC_AUTOADD);
+   m_pStreamLayer->SetColDataU(m_colReachRES_TEMP, 0);
+
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamRESOUTFALL, _T("RESOUTFALL"), TYPE_INT, CC_AUTOADD);
    m_pStreamLayer->SetColDataU(m_colStreamRESOUTFALL, 0);
 
@@ -2911,6 +2927,7 @@ bool FlowModel::Init( EnvContext *pContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_D, _T("XFLUX_D"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSPRING_CMS, _T("SPRING_CMS"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOFF, _T("IN_RUNOFF"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOF_C, _T("IN_RUNOF_C"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_UPSTREAM, _T("Q_UPSTREAM"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_MIN, _T("Q_MIN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachHBVCALIB, _T("HBVCALIB"), TYPE_INT, CC_MUST_EXIST);
@@ -3289,14 +3306,21 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
    InitRunFluxes();
    InitRunPlugins();
+
    InitReservoirControlPoints();   //initialize reservoir control points
+   m_pReachLayer->SetColDataU(m_colReachRES_H2O, 0);
+   m_pReachLayer->SetColDataU(m_colReachRES_TEMP, 0);
+   m_pReachLayer->SetColDataU(m_colReachRESAREA_HA, 0);
    if (!InitRunReservoirs( pEnvContext )) return(false);
+
    m_pIDUlayer->SetColDataU(m_colSNOWPACK, 0.f);
    m_pIDUlayer->SetColDataU(m_colSNOWCANOPY, 0.f);
    m_pIDUlayer->SetColDataU(m_colSM2ATM, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
+   m_pReachLayer->SetColDataU(m_colReachIN_RUNOF_C, 0);
    m_pReachLayer->SetColDataU(m_colReachQ_UPSTREAM, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
+   m_pReachLayer->SetColDataU(m_colReachSPRINGTEMP, 0);
 
    GlobalMethodManager::InitRun( &m_flowContext );
 
@@ -6205,25 +6229,36 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
 
          m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachQ, discharge);  // m3/sec        
          m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachLOG_Q, log10(discharge));  // log10(m3/sec)
-         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachTEMP_H2O, dischargeWP.WaterTemperature());  // degC        
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachTEMP_H2O, dischargeWP.WaterTemperature());  // degC       
+
+         Reservoir* pReservoir = pReach->m_pReservoir;
+         if (pReservoir != NULL)
+         {
+            double res_h2o_m3 = pReservoir->m_resWP.m_volume_m3;
+            m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachRES_H2O, res_h2o_m3);
+            m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachRES_TEMP, pReservoir->m_resWP.WaterTemperature());
+            double res_area_ha = pReservoir->GetPoolSurfaceAreaFromVolume_ha();
+            m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachRESAREA_HA, res_area_ha);
+         }
 
          double reachH2O_m3 = 0.;
          double reach_evap_m3 = 0.;
          double reach_surf_area_m2 = 0.;
-         double reach_in_runoff_m3 = 0.;
+         WaterParcel reach_in_runoffWP(0, 0);
          for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
          {
             ReachSubnode *pNode = pReach->GetReachSubnode(j);
             reachH2O_m3 += pNode->m_waterParcel.m_volume_m3;
             reach_evap_m3 += pNode->m_evap_m3;
             reach_surf_area_m2 += pNode->m_subreach_surf_area_m2;
-            reach_in_runoff_m3 += pNode->m_runoffWP.m_volume_m3;
+           reach_in_runoffWP.MixIn(pNode->m_runoffWP);
          }
          double reach_evap_mm = (reach_evap_m3 / reach_surf_area_m2) * MM_PER_M;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colStreamREACH_H2O, reachH2O_m3);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachEVAP_MM, reach_evap_mm);
-         double reach_in_runoff_cms = reach_in_runoff_m3 / SEC_PER_DAY;
+         double reach_in_runoff_cms = reach_in_runoffWP.m_volume_m3 / SEC_PER_DAY;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOFF, reach_in_runoff_cms);
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOF_C, reach_in_runoffWP.WaterTemperature());
       }
    }
 
