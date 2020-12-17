@@ -1170,8 +1170,24 @@ bool Spring::Step(FlowContext* pFlowContext)
    // Add water to reach.
    double H2O_to_add_m3 = m_springFlow_cms * SEC_PER_DAY;
    WaterParcel H2O_to_addWP(H2O_to_add_m3, m_temp_C);
+
+   // Special logic for Clear Lake
+   WaterParcel seasonal_springWP(0, 0);
+   if (m_pReach->m_reachID == 23773373)
+   {
+      double avg_additional_cms = 3.053;
+      double seasonal_amplitude_cms = 5.403;
+      double phase_deg = 0;
+      double theta_deg = 360 * ((double)pFlowContext->dayOfYear / (double)pFlowContext->pEnvContext->daysInCurrentYear);
+      double angle_rad = ((theta_deg + phase_deg) / 360) * 2 * PI;
+      double seasonal_adjustment_cms = seasonal_amplitude_cms * sin(angle_rad);
+      double total_additional_m3 = (avg_additional_cms + seasonal_adjustment_cms) * SEC_PER_DAY;
+      WaterParcel additionalWP(total_additional_m3, m_temp_C);
+      H2O_to_addWP.MixIn(additionalWP);
+   }
+
    m_pReach->AddH2OfromGlobalHandlerWP(H2O_to_addWP);
-   m_pReach->m_availableDischarge += m_springFlow_cms;
+   m_pReach->m_availableDischarge += H2O_to_addWP.m_volume_m3 / SEC_PER_DAY;
 
    // This reach may already have been affected by another flux today.
    double spring_flow_so_far_today_cms; pReachLayer->GetData(m_pReach->m_polyIndex, m_colReachSPRING_CMS, spring_flow_so_far_today_cms);

@@ -234,7 +234,7 @@
 
     <Spring name="Springs feeding Clear Lake" 
     COMID="23773373"
-    flow_cms="8.52"
+    flow_cms="6.343"
     temp_C="4.9"
        />
 
@@ -370,13 +370,25 @@ flow_cms="1.10"
     </climate_scenario>
 
     <!-- Gridded recent actual weather used for demos - 2010-17 -->
-    <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="365" >
-      <climate type="precip"   path="GriddedRecentWeather\uofimet_willamette_pr"     var_name="pr"      />
-      <climate type="tmax"     path="GriddedRecentWeather\uofimet_willamette_tasmax" var_name="tasmax"  />
-      <climate type="tmin"     path="GriddedRecentWeather\uofimet_willamette_tasmin" var_name="tasmin"  />
-      <climate type="humidity" path="GriddedRecentWeather\uofimet_willamette_sph"    var_name="sph"     />
-      <climate type="solrad"   path="GriddedRecentWeather\uofimet_willamette_rsds"   var_name="rsds"    />
-      <climate type="windspd"  path="GriddedRecentWeather\uofimet_willamette_vas"    var_name="vas"     />
+    <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="366"  firstYear="2010" lastYear="2019" >
+      <climate type="precip"
+               path="GriddedRecentWeather\WRB_4km_2010-latest\UofIMETDATA_precipitation_amount_2010-2019.nc"
+               var_name="precipitation_amount" units="mm" />
+      <climate type="tmax"
+               path="GriddedRecentWeather\WRB_4km_2010-latest\UofIMETDATA_max_air_temperature_2010-2019.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="GriddedRecentWeather\WRB_4km_2010-latest\UofIMETDATA_min_air_temperature_2010-2019.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="GriddedRecentWeather\WRB_4km_2010-latest\UofIMETDATA_specific_humidity_2010-2019.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="solrad"
+               path="GriddedRecentWeather\WRB_4km_2010-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_2010-2019.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
+      <climate type="windspd"
+               path="GriddedRecentWeather\WRB_4km_2010-latest\UofIMETDATA_wind_speed_2010-2019.nc"
+               var_name="wind_speed" units="m/s" />
     </climate_scenario>
 
     <!-- These are gridded and run from 1979 through the latest year available. The data includes leapdays. The data for all the years is combined in a single,
@@ -944,10 +956,13 @@ flow_cms="1.10"
       <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="EVAP_MM 23773373 McKenzie R" query="COMID=23773373" value="EVAP_MM" type="sum" domain="reach" />
-      <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
-      <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
-    </output_group>
-    
+        <output in_use="1" name="Spring water cfs 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS*35.315" type="sum" domain="reach" />
+        <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
+        <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
+        <output in_use="1" name="ET from Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+        <output in_use="1" name="ET from Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      </output_group>
+
     <output_group name="FLOW monthly thermal energy OUTLET OF CLEAR LAKE, OR_23773373 USGS_14158500" interval ="monthly" >
       <output in_use="1" name="PRECIP mmH2O 23773373 McKenzie R" query="COMID=23773373" value="PRECIP" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW" type="sum" domain="reach" />
@@ -962,8 +977,32 @@ flow_cms="1.10"
       <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="EVAP_MM 23773373 McKenzie R" query="COMID=23773373" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="Spring water cfs 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS*35.315" type="sum" domain="reach" />
       <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
       <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
+      <output in_use="1" name="ET from Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW yearly thermal energy OUTLET OF CLEAR LAKE, OR_23773373 USGS_14158500" interval ="yearly" >
+      <output in_use="1" name="PRECIP mmH2O 23773373 McKenzie R" query="COMID=23773373" value="PRECIP" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_AIR degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 23773373 McKenzie R" query="COMID=23773373" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="DEPTHMANNG m 23773373 McKenzie R" query="COMID=23773373" value="DEPTHMANNG" type="sum" domain="reach" />
+      <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23773373 McKenzie R" query="COMID=23773373" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="Spring water cfs 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS*35.315" type="sum" domain="reach" />
+      <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
+      <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
+      <output in_use="1" name="ET from Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
     </output_group>
 
     <output_group name="FLOW Vida Stream Temp Analysis" interval ="monthly" >
