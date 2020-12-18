@@ -240,7 +240,7 @@
 
     <Spring name="Springs feeding Lookout Creek" 
      COMID="23773411"
-     flow_cms="0.36"
+     flow_cms="0.14"
      temp_C="4.9"
        />
 
