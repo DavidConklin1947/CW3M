@@ -267,13 +267,13 @@
     flow_cms="0.76"
      temp_C="4.9"
        />
-<!--
+
     <Spring name="Springs above Cougar Reservoir" 
 COMID="23773037"
-flow_cms="6.37"
+flow_cms="6.06"
      temp_C="4.9"
        />
--->
+
     <Spring name="South Fork near Rainbow" 
 COMID="23773009"
 flow_cms="1.10"

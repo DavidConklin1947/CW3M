@@ -856,7 +856,7 @@ double ReachRouting::KinematicWave(double oldQ_cms, double upstreamInflow_cms, d
    double alph = manningN * pow((long double)wp, (long double)(2 / 3.)) / sqrt(slope);
    double alpha = pow((long double)alph, (long double) 0.6);
       
-   double Qstar_cms = (oldQ_cms + upstreamInflow_cms) / 2.0f; ASSERT(Qstar_cms > 0.);  // from Chow, eqn. 9.6.4 (m3/sec)
+   double Qstar_cms = (oldQ_cms + upstreamInflow_cms) / 2.0f; ASSERT(Qstar_cms > 0.);  // ? which book ? from Chow, eqn. 9.6.4 (m3/sec)
    double z = alpha * beta * pow(Qstar_cms, beta - 1.0); // s/m
    float dx_m = (float)length_m;
 
