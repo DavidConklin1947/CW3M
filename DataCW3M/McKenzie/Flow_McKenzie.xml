@@ -771,7 +771,7 @@ flow_cms="1.10"
                rule_priorities="cougar_rule_priorities.csv"       rp_dir="Rules_Cougar\"                              tailwater_elev="408"
                turbine_efficiency="0.9"                           td_elev="519.68"                                     fc1_elev="517.86"
                buffer_zone="Cougar_buffer.csv"                    ressim_output_f="Cougar_ressim_flow_1935_2008.csv"  ressim_output_r="Cougar_ressim_rule_1935_2008.csv"
-               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="0.45" />
+               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="0.50" />
 
     <reservoir id="9"   name="Blue River Reservoir (USACE)"       path="Reservoirs\"     initVolume="5063443"
                area_vol_curve="blue_river_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1.417"
@@ -916,6 +916,35 @@ flow_cms="1.10"
       <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
     </output_group>
     
+    <output_group name="FLOW Thermal Energy Budget for 8 CGR yearly" interval="yearly" >
+      <output in_use="1" name="REACH_H2O (m3 H2O)" query="HBVCALIB=8" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy reach water (MJ)" query="HBVCALIB=8" value="TEMP_H2O*REACH_H2O*998.2*4.187" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O (m2)" query="HBVCALIB=8" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RES_H2O (m3 H2O)" query="RESOUTFALL=8" value="RES_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy in reservoir water (MJ)" query="RESOUTFALL=8" value="RES_TEMP*RES_H2O*998.2*4.187" type="sum" domain="reach" />
+      <output in_use="1" name="RESAREA_HA (ha)" query="RESOUTFALL=8" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="insolation (MJ)" query="HBVCALIB=8" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out (MJ)" query="HBVCALIB=8" value="AREA_H2O*RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation (m3 H2O)" query="HBVCALIB=8" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation (MJ)" query="HBVCALIB=8" value="EVAP_MM*AREA_H2O*(2.5-0.00236*TEMP_H2O)/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (m3 H2O)" query="HBVCALIB=8" value="IN_RUNOFF*86400" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (MJ)" query="HBVCALIB=8" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (m3 H2O)" query="HBVCALIB=8" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (MJ)" query="HBVCALIB=8" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="HBVCALIB=8" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="HBVCALIB=8" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="RAD_SW over entire basin (W per m2)" query="HBVCALIB=8" value="RAD_SW" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="HBVCALIB=8" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="HBVCALIB=8" value="TMIN" type="areaWtMean" domain="idu" />
+      <output name="basin discharge (m3 H2O) 23773009" query="COMID=23773009" value="Q*86400" type="sum" domain="reach" />
+      <output in_use="1" name="basin discharge (cfs) 23773009"
+               query="COMID=23773009" value="Q*35.3146667" type="sum" domain="reach"
+              obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="basin discharge temperature (deg C) 23773009"
+              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+    </output_group>
+
     <output_group name="FLOW McKenzie basin daily weather" interval="daily" >
       <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
