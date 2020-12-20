@@ -693,6 +693,7 @@ protected:
    Reach* m_pReach;
    int m_colReachSPRING_CMS;   // m3/sec
    int m_colReachSPRINGTEMP; // temperature of spring water, deg C
+   int m_colReachIN_RUNOFF; // lateral inflow to the reach from runoff, cms
 }; // end of class Spring
 
 

@@ -1199,6 +1199,62 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
    // next - scenarios
    Report::StatusMsg( "Loading Scenarios..." );   
    Report::LogMsg( "Loading Scenarios" );
+
+
+
+
+
+   TiXmlElement* pXmlScenarios = pXmlRoot->FirstChildElement("scenarios");
+
+   CString simulation_scenarios_file;
+   int default_simulation_scenario = 0;
+   CString climate_scenarios_file;
+   int default_climate_scenario = 0;
+
+   XML_ATTR scenario_attrs[] = {
+      {"simulation_scenarios_file", TYPE_CSTRING, &simulation_scenarios_file, false, 0},
+      {"default_simulation_scenario", TYPE_INT, &default_simulation_scenario, false, 0},
+      {"climate_scenarios_file", TYPE_CSTRING, &climate_scenarios_file, true, 0},
+      {"default_climate_scenario", TYPE_INT, &default_climate_scenario, false, 0},
+      { NULL,                      TYPE_NULL,     NULL,                                false,   0 } };
+
+   ok = TiXmlGetAttributes(pXmlScenarios, scenario_attrs, filename, NULL);
+
+   m_pScenarioManager->m_path.Empty(); // = filename;
+   int scenario_count = 0;
+   if (!simulation_scenarios_file.IsEmpty()) scenario_count = m_pScenarioManager->LoadXml(simulation_scenarios_file, true, false);
+   if (scenario_count <= 0)
+   {
+      Scenario* pScenario = new Scenario("Default Scenario");
+      m_pScenarioManager->AddScenario(pScenario);
+      m_pScenarioManager->SetDefaultScenario(0);
+   }
+   else
+   {
+      msg.Format("Loaded %i scenarios from %s", scenario_count, filename);
+      Report::InfoMsg(msg);
+   }
+   if (default_simulation_scenario >= m_pScenarioManager->GetCount())
+      default_simulation_scenario = m_pScenarioManager->GetCount() - 1;
+   m_pScenarioManager->SetDefaultScenario(0);
+   m_pModel->SetScenario(m_pScenarioManager->GetScenario(default_simulation_scenario));
+ 
+   // reset output path to correct directory for output
+   // output directory (e.g. "C:\Envision\MyStudyArea\MyIDU\Outputs\<scenarioName>\" )
+   outputPath = PathManager::GetPath(PM_IDU_DIR);
+   outputPath += "Outputs\\";
+   outputPath += m_pScenarioManager->GetScenario(default_simulation_scenario)->m_name;
+   PathManager::SetPath(PM_OUTPUT_DIR, outputPath);
+
+   SHCreateDirectoryEx(NULL, outputPath, NULL);
+//x   mkdir(outputPath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+
+
+
+
+
+/*x
    m_pScenarioManager->m_path.Empty(); // = filename;
    TiXmlNode *pXmlScenarios = pXmlRoot->FirstChildElement( _T("scenarios") );
    int defaultIndex = 0;
@@ -1244,6 +1300,7 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
 #else
          mkdir(outputPath,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #endif
+x*/
 
    Report::StatusMsg( "Compiling Policies" );
    Report::LogMsg( "Compiling Policies" );
