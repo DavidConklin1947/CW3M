@@ -215,7 +215,8 @@ public:
    //int LoadScenarios( LPCSTR filename=NULL );
    //int SaveScenarios( LPCSTR filename );
 
-   int LoadXml( LPCTSTR filename, bool isImporting, bool appendToExisting );       // returns number of nodes in the first level
+   bool LoadXml(LPCTSTR filename);    
+   int LoadXml(LPCTSTR filename, bool isImporting, bool appendToExisting);       // returns number of nodes in the first level
    int LoadXml( TiXmlNode *pLulcTree, bool appendToExisting );
    int SaveXml( LPCTSTR filename );
    int SaveXml( FILE *fp, bool includeHdr, bool useFileRef );

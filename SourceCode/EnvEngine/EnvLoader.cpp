@@ -1200,10 +1200,6 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
    Report::StatusMsg( "Loading Scenarios..." );   
    Report::LogMsg( "Loading Scenarios" );
 
-
-
-
-
    TiXmlElement* pXmlScenarios = pXmlRoot->FirstChildElement("scenarios");
 
    CString simulation_scenarios_file;
@@ -1219,88 +1215,39 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       { NULL,                      TYPE_NULL,     NULL,                                false,   0 } };
 
    ok = TiXmlGetAttributes(pXmlScenarios, scenario_attrs, filename, NULL);
+   if (default_simulation_scenario < 0) default_simulation_scenario = 0;
+   if (default_climate_scenario < 0) default_climate_scenario = 0;
 
    m_pScenarioManager->m_path.Empty(); // = filename;
    int scenario_count = 0;
-   if (!simulation_scenarios_file.IsEmpty()) scenario_count = m_pScenarioManager->LoadXml(simulation_scenarios_file, true, false);
-   if (scenario_count <= 0)
+   bool simulation_scenarios_loaded = false;
+   simulation_scenarios_loaded = !simulation_scenarios_file.IsEmpty() && m_pScenarioManager->LoadXml(simulation_scenarios_file);
+   if (simulation_scenarios_loaded)
+   {
+      scenario_count = m_pScenarioManager->GetCount();
+      msg.Format("Loaded %i scenarios from %s", scenario_count, filename);
+      Report::InfoMsg(msg);
+   }
+   else 
    {
       Scenario* pScenario = new Scenario("Default Scenario");
       m_pScenarioManager->AddScenario(pScenario);
       m_pScenarioManager->SetDefaultScenario(0);
    }
-   else
-   {
-      msg.Format("Loaded %i scenarios from %s", scenario_count, filename);
-      Report::InfoMsg(msg);
-   }
-   if (default_simulation_scenario >= m_pScenarioManager->GetCount())
-      default_simulation_scenario = m_pScenarioManager->GetCount() - 1;
-   m_pScenarioManager->SetDefaultScenario(0);
+
+   if (default_simulation_scenario >= scenario_count) default_simulation_scenario = scenario_count - 1;
+
+   m_pScenarioManager->SetDefaultScenario(default_simulation_scenario);
    m_pModel->SetScenario(m_pScenarioManager->GetScenario(default_simulation_scenario));
  
    // reset output path to correct directory for output
-   // output directory (e.g. "C:\Envision\MyStudyArea\MyIDU\Outputs\<scenarioName>\" )
+   // output directory (e.g. C:\CW3M_McKenzie_0.4.2\McKenzie\Outputs\Baseline )
    outputPath = PathManager::GetPath(PM_IDU_DIR);
    outputPath += "Outputs\\";
    outputPath += m_pScenarioManager->GetScenario(default_simulation_scenario)->m_name;
    PathManager::SetPath(PM_OUTPUT_DIR, outputPath);
 
    SHCreateDirectoryEx(NULL, outputPath, NULL);
-//x   mkdir(outputPath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
-
-
-
-
-
-/*x
-   m_pScenarioManager->m_path.Empty(); // = filename;
-   TiXmlNode *pXmlScenarios = pXmlRoot->FirstChildElement( _T("scenarios") );
-   int defaultIndex = 0;
-   pXmlScenarios->ToElement()->Attribute( "default", &defaultIndex );
-   int scenarioCount = m_pScenarioManager->LoadXml( pXmlScenarios, false );
-
-   if ( defaultIndex < 0  )
-      defaultIndex = 0;
-      
-   // create a default scenario if none was specified in the ENVX file
-   if ( m_pScenarioManager->GetCount() == 0 )
-      {
-      Scenario *pScenario = new Scenario( "Default Scenario" );
-      m_pScenarioManager->AddScenario( pScenario );
-      m_pScenarioManager->SetDefaultScenario( 0 );
-      }
-   else
-      {
-      if ( defaultIndex >= m_pScenarioManager->GetCount() )
-         defaultIndex = 0;
-
-      m_pScenarioManager->SetDefaultScenario( defaultIndex );
-      }
-
-   m_pModel->SetScenario( m_pScenarioManager->GetScenario( defaultIndex ) );
-
-   if ( m_pScenarioManager->m_importPath.IsEmpty() )
-      msg.Format( "Loaded %i scenarios from %s", scenarioCount, filename );
-   else
-      msg.Format( "Loaded %i scenarios from %s", scenarioCount, (PCTSTR) m_pScenarioManager->m_importPath );
-   Report::InfoMsg( msg );
-
-   // reset output path to correct directory for output
-   // output directory (e.g. "C:\Envision\MyStudyArea\MyIDU\Outputs\<scenarioName>\" )
-   outputPath = PathManager::GetPath( PM_IDU_DIR );
-   outputPath += "Outputs\\";
-   outputPath += m_pScenarioManager->GetScenario( defaultIndex )->m_name;
-   PathManager::SetPath( PM_OUTPUT_DIR, outputPath );
-
-   // make sure directory exists
-#ifndef NO_MFC
-   SHCreateDirectoryEx( NULL, outputPath, NULL );
-#else
-         mkdir(outputPath,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-#endif
-x*/
 
    Report::StatusMsg( "Compiling Policies" );
    Report::LogMsg( "Compiling Policies" );
@@ -1323,10 +1270,8 @@ x*/
 
    m_pModel->m_logMsgLevel = logMsgLevel;
 
-
    return 1;   
    }
-
 
 
 int EnvLoader::LoadLayer( Map *pMap, LPCTSTR name, LPCTSTR path, int type,  int includeData, int red, int green, int blue, int extraCols, int records, LPCTSTR initField, LPCTSTR overlayFields, bool loadFieldInfo )

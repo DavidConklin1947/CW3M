@@ -771,61 +771,105 @@ int ScenarioManager::GetDefaultScenario()
    }
 
 
-
-int ScenarioManager::LoadXml( LPCSTR _filename, bool isImporting, bool appendToExisting )
+bool ScenarioManager::LoadXml(LPCSTR _filename)
+{
+   CString filename;
+   if (PathManager::FindPath(_filename, filename) < 0) //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
    {
-   if ( appendToExisting == false )
+      CString msg;
+      msg.Format("ScenarioManager: Input file '%s' not found - no scenarios will be loaded", _filename);
+      Report::ErrorMsg(msg);
+      return(false);
+   }
+
+   TiXmlDocument doc;
+   bool ok = doc.LoadFile(filename);
+
+   if (!ok)
+   {
+      CString msg;
+      msg.Format("Error reading scenario input file, %s", (LPCTSTR)m_path);
+      Report::ErrorMsg(msg);
+      return(false);
+   }
+
+// start interating through the scenarios
+   TiXmlElement* pXmlRoot = doc.RootElement();
+
+   int defaultIndex = 0;
+   pXmlRoot->Attribute("default", &defaultIndex);
+
+   int count = LoadXml(pXmlRoot, false);
+   if (count <= 0)
+   {
+      CString msg;
+      msg.Format("ScenarioManager::LoadXmL() No scenarios found in scenario input file, %s", (LPCTSTR)m_path);
+      Report::ErrorMsg(msg);
+      return(false);
+   }
+
+   SetDefaultScenario(defaultIndex);
+
+   m_loadStatus = 1;   // loaded from XML file
+   m_importPath = filename;
+   return(true);
+} // end of ScenarioManager::LoadXml(LPCSTR _filename)
+
+
+int ScenarioManager::LoadXml(LPCSTR _filename, bool isImporting, bool appendToExisting)
+{
+   if (appendToExisting == false)
       RemoveAll();
 
    CString filename;
-   if ( PathManager::FindPath( _filename, filename ) < 0 ) //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
-      {
+   if (PathManager::FindPath(_filename, filename) < 0) //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
+   {
       CString msg;
-      msg.Format( "ScenarioManager: Input file '%s' not found - no scenarios will be loaded", _filename );
-      Report::ErrorMsg( msg );
+      msg.Format("ScenarioManager: Input file '%s' not found - no scenarios will be loaded", _filename);
+      Report::ErrorMsg(msg);
       return false;
-      }
+   }
 
-   // have xml string, start parsing
+// have xml string, start parsing
    TiXmlDocument doc;
-   bool ok = doc.LoadFile( filename );
+   bool ok = doc.LoadFile(filename);
 
-   if ( ! ok )
-      {
+   if (!ok)
+   {
 #ifndef NO_MFC
       CString msg;
-      msg.Format("Error reading scenario input file, %s", (LPCTSTR) m_path );
-      AfxGetMainWnd()->MessageBox( doc.ErrorDesc(), msg );
+      msg.Format("Error reading scenario input file, %s", (LPCTSTR)m_path);
+      AfxGetMainWnd()->MessageBox(doc.ErrorDesc(), msg);
 #endif
       return -1;
-      }
+   }
 
-   // start interating through the scenarios
-   TiXmlElement *pXmlRoot = doc.RootElement();
+// start interating through the scenarios
+   TiXmlElement* pXmlRoot = doc.RootElement();
 
    int defaultIndex = 0;
-   pXmlRoot->Attribute( "default", &defaultIndex );
+   pXmlRoot->Attribute("default", &defaultIndex);
 
-   int count = LoadXml( pXmlRoot, appendToExisting );
-   
-   SetDefaultScenario( defaultIndex );
+   int count = LoadXml(pXmlRoot, appendToExisting);
 
-   if ( appendToExisting == false )
+   SetDefaultScenario(defaultIndex);
+
+   if (appendToExisting == false)
+   {
+      if (isImporting)
       {
-      if ( isImporting )
-         {
          m_loadStatus = 1;   // loaded from XML file
          m_importPath = filename;
-         }
+      }
       else     // loading from ENVX file
-         {
+      {
          m_loadStatus = 0;
          m_path = filename;
-         }
       }
+   }
 
    return count;
-   }
+} // end of ScenarioManager::LoadXml(LPCSTR _filename, bool isImporting, bool appendToExisting)
 
 
 int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
