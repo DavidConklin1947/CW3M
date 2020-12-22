@@ -1347,7 +1347,6 @@ public:
    ~ClimateDataInfo(void)
    { 
       if (m_pDataObj) delete m_pDataObj; 
-      if (m_ncid >= 0) nc_close(m_ncid);
    }
 };
 
