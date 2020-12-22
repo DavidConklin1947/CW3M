@@ -1171,7 +1171,7 @@ bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pF
       if (!ok)
       {
          CString msg;
-         msg.Format(_T("Flow: Misformed element reading <climate_scenario> attributes in input file %s - it is missing the 'id' attribute"), filename);
+         msg.Format(_T("Flow: Misformed element reading <climate_scenario> attributes in input file %s - it is missing the 'id' attribute"), filename.GetString());
          Report::ErrorMsg(msg);
          break;
       }
@@ -1232,10 +1232,10 @@ bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pF
             // Case 3: otherwise, interpret the path as relative to the current working directory.
             CStringArray tokens;
             int driveLetter = ::Tokenize(CString(path), ":", tokens);
-            if (driveLetter > 1)//there was a colon (ParseHRULayerDetails returns 1+the number of colons in the string)
+            if (driveLetter > 1) // if there was a colon (Tokenize() returns 1+the number of colons in the string)
                pInfo->m_path = path; // Case 1
-            else if (path == '\\')
-            { // Case 2
+            else if (path.GetAt(0) == '\\')
+            { // Case 2. nchars is the length of the CLIMATE_DRIVE environment variable, or 0 if CLIMATE_DRIVE is undefined.
                if (nchars > 0) pInfo->m_path = CString(drive_str) + path;
                else pInfo->m_path = path;
             }

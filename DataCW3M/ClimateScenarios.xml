@@ -123,22 +123,22 @@
     -->
    <climate_scenario name="Baseline_2019versionOfGridMET_2010-current" id="8" maxDaysInClimateYear="366" firstYear="2010" lastYear="2019" >
       <climate type="precip"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_precipitation_amount_2010-2019.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest_multiyear\UofIMETDATA_precipitation_amount_2010-2019.nc"
                var_name="precipitation_amount" units="mm" />
       <climate type="tmax"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_max_air_temperature_2010-2019.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest_multiyear\UofIMETDATA_max_air_temperature_2010-2019.nc"
                var_name="air_temperature" units="K" />
       <climate type="tmin"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_min_air_temperature_2010-2019.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest_multiyear\UofIMETDATA_min_air_temperature_2010-2019.nc"
                var_name="air_temperature" units="K" />
       <climate type="humidity"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_specific_humidity_2010-2019.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest_multiyear\UofIMETDATA_specific_humidity_2010-2019.nc"
                var_name="specific_humidity" units="kg/kg" />
       <climate type="solrad"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_2010-2019.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest_multiyear\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_2010-2019.nc"
                var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
       <climate type="windspd"
-               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest\UofIMETDATA_wind_speed_2010-2019.nc"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest_multiyear\UofIMETDATA_wind_speed_2010-2019.nc"
                var_name="wind_speed" units="m/s" />
     </climate_scenario>
 
@@ -267,7 +267,6 @@
                var_name="northward_wind" units="m/s" />
     </climate_scenario>
 
-<!-- The notes for climate scenario #8 BaselineGridMultiyearFiles contain information about the source of #13 BaselineGrid_2000-09. -->
     <climate_scenario name="Baseline_2019versionOfGridMET_2000-09" id="13" maxDaysInClimateYear="366" firstYear="2000" lastYear="2009" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest_multiyear\UofIMETDATA_precipitation_amount_2000-2009.nc"
