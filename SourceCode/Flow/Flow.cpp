@@ -2709,26 +2709,27 @@ bool FlowModel::DailyUpdateToSingleYearWeatherAverages(int doy, int daysInYear, 
 } // end of DailyUpdateToSingleYearWeatherAverages()
 
 
-bool FlowModel::Init( EnvContext *pContext )
+bool FlowModel::Init( EnvContext *pEnvContext )
    {
-   m_id = pContext->id;
+   m_id = pEnvContext->id;
 
-   ASSERT( pContext->pMapLayer != NULL );
-   m_pMap = pContext->pMapLayer->GetMapPtr();
+   ASSERT( pEnvContext->pMapLayer != NULL );
+   m_pMap = pEnvContext->pMapLayer->GetMapPtr();
 
    m_flowContext.Reset();
-   m_flowContext.pFlowModel = this;
-   m_flowContext.pEnvContext = pContext;
    m_flowContext.timing = GMT_INIT;
+   m_flowContext.pFlowModel = this;
+   m_flowContext.pEnvContext = pEnvContext;
+   pEnvContext->m_pFlowContext = &m_flowContext;
 
-   pContext->pEnvModel->m_pFlowModel = this;
+   pEnvContext->pEnvModel->m_pFlowModel = this;
 
-   m_pIDUlayer = (MapLayer*)pContext->pMapLayer;
-   m_pReachLayer = (MapLayer*)pContext->pReachLayer;
-   m_pHRUlayer = (MapLayer*)pContext->pHRUlayer;
-   m_pLinkLayer = (MapLayer*)pContext->pLinkLayer;
-   m_pNodeLayer = (MapLayer*)pContext->pNodeLayer;
-   m_pSubcatchLayer = (MapLayer*)pContext->pSubcatchmentLayer;
+   m_pIDUlayer = (MapLayer*)pEnvContext->pMapLayer;
+   m_pReachLayer = (MapLayer*)pEnvContext->pReachLayer;
+   m_pHRUlayer = (MapLayer*)pEnvContext->pHRUlayer;
+   m_pLinkLayer = (MapLayer*)pEnvContext->pLinkLayer;
+   m_pNodeLayer = (MapLayer*)pEnvContext->pNodeLayer;
+   m_pSubcatchLayer = (MapLayer*)pEnvContext->pSubcatchmentLayer;
 
    if ( m_catchmentLayer.IsEmpty() )
       {
@@ -2757,7 +2758,7 @@ bool FlowModel::Init( EnvContext *pContext )
       return false;
    }
 
-   m_pLinkLayer = (MapLayer *)pContext->pLinkLayer;
+   m_pLinkLayer = (MapLayer *)pEnvContext->pLinkLayer;
 
    if (m_pLinkLayer == NULL)
    {
@@ -3003,7 +3004,7 @@ bool FlowModel::Init( EnvContext *pContext )
       }
 */
    SetAllCatchmentAttributes();
-   InitHRULayers(pContext);
+   InitHRULayers(pEnvContext);
 
    // iterate through catchments/hrus/hrulayers, setting up the fluxes
    InitFluxes();
@@ -3164,9 +3165,9 @@ bool FlowModel::Init( EnvContext *pContext )
 
 
    // call any initialization methods for fluxes
-   m_flowContext.Reset();
-   m_flowContext.pFlowModel = this;
-   m_flowContext.pEnvContext = pContext;
+ //x  m_flowContext.Reset();
+ //x  m_flowContext.pFlowModel = this;
+ //x  m_flowContext.pEnvContext = pContext;
 
    int fluxInfoCount = (int) m_fluxInfoArray.GetSize();
    for ( int i=0; i < fluxInfoCount; i++ )
@@ -3274,7 +3275,24 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_currentEnvisionScenarioIndex = pEnvContext->scenarioIndex;
    m_projectionWKT = pEnvContext->pMapLayer->m_projection; //the Well Known Text for the maplayer projection
 
+   int num_available_climate_scenarios = (int)m_scenarioArray.GetCount();
+   if (m_currentFlowScenarioIndex >= num_available_climate_scenarios)
+   {
+      CString msg; msg.Format("FlowModel::InitRun() m_currentFlowScenarioIndex (=%d) is >= num_available_climate_scenarios (=%d)",
+         m_currentFlowScenarioIndex, num_available_climate_scenarios);
+      Report::ErrorMsg(msg);
+      return(false);
+   }
    FlowScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+   int num_climate_files = (int)pScenario->m_climateInfoArray.GetCount();
+   for (int climate_file_ndx = 0; climate_file_ndx < num_climate_files; climate_file_ndx++) 
+   {
+      ClimateDataInfo* pInfo = pScenario->m_climateInfoArray[climate_file_ndx];
+      ASSERT(pInfo->m_type != CDT_UNKNOWN);
+      pInfo->m_pDataObj = new GeoSpatialDataObj;
+      pInfo->m_pDataObj->InitLibraries();
+   } // end of loop to initialize access to the netCDF climate data files
+   
    if (pEnvContext->m_maxDaysInYear == -1) pEnvContext->m_maxDaysInYear = pScenario->m_maxDaysInClimateYear;
 
    m_precipNdx.RemoveAll();
@@ -10854,6 +10872,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
       
    // scenarios
    TiXmlElement *pXmlScenarios = pXmlRoot->FirstChildElement( "climate_scenarios" );
+   /*x
    if ( pXmlScenarios == NULL )
       {
       CString msg( "Flow: Missing <climate_scenarios> tag when reading " );
@@ -10861,8 +10880,9 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
       msg += "This is a required tag";
       Report::ErrorMsg( msg );
       }
-   else
-      {
+   x*/
+   if (pXmlScenarios != NULL)
+   {
       char drive_str[5] = "";
       int nchars = 0;
       nchars = GetEnvironmentVariable("CLIMATE_DRIVE", drive_str, sizeof(drive_str));

@@ -11,6 +11,7 @@
 #include "Actor.h"
 #include "Scenario.h"
 #include "EnvMisc.h"
+#include "..\Flow\Flow.h"
 
 #include <MAP.h>
 
@@ -1248,6 +1249,10 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
    PathManager::SetPath(PM_OUTPUT_DIR, outputPath);
 
    SHCreateDirectoryEx(NULL, outputPath, NULL);
+
+   // Now load climate scenarios.
+   FlowContext * pFlowContext = pModel->m_envContext.m_pFlowContext;
+   m_pScenarioManager->LoadClimateScenariosXml(climate_scenarios_file, pFlowContext);
 
    Report::StatusMsg( "Compiling Policies" );
    Report::LogMsg( "Compiling Policies" );

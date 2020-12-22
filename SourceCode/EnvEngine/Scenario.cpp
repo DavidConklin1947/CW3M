@@ -5,6 +5,7 @@
 
 #include "EnvModel.h"
 #include "Policy.h"
+#include "../Flow/Flow.h"
 
 #include <tinyxml.h>
 #include <PathManager.h>
@@ -793,7 +794,7 @@ bool ScenarioManager::LoadXml(LPCSTR _filename)
       return(false);
    }
 
-// start interating through the scenarios
+// start iterating through the scenarios
    TiXmlElement* pXmlRoot = doc.RootElement();
 
    int defaultIndex = 0;
@@ -1103,6 +1104,223 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
    return GetCount();
    }
 
+
+bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pFlowContext)
+{
+   char drive_str[5] = "";
+   int nchars = 0;
+   nchars = GetEnvironmentVariable("CLIMATE_DRIVE", drive_str, sizeof(drive_str));
+   CString msg;
+   if (nchars > 0)
+   {
+      msg.Format("FlowProcess::LoadXml() environment variable CLIMATE_DRIVE = %s Only the first letter matters.", drive_str);
+      drive_str[1] = ':';
+      drive_str[2] = 0;
+   }
+   else  msg.Format("FlowProcess::LoadXml() GetEnvironmentVariable(CLIMATE_DRIVE...) returned nchars = %d", nchars);
+   Report::LogMsg(msg);
+
+   CString filename;
+   if (PathManager::FindPath(_filename, filename) < 0) //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
+   {
+      CString msg;
+      msg.Format("ScenarioManager: Input file '%s' not found - no scenarios will be loaded", _filename);
+      Report::ErrorMsg(msg);
+      return(false);
+   }
+
+   TiXmlDocument doc;
+   bool ok = doc.LoadFile(filename);
+   if (!ok)
+   {
+      CString msg;
+      msg.Format("Error reading scenario input file, %s", (LPCTSTR)m_path);
+      Report::ErrorMsg(msg);
+      return(false);
+   }
+
+   TiXmlElement* pXmlScenarios = doc.RootElement();
+
+   int defaultIndex = 0;
+   XML_ATTR scenariosAttrs[] = {
+    // attr                     type          address                                isReq  checkCol
+    { "default",                 TYPE_INT,      &defaultIndex,                       false,   0 },
+    { NULL,                      TYPE_NULL,     NULL,                                false,   0 } };
+   ok = TiXmlGetAttributes(pXmlScenarios, scenariosAttrs, filename.GetString(), NULL);
+   ASSERT(ok);
+
+   TiXmlElement* pXmlScenario = pXmlScenarios->FirstChildElement("climate_scenario");
+   while (pXmlScenario != NULL)
+   {
+      LPCTSTR name = NULL;
+      int id = -1;
+      int max_days_in_climate_year = 366;
+      int first_year = 2010;
+      int last_year = 2010;
+
+      XML_ATTR scenarioAttrs[] = {
+         // attr      type          address         isReq  checkCol
+         { "name",    TYPE_STRING,   &name,         false,   0 },
+         { "id",      TYPE_INT,      &id,           true,    0 },
+         { "maxDaysInClimateYear", TYPE_INT, &max_days_in_climate_year, true, 0 },
+         { "firstYear", TYPE_INT,      &first_year, false, 0 },
+         { "lastYear", TYPE_INT,      &last_year, false, 0 },
+         { NULL,      TYPE_NULL,     NULL,          false,   0 } };
+
+      bool ok = TiXmlGetAttributes(pXmlScenario, scenarioAttrs, filename);
+      if (!ok)
+      {
+         CString msg;
+         msg.Format(_T("Flow: Misformed element reading <climate_scenario> attributes in input file %s - it is missing the 'id' attribute"), filename);
+         Report::ErrorMsg(msg);
+         break;
+      }
+
+      FlowScenario* pScenario = new FlowScenario;
+      pScenario->m_id = id;
+      pScenario->m_name = name;
+      pScenario->m_maxDaysInClimateYear = max_days_in_climate_year;
+      pScenario->m_firstYear = first_year;
+      pScenario->m_lastYear = last_year;
+
+      FlowModel* pFlowModel = pFlowContext->pFlowModel;
+
+      pFlowModel->m_scenarioArray.Add(pScenario);
+
+      //---------- <climate> ----------------------------------
+      TiXmlElement* pXmlClimate = pXmlScenario->FirstChildElement("climate");
+      while (pXmlClimate != NULL)
+      {
+         CString path;
+         LPTSTR varName = NULL;
+         CString cdtype;
+         float delta = -999999999.0f;
+         float elev = 0.0f;
+         CString units = "";
+
+         XML_ATTR climateAttrs[] = {
+            // attr        type          address     isReq  checkCol
+            { "type",      TYPE_CSTRING,  &cdtype,   true,   0 },
+            { "path",      TYPE_CSTRING,  &path,     true,   0 },
+            { "var_name",  TYPE_STRING,   &varName,  false,   0 },
+            { "delta",     TYPE_FLOAT,    &delta,    false,  0 },
+            { "elev",      TYPE_FLOAT,    &elev,     false,  0 },
+            { "units",     TYPE_CSTRING,  &units,    false,  0 },
+         { NULL,        TYPE_NULL,     NULL,      false,  0 } };
+
+         bool ok = TiXmlGetAttributes(pXmlClimate, climateAttrs, filename);
+         if (!ok)
+         {
+            CString msg;
+            msg.Format(_T("Flow: Misformed element reading <climate> attributes in input file %s"), filename.GetString());
+            Report::ErrorMsg(msg);
+         }
+         else
+         {
+            ClimateDataInfo* pInfo = new ClimateDataInfo;
+            pInfo->m_varName = varName;
+            pInfo->m_unitsAttribute = units;
+            pInfo->m_firstYear = pScenario->m_firstYear;
+            pInfo->m_lastYear = pScenario->m_lastYear;
+            pInfo->m_maxDaysInClimateYear = pScenario->m_maxDaysInClimateYear;
+
+            // Figure out the path to the climate data - 3 cases.
+            // "path" here is the string read from Flow.xml.
+            // Case 1: path contains a colon.  Interpret it as an absolute path containing a drive letter.
+            // Case 2: path begins with a backslash.  Interpret it as an absolute path on the drive identified by the environment variable CLIMATE_DRIVE, if any,
+            //         or otherwise on the same drive as the current working directory.
+            // Case 3: otherwise, interpret the path as relative to the current working directory.
+            CStringArray tokens;
+            int driveLetter = ::Tokenize(CString(path), ":", tokens);
+            if (driveLetter > 1)//there was a colon (ParseHRULayerDetails returns 1+the number of colons in the string)
+               pInfo->m_path = path; // Case 1
+            else if (path == '\\')
+            { // Case 2
+               if (nchars > 0) pInfo->m_path = CString(drive_str) + path;
+               else pInfo->m_path = path;
+            }
+            else pInfo->m_path = pFlowModel->m_path + path; // Case 3        
+
+            pInfo->m_useDelta = pXmlClimate->Attribute("delta") ? true : false;
+            if (pInfo->m_useDelta)
+               pInfo->m_delta = delta;
+
+            pInfo->m_type = CDT_UNKNOWN;
+            switch (cdtype[0])
+            {
+               case 'p':     // precip
+                  pInfo->m_type = CDT_PRECIP;
+                  break;
+
+               case 't':
+                  if (cdtype[2] == 'v')          // tavg
+                     pInfo->m_type = CDT_TMEAN;
+                  else if (cdtype[2] == 'i')     // tmin
+                     pInfo->m_type = CDT_TMIN;
+                  else if (cdtype[2] == 'a')     // tmax
+                     pInfo->m_type = CDT_TMAX;
+                  if (units == "K") pInfo->m_offset = -273.15f;
+                  break;
+
+               case 's':
+                  if (cdtype[1] == 'o')          // tavg
+                     pInfo->m_type = CDT_SOLARRAD;
+                  break;
+
+               case 'h':
+                  pInfo->m_type = CDT_SPHUMIDITY;
+                  break;
+
+               case 'r':
+                  if (cdtype[3] == 'v')          // rhavg
+                     pInfo->m_type = CDT_RELHUMIDITY;
+                  else if (cdtype[3] == 'i')     // rhmin
+                     pInfo->m_type = CDT_RHMIN;
+                  else if (cdtype[3] == 'a')     // rhmax
+                     pInfo->m_type = CDT_RHMAX;
+                  break;
+
+               case 'w':
+                  pInfo->m_type = CDT_WINDSPEED;
+                  break;
+
+               case 'u':
+                  pInfo->m_type = CDT_UAS;
+                  break;
+
+               case 'v':
+                  pInfo->m_type = CDT_VAS;
+                  break;
+
+               default: break;
+            }  // end of: switch( type[ 0 ] )
+            if (pInfo->m_type == CDT_UNKNOWN)
+            {
+               CString msg;
+               msg.Format("Flow Error: Unrecognized climate data '%s'type reading file %s", cdtype.GetString(), filename);
+               delete pInfo;
+               pInfo = NULL;
+            }
+
+            if (pInfo != NULL)
+            {
+            //pModel->m_climateDataInfoArray.Add( pInfo );
+               pScenario->m_climateDataMap.SetAt(pInfo->m_type, pInfo);
+               pScenario->m_climateInfoArray.Add(pInfo);
+            }
+
+         }  // end of: else ( valid info )
+
+         pXmlClimate = pXmlClimate->NextSiblingElement("climate");
+      }  // end of: while ( pXmlClimate != NULL )
+
+      pFlowModel->m_currentFlowScenarioIndex = defaultIndex;
+
+      pXmlScenario = pXmlScenario->NextSiblingElement("climate_scenario");
+   } // end of while (pXmlScenario != NULL)
+
+   return(true);
+} // end of LoadClimateScenariosXml() 
 
 
 int ScenarioManager::SaveXml( LPCSTR filename )

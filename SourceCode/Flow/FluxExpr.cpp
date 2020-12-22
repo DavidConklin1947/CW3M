@@ -1176,7 +1176,6 @@ bool Spring::Step(FlowContext* pFlowContext)
    WaterParcel seasonal_springWP(0, 0);
    if (m_pReach->m_reachID == 23773373)
    {
-/*x
       double avg_additional_cms = 3.053;
       double seasonal_amplitude_cms = 5.403;
       double phase_deg = 0;
@@ -1185,13 +1184,12 @@ bool Spring::Step(FlowContext* pFlowContext)
       double seasonal_adjustment_cms = seasonal_amplitude_cms * sin(angle_rad);
       double total_additional_m3 = (avg_additional_cms + seasonal_adjustment_cms) * SEC_PER_DAY;
       WaterParcel additionalWP(total_additional_m3, m_temp_C);
-x*/
+/*x
       double additional_frac = 0.934;
       double from_upstream_cms = m_pReach->GetUpstreamInflow();
-//x      double additional_cms = additional_frac * from_upstream_cms;
-//x      pFlowContext->pEnvContext->pMapLayer->GetData(m_pReach->m_polyIndex, m_colReachIN_RUNOFF, in_runoff_cms);
       double additional_m3 = additional_frac * from_upstream_cms * SEC_PER_DAY;
       WaterParcel additionalWP(additional_m3, m_temp_C);
+x*/
       H2O_to_addWP.MixIn(additionalWP);
    }
 

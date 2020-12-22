@@ -216,6 +216,7 @@ public:
    //int SaveScenarios( LPCSTR filename );
 
    bool LoadXml(LPCTSTR filename);    
+   bool LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pFlowContext);
    int LoadXml(LPCTSTR filename, bool isImporting, bool appendToExisting);       // returns number of nodes in the first level
    int LoadXml( TiXmlNode *pLulcTree, bool appendToExisting );
    int SaveXml( LPCTSTR filename );

@@ -1478,6 +1478,7 @@ public:
    double GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreach_ndx, double SW_unshaded_W_m2);
 
 
+
 protected:
    bool InitClimateMeanValues(EnvContext *pContext);
    bool InitReaches( void  );
@@ -1598,6 +1599,7 @@ protected:
 public:
    CArray< Reach*, Reach* > m_reachArray;       // N.B. the index to m_ReachArray is not necessarily the same as the index to the corresponding reach in the Reach shapefile
 												// pReach->m_polyIndex is the index to the Reach shapefile
+   CString m_path;
 
    // flux information
 protected:
@@ -1625,7 +1627,6 @@ protected:
    CString m_streamLayer;
    CString m_catchmentLayer;
    CString m_climateFilePath;
-   CString m_path;
    CString m_grid;
    MapLayer *m_pGrid;
    float m_climateStationElev;

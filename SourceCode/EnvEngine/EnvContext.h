@@ -7,6 +7,7 @@
 
 #include <Vdata.h>
 #include <DATE.HPP>
+//x #include "..\Flow\Flow.h"
 
 class ActorManager;
 class PolicyManager;
@@ -18,6 +19,7 @@ class QueryEngine;
 class EnvModel;
 class EnvContext;
 class FDataObj;
+class FlowContext;
 
 struct MODEL_VAR;
 
@@ -381,6 +383,8 @@ public:
    int             startYear;             // calendar year in which the simulation started (e.g. 2008)
    int             endYear;               // last calendar year of simulation (e.g. 2050)
    int             currentYear;           // current calendar year of run, incremented from startYear (e.g. 2010)
+
+   FlowContext* m_pFlowContext;
    SYSDATE         m_simDate;               // date being simulated
    int daysInCurrentYear; // 360 or 365 or 366. Gets set in FlowModel::Run()
    int weatherYear; // calendar year from which to draw the weather information; usually the same as currentYear
@@ -433,6 +437,7 @@ public:
       , endYear( 0 )
       , currentYear( 0 )
       , yearOfRun( 0 )
+      , m_pFlowContext(NULL)
       , run( -1 )
       , scenarioIndex( -1 )
       , showMessages( true )
