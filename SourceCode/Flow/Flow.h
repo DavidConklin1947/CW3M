@@ -1313,6 +1313,7 @@ public:
    CString m_varName;
 
    bool m_IDUbased;
+   bool m_row0inSouth; // applies only to gridded data, not IDU-based data. true => the first row of data is at the south edge of the grid.
    int m_firstYear;
    int m_lastYear;
    int m_mostRecentIndexYear; // A calendar year will go here
@@ -1341,7 +1342,7 @@ public:
 
    ClimateDataInfo(void) :
       m_type(CDT_UNKNOWN), m_pDataObj(NULL), m_pDataObjArray(NULL),
-      m_IDUbased(false), m_firstYear(-1), m_lastYear(-1), m_mostRecentIndexYear(-1), m_recentYearIndex(-1),
+      m_IDUbased(false), m_row0inSouth(false), m_firstYear(-1), m_lastYear(-1), m_mostRecentIndexYear(-1), m_recentYearIndex(-1),
       m_ncid(-1), m_varid_idu_id(-1), m_varid_data(-1), m_nctype(NC_NAT), m_size_idu(-1), m_size_time(-1), m_dimid_idu(-1), m_dimid_time(-1),
       m_scaleFactor(1.f), m_scaleFactorAttribute(1.f), m_offset(0.f), m_addOffsetAttribute(0.f), m_unitsAttribute(""), m_maxDaysInClimateYear(366), m_useDelta(false), m_delta(0) { }
    ~ClimateDataInfo(void)
@@ -1359,6 +1360,7 @@ public:
    int m_maxDaysInClimateYear;
    int m_firstYear;
    int m_lastYear;
+   bool m_row0inSouth; // applies only to gridded data, not IDU-based data. true => the first row of data is at the south edge of the grid.
 
    PtrArray< ClimateDataInfo > m_climateInfoArray;  
    

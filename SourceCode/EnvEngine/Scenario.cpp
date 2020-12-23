@@ -1157,14 +1157,16 @@ bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pF
       int max_days_in_climate_year = 366;
       int first_year = 2010;
       int last_year = 2010;
+      CString row_0_location = "N";
 
       XML_ATTR scenarioAttrs[] = {
          // attr      type          address         isReq  checkCol
-         { "name",    TYPE_STRING,   &name,         false,   0 },
+         { "name",    TYPE_STRING,   &name,         true,   0 },
          { "id",      TYPE_INT,      &id,           true,    0 },
          { "maxDaysInClimateYear", TYPE_INT, &max_days_in_climate_year, true, 0 },
          { "firstYear", TYPE_INT,      &first_year, false, 0 },
          { "lastYear", TYPE_INT,      &last_year, false, 0 },
+         { "row_0_location_N_or_S", TYPE_CSTRING, &row_0_location, false, 0},
          { NULL,      TYPE_NULL,     NULL,          false,   0 } };
 
       bool ok = TiXmlGetAttributes(pXmlScenario, scenarioAttrs, filename);
@@ -1176,12 +1178,27 @@ bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pF
          break;
       }
 
+      CString row_0_location_lc = row_0_location;
+      row_0_location_lc.MakeLower();
+      bool row_0_in_south = false;
+      if (row_0_location_lc == "s" || row_0_location_lc == "south") row_0_in_south = true;
+      else if (row_0_location_lc == "n" || row_0_location_lc == "north") row_0_in_south = false;
+      else
+      {
+         CString msg;
+         msg.Format("LoadClimateScenariosXml() cannot interpret row_0_location_N_or_S = %s in climate scenario %s. Please specify N for north or S for south.",
+            row_0_location.GetString(), name);
+         Report::ErrorMsg(msg);
+         return(false);
+      }
+
       FlowScenario* pScenario = new FlowScenario;
       pScenario->m_id = id;
       pScenario->m_name = name;
       pScenario->m_maxDaysInClimateYear = max_days_in_climate_year;
       pScenario->m_firstYear = first_year;
       pScenario->m_lastYear = last_year;
+      pScenario->m_row0inSouth = row_0_in_south;
 
       FlowModel* pFlowModel = pFlowContext->pFlowModel;
 
@@ -1223,6 +1240,7 @@ bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pF
             pInfo->m_firstYear = pScenario->m_firstYear;
             pInfo->m_lastYear = pScenario->m_lastYear;
             pInfo->m_maxDaysInClimateYear = pScenario->m_maxDaysInClimateYear;
+            pInfo->m_row0inSouth = pScenario->m_row0inSouth;
 
             // Figure out the path to the climate data - 3 cases.
             // "path" here is the string read from Flow.xml.

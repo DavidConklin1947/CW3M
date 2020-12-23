@@ -13483,18 +13483,16 @@ bool FlowModel::GetDailyWeatherField(CDTYPE type, int tgtDoy0, int tgtYear)
                   grid_index);
                Report::FatalMsg(msg);
             }
-            if (pInfo->m_lastYear == pInfo->m_firstYear) m_pIDUlayer->SetDataU(idu, colIDU, field_vals[grid_index]);
-            else
-            { // Kludge to get around the fact that University of Idaho v2 climate data uses
-               // the southwest corner of the grid as the origin, whereas the original 
-               // WW2100 single-year files use the northwest corner as the origin.
+
+            if (pInfo->m_row0inSouth)
+            { // In the NetCDF file itself, row 0 of the gridded data is along the south edge of the grid.
                int column = grid_index % NUM_OF_CLIMATE_GRID_COLUMNS;
                int orig_row = grid_index / NUM_OF_CLIMATE_GRID_COLUMNS;
                int new_row = (NUM_OF_CLIMATE_GRID_ROWS - 1) - orig_row;
-               int new_grid_index = new_row * NUM_OF_CLIMATE_GRID_COLUMNS + column;
-               m_pIDUlayer->SetDataU(idu, colIDU, field_vals[new_grid_index]);
+               int adjusted_grid_index = new_row * NUM_OF_CLIMATE_GRID_COLUMNS + column;
+               m_pIDUlayer->SetDataU(idu, colIDU, field_vals[adjusted_grid_index]);
             }
-            
+            else m_pIDUlayer->SetDataU(idu, colIDU, field_vals[grid_index]);            
          } // end of loop to populate this IDU weather attribute
       } // end of logic for grid-based climate data
    }
