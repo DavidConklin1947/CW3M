@@ -1186,7 +1186,7 @@ bool Spring::Step(FlowContext* pFlowContext)
       double total_additional_m3 = (avg_additional_cms + seasonal_adjustment_cms) * SEC_PER_DAY;
       WaterParcel additionalWP(total_additional_m3, m_temp_C);
 x*/
-      double additional_frac = 0.3063;
+      double additional_frac = 0.5358;
       double from_upstream_cms = m_pReach->GetUpstreamInflow();
       double additional_m3 = additional_frac * from_upstream_cms * SEC_PER_DAY;
       WaterParcel additionalWP(additional_m3, m_temp_C);
