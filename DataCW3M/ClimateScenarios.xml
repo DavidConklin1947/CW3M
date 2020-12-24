@@ -5,7 +5,7 @@
 
     <!-- "MIROC" aka "WW2100 Reference" gridded climate data prepared by OCCRI for WW2100 from CMIP5 RCP 8.5 MIROC GCM data downscaled
     by John Abatzaglou's group at the University of Idaho using the MACA method -->
-    <climate_scenario name="MIROC" id="0" maxDaysInClimateYear="365" row_0_location_N_or_S="N" >
+    <climate_scenario name="MIROC" id="0" maxDaysInClimateYear="365" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmin" var_name="tasmin"  />
@@ -17,7 +17,7 @@
 
     <!-- "GFDL" aka "WW2100 LowClim" (low climate change) gridded climate data prepared by OCCRI for WW2100 from CMIP5 RCP 4.5 GFDL GCM data downscaled
     by John Abatzaglou's group at the University of Idaho using the MACA method -->
-    <climate_scenario name="GFDL" id="1" maxDaysInClimateYear="365" row_0_location_N_or_S="N" >
+    <climate_scenario name="GFDL" id="1" maxDaysInClimateYear="365" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"   path="\ClimateSvn\trunk\daily\willamette_GFDL_pr"     var_name="pr"      />
       <climate type="tmax"     path="\ClimateSvn\trunk\daily\willamette_GFDL_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\ClimateSvn\trunk\daily\willamette_GFDL_tasmin" var_name="tasmin"  />
@@ -29,7 +29,7 @@
 
     <!-- "HadGEM" aka "WW2100 HighClim" (high climate change) gridded climate data prepared by OCCRI for WW2100 from CMIP5 8.5 HadGEM GCM data downscaled
     by John Abatzaglou's group at the University of Idaho using the MACA method -->
-    <climate_scenario name="HadGEM" id="2" maxDaysInClimateYear="365" row_0_location_N_or_S="N" >
+    <climate_scenario name="HadGEM" id="2" maxDaysInClimateYear="365" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_pr_365"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_tasmax_365" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\HadGEM\WRB_4km_1950-2099\willamette_HadGEM_tasmin_365" var_name="tasmin"  />
@@ -40,7 +40,7 @@
     </climate_scenario>
 
     <!-- MIROC climate data was used for the StationaryClim climate_scenario in WW2100-->
-    <climate_scenario name="WW2100StationaryClimate" id="3" maxDaysInClimateYear="365" row_0_location_N_or_S="N" >
+    <climate_scenario name="WW2100StationaryClimate" id="3" maxDaysInClimateYear="365" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\MIROC5\WRB_4km_1950-2100\willamette_MIROC5_tasmin" var_name="tasmin"  />
@@ -51,7 +51,7 @@
     </climate_scenario>
 
     <!-- "MACA training data" - these are gridded, run from 1979 thru 2011, and were prepared by OCCRI for WW2100 -->
-    <climate_scenario name="MACAtrainingData" id="4" maxDaysInClimateYear="365" row_0_location_N_or_S="N" >
+    <climate_scenario name="MACAtrainingData" id="4" maxDaysInClimateYear="365" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-2011\abat_willamette_tasmin" var_name="tasmin"  />
@@ -62,7 +62,7 @@
     </climate_scenario>
 
     <!-- these are gridded, run from 2000 thru 2017, and were prepared by John Dalrymple for the model skill assessment work -->
-    <climate_scenario name="BaselineGrid" id="5" maxDaysInClimateYear="365" row_0_location_N_or_S="N" >
+    <climate_scenario name="BaselineGrid" id="5" maxDaysInClimateYear="365" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"   path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_pr"     var_name="pr"      />
       <climate type="tmax"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_tasmax" var_name="tasmax"  />
       <climate type="tmin"     path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-latest\uofimet_willamette_tasmin" var_name="tasmin"  />
@@ -82,7 +82,7 @@
     </climate_scenario>
 
     <!-- Gridded recent actual weather used for demos - 2010-17 -->
-    <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="366"  firstYear="2010" lastYear="2019" row_0_location_N_or_S="N" >
+    <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="366"  firstYear="2010" lastYear="2019" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"
                path="GriddedRecentWeather\UofIMETDATA_precipitation_amount_2010-2019.nc"
                var_name="precipitation_amount" units="mm" />
@@ -121,7 +121,7 @@
     the temperature/precipitaton gridMET dataset to instead be daily PRISM bias corrected to monthly PRISM but 
     on a slightly different 4-km grid than the daily PRISM. When he made this change, he changed the entire dataset 1979-current."  
     -->
-   <climate_scenario name="Baseline_2019versionOfGridMET_2010-current" id="8" maxDaysInClimateYear="366" firstYear="2010" lastYear="2019" row_0_location_N_or_S="N" >
+   <climate_scenario name="Baseline_2019versionOfGridMET_2010-current" id="8" maxDaysInClimateYear="366" firstYear="2010" lastYear="2019" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2010-latest_multiyear\UofIMETDATA_precipitation_amount_2010-2019.nc"
                var_name="precipitation_amount" units="mm" />
@@ -144,7 +144,7 @@
 
 
     <!-- MACAv2-METDATA MIROC5 historical daily dataset -->
-    <climate_scenario name="MIROC5_macav2" id="9" maxDaysInClimateYear="366" firstYear="1950" lastYear="2005" row_0_location_N_or_S="S" >
+    <climate_scenario name="MIROC5_macav2" id="9" maxDaysInClimateYear="366" firstYear="1950" lastYear="2005" NetCDF_row_0_location_N_or_S="S" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_pr_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
                var_name="precipitation" units="mm" />
@@ -175,7 +175,7 @@
     </climate_scenario>
 
     <!-- MACAv2-METDATA MIROC5 RCP 8.5 2006-99 daily dataset -->
-    <climate_scenario name="MIROC5_rcp85" id="10" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" row_0_location_N_or_S="S" >
+    <climate_scenario name="MIROC5_rcp85" id="10" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" NetCDF_row_0_location_N_or_S="S" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_pr_MIROC5_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="precipitation" units="mm" />
@@ -206,7 +206,7 @@
     </climate_scenario>
 
     <!-- MACAv2-METDATA HadGEM2-ES historical daily dataset -->
-    <climate_scenario name="HadGEM2-ES_macav2" id="11" maxDaysInClimateYear="366" firstYear="1950" lastYear="2005" row_0_location_N_or_S="S" >
+    <climate_scenario name="HadGEM2-ES_macav2" id="11" maxDaysInClimateYear="366" firstYear="1950" lastYear="2005" NetCDF_row_0_location_N_or_S="S" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_pr_HadGEM2-ES365_r1i1p1_historical_1950_2005_willamette_daily.nc"
                var_name="precipitation" units="mm" />
@@ -237,7 +237,7 @@
     </climate_scenario>
 
     <!-- MACAv2-METDATA HadGEM2-ES RCP 8.5 2006-99 daily dataset -->
-    <climate_scenario name="HadGEM2-ES_rcp85" id="12" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" row_0_location_N_or_S="S" >
+    <climate_scenario name="HadGEM2-ES_rcp85" id="12" maxDaysInClimateYear="366" firstYear="2006" lastYear="2099" NetCDF_row_0_location_N_or_S="S" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\HadGEM\macav2metdata_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily\macav2metdata_pr_HadGEM2-ES365_r1i1p1_rcp85_2006_2099_willamette_daily.nc"
                var_name="precipitation" units="mm" />
@@ -267,7 +267,7 @@
                var_name="northward_wind" units="m/s" />
     </climate_scenario>
 
-    <climate_scenario name="Baseline_2019versionOfGridMET_2000-09" id="13" maxDaysInClimateYear="366" firstYear="2000" lastYear="2009" row_0_location_N_or_S="N" >
+    <climate_scenario name="Baseline_2019versionOfGridMET_2000-09" id="13" maxDaysInClimateYear="366" firstYear="2000" lastYear="2009" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-09_multiyear\UofIMETDATA_precipitation_amount_2000-2009.nc"
                var_name="precipitation_amount" units="mm" />
@@ -288,7 +288,7 @@
                var_name="wind_speed" units="m/s" />
     </climate_scenario>
 
-    <climate_scenario name="BaselineGridMultiyearFiles" id="14" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" row_0_location_N_or_S="S" >
+    <climate_scenario name="BaselineGridMultiyearFiles" id="14" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" NetCDF_row_0_location_N_or_S="S" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
                var_name="precipitation_amount" units="mm" />
@@ -309,5 +309,27 @@
                var_name="wind_speed" units="m/s" />
     </climate_scenario>
 
+<!--
+    <climate_scenario name="BaselineGridMultiyearFiles" id="14" maxDaysInClimateYear="366" firstYear="1979" lastYear="2019" NetCDF_row_0_location_N_or_S="S" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\gridmet_precipitation_amount_1979-2020.nc"
+               var_name="precipitation_amount" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\gridmet_daily_maximum_temperature_1979-2020.nc"
+               var_name="max_air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\gridmet_daily_minimum_temperature_1979-2020.nc"
+               var_name="min_air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\gridmet_daily_mean_specific_humidity_1979-2020.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\gridmet_daily_mean_shortwave_radiation_at_surface_1979-2020.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
+      <climate type="windspd"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\gridmet_daily_mean_wind_speed_1979-2020.nc"
+               var_name="wind_speed" units="m/s" />
+    </climate_scenario>
+-->
   </climate_scenarios>
 

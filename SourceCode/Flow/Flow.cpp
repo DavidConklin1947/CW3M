@@ -2481,7 +2481,7 @@ bool FlowModel::InitClimateMeanValues(EnvContext *pContext)
 // Called during InitRun().
 {
    CString msg; msg.Format("InitClimateMeanValues() starting now."); Report::LogMsg(msg);
-   FlowScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+   ClimateScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
 
    MapLayer *pIDUlayer = (MapLayer*)pContext->pMapLayer;
    int first_year_for_climate_averages = pContext->pEnvModel->m_referenceStartYear - pContext->m_yearsInStartingClimateAverages;
@@ -3283,7 +3283,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       Report::ErrorMsg(msg);
       return(false);
    }
-   FlowScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+   ClimateScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
    int num_climate_files = (int)pScenario->m_climateInfoArray.GetCount();
    for (int climate_file_ndx = 0; climate_file_ndx < num_climate_files; climate_file_ndx++) 
    {
@@ -3370,7 +3370,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       {
       for (int i = 0; i < m_numberOfYears; i++)
          {
-         FlowScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+         ClimateScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
          for (int j = 0; j < (int)pScenario->m_climateInfoArray.GetSize(); j++)//different climate parameters
             {
             ClimateDataInfo *pInfo = pScenario->m_climateInfoArray[j];
@@ -4639,7 +4639,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
       } // end of loop thru subnodes
    } // end of loop thru reaches
 
-   FlowScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+   ClimateScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
 
    // reset reservoirs for this year
    for (int i = 0; i < (int)m_reservoirArray.GetSize(); i++)
@@ -10927,7 +10927,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
             break;
             }
 
-         FlowScenario *pScenario = new FlowScenario;
+         ClimateScenario *pScenario = new ClimateScenario;
          pScenario->m_id = id;
          pScenario->m_name = name;
          pScenario->m_maxDaysInClimateYear = max_days_in_climate_year;
@@ -13046,7 +13046,7 @@ bool chk_nc(int io_rtnval)
 
 bool FlowModel::OpenClimateDataFiles(int tgtYear)
 {
-   FlowScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+   ClimateScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
    for (int i = 0; i < (int)pScenario->m_climateInfoArray.GetSize(); i++)
    {
       ClimateDataInfo *pInfo = pScenario->m_climateInfoArray[i];
@@ -13232,7 +13232,7 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
   // called at the end of FlowModel::Run()
 void FlowModel::CloseClimateData( void )
    {
-   FlowScenario *pScenario = m_scenarioArray[ m_currentFlowScenarioIndex ];
+   ClimateScenario *pScenario = m_scenarioArray[ m_currentFlowScenarioIndex ];
 
    for ( int i=0; i < (int) pScenario->m_climateInfoArray.GetSize(); i++ )
       {
@@ -13620,7 +13620,7 @@ bool FlowModel::InitGridIndex() // Read a netCDF file to initialize the GRID_IND
 {
    CString msg;
 
-   FlowScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+   ClimateScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
    ClimateDataInfo *pInfo = NULL;
    CString file_path_and_name;
    bool found_a_file = false;

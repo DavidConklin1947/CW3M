@@ -1166,7 +1166,7 @@ bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pF
          { "maxDaysInClimateYear", TYPE_INT, &max_days_in_climate_year, true, 0 },
          { "firstYear", TYPE_INT,      &first_year, false, 0 },
          { "lastYear", TYPE_INT,      &last_year, false, 0 },
-         { "row_0_location_N_or_S", TYPE_CSTRING, &row_0_location, false, 0},
+         { "NetCDF_row_0_location_N_or_S", TYPE_CSTRING, &row_0_location, false, 0},
          { NULL,      TYPE_NULL,     NULL,          false,   0 } };
 
       bool ok = TiXmlGetAttributes(pXmlScenario, scenarioAttrs, filename);
@@ -1186,13 +1186,13 @@ bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pF
       else
       {
          CString msg;
-         msg.Format("LoadClimateScenariosXml() cannot interpret row_0_location_N_or_S = %s in climate scenario %s. Please specify N for north or S for south.",
+         msg.Format("LoadClimateScenariosXml() cannot interpret NetCDF_row_0_location_N_or_S = %s in climate scenario %s. Please specify N for north or S for south.",
             row_0_location.GetString(), name);
          Report::ErrorMsg(msg);
          return(false);
       }
 
-      FlowScenario* pScenario = new FlowScenario;
+      ClimateScenario* pScenario = new ClimateScenario;
       pScenario->m_id = id;
       pScenario->m_name = name;
       pScenario->m_maxDaysInClimateYear = max_days_in_climate_year;

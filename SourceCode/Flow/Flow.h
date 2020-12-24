@@ -1352,7 +1352,7 @@ public:
 };
 
 
-class FlowScenario
+class ClimateScenario
 {
 public:
    CString m_name;
@@ -2094,7 +2094,7 @@ protected:
 	//  void ApplyMacros( CString &str );
 
 public:
-	PtrArray< FlowScenario > m_scenarioArray;
+	PtrArray< ClimateScenario > m_scenarioArray;
 	int m_currentFlowScenarioIndex;
    int m_waterRightsReportInputVar;
 	void ApplyMacros(CString &str);
@@ -2144,12 +2144,12 @@ public:
 
    ClimateDataInfo   *GetClimateDataInfo( CDTYPE type ) 
    { 
-      FlowScenario *pScenario = m_scenarioArray.GetAt( m_currentFlowScenarioIndex ); 
+      ClimateScenario *pScenario = m_scenarioArray.GetAt( m_currentFlowScenarioIndex ); 
       ClimateDataInfo *pInfo = NULL;  
       if ( pScenario && pScenario->m_climateDataMap.Lookup( type, pInfo ) ) return pInfo; 
       return NULL; 
    }
-   GeoSpatialDataObj *GetClimateDataObj ( CDTYPE type ) { FlowScenario *pScenario = m_scenarioArray.GetAt( m_currentFlowScenarioIndex ); ClimateDataInfo *pInfo = NULL;  if ( pScenario && pScenario->m_climateDataMap.Lookup( type, pInfo ) ) return pInfo->m_pDataObj; return NULL; }
+   GeoSpatialDataObj *GetClimateDataObj ( CDTYPE type ) { ClimateScenario *pScenario = m_scenarioArray.GetAt( m_currentFlowScenarioIndex ); ClimateDataInfo *pInfo = NULL;  if ( pScenario && pScenario->m_climateDataMap.Lookup( type, pInfo ) ) return pInfo->m_pDataObj; return NULL; }
 
    QueryEngine * m_pQE_IDU;
    QueryEngine * m_pQE_Reach;
