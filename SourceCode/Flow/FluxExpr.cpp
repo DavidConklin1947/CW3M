@@ -1186,13 +1186,29 @@ bool Spring::Step(FlowContext* pFlowContext)
       double total_additional_m3 = (avg_additional_cms + seasonal_adjustment_cms) * SEC_PER_DAY;
       WaterParcel additionalWP(total_additional_m3, m_temp_C);
 x*/
+/*x
       double additional_frac = 0.8351;
       double from_upstream_cms = m_pReach->GetUpstreamInflow();
       double additional_m3 = additional_frac * from_upstream_cms * SEC_PER_DAY;
       WaterParcel additionalWP(additional_m3, m_temp_C);
+x*/
+      double tau_for_avg_in_days = 30; // days
+      static double upstream_inflow_avg_cms;
+      double upstream_inflow_today_cms = m_pReach->GetUpstreamInflow();
+      if (pFlowContext->pFlowModel->m_timeInRun == 0)
+         upstream_inflow_avg_cms = upstream_inflow_today_cms;
+      else
+      {
+         double tau = pFlowContext->pFlowModel->m_timeInRun > tau_for_avg_in_days ? tau_for_avg_in_days : pFlowContext->pFlowModel->m_timeInRun;
+         upstream_inflow_avg_cms = upstream_inflow_avg_cms * exp(-1 / tau) + upstream_inflow_today_cms * (1 - exp(-1 / tau));
+      }
+
+      double additional_frac = 0.8351;
+      double additional_m3 = additional_frac * upstream_inflow_avg_cms * SEC_PER_DAY;
+      WaterParcel additionalWP(additional_m3, m_temp_C);
 
       H2O_to_addWP.MixIn(additionalWP);
-   }
+   } // end of   if (m_pReach->m_reachID == 23773373)  special logic for the Clear Lake springs
 
    m_pReach->AddH2OfromGlobalHandlerWP(H2O_to_addWP);
    m_pReach->m_availableDischarge += H2O_to_addWP.m_volume_m3 / SEC_PER_DAY;
