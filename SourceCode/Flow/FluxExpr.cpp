@@ -1192,7 +1192,7 @@ x*/
       double additional_m3 = additional_frac * from_upstream_cms * SEC_PER_DAY;
       WaterParcel additionalWP(additional_m3, m_temp_C);
 x*/
-      double tau_for_avg_in_days = 30; // days
+      double tau_for_avg_in_days = 45; // days
       static double upstream_inflow_avg_cms;
       double upstream_inflow_today_cms = m_pReach->GetUpstreamInflow();
       if (pFlowContext->pFlowModel->m_timeInRun == 0)
