@@ -1251,8 +1251,8 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
    SHCreateDirectoryEx(NULL, outputPath, NULL);
 
    // Now load climate scenarios.
-   FlowContext * pFlowContext = pModel->m_envContext.m_pFlowContext;
-   m_pScenarioManager->LoadClimateScenariosXml(climate_scenarios_file, pFlowContext);
+   FlowContext * pFlowContext = pModel->m_envContext.m_pFlowContext; // When FlowContext::LoadXml() fails, pFlowContext is NULL.
+   if (pFlowContext != NULL) m_pScenarioManager->LoadClimateScenariosXml(climate_scenarios_file, pFlowContext);
 
    Report::StatusMsg( "Compiling Policies" );
    Report::LogMsg( "Compiling Policies" );

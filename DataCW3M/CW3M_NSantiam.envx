@@ -450,8 +450,11 @@ initRunOnStartup  ='0'
                       S C E N A R I O S 
 ===================================================================================
 -->
-  
-  <scenarios default ='0' file='Scenarios.xml' />
+
+  <scenarios
+    climate_scenarios_file='ClimateScenarios.xml' default_climate_scenario='13'
+    simulation_scenarios_file='SimulationScenarios.xml' default_simulation_scenario='0'
+  />
 
 </Envision>
   

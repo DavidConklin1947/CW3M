@@ -1009,7 +1009,7 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
       if (pRes != NULL)
       {
          inflowWP = pRes->m_outflowWP;
-         ASSERT(pReach->m_pRight == NULL);
+//         ASSERT(pReach->m_pRight == NULL); This isn't true for Big Cliff.
 
          double reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
          ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.1, 100.));

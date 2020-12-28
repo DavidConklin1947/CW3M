@@ -1113,11 +1113,11 @@ bool ScenarioManager::LoadClimateScenariosXml(LPCSTR _filename, FlowContext * pF
    CString msg;
    if (nchars > 0)
    {
-      msg.Format("FlowProcess::LoadXml() environment variable CLIMATE_DRIVE = %s Only the first letter matters.", drive_str);
+      msg.Format("ScenarioManager::LoadClimateScenariosXml() environment variable CLIMATE_DRIVE = %s Only the first letter matters.", drive_str);
       drive_str[1] = ':';
       drive_str[2] = 0;
    }
-   else  msg.Format("FlowProcess::LoadXml() GetEnvironmentVariable(CLIMATE_DRIVE...) returned nchars = %d", nchars);
+   else  msg.Format("ScenarioManager::LoadClimateScenariosXml() GetEnvironmentVariable(CLIMATE_DRIVE...) returned nchars = %d", nchars);
    Report::LogMsg(msg);
 
    CString filename;

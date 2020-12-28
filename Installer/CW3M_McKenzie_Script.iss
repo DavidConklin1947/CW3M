@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CW3M_McKenzie"
-#define MyAppVersion "McKenzie_0.4.2"
+#define MyAppVersion "McKenzie_0.4.3"
 ;#define MyAppVersion "x.x.x"
 #define MyAppPublisher "Oregon Freshwater Simulations, Inc."
 #define MyAppURL "http:/www.freshwatersim.com"
@@ -54,10 +54,11 @@ Source: "{#InputPath}\GDAL\gdalplugins\*"; DestDir: "{app}\GDAL\gdalplugins"; Fl
 Source: "{#InputPath}\GDAL\gdal-data\*"; DestDir: "{app}\GDAL\gdal-data"; Flags: ignoreversion
 
 Source: "{#InputPath}\DataCW3M\Observations\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations"; 
-Source: "{#InputPath}\DataCW3M\Observations\jd_csv\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\jd_csv"; 
-Source: "{#InputPath}\DataCW3M\Observations\IncludingLeapDays\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\IncludingLeapDays"; 
+;Source: "{#InputPath}\DataCW3M\Observations\jd_csv\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\jd_csv"; 
+;Source: "{#InputPath}\DataCW3M\Observations\IncludingLeapDays\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\IncludingLeapDays"; 
 Source: "{#InputPath}\DataCW3M\Observations\McKenzie\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\McKenzie"; 
 Source: "{#InputPath}\DataCW3M\Observations\Clackamas\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\Clackamas"; 
+Source: "{#InputPath}\DataCW3M\Observations\NSantiam\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\NSantiam"; 
 
 Source: "{#InputPath}\DataCW3M\Reservoirs\Area_Capacity_Curves\*"; DestDir: "\CW3M_{#MyAppVersion}\Reservoirs\Area_Capacity_Curves"; 
 Source: "{#InputPath}\DataCW3M\Reservoirs\ControlPoints\*"; DestDir: "\CW3M_{#MyAppVersion}\Reservoirs\ControlPoints"; 
@@ -105,8 +106,10 @@ Source: "{#InputPath}\DataCW3M\CW3MdigitalHandbook\*"; DestDir: "\CW3M_{#MyAppVe
 Source: "{#InputPath}\DataCW3M\GriddedRecentWeather\*"; DestDir: "\CW3M_{#MyAppVersion}\GriddedRecentWeather"; 
 
 Source: "{#InputPath}\DataCW3M\ScenarioData\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData"; 
-Source: "{#InputPath}\DataCW3M\ScenarioData\Demo\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Demo";
+Source: "{#InputPath}\DataCW3M\ScenarioData\Demo_Baseline\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Demo_Baseline";
 Source: "{#InputPath}\DataCW3M\ScenarioData\Baseline\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Baseline";
+Source: "{#InputPath}\DataCW3M\ScenarioData\Baseline_2000-09\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Baseline_2000-09";
+Source: "{#InputPath}\DataCW3M\ScenarioData\Baseline_2010-current\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Baseline_2010-current";
 Source: "{#InputPath}\DataCW3M\ScenarioData\365dayBaseline\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\365dayBaseline";
 Source: "{#InputPath}\DataCW3M\ScenarioData\HadGEM-ES_20th_century\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\HadGEM-ES_20th_century";
 Source: "{#InputPath}\DataCW3M\ScenarioData\HadGEM-ES_rcp85\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\HadGEM-ES_rcp85";
@@ -166,6 +169,21 @@ Source: "{#InputPath}\DataCW3M\McKenzie\IDU_McKenzie.shx"; DestDir: "\CW3M_{#MyA
 Source: "{#InputPath}\DataCW3M\McKenzie\Reach_McKenzie*"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 ;Source: "{#InputPath}\DataCW3M\McKenzie\PEST\*"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie\PEST";
 Source: "{#InputPath}\DataCW3M\McKenzie\Reporter_McKenzie.xml"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
+
+Source: "{#InputPath}\DataCW3M\CW3M_NSantiam.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\Flow_NSantiam.xml"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\HRU_NSantiam*"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.cpg"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.dbf"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.prj"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.sbn"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.sbx"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.shp"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.shp.xml"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.shx"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\Reach_NSantiam*"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
+Source: "{#InputPath}\DataCW3M\NSantiam\Reporter_NSantiam.xml"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
