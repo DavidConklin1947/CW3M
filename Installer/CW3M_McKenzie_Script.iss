@@ -80,6 +80,7 @@ Source: "{#InputPath}\DataCW3M\Reservoirs\Rules_Lookout\*"; DestDir: "\CW3M_{#My
 Source: "{#InputPath}\DataCW3M\SkillAssessment\*"; DestDir: "\CW3M_{#MyAppVersion}\SkillAssessment"; 
 
 Source: "{#InputPath}\DataCW3M\APs.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\ClimateScenarios.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\cooling_cost.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\cropchoice.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Crops.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
@@ -95,7 +96,7 @@ Source: "{#InputPath}\DataCW3M\Modeler.xml"; DestDir: "\CW3M_{#MyAppVersion}";
 Source: "{#InputPath}\DataCW3M\probability_transition_lookup.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Reach.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Reporter.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
-Source: "{#InputPath}\DataCW3M\Scenarios.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\SimulationScenarios.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Scenarios_PEST.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\SpatialAllocator.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\VegSTM.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
