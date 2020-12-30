@@ -1568,6 +1568,14 @@ WaterParcel Reservoir::GetResOutflowWP(Reservoir* pRes, int doy)
    WaterParcel adjustedWP = ReachRouting::ApplyEnergyFluxes(pRes->m_resWP, h2o_area_m2, rad_sw_net_W_m2,
          pRes->m_resWP.WaterTemperature(), temp_air_degC, vts_frac, cloudiness_frac, reach_ws_m_s, sphumidity, rh_pct,
          evap_m3, evap_kJ, sw_kJ, lw_kJ);
+
+   double evap_mm = (evap_m3 / h2o_area_m2) * 1000.;
+   gpModel->m_pReachLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRES_EVAPMM, evap_mm);
+   double lw_W_m2 = ((lw_kJ * 1000.) / h2o_area_m2) / SEC_PER_DAY;
+   gpModel->m_pReachLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRES_LW_OUT, lw_W_m2);
+   double sw_W_m2 = ((sw_kJ * 1000.) / h2o_area_m2) / SEC_PER_DAY;
+   gpModel->m_pReachLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRES_SW_IN, sw_W_m2);
+
    pRes->m_resWP = adjustedWP;
    pRes->m_volume = pRes->m_resWP.m_volume_m3;
 
@@ -2898,8 +2906,17 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRESAREA_HA, _T("RESAREA_HA"), TYPE_DOUBLE, CC_AUTOADD);
    m_pStreamLayer->SetColDataU(m_colReachRESAREA_HA, 0);
 
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRES_EVAPMM, _T("RES_EVAPMM"), TYPE_DOUBLE, CC_AUTOADD);
+   m_pStreamLayer->SetColDataU(m_colReachRES_EVAPMM, 0);
+
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRES_H2O, _T("RES_H2O"), TYPE_DOUBLE, CC_AUTOADD);
    m_pStreamLayer->SetColDataU(m_colReachRES_H2O, 0);
+
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRES_LW_OUT, _T("RES_LW_OUT"), TYPE_DOUBLE, CC_AUTOADD);
+   m_pStreamLayer->SetColDataU(m_colReachRES_LW_OUT, 0);
+
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRES_SW_IN, _T("RES_SW_IN"), TYPE_DOUBLE, CC_AUTOADD);
+   m_pStreamLayer->SetColDataU(m_colReachRES_SW_IN, 0);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRES_TEMP, _T("RES_TEMP"), TYPE_DOUBLE, CC_AUTOADD);
    m_pStreamLayer->SetColDataU(m_colReachRES_TEMP, 0);
@@ -3326,7 +3343,10 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    InitRunPlugins();
 
    InitReservoirControlPoints();   //initialize reservoir control points
+   m_pReachLayer->SetColDataU(m_colReachRES_EVAPMM, 0);
    m_pReachLayer->SetColDataU(m_colReachRES_H2O, 0);
+   m_pReachLayer->SetColDataU(m_colReachRES_LW_OUT, 0);
+   m_pReachLayer->SetColDataU(m_colReachRES_SW_IN, 0);
    m_pReachLayer->SetColDataU(m_colReachRES_TEMP, 0);
    m_pReachLayer->SetColDataU(m_colReachRESAREA_HA, 0);
    if (!InitRunReservoirs( pEnvContext )) return(false);

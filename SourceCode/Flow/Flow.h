@@ -1406,6 +1406,8 @@ public:
 
 protected:
    int m_id;
+
+public:
    FlowContext m_flowContext;
 
 public:
@@ -1781,7 +1783,10 @@ public:
    int m_colReachHRU_FRAC;
    int m_colStreamRES_ID;
    int m_colReachRESAREA_HA;
+   int m_colReachRES_EVAPMM;
    int m_colReachRES_H2O;
+   int m_colReachRES_LW_OUT;
+   int m_colReachRES_SW_IN;
    int m_colReachRES_TEMP;
    int m_colStreamRESOUTFALL;
    int m_colStreamSTRMVERT0X;
