@@ -596,7 +596,9 @@ dynamic="0"
       <output in_use="1" name="USGS_14178000_temp_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591"
             query="COMID=23780591" value="TEMP_H2O" type="sum" domain="reach"
            obs="..\Observations\NSantiam\USGS_14178000_temp_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591.csv" format="E0" />
-      <output in_use="1" name="USGS_14179000_temp_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701"
+      <output in_use="1" name="Air temperature at reach_23780591"
+           query="COMID=23780591" value="TEMP_AIR" type="sum" domain="reach" />
+     <output in_use="1" name="USGS_14179000_temp_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701"
             query="COMID=23780701" value="TEMP_H2O" type="sum" domain="reach"
            obs="..\Observations\NSantiam\USGS_14179000_temp_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701.csv" format="E0" />
       <output in_use="1" name="USGS_14180300_temp_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
