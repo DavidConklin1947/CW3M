@@ -929,7 +929,8 @@ double Reach::Evap_m_s(int subreachNdx, double swIn_W_m2, double lwOut_W_m2, dou
 
 double Reach::Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity)
 // returns evaporation rate in m3H2O/m2/sec, i.e. m/sec
-{ // Implements eq. 2-105 for evaporation rate on p. 61 of Boyd & Kasper
+{ // Implements equations 2-105 (evaporation rate), 2-106 (slope of the saturation vapor v. air temperature curve), 
+   // 2-108 (aerodynamic evaporation), and 2-109 (wind function) on pp. 61-2 of Boyd & Kasper.
    // The evap rate is a function of shortwave flux, longwave flux, aerodynamic evaporation, the air temperature,
    // the water temperature, and the relative humidity.  The equation also uses the latent heat of vaporization,
    // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
@@ -938,9 +939,16 @@ double Reach::Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2,
    double L_e_J_kg = LatentHeatOfVaporization_MJ_kg(tempH2O_degC) * 1.e6;
    double e_s = WaterParcel::SatVP_mbar(tempH2O_degC);
    double e_a = WaterParcel::SatVP_mbar(tempAir_degC);
-   double E_a = 0.; // ??? aerodynamic evaporation, m/s
+   double E_a = 3.083e-9 + 5.845e-9 * ws_m_sec; // aerodynamic evaporation, m/s, uses coefficients from Bowie et al. 1985 cited on p. 62 of Boyd & Kasper
    double gamma = 66. / PA_PER_MBAR; // psychrometric constant, mbar/degC, ~= 0.066 kPa/degK = 66 Pa/degC
-   double delta = (e_s - e_a) / (tempH2O_degC - tempAir_degC); // slope of the saturation vapor v. air temperature curve
+
+   double delta = -1; // slope of the saturation vapor v. air temperature curve. By definition, = d/dtemperature(saturation vp(temperature))
+   // Use eq. 2-106 on p. 61 of Boyd & Kasper
+   double Ta = tempAir_degC;
+   double first_term = 6.1275 * exp(17.27 * Ta / (237.3 + Ta));
+   double second_term = 6.1275 * exp(17.27 * (Ta - 1.) / (237.3 + (Ta - 1.)));
+   delta = first_term - second_term;
+
    double numerator = ((swIn_W_m2 - lwOut_W_m2) / (DENSITY_H2O * L_e_J_kg)) * delta + E_a * gamma;
    double evap_m_s = numerator / (delta + gamma);
    if (evap_m_s < 0.) evap_m_s = 0.;
