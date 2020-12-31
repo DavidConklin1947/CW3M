@@ -664,8 +664,9 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
          double in_net_sw_W_m2 = ((pSubreach->m_sw_kJ / SEC_PER_DAY) * 1000.) / pSubreach->m_subreach_surf_area_m2;
          sw_x_surface_accum_W += in_net_sw_W_m2 * pSubreach->m_subreach_surf_area_m2;
 
-         double out_net_lw_W_m2 = ((pSubreach->m_lw_kJ / SEC_PER_DAY) * 1000.) / pSubreach->m_subreach_surf_area_m2;
-         lw_x_surface_accum_W += out_net_lw_W_m2 * pSubreach->m_subreach_surf_area_m2;
+//X         double out_net_lw_W_m2 = ((pSubreach->m_lw_kJ / SEC_PER_DAY) * 1000.) / pSubreach->m_subreach_surf_area_m2;
+//X         lw_x_surface_accum_W += out_net_lw_W_m2 * pSubreach->m_subreach_surf_area_m2;
+         lw_x_surface_accum_W += (pSubreach->m_lw_kJ * 1000.) / SEC_PER_DAY;
          reach_net_lw_kJ += pSubreach->m_lw_kJ;
 
          total_surface_in_subreaches_m2 += pSubreach->m_subreach_surf_area_m2;

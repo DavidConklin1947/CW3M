@@ -936,6 +936,10 @@ double Reach::Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2,
    // the psychrometric constant, and the slope of the saturation vapor v. air temperature curve.  The
    // aerodynamic evaporation is a function of the windspeed.
    // Eq. 2-105 is for evap rate in m3H2O/m2/sec, i.e. m/sec
+
+   double net_incoming_rad_W_m2 = swIn_W_m2 - lwOut_W_m2;
+   if (net_incoming_rad_W_m2 <= 0) return(0);
+
    double L_e_J_kg = LatentHeatOfVaporization_MJ_kg(tempH2O_degC) * 1.e6;
    double e_s = WaterParcel::SatVP_mbar(tempH2O_degC);
    double e_a = WaterParcel::SatVP_mbar(tempAir_degC);
@@ -949,7 +953,7 @@ double Reach::Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2,
    double second_term = 6.1275 * exp(17.27 * (Ta - 1.) / (237.3 + (Ta - 1.)));
    delta = first_term - second_term;
 
-   double numerator = ((swIn_W_m2 - lwOut_W_m2) / (DENSITY_H2O * L_e_J_kg)) * delta + E_a * gamma;
+   double numerator = (net_incoming_rad_W_m2 / (DENSITY_H2O * L_e_J_kg)) * delta + E_a * gamma;
    double evap_m_s = numerator / (delta + gamma);
    if (evap_m_s < 0.) evap_m_s = 0.;
 

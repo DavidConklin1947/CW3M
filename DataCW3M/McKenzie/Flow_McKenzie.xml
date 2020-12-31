@@ -583,8 +583,12 @@ flow_cms="1.10"
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RES_H2O (m3 H2O)" query="1" value="RES_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RESAREA_HA (ha)" query="1" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="RES_SW_IN*RESAREA_HA (W)" query="1" value="RES_SW_IN*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="RES_LW_OUT*RESAREA_HA (W)" query="1" value="RES_LW_OUT*RESAREA_HA*10000" type="sum" domain="reach" />
       <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
@@ -612,8 +616,12 @@ flow_cms="1.10"
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RES_H2O (m3 H2O)" query="1" value="RES_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RESAREA_HA (ha)" query="1" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="RES_SW_IN*RESAREA_HA (W)" query="1" value="RES_SW_IN*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="RES_LW_OUT*RESAREA_HA (W)" query="1" value="RES_LW_OUT*RESAREA_HA*10000" type="sum" domain="reach" />
       <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
@@ -641,8 +649,12 @@ flow_cms="1.10"
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RES_H2O (m3 H2O)" query="1" value="RES_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RESAREA_HA (ha)" query="1" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="RES_SW_IN*RESAREA_HA (W)" query="1" value="RES_SW_IN*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="RES_LW_OUT*RESAREA_HA (W)" query="1" value="RES_LW_OUT*RESAREA_HA*10000" type="sum" domain="reach" />
       <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
