@@ -580,8 +580,12 @@ flow_cms="1.10"
       <output in_use="1" name="longwave radiation out of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_LW_OUT*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
+      <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="TEMP_H2O*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_Q (cms)" query="1" value="ADDED_Q" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
@@ -592,8 +596,11 @@ flow_cms="1.10"
       <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
       <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output name="OUT_MUNI (m3 H2O)" query="1" value="OUT_MUNI*86400" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (m3 H2O)" query="1" value="OUT_IRRIG*86400" type="sum" domain="reach" />
       <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
       <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
@@ -625,6 +632,7 @@ flow_cms="1.10"
       <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
       <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
       <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
@@ -658,6 +666,7 @@ flow_cms="1.10"
       <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
       <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
       <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
@@ -737,7 +746,7 @@ flow_cms="1.10"
       <output in_use="1" name="McKenzie outlet" query="COMID=23765583" value="TEMP_H2O" type="sum" domain="reach" />
     </output_group>
     
-      <output_group name="FLOW daily thermal energy OUTLET OF CLEAR LAKE, OR_23773373 USGS_14158500" interval ="daily" >
+      <output_group name="FLOW Clear Lake thermal energy daily 23773373" interval ="daily" >
       <output in_use="1" name="PRECIP mmH2O 23773373 McKenzie R" query="COMID=23773373" value="PRECIP" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW" type="sum" domain="reach" />
       <output in_use="1" name="TEMP_H2O degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_H2O" type="sum" domain="reach" />
@@ -752,6 +761,8 @@ flow_cms="1.10"
       <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="EVAP_MM 23773373 McKenzie R" query="COMID=23773373" value="EVAP_MM" type="sum" domain="reach" />
         <output in_use="1" name="Spring water cfs 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS*35.315" type="sum" domain="reach" />
+        <output in_use="1" name="SPRING_CMS 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
+        <output in_use="1" name="SPRINGTEMP (deg C) 23773373 McKenzie R" query="COMID=23773373" value="SPRINGTEMP" type="sum" domain="reach" />
         <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
         <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
         <output in_use="1" name="ET from Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />

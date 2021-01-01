@@ -2941,7 +2941,8 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamQ_DIV_WRQ, _T("Q_DIV_WRQ"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamINSTRM_REQ, _T("INSTRM_REQ"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamREACH_H2O, _T("REACH_H2O"), TYPE_FLOAT, CC_AUTOADD);
-//x   EnvExtension::CheckCol(m_pStreamLayer, m_colReachREACH_EVAP, _T("REACH_EVAP"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachADDED_VOL, _T("ADDED_VOL"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachADDED_Q, _T("ADDED_Q"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachEVAP_MM, _T("EVAP_MM"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamHYDRO_MW, _T("HYDRO_MW"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamJoin, m_streamJoinCol, TYPE_INT, CC_MUST_EXIST);
@@ -3371,6 +3372,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pReachLayer->SetColDataU(m_colReachQ_UPSTREAM, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRINGTEMP, 0);
+   m_pReachLayer->SetColDataU(m_colReachADDED_VOL, 0);
+   m_pReachLayer->SetColDataU(m_colReachADDED_Q, 0);
 
    GlobalMethodManager::InitRun( &m_flowContext );
 
@@ -4860,6 +4863,8 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
       }
    } // end of loop thru the Reach layer
 
+   MagicReachWaterReport_m3(false); // Calculate ADDED_VOL and ADDED_Q.
+
    return true;
 } // end of FlowModel::EndStep()
 
@@ -5038,6 +5043,9 @@ double FlowModel::MagicHRUwaterReport_m3(bool msgFlag) // Report on NaNs and add
             comid_of_largest_added_discharge_reach = pReach->m_reachID;
          }
       }
+
+      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_VOL, pReach->m_addedVolume_m3);
+      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_Q, pReach->m_addedDischarge_cms);
    } // end of loop thru reaches
 
    if (msgFlag)

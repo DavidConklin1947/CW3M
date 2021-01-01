@@ -1794,7 +1794,8 @@ public:
    int m_colStreamQ_DIV_WRQ;
    int m_colStreamINSTRM_REQ; // regulatory flow requirement for this reach, cms (requirement of most junior instream WR, if more than one applies)
    int m_colStreamREACH_H2O; // volume of water in reach, m3
-//x   int m_colReachREACH_EVAP; // daily evaporation from reach, m3H2O
+   int m_colReachADDED_VOL; // m3 H2O
+   int m_colReachADDED_Q; // cms
    int m_colReachEVAP_MM; // daily evaporation from reach, m3H2O
    int m_colStreamHYDRO_MW;
    int m_colStreamTEMP_AIR;
