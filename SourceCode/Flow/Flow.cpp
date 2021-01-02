@@ -5048,7 +5048,7 @@ double FlowModel::MagicHRUwaterReport_m3(bool msgFlag) // Report on NaNs and add
       m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_Q, pReach->m_addedDischarge_cms);
    } // end of loop thru reaches
 
-   if (msgFlag)
+   if  (msgFlag)
    {
       CString msg;
       msg.Format("FlowModel::EndYear() Reaches... nan_count = %d, added_volume_count = %d, added_volume_tot_m3 = %f, added_discharge_count = %d, added_discharge_tot_cms = %f (%f m3)",
