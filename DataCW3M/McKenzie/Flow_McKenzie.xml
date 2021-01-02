@@ -446,7 +446,7 @@ flow_cms="1.10"
                rule_priorities="cougar_rule_priorities.csv"       rp_dir="Rules_Cougar\"                              tailwater_elev="408"
                turbine_efficiency="0.9"                           td_elev="519.68"                                     fc1_elev="517.86"
                buffer_zone="Cougar_buffer.csv"                    ressim_output_f="Cougar_ressim_flow_1935_2008.csv"  ressim_output_r="Cougar_ressim_rule_1935_2008.csv"
-               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="0.50" />
+               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="0.40" />
 
     <reservoir id="9"   name="Blue River Reservoir (USACE)"       path="Reservoirs\"     initVolume="5063443"
                area_vol_curve="blue_river_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1.417"
@@ -456,7 +456,7 @@ flow_cms="1.10"
                rule_priorities="blue_river_rule_priorities.csv"   rp_dir="Rules_BR\"                                  td_elev="415.0"
                fc1_elev="414.0"                                   buffer_zone="BR_buffer.csv"                         ressim_output_f="BR_ressim_flow_1935_2008.csv"
                ressim_output_r="BR_ressim_rule_1935_2008.csv"     inactive_elev="359.66"                              reservoir_type="FloodControl"
-               solar_radiation_multiplier="0.15" />
+               solar_radiation_multiplier="0.30" />
 
     <reservoir id="10"  name="Green Peter Reservoir (USACE)"      path="Reservoirs\"     initVolume="197233746"
                area_vol_curve="green_peter_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="22.6"
@@ -559,8 +559,12 @@ flow_cms="1.10"
       <output in_use="1" name="ET from HBVCALIB 46 Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 8 CGR mm" query="HBVCALIB=8" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 8 CGR m3" query="HBVCALIB=8" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="evaporation from the CGR reservoir (mm)" query="RESOUTFALL=8" value="RES_EVAPMM" type="areaWtMean" domain="reach" />
+      <output in_use="1" name="evaporation from the CGR reservoir (m3)" query="RESOUTFALL=8" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="areaWtMean" domain="reach" />
       <output in_use="1" name="ET from HBVCALIB 9 BLU mm" query="HBVCALIB=9" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 9 BLU m3" query="HBVCALIB=9" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mm)" query="RESOUTFALL=9" value="RES_EVAPMM" type="areaWtMean" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (m3)" query="RESOUTFALL=9" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="areaWtMean" domain="reach" />
       <output in_use="1" name="ET from HBVCALIB 34 Upper McKenzie mm" query="HBVCALIB=34" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 34 Upper McKenzie m3" query="HBVCALIB=34" value="ET_DAY*Area/1000" type="sum" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 25 Mohawk mm" query="HBVCALIB=25" value="ET_DAY" type="areaWtMean" domain="idu" />
@@ -620,8 +624,12 @@ flow_cms="1.10"
       <output in_use="1" name="longwave radiation out of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_LW_OUT*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
+      <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="TEMP_H2O*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_Q (cms)" query="1" value="ADDED_Q" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
@@ -635,6 +643,8 @@ flow_cms="1.10"
       <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
       <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output name="OUT_MUNI (m3 H2O)" query="1" value="OUT_MUNI*86400" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (m3 H2O)" query="1" value="OUT_IRRIG*86400" type="sum" domain="reach" />
       <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
       <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
@@ -654,8 +664,12 @@ flow_cms="1.10"
       <output in_use="1" name="longwave radiation out of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_LW_OUT*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
+      <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="TEMP_H2O*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_Q (cms)" query="1" value="ADDED_Q" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
       <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
@@ -669,6 +683,8 @@ flow_cms="1.10"
       <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
       <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output name="OUT_MUNI (m3 H2O)" query="1" value="OUT_MUNI*86400" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (m3 H2O)" query="1" value="OUT_IRRIG*86400" type="sum" domain="reach" />
       <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
       <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
       <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
