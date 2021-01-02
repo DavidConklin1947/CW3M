@@ -446,7 +446,7 @@ flow_cms="1.10"
                rule_priorities="cougar_rule_priorities.csv"       rp_dir="Rules_Cougar\"                              tailwater_elev="408"
                turbine_efficiency="0.9"                           td_elev="519.68"                                     fc1_elev="517.86"
                buffer_zone="Cougar_buffer.csv"                    ressim_output_f="Cougar_ressim_flow_1935_2008.csv"  ressim_output_r="Cougar_ressim_rule_1935_2008.csv"
-               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="0.40" />
+               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="1.0" />
 
     <reservoir id="9"   name="Blue River Reservoir (USACE)"       path="Reservoirs\"     initVolume="5063443"
                area_vol_curve="blue_river_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1.417"
@@ -554,17 +554,21 @@ flow_cms="1.10"
     -->
 
   <outputs>
-    <output_group name="FLOW ET by HBVCALIB" interval="yearly" >
+    <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
       <output in_use="1" name="ET from HBVCALIB 46 Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 46 Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 8 CGR mm" query="HBVCALIB=8" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 8 CGR m3" query="HBVCALIB=8" value="ET_DAY*Area/1000" type="sum" domain="idu" />
-      <output in_use="1" name="evaporation from the CGR reservoir (mm)" query="RESOUTFALL=8" value="RES_EVAPMM" type="areaWtMean" domain="reach" />
-      <output in_use="1" name="evaporation from the CGR reservoir (m3)" query="RESOUTFALL=8" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="areaWtMean" domain="reach" />
+      <output in_use="1" name="evaporation from the CGR reservoir (mm)" query="RESOUTFALL=8" value="RES_EVAPMM" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the CGR reservoir (m3)" query="RESOUTFALL=8" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the CGR reservoir (mJ)" query="RESOUTFALL=8" value="((RES_EVAPMM/1000)*(RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" 
+              type="sum" domain="reach" />
       <output in_use="1" name="ET from HBVCALIB 9 BLU mm" query="HBVCALIB=9" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 9 BLU m3" query="HBVCALIB=9" value="ET_DAY*Area/1000" type="sum" domain="idu" />
-      <output in_use="1" name="evaporation from the BLU reservoir (mm)" query="RESOUTFALL=9" value="RES_EVAPMM" type="areaWtMean" domain="reach" />
-      <output in_use="1" name="evaporation from the BLU reservoir (m3)" query="RESOUTFALL=9" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="areaWtMean" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mm)" query="RESOUTFALL=9" value="RES_EVAPMM" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (m3)" query="RESOUTFALL=9" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mJ)" query="RESOUTFALL=9" value="((RES_EVAPMM/1000)*(RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)"
+              type="sum" domain="reach" />
       <output in_use="1" name="ET from HBVCALIB 34 Upper McKenzie mm" query="HBVCALIB=34" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 34 Upper McKenzie m3" query="HBVCALIB=34" value="ET_DAY*Area/1000" type="sum" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 25 Mohawk mm" query="HBVCALIB=25" value="ET_DAY" type="areaWtMean" domain="idu" />
