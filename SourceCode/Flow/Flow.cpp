@@ -1581,6 +1581,7 @@ WaterParcel Reservoir::GetResOutflowWP(Reservoir* pRes, int doy)
          pRes->m_resWP.WaterTemperature(), temp_air_degC, vts_frac, cloudiness_frac, reach_ws_m_s, sphumidity, rh_pct,
          evap_m3, evap_kJ, sw_kJ, lw_kJ);
 
+   gpModel->m_totEvapFromReservoirsYr_m3 += evap_m3;
    double evap_mm = (evap_m3 / h2o_area_m2) * 1000.;
    gpModel->m_pReachLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRES_EVAPMM, evap_mm);
    double lw_W_m2 = ((lw_kJ * 1000.) / h2o_area_m2) / SEC_PER_DAY;
@@ -4644,6 +4645,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
    m_annualTotalSnowfall  = 0; // acre-ft
    m_volumeMaxSWE = 0.0f; // m3 H2O
    m_totEvapFromReachesYr_m3 = 0.; // m3 H2O
+   m_totEvapFromReservoirsYr_m3 = 0.;
 
    m_pIDUlayer->SetColDataU(m_colSM2ATM_YR, 0.f);
 
