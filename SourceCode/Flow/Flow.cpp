@@ -850,7 +850,7 @@ Reach::Reach(  )
 , m_instreamWaterRightUse ( 0.0f )
 , m_availableDischarge( 0.0f )
 , m_IDUndxForReach(-1)
-, m_addedVolume_m3(0.)
+, m_reachAddedVolumeWP(0.,0.)
 , m_addedDischarge_cms(0.)
    { }
 
@@ -2942,6 +2942,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamINSTRM_REQ, _T("INSTRM_REQ"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamREACH_H2O, _T("REACH_H2O"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachADDED_VOL, _T("ADDED_VOL"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachADDEDVOL_C, _T("ADDEDVOL_C"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachADDED_Q, _T("ADDED_Q"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachEVAP_MM, _T("EVAP_MM"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamHYDRO_MW, _T("HYDRO_MW"), TYPE_FLOAT, CC_AUTOADD);
@@ -3373,6 +3374,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRINGTEMP, 0);
    m_pReachLayer->SetColDataU(m_colReachADDED_VOL, 0);
+   m_pReachLayer->SetColDataU(m_colReachADDEDVOL_C, 0);
    m_pReachLayer->SetColDataU(m_colReachADDED_Q, 0);
 
    GlobalMethodManager::InitRun( &m_flowContext );
@@ -4662,13 +4664,13 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
    {
       Reach * pReach = m_reachArray[reach_ndx];
       pReach->m_addedDischarge_cms = 0;
-      pReach->m_addedVolume_m3 = 0;
+      pReach->m_reachAddedVolumeWP = WaterParcel(0,0);
       pReach->m_nanOccurred = false;
       for (int node_ndx = 0; node_ndx < pReach->GetSubnodeCount(); node_ndx++)
       {
          ReachSubnode * pNode = pReach->GetReachSubnode(node_ndx);
          pNode->m_addedDischarge_cms = 0.;
-         pNode->m_addedVolume_m3 = 0.;
+         pNode->m_addedVolumeWP = WaterParcel(0,0);
          pNode->m_nanOccurred = false;
          pNode->m_dischargeDOY = -1;
       } // end of loop thru subnodes
@@ -5013,24 +5015,24 @@ double FlowModel::MagicHRUwaterReport_m3(bool msgFlag) // Report on NaNs and add
       Reach* pReach = m_reachArray[reach_ndx];
 
       pReach->m_addedDischarge_cms = 0;
-      pReach->m_addedVolume_m3 = 0;
+      pReach->m_reachAddedVolumeWP = WaterParcel(0, 0);
       pReach->m_nanOccurred = false;
       int subnode_count = pReach->GetSubnodeCount();
       for (int subnode_ndx = 0; subnode_ndx < subnode_count; subnode_ndx++)
       {
          ReachSubnode* pNode = pReach->GetReachSubnode(subnode_ndx);
          pReach->m_addedDischarge_cms += pNode->m_addedDischarge_cms / pReach->GetSubnodeCount();
-         pReach->m_addedVolume_m3 += (float)pNode->m_addedVolume_m3;
+         pReach->m_reachAddedVolumeWP.MixIn(pNode->m_addedVolumeWP);
          pReach->m_nanOccurred = pReach->m_nanOccurred || pNode->m_nanOccurred;
       } // end of loop thru subnodes
 
       if (pReach->m_nanOccurred) nan_count++;
-      if (pReach->m_addedVolume_m3 > 0)
-      {
-         added_volume_count++; added_volume_tot_m3 += pReach->m_addedVolume_m3;
-         if (pReach->m_addedVolume_m3 > largest_added_volume_m3)
+      if (pReach->m_reachAddedVolumeWP.m_volume_m3 > 0)
          {
-            largest_added_volume_m3 = pReach->m_addedVolume_m3;
+         added_volume_count++; added_volume_tot_m3 += pReach->m_reachAddedVolumeWP.m_volume_m3;
+         if (pReach->m_reachAddedVolumeWP.m_volume_m3 > largest_added_volume_m3)
+            {
+            largest_added_volume_m3 = pReach->m_reachAddedVolumeWP.m_volume_m3;
             comid_of_largest_added_volume_reach = pReach->m_reachID;
          }
       }
@@ -5044,7 +5046,8 @@ double FlowModel::MagicHRUwaterReport_m3(bool msgFlag) // Report on NaNs and add
          }
       }
 
-      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_VOL, pReach->m_addedVolume_m3);
+      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_VOL, pReach->m_reachAddedVolumeWP.m_volume_m3);
+      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDEDVOL_C, pReach->m_reachAddedVolumeWP.m_temp_degC);
       m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_Q, pReach->m_addedDischarge_cms);
    } // end of loop thru reaches
 

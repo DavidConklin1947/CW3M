@@ -91,7 +91,8 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
             float volume = (width * depth * pReach->m_length / subnode_count);
 
             float node_current_added_volume_m3 = (float)(volume - pNode->m_waterParcel.m_volume_m3);
-            pNode->m_addedVolume_m3 += node_current_added_volume_m3;
+            WaterParcel node_current_added_volumeWP = WaterParcel(node_current_added_volume_m3, H2O_temp_degC);
+            pNode->m_addedVolumeWP.MixIn(node_current_added_volumeWP);
             pNode->m_waterParcel = WaterParcel(volume, H2O_temp_degC);
          }
       } // end of loop thru subnodes
@@ -895,9 +896,10 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
       { // There is not enough water to handle the withdrawals.  
          // Add some magic water. This violates conservation of mass.
          double magic_H2O_to_add_m3 = pSubnode->m_min_volume_m3 - (original_volume_m3 + upstream_inflowWP.m_volume_m3 + net_lateral_inflow_m3);
-         pSubnode->m_waterParcel.MixIn(WaterParcel(magic_H2O_to_add_m3, original_temp_degC));
-         pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
-      } // end of block for adding magic water to the reach
+         WaterParcel magic_H2O_to_addWP(magic_H2O_to_add_m3, original_temp_degC);
+         pSubnode->m_addedVolumeWP.MixIn(magic_H2O_to_addWP);
+         pSubnode->m_waterParcel.MixIn(WaterParcel(magic_H2O_to_addWP));
+     } // end of block for adding magic water to the reach
    } // end of block for net lateral flow out of the reach
 
    // If there is more water already in this reach than the sum of what is flowing in from upstream plus the lateral inflow plus the minimum volume,
@@ -946,10 +948,10 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
    pSubnode->m_waterParcel.MixIn(pSubnode->m_runoffWP); 
    if (magic_H2O_to_add_m3 > 0.)
    {
-      double magic_H2O_temp_degC = pSubnode->m_waterParcel.WaterTemperature();
+      double magic_H2O_temp_degC = original_temp_degC;
       WaterParcel magicWP = WaterParcel(magic_H2O_to_add_m3, magic_H2O_temp_degC);
       pSubnode->m_waterParcel.MixIn(magicWP);
-      pSubnode->m_addedVolume_m3 += magic_H2O_to_add_m3;
+      pSubnode->m_addedVolumeWP.MixIn(magicWP);
    }
 
    if (pSubnode->m_withdrawalWP.m_volume_m3 > 0)

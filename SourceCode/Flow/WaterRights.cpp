@@ -545,7 +545,9 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
    m_pReachLayer->CheckCol(m_colReachSPRING_CMS, "SPRING_CMS", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachXFLUX_D, "XFLUX_D", TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamOUT_IRRIG, "OUT_IRRIG", TYPE_FLOAT, CC_AUTOADD);
-   m_pReachLayer->CheckCol(m_colStreamOUT_MUNI, "OUT_MUNI", TYPE_FLOAT, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colStreamOUTIRRIG_C, "OUTIRRIG_C", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colStreamTEMP_H2O, "TEMP_H2O", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colStreamOUT_MUNI, "OUT_MUNI", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colStreamIN_MUNI, "IN_MUNI", TYPE_FLOAT, CC_AUTOADD);
 
    m_pIDUlayer->CheckCol(m_colCOMID, "COMID", TYPE_INT, CC_MUST_EXIST);
@@ -1584,6 +1586,7 @@ bool AltWaterMaster::Step(FlowContext *pFlowContext)
    pStreamLayer->m_readOnly = true;
 
    pStreamLayer->SetColDataU(m_colStreamOUT_IRRIG, 0);
+   pStreamLayer->SetColDataU(m_colStreamOUTIRRIG_C, 0);
    pStreamLayer->SetColDataU(m_colStreamOUT_MUNI, 0);
    pStreamLayer->SetColDataU(m_colStreamIN_MUNI, 0);
 
@@ -2523,8 +2526,14 @@ void AltWaterMaster::FateOfUGA_UrbanWaterUsingSewers()
                m_iduSWUnExerIrrArrayDy[iduNdx] += unused_amt_cms;
             }
             float out_irrig_cms; m_pReachLayer->GetData(pReach->m_polyIndex, m_colStreamOUT_IRRIG, out_irrig_cms);
-            out_irrig_cms += amt_allocated_cms;
+            double outirrig_C; m_pReachLayer->GetData(pReach->m_polyIndex, m_colStreamOUTIRRIG_C, outirrig_C);
+            WaterParcel out_irrigWP(out_irrig_cms * SEC_PER_DAY, outirrig_C);
+            double reach_temperature_C; m_pReachLayer->GetData(pReach->m_polyIndex, m_colStreamTEMP_H2O, reach_temperature_C);
+            out_irrigWP.MixIn(WaterParcel(amt_allocated_cms * SEC_PER_DAY, reach_temperature_C));
+            out_irrig_cms = (float)(out_irrigWP.m_volume_m3 / SEC_PER_DAY);
             m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colStreamOUT_IRRIG, out_irrig_cms);
+            outirrig_C = out_irrigWP.WaterTemperature();
+            m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colStreamOUTIRRIG_C, outirrig_C);
          }
          break;
 

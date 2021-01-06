@@ -417,6 +417,8 @@ protected:
    int m_colReachSPRING_CMS;
 	int m_colReachXFLUX_D;
    int m_colStreamOUT_IRRIG;
+	int m_colStreamOUTIRRIG_C;
+	int m_colStreamTEMP_H2O;
    int m_colStreamOUT_MUNI;
    int m_colStreamIN_MUNI;
 

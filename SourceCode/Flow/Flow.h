@@ -851,7 +851,7 @@ public:
    double m_evap_m3;
    double m_evap_kJ;
 
-   double m_addedVolume_m3; // amount added to keep compartment from going negative
+   WaterParcel m_addedVolumeWP; // amount added to keep compartment from going negative
    double m_addedDischarge_cms; // amount added to ensure discharge is always > 0
    bool m_nanOccurred;
  
@@ -860,7 +860,7 @@ public:
       ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
          m_previousDischarge(0.11), m_previousVolume(0.0),
          m_waterParcel(0, 0),
-      m_addedVolume_m3(0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
+      m_addedVolumeWP(0,0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }
 
 };
@@ -958,7 +958,7 @@ public:
    int m_IDUndxForReach; // index to an IDU in the IDU layer which contains a vertex of this reach
 
    double m_addedDischarge_cms;
-   double m_addedVolume_m3;
+   WaterParcel m_reachAddedVolumeWP;
 
    // kinematic wave parameters
    float m_alpha;
@@ -1795,6 +1795,7 @@ public:
    int m_colStreamINSTRM_REQ; // regulatory flow requirement for this reach, cms (requirement of most junior instream WR, if more than one applies)
    int m_colStreamREACH_H2O; // volume of water in reach, m3
    int m_colReachADDED_VOL; // m3 H2O
+   int m_colReachADDEDVOL_C; // deg C
    int m_colReachADDED_Q; // cms
    int m_colReachEVAP_MM; // daily evaporation from reach, m3H2O
    int m_colStreamHYDRO_MW;

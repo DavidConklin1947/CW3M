@@ -582,6 +582,7 @@ flow_cms="1.10"
       <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="water from springs (MJ)" query="1" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="added by model (MJ)" query="1" value="ADDEDVOL_C*ADDED_VOL*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="insolation of reaches (MJ)" query="1" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="insolation of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="longwave radiation out of reaches (MJ)" query="1" value="AREA_H2O*RAD_LW_OUT*86400/1000000" type="sum" domain="reach" />
@@ -589,7 +590,7 @@ flow_cms="1.10"
       <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" type="sum" domain="reach" />
       <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
-      <output name="OUT_IRRIG (MJ)" query="1" value="TEMP_H2O*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="OUTIRRIG_C*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
@@ -622,6 +623,7 @@ flow_cms="1.10"
       <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="water from springs (MJ)" query="1" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="added by model (MJ)" query="1" value="ADDEDVOL_C*ADDED_VOL*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="insolation of reaches (MJ)" query="1" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="insolation of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="longwave radiation out of reaches (MJ)" query="1" value="AREA_H2O*RAD_LW_OUT*86400/1000000" type="sum" domain="reach" />
@@ -629,7 +631,7 @@ flow_cms="1.10"
       <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" type="sum" domain="reach" />
       <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
-      <output name="OUT_IRRIG (MJ)" query="1" value="TEMP_H2O*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="OUTIRRIG_C*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
@@ -662,6 +664,7 @@ flow_cms="1.10"
       <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="water from springs (MJ)" query="1" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="added by model (MJ)" query="1" value="ADDEDVOL_C*ADDED_VOL*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="insolation of reaches (MJ)" query="1" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="insolation of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_SW_IN*86400/1000000" type="sum" domain="reach" />
       <output in_use="1" name="longwave radiation out of reaches (MJ)" query="1" value="AREA_H2O*RAD_LW_OUT*86400/1000000" type="sum" domain="reach" />
@@ -669,7 +672,7 @@ flow_cms="1.10"
       <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
       <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" type="sum" domain="reach" />
       <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
-      <output name="OUT_IRRIG (MJ)" query="1" value="TEMP_H2O*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="OUTIRRIG_C*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
       <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
