@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<scenarios default='0'>
+
+    <scenario name='PEST'
+   originator='Dave Conklin, Oregon Freshwater Simulations'
+   isEditable='1'
+   isShared='1'
+   policyPreferenceWt='0.333333'
+   evalModelFreq='1'>
+    <description>
+      Scenario for use with PEST calibration runs
+    </description>
+    <policies>
+    </policies>
+    <vars>
+      <var vtype='8' inUse='1' name='PopGrowth.Population Scenario' value='6.000000' />
+      <var vtype='8' inUse='1' name='UrbanWater.Population Scenario' value='6' />
+      <var vtype='8' inUse='1' name='Flow.Climate Scenario' value='7' />
+      <var vtype='8' inUse='0' name='Flow.Use Parameter Estimation' value='0.000000' />
+      <var vtype='8' inUse='0' name='Flow.Grid Classification?' value='2.000000' />
+      <var vtype='8' inUse='0' name='Flow.Dynamic Water Right type' value='0.000000' />
+      <var vtype='8' inUse='1' name='Flow.Regulation type' value='1.000000' />
+      <var vtype='1' inUse='0' name='Decision Elements' value='7.000000' />
+    </vars>
+  </scenario>
+
+  <scenario name='PEST_Spinup'
+   originator='Dave Conklin, Oregon Freshwater Simulations'
+   isEditable='1'
+   isShared='1'
+   policyPreferenceWt='0.333333'
+   evalModelFreq='1'>
+    <description>
+      Scenario for use with PEST calibration runs
+    </description>
+    <policies>
+    </policies>
+    <vars>
+      <var vtype='8' inUse='1' name='PopGrowth.Population Scenario' value='6.000000' />
+      <var vtype='8' inUse='1' name='UrbanWater.Population Scenario' value='6' />
+      <var vtype='8' inUse='1' name='Flow.Climate Scenario' value='13' />
+      <var vtype='8' inUse='0' name='Flow.Use Parameter Estimation' value='0.000000' />
+      <var vtype='8' inUse='0' name='Flow.Grid Classification?' value='2.000000' />
+      <var vtype='8' inUse='0' name='Flow.Dynamic Water Right type' value='0.000000' />
+      <var vtype='8' inUse='1' name='Flow.Regulation type' value='1.000000' />
+      <var vtype='1' inUse='0' name='Decision Elements' value='7.000000' />
+    </vars>
+  </scenario>
+
+</scenarios>

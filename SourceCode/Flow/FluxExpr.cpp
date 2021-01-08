@@ -1137,7 +1137,7 @@ bool Spring::Init(FlowContext* pFlowContext)
    {
       CString msg;
       msg.Format("Spring::Init() Unable to find reach with COMID = %d for spring %s", m_springCOMID, m_springName.GetString());
-      Report::ErrorMsg(msg);
+      Report::LogMsg(msg);
       return(false);
    }
 
@@ -1165,6 +1165,8 @@ bool Spring::StartStep(FlowContext* pFlowContext)
 
 bool Spring::Step(FlowContext* pFlowContext)
 {
+   if (m_pReach == NULL) return(false);
+
    MapLayer* pReachLayer = (MapLayer*)pFlowContext->pEnvContext->pReachLayer;
    FlowModel* pModel = pFlowContext->pFlowModel;
 

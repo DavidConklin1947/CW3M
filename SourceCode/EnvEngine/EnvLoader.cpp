@@ -1245,7 +1245,8 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
    // output directory (e.g. C:\CW3M_McKenzie_0.4.2\McKenzie\Outputs\Baseline )
    outputPath = PathManager::GetPath(PM_IDU_DIR);
    outputPath += "Outputs\\";
-   outputPath += m_pScenarioManager->GetScenario(default_simulation_scenario)->m_name;
+   Scenario* pScenario = m_pScenarioManager->GetScenario(default_simulation_scenario);
+   if (pScenario != NULL) outputPath += m_pScenarioManager->GetScenario(default_simulation_scenario)->m_name;
    PathManager::SetPath(PM_OUTPUT_DIR, outputPath);
 
    SHCreateDirectoryEx(NULL, outputPath, NULL);
