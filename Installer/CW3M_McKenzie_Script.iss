@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CW3M_McKenzie"
-#define MyAppVersion "McKenzie_0.4.3"
+#define MyAppVersion "McKenzie_0.4.4"
 ;#define MyAppVersion "x.x.x"
 #define MyAppPublisher "Oregon Freshwater Simulations, Inc."
 #define MyAppURL "http:/www.freshwatersim.com"
@@ -57,7 +57,7 @@ Source: "{#InputPath}\DataCW3M\Observations\*"; DestDir: "\CW3M_{#MyAppVersion}\
 ;Source: "{#InputPath}\DataCW3M\Observations\jd_csv\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\jd_csv"; 
 ;Source: "{#InputPath}\DataCW3M\Observations\IncludingLeapDays\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\IncludingLeapDays"; 
 Source: "{#InputPath}\DataCW3M\Observations\McKenzie\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\McKenzie"; 
-Source: "{#InputPath}\DataCW3M\Observations\Clackamas\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Observations\Clackamas\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\Clackamas"; 
 Source: "{#InputPath}\DataCW3M\Observations\NSantiam\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\NSantiam"; 
 
 Source: "{#InputPath}\DataCW3M\Reservoirs\Area_Capacity_Curves\*"; DestDir: "\CW3M_{#MyAppVersion}\Reservoirs\Area_Capacity_Curves"; 
@@ -97,7 +97,7 @@ Source: "{#InputPath}\DataCW3M\probability_transition_lookup.csv"; DestDir: "\CW
 Source: "{#InputPath}\DataCW3M\Reach.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Reporter.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\SimulationScenarios.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
-Source: "{#InputPath}\DataCW3M\Scenarios_PEST.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\SimulationScenarios_PEST.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\SpatialAllocator.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\VegSTM.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\wr_pods.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
@@ -135,25 +135,23 @@ Source: "{#InputPath}\DataCW3M\ScenarioData\PopulationAndIncomeScenarios\Baselin
 ;Source: "{#InputPath}\DataCW3M\IDU_CW3M.shx"; DestDir: "\CW3M_{#MyAppVersion}"; 
 ;Source: "{#InputPath}\DataCW3M\Reach_CW3M*"; DestDir: "\CW3M_{#MyAppVersion}"; 
 
-Source: "{#InputPath}\DataCW3M\CW3M_Clackamas.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\Flow_Clackamas.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\HRU_Clackamas*"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.cpg"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.dbf"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.prj"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.sbn"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.sbx"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.shp"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.shp.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.shx"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
-Source: "{#InputPath}\DataCW3M\Clackamas\Reach_Clackamas*"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\CW3M_Clackamas.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\Flow_Clackamas.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\HRU_Clackamas*"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.cpg"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.dbf"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.prj"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.sbn"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.sbx"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.shp"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.shp.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\IDU_Clackamas.shx"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
+;Source: "{#InputPath}\DataCW3M\Clackamas\Reach_Clackamas*"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
 ;Source: "{#InputPath}\DataCW3M\Clackamas\Reporter_Clackamas.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
 
 Source: "{#InputPath}\DataCW3M\CW3M_McKenzie.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
-;Source: "{#InputPath}\DataCW3M\CW3M_McKenzie_PEST.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\McKenzie\Flow_McKenzie.xml"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
-;Source: "{#InputPath}\DataCW3M\McKenzie\Flow_McKenzie_PEST.xml"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 Source: "{#InputPath}\DataCW3M\McKenzie\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 ;Source: "{#InputPath}\DataCW3M\McKenzie\Flow_McKenzie_31yr_spinup_2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 ;Source: "{#InputPath}\DataCW3M\McKenzie\Flow_McKenzie_MIROC5_56yr_spinup_2006.ic"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
@@ -170,6 +168,20 @@ Source: "{#InputPath}\DataCW3M\McKenzie\IDU_McKenzie.shx"; DestDir: "\CW3M_{#MyA
 Source: "{#InputPath}\DataCW3M\McKenzie\Reach_McKenzie*"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 ;Source: "{#InputPath}\DataCW3M\McKenzie\PEST\*"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie\PEST";
 Source: "{#InputPath}\DataCW3M\McKenzie\Reporter_McKenzie.xml"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
+
+Source: "{#InputPath}\DataCW3M\CW3M_PEST_BLU9.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\Flow_PEST_BLU9.xml"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\HRU_BLU9*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\IDU_BLU9.cpg"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\IDU_BLU9.dbf"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\IDU_BLU9.prj"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\IDU_BLU9.sbn"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\IDU_BLU9.sbx"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\IDU_BLU9.shp"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\IDU_BLU9.shp.xml"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\IDU_BLU9.shx"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
+Source: "{#InputPath}\DataCW3M\PEST_BLU9\Reach_BLU9*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_BLU9"; 
 
 Source: "{#InputPath}\DataCW3M\CW3M_NSantiam.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\NSantiam\Flow_NSantiam.xml"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
