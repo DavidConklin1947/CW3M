@@ -554,8 +554,8 @@ flow_cms="1.10"
     -->
 
   <outputs>
-    <output_group name="HBV Flows (m3/s)">
-      <output in_use="1" name="Blue River 23773407 (m3/s)" query="COMID = 23773407" value="reachOutflow" type="sum" domain="reach" />
+    <output_group name="HBV Flows (cfs)">
+      <output in_use="1" name="Blue River 23773407 (cfs)" query="COMID = 23773407" value="reachOutflow*35.315" type="sum" domain="reach" />
     </output_group>
 
   </outputs>
