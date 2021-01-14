@@ -554,6 +554,21 @@ flow_cms="1.10"
     -->
 
   <outputs>
+    <output_group name="FLOW Shade-a-lator comparison" interval="daily" >
+      <output name="23772865 RAD_SW_IN (W per m2)" query="COMID=23772865" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output name="23772865 WIDTH (m)" query="COMID=23772865" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772865 LENGTH (m)" query="COMID=23772865" value="LENGTH" type="sum" domain="reach" />
+      <output name="23772865 DEPTH (m)" query="COMID=23772865" value="DEPTH" type="sum" domain="reach" />
+      <output name="23772863 RAD_SW_IN (W per m2)" query="COMID=23772863" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output name="23772863 WIDTH (m)" query="COMID=23772863" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772863 LENGTH (m)" query="COMID=23772863" value="LENGTH" type="sum" domain="reach" />
+      <output name="23772863 DEPTH (m)" query="COMID=23772863" value="DEPTH" type="sum" domain="reach" />
+      <output name="23772861 RAD_SW_IN (W per m2)" query="COMID=23772861" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output name="23772861 WIDTH (m)" query="COMID=23772861" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772861 LENGTH (m)" query="COMID=23772861" value="LENGTH" type="sum" domain="reach" />
+      <output name="23772861 DEPTH (m)" query="COMID=23772861" value="DEPTH" type="sum" domain="reach" />
+    </output_group>
+    
     <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
       <output in_use="1" name="ET from HBVCALIB 46 Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output in_use="1" name="ET from HBVCALIB 46 Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />

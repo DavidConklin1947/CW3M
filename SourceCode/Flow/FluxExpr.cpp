@@ -1082,13 +1082,15 @@ Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel * pModel, MapLaye
    bool dynamic = false;
    int spring_comid;
    float spring_flow_cms = 0.f;
+   float spring_flow_cfs = 0.f;
    float temp_C = DEFAULT_SOIL_H2O_TEMP_DEGC;
 
    XML_ATTR attrs[] = {
       // attr                 type          address               isReq  checkCol
       { "name",               TYPE_STRING,    &name,              true,    0 },
       { "COMID",              TYPE_INT,       &spring_comid,      true,    0 },
-      { "flow_cms",           TYPE_FLOAT,     &spring_flow_cms,   true,    0 },
+      { "flow_cms",           TYPE_FLOAT,     &spring_flow_cms,   false,    0 },
+      { "flow_cfs",           TYPE_FLOAT,     &spring_flow_cfs,   false,   0 },
       { "temp_C",             TYPE_FLOAT,     &temp_C,            false,   0 },
       { NULL,                 TYPE_NULL,      NULL,               false,   0 } };
 
@@ -1101,13 +1103,15 @@ Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel * pModel, MapLaye
       return NULL;
    }
 
-   if (spring_flow_cms < 0.)
+   if (spring_flow_cms <= 0. && spring_flow_cfs <= 0.)
    {
       CString msg;
-      msg.Format("Spring::LoadXml() Spring %s flow = %f is negative; changing it to 0 now.", name, spring_flow_cms);
+      msg.Format("Spring::LoadXml() Unable to interpret the flow for spring %s. spring_flow_cms = %f, and spring_flow_cfs = %f; changing it to 0 now.",
+         name, spring_flow_cms, spring_flow_cfs);
       Report::WarningMsg(msg);
       spring_flow_cms = 0.f;
    }
+   else if (spring_flow_cms <= 0.) spring_flow_cms = spring_flow_cfs / FT3_PER_M3;
 
    if (temp_C < 0. || temp_C >100.)
    {

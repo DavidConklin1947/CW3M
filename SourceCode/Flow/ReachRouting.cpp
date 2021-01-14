@@ -17,9 +17,17 @@ extern FlowModel *gpModel;
 bool ReachRouting::Init(FlowContext* pFlowContext)
 {
    m_pHBVtable = gpModel->GetTable("HBV");
-   ASSERT(m_pHBVtable != NULL);
-   gpModel->m_colHbvW2A_SLP = m_pHBVtable->GetFieldCol("W2A_SLP");          
-   gpModel->m_colHbvW2A_INT = m_pHBVtable->GetFieldCol("W2A_INT");   
+   if (m_pHBVtable != NULL)
+   {
+      gpModel->m_colHbvW2A_SLP = m_pHBVtable->GetFieldCol("W2A_SLP");
+      gpModel->m_colHbvW2A_INT = m_pHBVtable->GetFieldCol("W2A_INT");
+   }
+   else
+   {
+      CString msg;
+      msg.Format("ReachRouting::Init() m_pHBVtable is NULL. This can happen when the HBV.csv file is open in Excel.");
+      Report::ErrorMsg(msg);
+   }
 
    return(m_pHBVtable != NULL && gpModel->m_colHbvW2A_SLP > 0 && gpModel->m_colHbvW2A_INT > 0);
 } // end of ReachRouting::Init()

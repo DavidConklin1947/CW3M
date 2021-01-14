@@ -231,35 +231,7 @@
                percent_IDU_POU_intersection ="15.0"
                DynamicWR_Appropriation_Date ="-1"
             />
-
-    <flux name="Blue River Reservoir drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=9"
-    value_domain="source"
-    value="-579"
-    dynamic="0"
-       />
-    <flux name="Cougar Reservoir Drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=8"
-    value_domain="source"
-    value="-1908"
-    dynamic="0"
-       />
-    <flux name="Walterville gage additional GW" use="1"
-source_domain="reach"
-source_query="HBVCALIB=34"
-value_domain="source"
-value="-4939"
-dynamic="0"
-       />
-    <flux name="Clackamas High Cascades Groundwater contribution" use="1"
-            source_domain="reach"
-            source_query="(ECO = 9 or ECO = 10) and SUB_AREA =3"
-            value_domain="source"
-            value="-7743.0"
-            dynamic="0"
-       />
+    <!--
     <flux name="Detroit Reservoir Drainage HC GW contribution" use="1"
      source_domain="reach"
      source_query="HBVCALIB=12"
@@ -267,27 +239,43 @@ dynamic="0"
      value="-2097"
      dynamic="0"
        />
-    <flux name="Hills Creek Reservoir Drainage additional GW" use="1"
-   source_domain="reach"
-   source_query="HBVCALIB=1"
-   value_domain="source"
-   value="-1546"
-   dynamic="0"
+-->
+    <Spring name="Blowout Cr."
+COMID="23780557"
+flow_cfs="9"
+temp_C="4.9"
        />
-    <flux name="Fall Creek Reservoir Drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=4"
-    value_domain="source"
-    value="-155"
-    dynamic="0"
+    <Spring name="Breitenbush"
+COMID="23780701"
+flow_cfs="159"
+temp_C="4.9"
        />
-    <flux name="Middle Fork at Jasper additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=38"
-    value_domain="source"
-    value="-814"
-    dynamic="0"
+    <Spring name="Marion Cr."
+COMID="23780673"
+flow_cfs="41"
+temp_C="4.9"
        />
+    <Spring name="Pamelia Cr."
+COMID="23780957"
+flow_cfs="23"
+temp_C="4.9"
+       />
+    <Spring name="Whitewater Cr."
+COMID="23781597"
+flow_cfs="15"
+temp_C="4.9"
+       />
+    <Spring name="Horn Cr."
+COMID="23781739"
+flow_cfs="31"
+temp_C="4.9"
+       />
+    <Spring name="Boulder Cr."
+COMID="23780901"
+flow_cfs="60"
+temp_C="4.9"
+       />
+
 
   </global_methods>
 
@@ -568,6 +556,42 @@ dynamic="0"
     -->
 
   <outputs>
+    <output_group name="FLOW at D Sherrods locations (cfs) daily" interval ="daily" >
+      <output name="NSantiam R 23780643" query="COMID=23780643" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780629" query="COMID=23780629" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Horn Cr 23781739" query="COMID=23781739" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Marion Cr 23780673" query="COMID=23780673" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Minto Cr 23781671 ?" query="COMID=23781671" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780621" query="COMID=23780621" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Pamelia Cr 23780957" query="COMID=23780957" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Whitewater Cr 23781597" query="COMID=23781597" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780611" query="COMID=23780611" value="Q*35.3146667" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW at D Sherrods locations (cfs) monthly" interval ="monthly" >
+      <output name="NSantiam R 23780643" query="COMID=23780643" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780629" query="COMID=23780629" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Horn Cr 23781739" query="COMID=23781739" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Marion Cr 23780673" query="COMID=23780673" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Minto Cr 23781671 ?" query="COMID=23781671" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780621" query="COMID=23780621" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Pamelia Cr 23780957" query="COMID=23780957" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Whitewater Cr 23781597" query="COMID=23781597" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780611" query="COMID=23780611" value="Q*35.3146667" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW at D Sherrods locations (cfs) yearly" interval ="yearly" >
+      <output name="NSantiam R 23780643" query="COMID=23780643" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780629" query="COMID=23780629" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Horn Cr 23781739" query="COMID=23781739" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Marion Cr 23780673" query="COMID=23780673" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Minto Cr 23781671 ?" query="COMID=23781671" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780621" query="COMID=23780621" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Pamelia Cr 23780957" query="COMID=23780957" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="Whitewater Cr 23781597" query="COMID=23781597" value="Q*35.3146667" type="sum" domain="reach" />
+      <output name="NSantiam R 23780611" query="COMID=23780611" value="Q*35.3146667" type="sum" domain="reach" />
+    </output_group>
+
     <output_group name="FLOW NSantiam flow skill assessment monthly" interval ="monthly" >
       <output in_use="1" name="USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591"
               query="COMID=23780591" value="Q*35.3146667" type="sum" domain="reach"
@@ -627,57 +651,6 @@ dynamic="0"
       <output in_use="1" name="Total OUT_MUNI (cms)" query="SUB_AREA=6" value="OUT_MUNI" type="sum" domain="reach" />
       <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="SUB_AREA=6" value="-IN_MUNI" type="sum" domain="reach" />
       <output in_use="1" name="Total XFLUX_D (cms)" query="SUB_AREA=6" value="XFLUX_D" type="sum" domain="reach" />
-    </output_group>
-
-    <output_group name="FLOW NSantiam monthly flows with Obs (cfs)" interval="monthly" >
-      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" 
-              obs="..\Observations\IncludingLeapDays\obs_usgs14178000.csv" format="E0" />
-      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" 
-              obs="..\Observations\IncludingLeapDays\obs_usgs14179000.csv" format="E0" />
-      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" 
-              obs="..\Observations\IncludingLeapDays\obs_usgs14180300.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" 
-              obs="..\Observations\IncludingLeapDays\obs_usgs14181500.csv" format="E0" />
-      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" 
-              obs="..\Observations\IncludingLeapDays\obs_usgs14182500.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" 
-              obs="..\Observations\IncludingLeapDays\obs_usgs14183000.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" 
-              obs="..\Observations\IncludingLeapDays\obs_usgs14184100.csv" format="E0" />
-    </output_group>
-
-    <output_group name="FLOW NSantiam daily flows with Obs (cfs)" interval="daily" >
-      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14178000.csv" format="E0" />
-      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14179000.csv" format="E0" />
-      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14180300.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14181500.csv" format="E0" />
-      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14182500.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14183000.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14184100.csv" format="E0" />
-    </output_group>
-
-    <output_group name="FLOW NSantiam yearly flows with Obs (cfs)" interval="yearly" >
-      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14178000.csv" format="E0" />
-      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14179000.csv" format="E0" />
-      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14180300.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14181500.csv" format="E0" />
-      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14182500.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14183000.csv" format="E0" />
-      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach"
-              obs="..\Observations\IncludingLeapDays\obs_usgs14184100.csv" format="E0" />
     </output_group>
 
     <output_group name="FLOW HBVCALIB outflows" >

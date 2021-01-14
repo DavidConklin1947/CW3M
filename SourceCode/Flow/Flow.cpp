@@ -3243,10 +3243,195 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    msg.Format( "Flow: Processors available=%i, Max Processors specified=%i, Processors used=%i", ::omp_get_num_procs(), gpFlow->m_maxProcessors, gpFlow->m_processorsUsed );
    Report::LogMsg( msg, RT_INFO );
 
+//   DumpReachInsolationData(downstreamCOMID, upstreamCOMID);
+
    return true;
    } // end of FlowModel::Init()
 
+/*x
+bool FlowModel::DumpReachInsolationData(int downstreamCOMID, int upstreamCOMID)
+{
+   // Get the path to the current user's Documents folder.
+   PWSTR userPath;
+   SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &userPath);
+   char szBuffer[255];
+   WideCharToMultiByte(CP_ACP, 0, userPath, -1, szBuffer, sizeof(szBuffer), NULL, NULL);
+
+   // Set the string "filename" equal to Users\<username>\Documents\ReachInsolationData.csv
+   CString filename;
+   filename.Format("%s\\ReachInsolationData.csv", szBuffer);
+   const char* filename_const = filename;
+
+   FILE* oFile = NULL;
+   int errNo = fopen_s(&oFile, filename_const, "w");
+   if (errNo != 0) return(false);
+
+   fprintf(oFile, "COMID, INSTRMWRID, INSTRM_WR, STRM_ORDER\n");
+   fprintf(ofile, "RIVER_KM, COMID, LENGTH, WIDTH, DIRECTION, BANK_L_IDU, VEGCLASS_L,"
+      "AGE_CLASS_L, TREE_HT_L, BANK_R_IDU, VEGCLASS_R, AGE_CLASS_R, TREE_HT_R, SHADECOEFF, "
+      "SUBREACH_NDX, LENGTH_SR, WIDTH_SR, DIRECTION_SR\n");
    
+   double river_km = 0.;
+
+   int num_reaches = (int)m_reachArray.GetSize();
+   for (int reach_ndx = 0; reach_ndx < num_reaches; reach_ndx++)
+   {
+      Reach* pReach = m_reachArray[reach_ndx];
+
+   } // end of loop through reaches
+
+   for (MapLayer::Iterator reach = m_pReachLayer->Begin(); reach < m_pReachLayer->End(); reach++)
+   {
+      int instrmwrid; m_pReachLayer->GetData(reach, m_colStreamINSTRMWRID, instrmwrid);
+      if (instrmwrid == 0) continue;
+      int comid; m_pReachLayer->GetData(reach, m_colStreamCOMID, comid);
+
+} // end of DumpReachInsolationData()
+x*/
+/*x
+bool AltWaterMaster::WriteWRreport()
+{
+   // Get the path to the current user's Documents folder.
+   PWSTR userPath;
+   SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &userPath);
+   char szBuffer[255];
+   WideCharToMultiByte(CP_ACP, 0, userPath, -1, szBuffer, sizeof(szBuffer), NULL, NULL);
+
+   // Set the string "filename" equal to Users\<username>\Documents\InstreamWaterRightsReport.csv
+   CString filename;
+   filename.Format("%s\\InstreamWaterRightsReportByReach.csv", szBuffer);
+   const char* filename_const = filename;
+
+   FILE* oFile = NULL;
+   int errNo = fopen_s(&oFile, filename_const, "w");
+   if (errNo != 0) return(false);
+
+   fprintf(oFile, "COMID, INSTRMWRID, INSTRM_WR, STRM_ORDER\n");
+
+   for (MapLayer::Iterator reach = m_pReachLayer->Begin(); reach < m_pReachLayer->End(); reach++)
+   {
+      int instrmwrid; m_pReachLayer->GetData(reach, m_colStreamINSTRMWRID, instrmwrid);
+      if (instrmwrid == 0) continue;
+      int comid; m_pReachLayer->GetData(reach, m_colStreamCOMID, comid);
+      int instrm_wr; m_pReachLayer->GetData(reach, m_colStreamINSTRM_WR, instrm_wr);
+      int strm_order; m_pReachLayer->GetData(reach, m_colStreamSTRM_ORDER, strm_order);
+      fprintf(oFile, "%d, %d, %d, %d\n", comid, instrmwrid, instrm_wr, strm_order);
+   }
+
+   fclose(oFile); oFile = NULL;
+
+   // Now set the string "filename" equal to Users\<username>\Documents\IrrigationWaterRightsReportByIDU.csv
+   filename.Format("%s\\IrrigationWaterRightsReportByIDU.csv", szBuffer);
+   const char* filename_const2 = filename;
+
+   errNo = fopen_s(&oFile, filename_const2, "w");
+   if (errNo != 0) return(false);
+
+   fprintf(oFile, "IDU_ID, WR_IRRIG_S, WR_IRRIG_G, WATERRIGHT, WRPRIORITY, WR_PCT_IDU, WR_PCT_POU, SUB_AREA, HBVCALIB, COUNTYID, COMID_POD\n");
+
+   for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu < m_pIDUlayer->End(); idu++)
+   {
+      int wr_irrig_s; m_pIDUlayer->GetData(idu, m_colWR_IRRIG_S, wr_irrig_s);
+      int wr_irrig_g; m_pIDUlayer->GetData(idu, m_colWR_IRRIG_G, wr_irrig_g);
+      if (wr_irrig_s == 0 && wr_irrig_g == 0) continue;
+
+      int idu_id; m_pIDUlayer->GetData(idu, m_colIDU_ID, idu_id);
+      int waterright; m_pIDUlayer->GetData(idu, m_colWATERRIGHT, waterright);
+      int wrpriority; m_pIDUlayer->GetData(idu, m_colWRPRIORITY, wrpriority);
+      float wr_pct_idu; m_pIDUlayer->GetData(idu, m_colWR_PCT_IDU, wr_pct_idu);
+      float wr_pct_pou; m_pIDUlayer->GetData(idu, m_colWR_PCT_POU, wr_pct_pou);
+      int sub_area; m_pIDUlayer->GetData(idu, m_colSUB_AREA, sub_area);
+      int hbvcalib; m_pIDUlayer->GetData(idu, m_colHBVCALIB, hbvcalib);
+      int countyid; m_pIDUlayer->GetData(idu, m_colCOUNTYID, countyid);
+      int comid_pod; m_pIDUlayer->GetData(idu, m_colCOMID_POD, comid_pod);
+
+      fprintf(oFile, "%d, %d, %d, %d, %d, %f, %f, %d, %d, %d, %d\n",
+         idu_id, wr_irrig_s, wr_irrig_g, waterright, wrpriority, wr_pct_idu, wr_pct_pou, sub_area, hbvcalib, countyid, comid_pod);
+   }
+
+   fclose(oFile); oFile = NULL;
+
+   // Now set the string "filename" equal to Users\<username>\Documents\InstreamWaterRightsReportByPOD.csv
+   filename.Format("%s\\InstreamWaterRightsReportByPOD.csv", szBuffer);
+   const char* filename_const3 = filename;
+
+   errNo = fopen_s(&oFile, filename_const3, "w");
+   if (errNo != 0) return(false);
+
+   fprintf(oFile, "POD_INDEX, REACHCOMID, REACH_ID, STREAMINDEX, XCOORD, YCOORD, BEGIN_DOY, END_DOY, PODRATE_CFS, WATERRIGHTID, PODID, PRIORYR, PRIORDOY, PERMITCODE, USECODE, PODSTATUS\n");
+
+   // loop thru the m_podArray entries: for each entry with use=WRU_INSTREAM, find the associated reach
+   int podArrayLen = (int)m_podArray.GetCount();
+   for (int podNdx = 0; podNdx < podArrayLen; podNdx++)
+   {
+      Reach* pReach = m_podArray[podNdx]->m_pReach;
+      if (m_podArray[podNdx]->m_useCode == WRU_INSTREAM)
+         fprintf(oFile, "%d, %d, %d, %d, %f, %f, %d, %d, %f, %d, %d, %d, %d, %d, %d, %d\n",
+            podNdx,
+            m_podArray[podNdx]->m_reachComid,
+            pReach != NULL ? pReach->m_reachID : 0,
+            m_podArray[podNdx]->m_streamIndex,
+            m_podArray[podNdx]->m_xCoord,
+            m_podArray[podNdx]->m_yCoord,
+            m_podArray[podNdx]->m_beginDoy,
+            m_podArray[podNdx]->m_endDoy,
+            m_podArray[podNdx]->m_podRate_cfs,
+            m_podArray[podNdx]->m_wrID,
+            m_podArray[podNdx]->m_podID,
+            m_podArray[podNdx]->m_priorYr,
+            m_podArray[podNdx]->m_priorDoy,
+            m_podArray[podNdx]->m_permitCode,
+            m_podArray[podNdx]->m_useCode,
+            m_podArray[podNdx]->m_podStatus);
+   }
+
+   fclose(oFile); oFile = NULL;
+
+   // Now set the string "filename" equal to Users\<username>\Documents\SurfaceIrrigationWaterRightsReportByPOD.csv
+   filename.Format("%s\\SurfaceIrrigationWaterRightsReportByPOD.csv", szBuffer);
+   const char* filename_const4 = filename;
+
+   errNo = fopen_s(&oFile, filename_const4, "w");
+   if (errNo != 0) return(false);
+
+   fprintf(oFile, "POD_INDEX, REACHCOMID, REACH_ID, STREAMINDEX, XCOORD, YCOORD, BEGIN_DOY, END_DOY, PODRATE_CFS, WATERRIGHTID, PODID, PRIORYR, PRIORDOY, PERMITCODE, USECODE, PODSTATUS, "
+      "POUID, POURATE, INUSE, NPODSPERWR, PODUSERATE_CFS, SPECIALCODE\n");
+
+   // loop thru the m_podArray entries: for each entry with use=WRU_INSTREAM, find the associated reach
+   for (int podNdx = 0; podNdx < podArrayLen; podNdx++)
+   {
+      Reach* pReach = m_podArray[podNdx]->m_pReach;
+      if (m_podArray[podNdx]->m_useCode == WRU_IRRIGATION && m_podArray[podNdx]->m_permitCode == WRP_SURFACE)
+         fprintf(oFile, "%d, %d, %d, %d, %f, %f, %d, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %f, %d, %d, %f, %d\n",
+            podNdx,
+            m_podArray[podNdx]->m_reachComid,
+            pReach != NULL ? pReach->m_reachID : 0,
+            m_podArray[podNdx]->m_streamIndex,
+            m_podArray[podNdx]->m_xCoord,
+            m_podArray[podNdx]->m_yCoord,
+            m_podArray[podNdx]->m_beginDoy,
+            m_podArray[podNdx]->m_endDoy,
+            m_podArray[podNdx]->m_podRate_cfs,
+            m_podArray[podNdx]->m_wrID,
+            m_podArray[podNdx]->m_podID,
+            m_podArray[podNdx]->m_priorYr,
+            m_podArray[podNdx]->m_priorDoy,
+            m_podArray[podNdx]->m_permitCode,
+            m_podArray[podNdx]->m_useCode,
+            m_podArray[podNdx]->m_podStatus,
+            m_podArray[podNdx]->m_pouID,
+            m_podArray[podNdx]->m_pouRate,
+            m_podArray[podNdx]->m_inUse,
+            m_podArray[podNdx]->m_nPODSperWR,
+            m_podArray[podNdx]->m_podUseRate_cfs,
+            m_podArray[podNdx]->m_specialCode);
+   }
+
+   fclose(oFile); oFile = NULL;
+
+   return(true);
+} // end of WriteWRreport()
+x*/
 void FlowModel::SummarizeIDULULC()
    {
 
