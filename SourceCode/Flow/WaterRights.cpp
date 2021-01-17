@@ -301,7 +301,7 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
    { 507544, 4871675, 23751778, 38 }, // 38 Middle Fork near Jasper
    { 0, 0, 23751752, 18 }, // 18 Middle Fork outlet
 // McKenzie basin
-   { 0, 0, 23773407, 9 }, //", 9, Blue River, ,
+   { 0, 0, 23773405, 9 }, // 9, BLU9, USGS gage 14162200 on Blue R below Quartz Cr. and the dam and above Simmonds Cr.
    { 0, 0, 0, 14 }, // now spare14 { 553414.7513, 4890138.574, 23773405, 14 }, //", 14, Blue River, 44.162500, -122.331940
    { 0, 0, 23773373, 46 }, // Clear Lake
    { 0, 0, 0, 33 }, // now spare33 { 575933.4287, 4902090.896, -99, 33 }, //", 33, Trail Bridge, 44.268100, -122.048600
@@ -392,13 +392,10 @@ void AltWaterMaster::SetUpstreamReachAttributes(Reach * pReach, int newValue, in
    m_pReachLayer->SetDataU(polyNdx, reachColNum, newValue);
 
    Reach * pUpstreamReachLeft = m_pFlowModel->GetReachFromNode(pReach->m_pLeft);
-   Reach * pUpstreamReachRight = m_pFlowModel->GetReachFromNode(pReach->m_pRight);
+   if (pUpstreamReachLeft != NULL) SetUpstreamReachAttributes(pUpstreamReachLeft, newValue, origValue, reachColNum);
 
-   if (pUpstreamReachLeft != NULL)
-   {
-      SetUpstreamReachAttributes(pUpstreamReachLeft, newValue, origValue, reachColNum);
-      if (pUpstreamReachRight != NULL) SetUpstreamReachAttributes(pUpstreamReachRight, newValue, origValue, reachColNum);
-   }
+   Reach * pUpstreamReachRight = m_pFlowModel->GetReachFromNode(pReach->m_pRight);
+   if (pUpstreamReachRight != NULL) SetUpstreamReachAttributes(pUpstreamReachRight, newValue, origValue, reachColNum); 
 } // end of SetUpstreamReachAttributes()
 
 
@@ -426,10 +423,11 @@ bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
       int comid = (int)HBVcalibPts[iPt][2];
       int polyNdx = pStreamLayer->FindIndex(m_colStreamCOMID, comid);
       if (polyNdx < 0) continue;
-      int origHBVcalib = -1; pStreamLayer->GetData(polyNdx, m_colStreamHBVCALIB, origHBVcalib);
+      
+      int new_hbvcalib = (int)HBVcalibPts[iPt][3];
+      int orig_hbvcalib = -1; pStreamLayer->GetData(polyNdx, m_colStreamHBVCALIB, orig_hbvcalib);
       Reach * pReach = pFlowContext->pFlowModel->FindReachFromPolyIndex(polyNdx);
-
-      SetHBVCALIB(pFlowContext, pReach, (int)HBVcalibPts[iPt][3], origHBVcalib);
+      SetHBVCALIB(pFlowContext, pReach, new_hbvcalib, orig_hbvcalib); // Sets HBVCALIB in this reach and reaches upstream of this reach
    }
    pStreamLayer->m_readOnly = readOnlyFlag;
 

@@ -179,7 +179,7 @@
      query="LULC_A!=2"
      lulc_col="LULC_B"
      soil_col="HBVCALIB"
-     soil_table="HBV.csv"
+     soil_table="HBV_PEST.csv"
      bulkStomatalResistance="150"
      latitude="45"
      longitude="123">
@@ -194,7 +194,7 @@
           lulc_col="LULC_B"
           soil_col="HBVCALIB"
           crop_table="Crops.csv"
-          soil_table="HBV.csv"
+          soil_table="HBV_PEST.csv"
           irrig_loss_factor="0.20"
           latitude="45"
           longitude="123">
@@ -509,7 +509,7 @@ flow_cms="1.10"
     -->
 
   <tables>
-    <table name="HBV" description="HBV Parameters" col="HBVCALIB" source="HBV.csv" type="float" />
+    <table name="HBV" description="HBV Parameters" col="HBVCALIB" source="HBV_PEST.csv" type="float" />
   </tables>
 
   <!--
@@ -554,8 +554,48 @@ flow_cms="1.10"
     -->
 
   <outputs>
-    <output_group name="HBV Flows (cfs)">
-      <output in_use="1" name="Blue River 23773407 (cfs)" query="COMID = 23773407" value="reachOutflow*35.315" type="sum" domain="reach" />
+    <output_group name="FLOW BLU 23773407 analysis" interval="daily" >
+      <output in_use="1" name="Q_UPSTREAM into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOFF into BLU outfall reach" query="COMID=23773405" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM from BLU outfall reach" query="COMID=23773405" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 of BLU outfall reach" query="COMID=23773405" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 in BLU outfall reach" query="COMID=23773405" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Q from BLU outfall reach" query="COMID=23773405" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="total cms into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM + IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="total cms out of BLU outfall reach" query="COMID=23773405" value="Q + (EVAP_MM/1000)*AREA_H2O/86400" type="sum" domain="reach" />
+      <output in_use="1" name="BLU outfall reach Q cms 23773407" query="COMID=23773407" value="Q" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW BLU9 outlet flow and stream temperature daily"  interval ="daily" >
+      <output in_use="1" name="BLU outlet flow (cms) reachOutflow 23773407" query="COMID = 23773407" value="reachOutflow" type="sum" domain="reach" />
+      <output in_use="1" name="BLU outlet flow (cms) Q 23773407" query="COMID = 23773407" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="BLU outlet flow (cfs) reachOutflow 23773407" query="COMID = 23773407" value="reachOutflow*35.315" type="sum" domain="reach"
+      obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773407.csv" format="E0" />
+      <output in_use="1" name="BLU outlet stream temperature (deg C) 23773407" query="COMID = 23773407" value="TEMP_H2O" type="sum" domain="reach"
+      obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773407.csv" format="E0" />
+    </output_group>
+    
+    <output_group name="FLOW BLU9 outlet flow and stream temperature monthly"  interval ="monthly" >
+      <output in_use="1" name="BLU outlet flow (cfs) 23773407" query="COMID = 23773407" value="reachOutflow*35.315" type="sum" domain="reach"
+      obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773407.csv" format="E0" />
+      <output in_use="1" name="BLU outlet stream temperature (deg C) 23773407" query="COMID = 23773407" value="TEMP_H2O" type="sum" domain="reach"
+      obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773407.csv" format="E0" />
+    </output_group>
+    
+    <output_group name="FLOW BLU9 outlet flow and stream temperature yearly"  interval ="yearly" >
+      <output in_use="1" name="BLU outlet flow (cfs) 23773407" query="COMID = 23773407" value="reachOutflow*35.315" type="sum" domain="reach"
+      obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773407.csv" format="E0" />
+      <output in_use="1" name="BLU outlet stream temperature (deg C) 23773407" query="COMID = 23773407" value="TEMP_H2O" type="sum" domain="reach"
+      obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773407.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
+      <output in_use="1" name="ET from HBVCALIB 9 BLU mm" query="HBVCALIB=9" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 9 BLU m3" query="HBVCALIB=9" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mm)" query="RESOUTFALL=9" value="RES_EVAPMM" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (m3)" query="RESOUTFALL=9" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mJ)" query="RESOUTFALL=9" value="((RES_EVAPMM/1000)*(RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)"
+              type="sum" domain="reach" />
     </output_group>
 
   </outputs>

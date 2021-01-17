@@ -231,62 +231,15 @@
                percent_IDU_POU_intersection ="15.0"
                DynamicWR_Appropriation_Date ="-1"
             />
-    <!--
-    <flux name="Detroit Reservoir Drainage HC GW contribution" use="1"
-     source_domain="reach"
-     source_query="HBVCALIB=12"
-     value_domain="source"
-     value="-2097"
-     dynamic="0"
-       />
--->
-    <Spring name="Blowout Cr."
-COMID="23780557"
-flow_cfs="9"
-temp_C="4.9"
-       />
 
-    <Spring name="French Cr."
-COMID="23780793"
-flow_cfs="155"
-temp_C="4.9"
-       />
-    
-    <Spring name="Breitenbush"
-COMID="23780701"
-flow_cfs="159"
-temp_C="4.9"
-       />
-    
-    <Spring name="Marion Cr."
-COMID="23780673"
-flow_cfs="41"
-temp_C="4.9"
-       />
-    
-    <Spring name="Pamelia Cr."
-COMID="23780957"
-flow_cfs="23"
-temp_C="4.9"
-       />
-    
-    <Spring name="Whitewater Cr."
-COMID="23781597"
-flow_cfs="15"
-temp_C="4.9"
-       />
-    
-    <Spring name="Horn Cr."
-COMID="23781739"
-flow_cfs="31"
-temp_C="4.9"
-       />
-    
-    <Spring name="Boulder Cr."
-COMID="23780901"
-flow_cfs="60"
-temp_C="4.9"
-       />
+    <Spring name="Marion Cr." COMID="23780673" flow_cfs="41" temp_C="4.9" />
+    <Spring name="Pamelia Cr." COMID="23780957" flow_cfs="23" temp_C="4.9" />
+    <Spring name="Whitewater Cr." COMID="23781597" flow_cfs="15" temp_C="4.9" />
+    <Spring name="Horn Cr." COMID="23781739" flow_cfs="31" temp_C="4.9" />
+    <Spring name="Boulder Cr." COMID="23780901" flow_cfs="60" temp_C="4.9" />
+    <Spring name="Blowout Cr." COMID="23780557" flow_cfs="9" temp_C="4.9" />
+    <Spring name="Breitenbush" COMID="23780701" flow_cfs="159" temp_C="4.9" />
+    <Spring name="French Cr." COMID="23780793" flow_cfs="155" temp_C="4.9" />
 
   </global_methods>
 
