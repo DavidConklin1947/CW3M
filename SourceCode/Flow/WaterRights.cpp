@@ -287,7 +287,7 @@ delete[] m_myGeo;
 
 
 // {EASTING, NORTHING, COMID, HBVCALIB attribute value}, 
-#define NUM_HBV_CALIB_PTS 47
+#define NUM_HBV_CALIB_PTS 50
 double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
 { // These entries should be ordered so that upstream points in a drainage come before downstream points.
 // Coast Fork Willamette basin
@@ -301,13 +301,15 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
    { 507544, 4871675, 23751778, 38 }, // 38 Middle Fork near Jasper
    { 0, 0, 23751752, 18 }, // 18 Middle Fork outlet
 // McKenzie basin
+   { 0, 0, 23773411, 49 }, // Lookout49 - Lookout Cr.; gage 14161500. 
    { 0, 0, 23773405, 9 }, // 9, BLU9, USGS gage 14162200 on Blue R below Quartz Cr. and the dam and above Simmonds Cr.
    { 0, 0, 0, 14 }, // now spare14 { 553414.7513, 4890138.574, 23773405, 14 }, //", 14, Blue River, 44.162500, -122.331940
    { 0, 0, 23773373, 46 }, // Clear Lake
-   { 0, 0, 0, 33 }, // now spare33 { 575933.4287, 4902090.896, -99, 33 }, //", 33, Trail Bridge, 44.268100, -122.048600
+   { 0, 0, 23773393, 47 }, // Smith47 - Smith R above Smith R reservoir; gage 14158790. 
+   { 0, 0, 23773037, 48 }, // SFork48 - S Fork McKenzie R above Cougar; gage 14159200. 
    { 0, 0, 23773011, 8 }, //", 8, Cougar, ,
    { 518418.3531, 4879673.347, 23772801, 34 }, //", 34, Walterville, 44.070000, -122.770000
-   { 0, 0, 23773507, 25 }, // Mohawk outlet into the McKenzie
+   { 0, 0, 23773513, 25 }, // Mohawk at gage 14165000
    { 0, 0, 23765583, 16 }, // McKenzie outlet
 // Upper Willamette basin
    { 0, 0, 23763395, 15 }, // upper Willamette mainstem at the confluence with the McKenzie
@@ -401,20 +403,21 @@ void AltWaterMaster::SetUpstreamReachAttributes(Reach * pReach, int newValue, in
 
 bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
 {
-   MapLayer *pLayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+   MapLayer *pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+ 
    for (int iPt = 0; iPt < NUM_HBV_CALIB_PTS; iPt++) if (HBVcalibPts[iPt][2] == -99)
    {
-      int idu_index = IDUatXY(HBVcalibPts[iPt][0], HBVcalibPts[iPt][1], pLayer);
-      int comid = -99; pLayer->GetData(idu_index, m_colCOMID, comid);
+      int idu_index = IDUatXY(HBVcalibPts[iPt][0], HBVcalibPts[iPt][1], pIDUlayer);
+      int comid = -99; pIDUlayer->GetData(idu_index, m_colCOMID, comid);
       HBVcalibPts[iPt][2] = (double)comid;
       CString msg; msg.Format("HBVcalibPts[%d] comid = %d HBVCALIB = %d", iPt, (int)HBVcalibPts[iPt][2], (int)HBVcalibPts[iPt][3]); Report::LogMsg(msg);
    }
-   int iduCount = pLayer->GetRecordCount();
+   int iduCount = pIDUlayer->GetRecordCount();
    MapLayer* pStreamLayer = (MapLayer*)pFlowContext->pFlowModel->m_pStreamLayer;
-   int reachCount = pFlowContext->pFlowModel->GetReachCount();
-
+ 
    bool readOnlyFlag = pStreamLayer->m_readOnly;
-   pStreamLayer->m_readOnly = false; pStreamLayer->SetColData(m_colStreamHBVCALIB, 0, true);
+   pStreamLayer->m_readOnly = false; 
+   pStreamLayer->SetColData(m_colStreamHBVCALIB, 0, false);
 
    pStreamLayer->m_readOnly = false;
    for (int iPt = 0; iPt < NUM_HBV_CALIB_PTS; iPt++) if (HBVcalibPts[iPt][2] != 0)
@@ -431,11 +434,10 @@ bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
    }
    pStreamLayer->m_readOnly = readOnlyFlag;
 
-   readOnlyFlag = pLayer->m_readOnly; pLayer->m_readOnly = false;
    int missing_reach_count = 0;
-   for (MapLayer::Iterator idu = pLayer->Begin(); idu != pLayer->End(); idu++)
+   for (MapLayer::Iterator idu = pIDUlayer->Begin(); idu != pIDUlayer->End(); idu++)
    {
-      int idu_comid = -1; pLayer->GetData(idu, m_colCOMID, idu_comid);
+      int idu_comid = -1; pIDUlayer->GetData(idu, m_colCOMID, idu_comid);
       int reachNdx = pStreamLayer->FindIndex(m_colStreamCOMID, idu_comid);
       int HBVcalib = -1;
       if (reachNdx >= 0) pStreamLayer->GetData(reachNdx, m_colStreamHBVCALIB, HBVcalib);
@@ -446,9 +448,8 @@ bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
             (int)idu, idu_comid, reachNdx, missing_reach_count, HBVcalib);
          Report::WarningMsg(msg);
       }
-      pLayer->SetData(idu, m_colHBVCALIB, HBVcalib);
+      pIDUlayer->SetDataU(idu, m_colHBVCALIB, HBVcalib);
    }
-   pLayer->m_readOnly = readOnlyFlag;
 
    return(true);
 } // end of PopulateHBVCALIB()
@@ -603,7 +604,7 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
       { 
       m_pReachLayer->CheckCol(m_colStreamSTRMVERT0X, "STRMVERT0X", TYPE_INT, CC_MUST_EXIST);
       m_pReachLayer->CheckCol(m_colStreamSTRMVERT0Y, "STRMVERT0Y", TYPE_INT, CC_MUST_EXIST);
-      // PopulateHBVCALIB(pFlowContext);    uncomment when creating new HBVCALIB rows
+      // PopulateHBVCALIB(pFlowContext);   // uncomment when creating new HBVCALIB rows
    }
 
    m_pReachLayer->m_readOnly = streamReadOnlyFlag;
