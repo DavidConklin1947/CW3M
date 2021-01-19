@@ -1180,7 +1180,7 @@ bool Spring::Step(FlowContext* pFlowContext)
 
    // Special logic for Clear Lake
    WaterParcel seasonal_springWP(0, 0);
-   if (m_pReach->m_reachID == 23773373)
+   if (false && m_pReach->m_reachID == 23773373)
    {
 /*x
       double avg_additional_cms = 3.053;

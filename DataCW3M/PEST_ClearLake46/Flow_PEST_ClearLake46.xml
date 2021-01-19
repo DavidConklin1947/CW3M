@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- <flow_model> defines a model
+        Attributes include:
+        name:      Name of the model. (optional)
+        time_step: Time step at which all modeled components are synchronized.  This should be at least as large
+                   as the largest component time step specfified in the component tags below. (required)
+        init_catchment_cols:  flag indicating how Flow should build catchments:
+        ..build_catchments_method:  flag indicating how Flow should build catchments:
+                   0 = build catchments based on a field specified in the <catchment> 'catchID_col' attribute.
+                   1 = build catchments from the aggregate queries defined in the <catchment> 'catch_agg_cols' attribute
+                       and populate the catchmentID_col with unique catchment IDs,
+                   (optional, default is "1" )
+                   
+        join_col:  catchment coverage column name containing the join information for connecting catchments and reaches.
+                   (required, typically COMID)
+        update_display: Update the map with Results from the Hydrology model?  0: no update, 1: update each year, 2: update each flow timestep
+                   (optional, default="2"
+       
+       TO DISABLE SIMPLIFICATION
+           1) Set 'catchment_join_col' to COMID
+           2) Set 'stream_join_col' to COMID
+           3) Set 'catchment_agg_cols' to COMID
+           4) remove any 'simplify_xxx' attributes from <flow_model>
+           
+       TO BUILD A SIMPLIFIED REPRESENTATION
+           1) disable simplication as per instructions above
+           2) Copy the COMID values to FLOWID for both the IDU and Stream coverage (Note - use Arc, Envision appears buggy for this)
+           3) SAVE both coverages.
+           4) Set 'catchment_join_col' to FLOWID
+           5) Set 'stream_join_col' to FLOWID
+           6) Set 'catchment_agg_cols' to FLOWID
+           7) Add any 'simplify_xxx' attributes to <flow_model>
+           8) Launch Envision.  After flow initializes, save the IDU and Stream coverages.  THe FLOWID field will be modified in both coverages.
+           
+       TO USE THE SIMPLIFIED REPRESENTATION
+           1) Set 'catchment_join_col' to FLOWID
+           2) Set 'stream_join_col' to FLOWID
+           3) Set 'catchment_agg_cols' to FLOWID
+           4) remove any 'simplify_xxx' attributes from <flow_model>
+
+
+       To turn off simplification, remove the <streams> 'query' etc attributes.
+            simplify_query="ORDER > 1" 
+            simplify_min_area="1000000000" 
+            simplify_max_area="10000000000"
+-->
+<!--
+               initial_conditions="flow.ic"
+-->
+<flow_model name="flow"
+             time_step="1"
+             build_catchments_method="1"
+             catchment_join_col ="COMID"
+             stream_join_col="COMID"
+             check_mass_balance="0"
+             integrator="euler"
+             max_processors="32"
+             update_display="0"
+             daily_idu_output="0"
+             annual_idu_output="0"
+             daily_reach_output="0"
+             annual_reach_output="0"
+              >
+  <!--  initial_conditions="Flow_McKenzie2010.ic" -->
+
+  <!-- <catchment> specifies how to construct catchment structures for the model.
+        Attributes include:
+        layer:     Name of the layer used to construct catchments from (in the envx file).
+                   This is generally the IDU layer. (optional, defaults to first layer)
+        query:     Subset of the layer used to create catchments.  If empty or not present,
+                   the entire layer is used. (optional)
+        area_col:  column name containing the area of the polygon. (optional, defaults to "AREA")
+        catchmentID_col:  column name containing the catchmentID identifying unique catchments, generated
+                   during the aggregation process. This column will be added to the layer if it doesn't
+                   already exist.  (optional - defaults to CATCH_ID)
+        hruID_col: column name containing the hruID identifying unique catchments, generated during the
+                   aggregation process. This column will be added to the layer if it doesn't
+                   already exist. (optional - defaults to HRU_ID)
+        catch_agg_cols:  Comma-separated list of column names used to identify unique combinations of attribute values
+                   during the catchment aggregation process.  (required)
+        hru_agg_cols:  Comma-separated list of column names used to identify unique combinations of attribute values
+                   during the hru aggregation process.  (required)
+        soil_layers: integer identifying number of HRU soil layers to use (optional, defaults to 1)
+        snow_layers: integer identifying number of HRU snow layers to use (optional, defaults to 0)
+        veg_layers:  integer identifying number of HRU vegetation layers to use (optional, defaults to 0)
+        layer_names: colon-separated list of layer names used to describe HRU layers for plotting purposes.
+                    the sum of soil_layers+snow_layers+veg_layers should be equal to the number of names (optional)
+        init_water_content:  initial soil water content (m3/m3) - (optional, defaults to 0.5)        
+  -->
+
+  <macros>
+    <macro name="ScenarioName" default="">
+      <!--
+      <scenario name="StressedResources" value="LateRefill\" />
+      <scenario name="IntegratedWater" value="LateRefill\" />
+      -->
+    </macro>
+  </macros>
+
+  <catchments layer="IDU"
+            query=""
+            area_col="AREA"
+            catchmentID_col="CATCHID"
+            hruID_col="HRU_ID"
+            catchment_agg_cols="COMID"
+            hru_agg_cols="ONE_VAL"
+            soil_layers="6" snow_layers="0" veg_layers="0"
+            layer_names="SnowPack:Melt:UnirrigatedSoil:IrrigatedSoil:ShallowGround:DeepGround"
+            init_water_content="0.1"/>
+
+
+  <!-- <stream>
+      Attributes include:
+      layer:        Name of the layer used to construct catchments from (in the envx file). (required)
+      query:        Subset of the layer used to create reaches.  If empty or not present, the entire layer is used. (optional)
+      order_col:    Column name to populate with stream order info.  If the column doesn't exist in the stream coverage, it will
+                    be added. (optional - defaults to nothing, no stream oreder info is generated.)      
+      subnodeLength: max length between subnodes (length units corresponding to the coverage) (optional, defaults to 0, which
+                    allocates one subnode per reach.
+      wd_ratio:     default value for width/depth ratio for reach segments. (optional, defaults to 
+      method:       solution method, euler, rk4, rkf, kinematic, external.  Note external implies fluxes are
+                    processed by the plugin, not the framework.  (optional, defaults to 10)
+      stepsize:     timestep used to solve the instream routing equations. (optional, defaults to 1 day)
+ -->
+  <!--  <streams layer="Streams" subnode_length="1000" order_col="ORDER"  /> -->
+  <streams layer="Reach"
+           subnode_length="1000"  />
+
+  <!-- <global_methods>
+    Attributes include:
+    reach_routing:         reach routing solution method, one of 'euler', 'rk4', 'rkf', 'kinematic', or an 
+                           externally defined method. Externally defined methods should be of the form:
+                           'path:entrypointname'. Note external implies fluxes are processed by the plugin, 
+                           not the framework. (optional, defaults to "kinematic")
+    horizontal_exchange:   solution method for lateral exchange between reaches and corresponding HRU Layers; internal options 
+                           include 'linear_reservoir'.  Externally defined methods should be of the form:
+                           'path:entrypointname'. (optional, defaults to "linear_reservoir")
+    hru_vertical_exchange: solution method for vertical movement of water between HRULayers; internal options 
+                           include 'brooks_corey'.  Externally defined methods should be of the form:
+                           'path:entrypointname'. (optional, defaults to "brooks_corey") 
+  -->
+  <!--
+  <global_methods reach_routing="kinematic" horizontal_exchange="fn=HBV.dll:HBV_HorizontalwSnow" hru_vertical_exchange="none" />
+-->
+
+
+  <global_methods >
+    <reach_routing name="Reach Routing" method="kinematic" query=""/>
+    <lateral_exchange name="Lateral Exchange" method="none" query=""/>
+    <hru_vertical_exchange name="Vertical Exchange" method="none" query="" />
+
+    <!--
+    enum // Global Method Timing flags
+    {
+    GMT_INIT = 1,       // called during Init();
+    GMT_INITRUN = 2,       // called during InitRun();
+    GMT_START_YEAR = 4,       // called at the beginning of a Envision timestep (beginning of each year of run)  (PreRun)
+    GMT_START_STEP = 8,       // called at the beginning of a Flow timestep PreRun)
+    GMT_CATCHMENT = 16,      // called during GetCatchmentDerivatives()
+    GMT_REACH = 32,      // called during GetReachDerivatives()
+    GMT_RESERVOIR = 64,      // called during GetReservoirDerivatives()
+    GMT_END_STEP = 128,     // called at the beginning of a Flow timestep PreRun)
+    GMT_END_YEAR = 256,     // called at the end of a Envision timestep (beginning of each year of run) (PostRun)
+    GMT_ENDRUN = 512,      // called during EndRun()
+    };
+-->
+    
+    <external name="HBV"   method="fn=hbv.dll:HBV_IrrigatedSoil" use="1" timing="1+16"/> 
+
+    <!--The layers tag will remove water from the layer distribution matching the query first and then remove the unmatched idus 
+      using the second layer distribution tag in the percentages indicated -->
+    <!--The ratio = 1 flag will remove water from the indicated layers in proportion to the amount of water in the layers
+     even though the percentages are indicated as 0.  The calculation of the percentages removed are done at run time
+     For example: "(2,1), (4, 0), (5,0)" ratio="1"  will remove water out of all three layers: 2, 4, and 5, in proportion, removing the higher 
+     percentage out of the layer with the highest percentage of the total amount in all 3 layers-->
+
+    <evap_trans name="ForestET" method="PM" use="1"
+     query="LULC_A!=2"
+     lulc_col="LULC_B"
+     soil_col="HBVCALIB"
+     soil_table="HBV_PEST.csv"
+     bulkStomatalResistance="150"
+     latitude="45"
+     longitude="123">
+      <layers>
+        <layer layer_distributions="(2,1)" />
+      </layers>
+    </evap_trans>
+
+    <evap_trans
+          name="AgET" method="fao56" use="1"
+          query="LULC_A=2 {Ag}"
+          lulc_col="LULC_B"
+          soil_col="HBVCALIB"
+          crop_table="Crops.csv"
+          soil_table="HBV_PEST.csv"
+          irrig_loss_factor="0.20"
+          latitude="45"
+          longitude="123">
+      <layers>
+        <layer layer_distributions="(3,1)" query="IRRIGATION=1" />
+        <layer layer_distributions="(2,1)" />
+      </layers>
+    </evap_trans>
+
+    <urban_water_demand name="UrbanWaterDemand"
+        method="Daily"
+        use="1"
+            />
+
+    <allocation name="WaterRights"
+               method="WaterRights"
+               use="1"
+               pod_table="wr_pods.csv"
+               pou_table="wr_pous.csv"
+               n_years_WR_not_used_limit="5"
+               n_days_WR_shortage_1 = "1"
+               n_days_WR_shortage_2 = "7"
+               max_duty_halt  ="1"
+               Water_RightExist_BitWise_col_name ="WREXISTS"
+               irrigate_or_not_col_name = "IRRIGATION"
+               default_irrigation_begin_dayofyear = "60"
+               default_irrigation_end_dayofyear = "304"
+               export_distance_POD_COMID = "0"
+               debug = "0"
+               dynamic_WR_table="wv_dynamic_WaterRights.csv"
+               dynamicWRRadius ="10000"
+               max_days_in_shortage ="7"
+               reach_recursive_depth_shortage ="2"
+               percent_IDU_POU_intersection ="15.0"
+               DynamicWR_Appropriation_Date ="-1"
+            />
+
+    <Spring name="Springs feeding Clear Lake" 
+    COMID="23773373"
+    flow_cms="5.7"
+    temp_C="4.9"
+       />
+
+    <Spring name="Springs feeding Lookout Creek" 
+     COMID="23773411"
+     flow_cms="0.14"
+     temp_C="4.9"
+       />
+
+    <Spring name="Springs below Trail Bridge Dam" 
+    COMID="23773359"
+    flow_cms="9.67"
+     temp_C="4.9"
+       />
+
+    <Spring name="Foley Springs on West Fork" 
+    COMID="23773239"
+    flow_cms="3.31"
+      temp_C="4.9"
+       />
+
+    <Spring name="Springs feeding Blue R at and above Tidbit Creek" 
+    COMID="23773429"
+    flow_cms="1.60"
+     temp_C="4.9"
+       />
+
+    <Spring name="Springs above Smith R Reservoir"
+    COMID="23773393"
+    flow_cms="0.76"
+     temp_C="4.9"
+       />
+
+    <Spring name="Springs above Cougar Reservoir" 
+COMID="23773037"
+flow_cms="6.06"
+     temp_C="4.9"
+       />
+
+    <Spring name="South Fork near Rainbow" 
+COMID="23773009"
+flow_cms="1.10"
+     temp_C="4.9"
+       />
+    
+  </global_methods>
+
+  <controlPoints>
+    <controlPoint id="1"      name="Min flow at Salem"                path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_flow_at_Salem_23791083.csv"               reservoirs="1,2,4,5,6,8,9,10"
+      location="23791083"/>
+
+    <controlPoint id="2"      name="Max_bankfull_flow_at_Salem"       path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Salem_23791083.csv"                    reservoirs="10,11,12"
+      location ="23791083" />
+
+    <controlPoint id="3"      name="Min_Flow_at_Albany"               path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_Flow_at_Albany_23762845.csv"              reservoirs="1,2,4,5,6,8,9"
+      location ="23762845" />
+
+    <controlPoint id="4"      name="Max_Bankfull_Flow_at_Jefferson"   path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Jefferson_23780423.csv"                reservoirs="10,11,12"
+      location ="23780423" />
+
+    <controlPoint id="5"      name="Max_bankfull_flow_at_Mehama"      path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Mehama_23780481.csv"                   reservoirs="12"
+      location ="23780481" />
+
+    <controlPoint id="6"      name="Max_Harrisburg_42500_cfs"         path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_HB_42500_cfs_23763337.csv"                reservoirs="2,4,5,6"
+      location ="23763337" />
+
+    <controlPoint id="7"      name="Max_Harrisburg_51000_cfs"         path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_HB_51000_cfs_23763337.csv"                reservoirs="2,4,5,6"
+      location ="23763337" />
+
+    <controlPoint id="8"      name="Max_Harrisburg_70500_cfs"         path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_HB_70500_cfs_23763337.csv"                reservoirs="2"
+      location ="23763337" />
+
+    <controlPoint id="9"      name="Max_Vida_Flood"                   path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Vida_Flood_23772903.csv"                  reservoirs="8,9"
+      location ="23772903" />
+
+    <controlPoint id="10"     name="Max_Jasper_Bankfull"              path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Jasper_Bankfull_23751778.csv"             reservoirs="2,4"
+      location ="23751778" />
+
+    <controlPoint id="11"     name="Max_Bankfull_Flow_at_Goshen"      path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Goshen_23759228.csv"                   reservoirs="5,6"
+      location ="23759228" />
+
+    <controlPoint id="12"     name="Max_Bankfull_Flow_at_Waterloo"    path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_bf_Waterloo_23785687.csv"                 reservoirs="10,11"
+      location ="23785687" />
+
+    <controlPoint id="13"     name="Max_Reg_Goal_Long_Tom_Monroe"     path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Reg_Monroe_23763073.csv"                  reservoirs="7"
+      location ="23763073" />
+
+    <controlPoint id="14"     name="Min_Flow_at_Monroe"               path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_Flow_at_Monroe_23763073.csv"              reservoirs="7"
+      location ="23763073" />
+
+    <controlPoint id="15"     name="Max_Flood_Flow_Winter_Ops_Mehama" path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Winter_Ops_Mehama_23780481.csv"           reservoirs="12"
+      location ="23780481" />
+
+    <controlPoint id="16"     name="Max_Flood_Flow_Winter_Ops_Salem"  path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_Winter_Ops_Salem_23791083.csv"            reservoirs="12"
+      location ="23791083" />
+
+    <controlPoint id="17"     name="Max_10K_into_Foster"              path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_10K_into_Foster_23787257.csv"             reservoirs="10"
+      location ="23787257" />
+
+    <controlPoint id="18"     name="Max_12K_into_Foster"              path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Max_12K_into_Foster_23787257.csv"             reservoirs="10"
+      location ="23787257" />
+
+    <controlPoint id="19"     name="Min_BiOp_MaxD_at_FOS"             path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_BiOp_MaxD_at_FOS_23785773.csv"            reservoirs="10"
+      location ="23785773" />
+
+    <controlPoint id="20"     name="Min_Con_Flow_from_Foster"         path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_Con_Flow_from_Foster_23785773.csv"        reservoirs="10"
+      location ="23785773" />
+
+    <controlPoint id="21"     name="Min_Buffer_Flow_from_Foster"      path="Reservoirs\ControlPoints\{ScenarioName}\"
+      control_point="cp_Min_Buffer_Flow_from_Foster_23785773.csv"     reservoirs="10"
+      location ="23785773" />
+
+  </controlPoints>
+
+
+  <reservoirs col="RES_ID">
+  
+    <reservoir id="1"   name="Hills Creek Reservoir (USACE)"      path="Reservoirs\"                                  initVolume="209709507"
+               area_vol_curve="hills_creek_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="11"
+               rule_curve="hills_creek_rule_curve.csv"            rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="461075511"
+               composite_rc="HC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="42.5"
+               RO_rc="HC_RO_capacity.csv"                         spillway_rc="HC_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="hills_creek_rule_priorities.csv"  rp_dir="Rules_HC\"                                  tailwater_elev="391.0"
+               turbine_efficiency="0.9"                           td_elev="472.0"                                     fc1_elev="470.0"
+               buffer_zone="HC_buffer.csv"                        ressim_output_f="HC_ressim_flow_1935_2008.csv"      ressim_output_r="HC_ressim_rule_1935_2008.csv"
+               inactive_elev="441.046"                            reservoir_type="FloodControl"/>
+
+    <reservoir id="2"   name="Lookout Point Reservoir (USACE)"    path="Reservoirs\"                                  initVolume="143948194"
+               area_vol_curve="lookout_point_area_capacity.csv"   av_dir="Area_Capacity_Curves\"                      minOutflow="34"
+               rule_curve="lookout_point_rule_curve.csv"          rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="622295321"
+               composite_rc="LO_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="203.9"
+               RO_rc="LO_composite_rc.csv"                        spillway_rc="LO_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="lookout_rule_priorities.csv"      rp_dir="Rules_Lookout\"                             tailwater_elev="216"
+               turbine_efficiency="0.9"                           td_elev="287.0"                                     fc1_elev="285.0"
+               fc3_elev="283.0"                                   fc2_elev="261.0"                                    buffer_zone="LO_buffer.csv"
+               ressim_output_f="LO_ressim_flow_1935_2008.csv"     ressim_output_r="LO_ressim_rule_1935_2008.csv"      inactive_elev="251.46"
+               reservoir_type="FloodControl"/>
+
+    <reservoir id="3"  name="Dexter Reservoir (USACE - re-regulating)"      path="Reservoirs\"                        initVolume="28863475"
+               area_vol_curve="dexter_area_capacity.csv"          av_dir="Area_Capacity_Curves\"                      minOutflow="34"
+               composite_rc="Dexter_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="118.9"
+               RO_rc="Dexter_RO_capacity.csv"                     spillway_rc="Dexter_Spillway_capacity.csv"          tailwater_elev="198"
+               turbine_efficiency="0.9"                           inactive_elev="194.24"                              reservoir_type="RiverRun" />
+
+    <reservoir id="4"   name="Fall Creek Reservoir (USACE)"       path="Reservoirs\"                                  initVolume="7252080"
+               area_vol_curve="fall_creek_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1"
+               rule_curve="fall_creek_rule_curve.csv"             rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="168741328"
+               composite_rc="FC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="FC_RO_capacity.csv"                         spillway_rc="FC_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="fall_creek_rule_priorities.csv"   rp_dir="Rules_FC\"                                  td_elev="256.0"
+               fc1_elev="254.0"                                   fc2_elev="243.0"                                    buffer_zone="FC_buffer.csv"
+               ressim_output_f="FC_ressim_flow_1935_2008.csv"     ressim_output_r="FC_ressim_rule_1935_2008.csv"      inactive_elev="217.32"
+               reservoir_type="FloodControl" />
+
+    <reservoir id="5"   name="Dorena Reservoir (USACE)"           path="Reservoirs\"                                  initVolume="9072259"
+               area_vol_curve="dorena_area_capacity.csv"          av_dir="Area_Capacity_Curves\"                      minOutflow="2.8"
+               rule_curve="dorena_rule_curve.csv"                 rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="178855940"
+               composite_rc="Dorena_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="Dorena_RO_capacity.csv"                     spillway_rc="Dorena_spillway_capacity.csv"          cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="dorena_rule_priorities.csv"       rp_dir="Rules_Dorena\"                              td_elev="264.0"
+               fc1_elev="255.0"                                   fc2_elev="247.0"                                    buffer_zone="Dorena_buffer.csv"
+               ressim_output_f="Dorena_ressim_flow_1935_2008.csv" ressim_output_r="Dorena_ressim_rule_1935_2008.csv"  inactive_elev="235.0"
+               reservoir_type="FloodControl" />
+
+    <reservoir id="6"   name="Cottage Grove Reservoir (USACE)"    path="Reservoirs\"                                  initVolume="4647760"
+               area_vol_curve="cottage_grove_area_capacity.csv"   av_dir="Area_Capacity_Curves\"                      minOutflow="1.4"
+               rule_curve="cottage_grove_rule_curve.csv"          rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="68014597"
+               composite_rc="CG_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="CG_RO_capacity.csv"                         spillway_rc="CG_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="cottage_grove_rule_priorities.csv" rp_dir="Rules_CG\"                                 td_elev="246.0"
+               fc1_elev="241.0"                                   fc2_elev="237.0"                                    buffer_zone="CG_buffer.csv"
+               ressim_output_f="CG_ressim_flow_1935_2008.csv"     ressim_output_r="CG_ressim_rule_1935_2008.csv"      inactive_elev="228.6"
+               reservoir_type="FloodControl" />
+
+    <reservoir id="7"   name="Fern Ridge Reservoir (USACE)"       path="Reservoirs\"      initVolume="6472079"
+               area_vol_curve="fern_ridge_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1"
+               rule_curve="fern_ridge_rule_curve.csv"             rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="211850506"
+               composite_rc="FR_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="FR_RO_capacity.csv"                         spillway_rc="FR_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="fern_ridge_rule_priorities.csv"   rp_dir="Rules_FR\"                                  td_elev="116.0"
+               fc1_elev="114.0"                                   buffer_zone="FR_buffer.csv"                         ressim_output_f="FR_ressim_flow_1935_2008.csv"
+               ressim_output_r="FR_ressim_rule_1935_2008.csv"     inactive_elev="107.60"                              reservoir_type="FloodControl"/>
+
+    <reservoir id="8"   name="Cougar Reservoir (USACE)"           path="Reservoirs\"     initVolume="69087752"
+               area_vol_curve="cougar_area_capacity.csv"          av_dir="Area_Capacity_Curves\"                      minOutflow="11"
+               rule_curve="cougar_rule_curve.csv"                 rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="246696368"
+               composite_rc="Cougar_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="25.8"
+               RO_rc="Cougar_RO_capacity.csv"                     spillway_rc="Cougar_spillway_capacity.csv"          cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="cougar_rule_priorities.csv"       rp_dir="Rules_Cougar\"                              tailwater_elev="408"
+               turbine_efficiency="0.9"                           td_elev="519.68"                                     fc1_elev="517.86"
+               buffer_zone="Cougar_buffer.csv"                    ressim_output_f="Cougar_ressim_flow_1935_2008.csv"  ressim_output_r="Cougar_ressim_rule_1935_2008.csv"
+               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="1.0" />
+
+    <reservoir id="9"   name="Blue River Reservoir (USACE)"       path="Reservoirs\"     initVolume="5063443"
+               area_vol_curve="blue_river_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1.417"
+               rule_curve="blue_river_rule_curve.csv"             rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="168123574"
+               composite_rc="BR_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="0"
+               RO_rc="BR_RO_capacity.csv"                         spillway_rc="BR_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="blue_river_rule_priorities.csv"   rp_dir="Rules_BR\"                                  td_elev="415.0"
+               fc1_elev="414.0"                                   buffer_zone="BR_buffer.csv"                         ressim_output_f="BR_ressim_flow_1935_2008.csv"
+               ressim_output_r="BR_ressim_rule_1935_2008.csv"     inactive_elev="359.66"                              reservoir_type="FloodControl"
+               solar_radiation_multiplier="0.30" />
+
+    <reservoir id="10"  name="Green Peter Reservoir (USACE)"      path="Reservoirs\"     initVolume="197233746"
+               area_vol_curve="green_peter_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="22.6"
+               rule_curve="green_peter_rule_curve.csv"            rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="551246341"
+               composite_rc="GP_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="101.9"
+               RO_rc="GP_RO_capacity.csv"                         spillway_rc="GP_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="green_peter_rule_priorities.csv"  rp_dir="Rules_GP\"                                  tailwater_elev="220"
+               turbine_efficiency="0.9"                           td_elev="311.0"                                     fc1_elev="309.0"
+               buffer_zone="GP_buffer.csv"                        ressim_output_f="GP_ressim_flow_1935_2008.csv"      ressim_output_r="GP_ressim_rule_1935_2008.csv"
+               inactive_elev="281.03"                             reservoir_type="FloodControl" />
+
+    <reservoir id="11"  name="Foster Reservoir (USACE)"           path="Reservoirs\"     initVolume="39471419"
+               area_vol_curve="foster_area_capacity.csv"          av_dir="Area_Capacity_Curves\"                      minOutflow="22.6"
+               rule_curve="foster_rule_curve.csv"                 rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="90167522"
+               composite_rc="Foster_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="75.3"
+               RO_rc="Foster_RO_capacity.csv"                     spillway_rc="Foster_spillway_capacity.csv"          cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="foster_rule_priorities.csv"       rp_dir="Rules_Foster\"                              tailwater_elev="165"
+               turbine_efficiency="0.9"                           td_elev="197.0"                                     fc1_elev="195.0"
+               buffer_zone="Foster_buffer.csv"                    ressim_output_f="Foster_ressim_flow_1935_2008.csv"  ressim_output_r="Foster_ressim_rule_1935_2008.csv"
+               inactive_elev="186.84"                             reservoir_type="FloodControl"/>
+
+    <reservoir id="12"  name="Detroit Reservoir (USACE)"          path="Reservoirs\"     initVolume="203449596"
+               area_vol_curve="detroit_area_capacity.csv"         av_dir="Area_Capacity_Curves\"                      minOutflow="34"
+               rule_curve="detroit_rule_curve.csv"                rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="606873064"
+               composite_rc="Detroit_composite_rc.csv"            re_dir="Rel_Cap\"                                   maxPowerFlow="110.4"
+               RO_rc="Detroit_RO_capacity.csv"                    spillway_rc="Detroit_Spillway_capacity.csv"         cp_dir="ControlPoints\{ScenarioName}"
+               rule_priorities="detroit_rule_priorities.csv"      rp_dir="Rules_Detroit\"                             tailwater_elev="375"
+               turbine_efficiency="0.9"                           td_elev="481.0"                                     fc1_elev="480.0"
+               buffer_zone="Detroit_buffer.csv"                   ressim_output_f="DET_ressim_flow_1935_2008.csv"     ressim_output_r="DET_ressim_rule_1935_2008.csv"
+               inactive_elev="441.96"                             reservoir_type="FloodControl" />
+
+    <reservoir id="13"  name="Big Cliff Reservoir (USACE - re-regulating)"  path="Reservoirs\"     initVolume="3885468"
+               area_vol_curve="Big_Cliff_area_capacity.csv"       av_dir="Area_Capacity_Curves\"                      minOutflow="34"
+               composite_rc="BC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="79.6"
+               RO_rc="BC_RO_capacity.csv"                         spillway_rc="BC_spillway_capacity.csv"              tailwater_elev="342"
+               turbine_efficiency="0.9"                           inactive_elev="353.99"                              reservoir_type="RiverRun"/>
+  
+  </reservoirs>
+
+  <fluxes>
+
+
+  </fluxes>
+
+  <!--
+    specifies table inputs.
+      name:   name for table, this MUST correspond to a field in the IDU coverage
+      source: path to  csv file containing values and label headers
+      type:   'float' - all values are real, 'int' - all values are integer, 'var' - variable type (only float currently supported)
+    -->
+
+  <tables>
+    <table name="HBV" description="HBV Parameters" col="HBVCALIB" source="HBV_PEST.csv" type="float" />
+  </tables>
+
+  <!--
+    specifies parameter estimation techniques.
+     <parameterEstimation>
+      estimateParameters:  This is actually an exposed variable.  To set it to false, change in the Envision-Scenarios dialog
+      numberOfRuns:  Flow will run this number of simulations prior to ending
+      numberOfYears: The number of years in each model run
+      saveResultsEvery: The model will write results to the disk after this many runs.  
+      
+      <parameter>
+      table:   name for table, this MUST correspond to a field in the IDU coverage
+      name:    name of the parameter. This MUST correspond to a parameter name outlined in the referenced table.
+      distributeSpatially:  true if the parameter varies in space (a multiplier will be sampled) otherwise, the parameter value will be sample
+    -->
+  <parameterEstimation estimateParameters="false" numberOfRuns="5000" numberOfYears="3" saveResultsEvery="10">
+    <parameter table="HBV" name="TT"    value="0.01"  minValue="0" maxValue="2"   distributeSpatially="false" />
+    <parameter table="HBV" name="CFMAX" value="0.01"  minValue="2" maxValue="6"   distributeSpatially="false" />
+  </parameterEstimation>
+
+
+
+  <!-- 
+    name:     name assigned to variable
+    query:    query constraining calculations
+    value:    expression to be evaulated.  Can be any mathematical expression using IDU field names or
+               internally defined variables, including:
+                "hruVolMelt"     - HRU Melt Volume
+                "hruVolSwe"      - HRU SWE Volume
+                "hruPrecip"      - HRU Total Precip
+                "hruRainThrufall"    - HRU Rain thrufall
+                "hruSnowThrufall"    - HRU Snow thrufall
+                "hruAirTemp"     - HRU Air Temp (C)
+                "hruET"          - HRU ET
+                "hruCumMaxET"      - HRU Cumulutive Maximum ET
+                "hruCumET"       - HRU Cumulutive ET
+                "hruCumP"        - HRU Cumulutive P
+                
+                "obs"            - 
+    type:    calculation type, one of "sum", "areaWtMean" or "pctArea".  For pctArea, the "value" expression is ignored.
+    domain:  target of calculation, one of "idu", "hru", "layer", "reach"    
+    -->
+
+  <outputs>
+    <output_group name="FLOW Q at gage daily" interval="daily" >
+      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773373" value="Q*35.315*2.716" type="sum" domain="reach"
+    obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Q at gage monthly" interval="monthly" >
+      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773373" value="Q*35.315*2.716" type="sum" domain="reach"
+    obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
+    </output_group>
+
+  </outputs>
+ 
+</flow_model>
