@@ -234,7 +234,7 @@
 
     <Spring name="Springs feeding Clear Lake" 
     COMID="23773373"
-    flow_cms="5.7"
+    flow_cms="6.6"
     temp_C="4.9"
        />
 
@@ -555,12 +555,12 @@ flow_cms="1.10"
 
   <outputs>
     <output_group name="FLOW Q at gage daily" interval="daily" >
-      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773373" value="Q*35.315*2.716" type="sum" domain="reach"
+      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773373" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
     obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
     </output_group>
 
     <output_group name="FLOW Q at gage monthly" interval="monthly" >
-      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773373" value="Q*35.315*2.716" type="sum" domain="reach"
+      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773373" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
     obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
     </output_group>
 

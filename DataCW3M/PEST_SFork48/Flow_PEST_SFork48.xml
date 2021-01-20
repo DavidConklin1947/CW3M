@@ -270,7 +270,7 @@
 
     <Spring name="Springs above Cougar Reservoir" 
 COMID="23773037"
-flow_cms="6.06"
+flow_cfs="139"
      temp_C="4.9"
        />
 

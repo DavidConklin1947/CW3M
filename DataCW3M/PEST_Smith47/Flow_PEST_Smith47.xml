@@ -264,13 +264,13 @@
 
     <Spring name="Springs above Smith R Reservoir"
     COMID="23773393"
-    flow_cms="0.76"
+    flow_cfs="4"
      temp_C="4.9"
        />
 
     <Spring name="Springs above Cougar Reservoir" 
 COMID="23773037"
-flow_cms="6.06"
+flow_cfs="139"
      temp_C="4.9"
        />
 
@@ -562,6 +562,11 @@ flow_cms="1.10"
     <output_group name="FLOW Q at gage monthly" interval="monthly" >
       <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773393" value="Q*35.315*0.951" type="sum" domain="reach"
       obs="..\Observations\McKenzie\USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
+      <output in_use="1" name="ET from Smith47 mm" query="HBVCALIB=47" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from Smith47 m3" query="HBVCALIB=47" value="ET_DAY*Area/1000" type="sum" domain="idu" />
     </output_group>
 
   </outputs>
