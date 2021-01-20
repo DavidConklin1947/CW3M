@@ -174,9 +174,9 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
       int hruCount = pFlowContext->pFlowModel->GetHRUCount();
 
       // Create and initialize the planting and harvest doy and cumulative gorwing degree days since planting lookup tables
-      m_phruCropStartGrowingSeasonArray = new IDataObj( hruCount, m_cropCount, CROP_NOT_IN_HRU);
-      m_phruCropEndGrowingSeasonArray = new IDataObj( hruCount, m_cropCount, CROP_NOT_IN_HRU);
-      m_phruCurrCGDDArray = new FDataObj( hruCount, m_cropCount, 0.0f );
+      m_phruCropStartGrowingSeasonArray = new IDataObj( hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
+      m_phruCropEndGrowingSeasonArray = new IDataObj( hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
+      m_phruCurrCGDDArray = new FDataObj( hruCount, max(0, m_cropCount), 0.0f );
 
       } // end of if ( m_method != GM_PENMAN_MONTIETH )
 

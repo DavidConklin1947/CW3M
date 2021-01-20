@@ -240,7 +240,7 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       if (study_area_name.IsEmpty())
       {
          CString msg; msg.Format("Please specify studyAreaName=... in the <settings> block of the ENVX file.");
-         Report::WarningMsg(msg);
+         Report::LogMsg(msg);
 //         return(-2);
       }
       else m_pModel->m_envContext.m_studyAreaName = study_area_name;
