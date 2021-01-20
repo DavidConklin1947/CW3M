@@ -383,6 +383,7 @@ public:
    int             startYear;             // calendar year in which the simulation started (e.g. 2008)
    int             endYear;               // last calendar year of simulation (e.g. 2050)
    int             currentYear;           // current calendar year of run, incremented from startYear (e.g. 2010)
+   CString         m_studyAreaName;
 
    FlowContext* m_pFlowContext;
    SYSDATE         m_simDate;               // date being simulated

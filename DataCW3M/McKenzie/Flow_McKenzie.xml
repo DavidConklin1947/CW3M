@@ -234,8 +234,8 @@
 
     <Spring name="Springs feeding Clear Lake" 
     COMID="23773373"
-    flow_cms="5.7"
-    temp_C="4.9"
+    flow_cfs="32"
+     temp_C="4.9"
        />
 
     <Spring name="Springs feeding Lookout Creek" 
@@ -264,13 +264,13 @@
 
     <Spring name="Springs above Smith R Reservoir"
     COMID="23773393"
-    flow_cms="0.76"
+    flow_cfs="4"
      temp_C="4.9"
        />
 
     <Spring name="Springs above Cougar Reservoir" 
 COMID="23773037"
-flow_cms="6.06"
+flow_cfs="139"
      temp_C="4.9"
        />
 
@@ -891,10 +891,7 @@ flow_cms="1.10"
 
     <output_group name="FLOW Daily McKenzie flow skill assessment" interval ="daily" >
       <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
-              query="COMID=23773373" value="Q*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
-      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773363"
-              query="COMID=23773363" value="Q*35.3146667" type="sum" domain="reach"
+              query="COMID=23773363" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
       <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
               query="COMID=23773393" value="Q*35.3146667" type="sum" domain="reach"
@@ -957,10 +954,7 @@ flow_cms="1.10"
     
     <output_group name="FLOW Yearly McKenzie flow skill assessment" interval ="yearly" >
       <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
-              query="COMID=23773373" value="Q*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
-      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773363"
-              query="COMID=23773363" value="Q*35.3146667" type="sum" domain="reach"
+              query="COMID=23773363" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
       <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
               query="COMID=23773393" value="Q*35.3146667" type="sum" domain="reach"
@@ -1023,10 +1017,7 @@ flow_cms="1.10"
 
     <output_group name="FLOW Monthly McKenzie flow skill assessment" interval ="monthly" >
       <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
-              query="COMID=23773373" value="Q*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
-      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773363"
-              query="COMID=23773363" value="Q*35.3146667" type="sum" domain="reach"
+              query="COMID=23773363" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
       <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
               query="COMID=23773393" value="Q*35.3146667" type="sum" domain="reach"

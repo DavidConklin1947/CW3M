@@ -183,9 +183,11 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       LPCTSTR exportDeltaFieldList = NULL;
       LPCTSTR constraints          = NULL; 
       LPCTSTR _mapUnits            = NULL;
+      CString study_area_name;
 
       XML_ATTR attrs[] = 
          { // attr                             type        address                  isReq checkCol
+         { _T("studyAreaName"),              TYPE_CSTRING,  &study_area_name,       false,  0 },
          { _T("actorInitMethod"),            TYPE_INT,      &aim,                   false,  0 },
          { _T("actorAssociations"),          TYPE_INT,      &m_pActorManager->m_actorAssociations, false, 0 },
          { _T("loadSharedPolicies"),         TYPE_INT,      &loadSharedPolicies,    false,  0 },
@@ -235,6 +237,13 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       //???Check
       //if ( constraints != NULL )
       //   this->m_constraintArray.Add( constraints );  // NEEDS WORK!!!!!! - multiple constraints, check quer
+      if (study_area_name.IsEmpty())
+      {
+         CString msg; msg.Format("Please specify studyAreaName=... in the <settings> block of the ENVX file.");
+         Report::WarningMsg(msg);
+//         return(-2);
+      }
+      else m_pModel->m_envContext.m_studyAreaName = study_area_name;
 
       m_pModel->m_envContext.coldStartFlag = coldStartFlag == 1;
 

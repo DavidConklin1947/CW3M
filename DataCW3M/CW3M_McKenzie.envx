@@ -4,6 +4,7 @@
 <Envision ver='5.0'>
 
   <settings
+    studyAreaName='McKenzie'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'

@@ -983,7 +983,7 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
 
 bool WW2100AP::InitRunGetWeather(EnvContext* pContext)
 {
-   if (m_stationaryClimSeed != 0) m_WeatherRandomDraw.SetSeed(m_stationaryClimSeed);
+   if (m_stationaryClimSeed != 0) m_WeatherRandomDraw.SetSeed((long)m_stationaryClimSeed);
 
    return(true);
 } // end of WW2100AP::InitRunGetWeather()
