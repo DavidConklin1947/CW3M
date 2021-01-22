@@ -1,0 +1,459 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- CW3M_McKenzie.envx -->
+
+<Envision ver='5.0'>
+
+  <settings
+    actorInitMethod            ='4'
+    actorAssociations          ='0'
+    loadSharedPolicies         ='1'
+    debug                      ='0'
+    logMsgLevel                ='0'
+    noBuffering                ='0'
+    multiRunDecadalMapsModulus ='10'
+    defaultPeriod              ='9'
+    dynamicUpdate              ='15'
+    spatialIndexDistance       ='0'
+    areaCutoff                 ='0'
+    startYear                  ='2010'
+    mapUnits                   ='meters'
+    deltaAllocationSize        ='320000'
+    multiRunIterations         ='25'
+    actorDecisionElements      ='7'
+    actorDecisionMethod        ='1'
+    dynamicActors              ='0'
+    policyPreferenceWt         ='0.333333'
+    shuffleActorPolys          ='0'
+    parallel                   ='0'
+    addReturnsToBudget         ='0'
+    collectPolicyData          ='0'
+    exportMapInterval          ='-1'
+	  exportBmpInterval          ='-1'
+    exportBmpPixelSize          ='60'
+    exportBmpCols              =''
+    exportOutputs              ='1'
+    exportDeltas               ='0'
+    exportDeltaCols            =''
+    discardMultiRunDeltas      ='1'
+    useWaterYears              ='0'
+  />
+
+  <layers >
+
+    <layer
+      name         ='IDU'
+      path         ='BLU\IDU_BLU.shp'
+      type         ='0'
+      includeData  ='1'
+      color        ='0,0,0'
+      records      ='-1'
+      initField    =''
+      overlayFields =''
+      fieldInfoFile='idu.xml'
+	/>
+    <layer
+  name         ='HRU'
+  path         ='BLU\HRU_BLU.shp'
+  type         ='0'
+  includeData  ='1'
+  color        ='0,0,155'
+  records      ='-1'
+  initField    ='FRC_NATURL'
+  overlayFields =''
+  fieldInfoFile=''
+	/>
+
+  <layer
+      name         ='Reach'
+      path         ='BLU\Reach_BLU.shp'
+      type         ='0'
+      includeData  ='1'
+      color        ='0,0,155'
+      records      ='-1'
+      initField    ='STRM_ORDER'
+      overlayFields =''
+      fieldInfoFile='Reach.xml'
+	/>
+
+  </layers>
+
+   <models>
+
+  </models>
+
+  <autonomous_processes>
+    <!-- The cold start stuff in APs is used for constructing IDU attributes; 
+it is not ordinarily run as part of a simulation.  
+
+   <autonomous_process
+   name         ='ColdStart'
+   path         ='APs.dll'
+   id           ='0'
+   use          ='1'
+   timing       ='0'
+   freq         ='1'
+   sandbox      ='0'
+   fieldName    =''
+   initInfo     ='APs.xml'
+   dependencies =''
+   initRunOnStartup ='0'
+   />
+-->
+
+
+<autonomous_process
+    name         ='ResetIRRIGATION'
+    path         ='Modeler.dll'
+    id           ='11'
+    use          ='1'
+    timing       ='0'
+    freq         ='1'
+    sandbox      ='0'
+    fieldName    =''
+    initInfo     ='Modeler.xml'
+    dependencies =''
+    initRunOnStartup  ='0'
+	/>
+
+<autonomous_process
+    name         ='ResetFireDISTURB'
+    path         ='Modeler.dll'
+    id           ='12'
+    use          ='1'
+    timing       ='0'
+    freq         ='1'
+    sandbox      ='0'
+    fieldName    =''
+    initInfo     ='Modeler.xml'
+    dependencies =''
+    initRunOnStartup  ='0'
+	/>
+
+<autonomous_process
+name         ='ResetCCdisturb'
+path         ='Modeler.dll'
+id           ='13'
+use          ='1'
+timing       ='0'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='Modeler.xml'
+dependencies =''
+initRunOnStartup  ='0'
+	/>
+
+<autonomous_process
+    name         ='ResetHarvestDISTURB'
+    path         ='Modeler.dll'
+    id           ='14'
+    use          ='1'
+    timing       ='0'
+    freq         ='1'
+    sandbox      ='0'
+    fieldName    =''
+    initInfo     ='Modeler.xml'
+    dependencies =''
+    initRunOnStartup  ='0'
+	/>
+
+<autonomous_process
+name         ='ResetVEGTRNTYPE'
+path         ='Modeler.dll'
+id           ='15'
+use          ='1'
+timing       ='0'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='Modeler.xml'
+dependencies =''
+initRunOnStartup ='0'
+   />
+
+<autonomous_process
+    name         ='ResetCropChoice'
+    path         ='Modeler.dll'
+    id           ='16'
+    use          ='1'
+    timing       ='0'
+    freq         ='1'
+    sandbox      ='0'
+    fieldName    =''
+    initInfo     ='Modeler.xml'
+    dependencies =''
+    initRunOnStartup  ='0'
+	/>
+
+<autonomous_process
+name         ='GetWeather'
+path         ='APs.dll'
+id           ='20'
+use          ='1'
+timing       ='0'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='APs.xml'
+dependencies =''
+initRunOnStartup ='0'
+   />
+
+    <autonomous_process
+name         ='PopGrowth'
+path         ='APs.dll'
+id           ='30'
+use          ='1'
+timing       ='0'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='APs.xml'
+dependencies =''
+initRunOnStartup ='0'
+   />
+
+<autonomous_process
+  name         ='IrrigationDecision'
+  path         ='APs.dll'
+  id           ='39'
+  use          ='1'
+  timing       ='0'
+  freq         ='1'
+  sandbox      ='0'
+  fieldName    =''
+  initInfo     ='APs.xml'
+  dependencies =''
+  initRunOnStartup ='0'
+   />
+
+<autonomous_process
+   name         ='CropChoice'
+   path         ='APs.dll'
+   id           ='50'
+   use          ='1'
+   timing       ='0'
+   freq         ='1'
+   sandbox      ='0'
+   fieldName    =''
+   initInfo     ='APs.xml'
+   dependencies =''
+   initRunOnStartup ='0'
+   />
+
+<autonomous_process
+  name         ='UrbanWater'
+  path         ='APs.dll'
+  id           ='60'
+  use          ='1'
+  timing       ='0'
+  freq         ='1'
+  sandbox      ='0'
+  fieldName    =''
+  initInfo     ='APs.xml'
+  dependencies =''
+  initRunOnStartup ='0'
+   />
+
+<autonomous_process
+name         ='Flow'
+path         ='Flow.dll'
+id           ='100'
+use          ='1'
+timing       ='0'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='BLU\Flow_BLU.xml'
+   />
+
+    <!-- Policies are applied here, i.e. after all the APs with timing=0 have run, but before any of the APs with timing=1 begin to run. -->
+
+<autonomous_process
+   name         ='PVTdisturb'
+   path         ='Modeler.dll'
+   id           ='110'
+   use          ='1'
+   timing       ='1'
+   freq         ='1'
+   sandbox      ='0'
+   fieldName    =''
+   initInfo     ='Modeler.xml'
+   dependencies =''
+   initRunOnStartup  ='0'
+   />
+
+<autonomous_process
+name         ='StandDisturbance'
+path         ='SpatialAllocator.dll'
+id           ='120'
+use          ='1'
+timing       ='1'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='SpatialAllocator.xml'
+dependencies =''
+initRunOnStartup  ='0'
+   />
+   
+<autonomous_process
+name         ='VegSTMengine'
+path         ='VegSTM.dll'
+id           ='130'
+use          ='1'
+timing       ='1'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='VegSTM.xml'
+dependencies =''
+initRunOnStartup  ='0'
+   />
+<!--
+<autonomous_process
+name         ='UpdateDGVMvegtype'
+path         ='APs.dll'
+id           ='140'
+use          ='1'
+timing       ='1'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='APs.xml'
+dependencies =''
+initRunOnStartup ='0'
+   />
+  
+<autonomous_process
+name         ='FarmlandRent'
+path         ='APs.dll'
+id           ='160'
+use          ='1'
+timing       ='1'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='APs.xml'
+dependencies =''
+initRunOnStartup ='0'
+   />
+
+<autonomous_process
+  name         ='LandUseTransitions'
+  path         ='APs.dll'
+  id           ='170'
+  use          ='1'
+  timing       ='1'
+  freq         ='1'
+  sandbox      ='0'
+  fieldName    =''
+  initInfo     ='APs.xml'
+  dependencies =''
+  initRunOnStartup ='0'
+   />
+
+<autonomous_process
+  name         ='UGAexpansion'
+  path         ='APs.dll'
+  id           ='180'
+  use          ='1'
+  timing       ='1'
+  freq         ='1'
+  sandbox      ='0'
+  fieldName    =''
+  initInfo     ='APs.xml'
+  dependencies =''
+  initRunOnStartup ='0'
+   />
+
+
+<autonomous_process
+  name         ='FishModel'
+  path         ='APs.dll'
+  id           ='190'
+  use          ='1'
+  timing       ='1'
+  freq         ='1'
+  sandbox      ='0'
+  fieldName    =''
+  initInfo     ='APs.xml'
+  dependencies =''
+  initRunOnStartup ='0'
+   />
+
+<autonomous_process
+name         ='YearlyReports'
+path         ='Reporter.dll'
+id           ='200'
+use          ='1'
+timing       ='1'
+freq         ='10'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='Reporter.xml'
+dependencies =''
+initRunOnStartup  ='0'
+   />
+-->
+</autonomous_processes>
+
+
+  <!--
+===================================================================================
+                      L U L C   T R E E 
+===================================================================================
+-->
+
+  <lulcTree file='lulc.xml' />
+
+  <!--
+===================================================================================
+                      P O L I C I E S 
+===================================================================================
+-->
+
+  <policies />
+
+
+  <!--
+===================================================================================
+                      M E T A G O A L S 
+===================================================================================
+-->
+
+  <metagoals>
+
+  </metagoals>
+
+
+
+  <!--
+===================================================================================
+                      A C T O R S 
+===================================================================================
+-->
+
+  <actors default='0'>
+
+    <actor id='0' name='Uniform Actor' originator='' decisionFreq='1' color='9881700' query='' valueStdDev='0' count='1'>
+      <goal_scores>
+      </goal_scores>
+    </actor>
+
+  </actors>
+
+  <!--
+===================================================================================
+                      S C E N A R I O S 
+===================================================================================
+-->
+  <scenarios 
+    climate_scenarios_file='ClimateScenarios.xml' default_climate_scenario='13' 
+    simulation_scenarios_file='SimulationScenarios_PEST.xml' default_simulation_scenario='0' 
+  />
+
+</Envision>
+  
+
+
