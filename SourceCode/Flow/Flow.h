@@ -1479,7 +1479,7 @@ public:
    double MagicReachWaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in reaches.
    double MagicHRUwaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in HRUs.
    double GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreach_ndx, double SW_unshaded_W_m2);
-   bool DumpReachInsolationData(int downstreamCOMID, int upstreamCOMID, double startingRiver_km = 0);
+   bool DumpReachInsolationData(int downstreamCOMID, int upstreamCOMID, double startingRiver_km);
 
 
 

@@ -37,6 +37,10 @@ extern FlowProcess *gpFlow;
 
 FlowModel *gpModel = NULL;
 
+FILE* insolation_ofile;
+int downstream_comid = 23765583; // McKenzie outlet
+int upstream_comid = 23772871; // through river kilometer 56.275, 2,251 segments each 25 m long, as in the Shade-a-lator data from Tommy Franzen
+double starting_river_km = 58.9188;
 
 MTDOUBLE HRU::m_mvDepthMelt = 0;  // volume of water in snow
 MTDOUBLE HRU::m_mvDepthSWE_mm = 0;   // volume of ice in snow
@@ -3244,16 +3248,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    msg.Format( "Flow: Processors available=%i, Max Processors specified=%i, Processors used=%i", ::omp_get_num_procs(), gpFlow->m_maxProcessors, gpFlow->m_processorsUsed );
    Report::LogMsg( msg, RT_INFO );
 
-   int downstream_comid = 23765583; // McKenzie outlet
-   int upstream_comid = 23772865; // through river kilometer 56.275, 2,251 segments each 25 m long, as in the Shade-a-lator data from Tommy Franzen
-   DumpReachInsolationData(downstream_comid, upstream_comid);
-
-   return true;
-   } // end of FlowModel::Init()
-
-
-bool FlowModel::DumpReachInsolationData(int downstreamComid, int upstreamComid, double startingRiver_km)
-{
+   // Initialize DumpReachInsolationData()
    // Get the path to the current user's Documents folder.
    PWSTR userPath;
    SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &userPath);
@@ -3265,21 +3260,40 @@ bool FlowModel::DumpReachInsolationData(int downstreamComid, int upstreamComid, 
    filename.Format("%s\\ReachInsolationData.csv", szBuffer);
    const char* filename_const = filename;
 
-   FILE* ofile = NULL;
-   int errNo = fopen_s(&ofile, filename_const, "w");
+   int errNo = fopen_s(&insolation_ofile, filename_const, "w");
    if (errNo != 0) return(false);
 
-   fprintf(ofile, "RIVER_KM, COMID, LENGTH, WIDTH, DIRECTION, SHADECOEFF, "
+   fprintf(insolation_ofile, "YEAR, MONTH, DAY, "
+      "RIVER_KM, COMID, LENGTH, RAD_SW, RAD_SW_IN, RAD_LW_OUT, WIDTH, DIRECTION, SHADECOEFF, "
       "BANK_L_IDU, VEGCLASS_L, AGE_CLASS_L, TREE_HT_L, "
       "BANK_R_IDU, VEGCLASS_R, AGE_CLASS_R, TREE_HT_R, "
-      "SUBREACH_NDX, LENGTH_SR, WIDTH_SR, DIRECTION_SR\n");
+      "NUM_SUBREACHES\n");
 
-   int comid = downstreamComid;
+   return true;
+   } // end of FlowModel::Init()
+
+
+bool FlowModel::DumpReachInsolationData(int downstreamComid, int upstreamComid, double startingRiver_km)
+{
+   int year = m_flowContext.pEnvContext->currentYear;
+   int jday0 = m_flowContext.dayOfYear; // Jan 1 = 0
+
+   // period of interest is 11/1/19-12/31/19
+   if (year != 2019 || jday0 < 304) return(true);
+
+   int days_in_year = 365; // for 2019  
+   int month, day_of_month; 
+   GetCalDate0(jday0, &month, &day_of_month, days_in_year);
+
+   int comid = upstreamComid;
    double river_km = startingRiver_km;
    Reach* pReach = FindReachFromID(comid);
    bool done = pReach == NULL;
    while (!done)
    {
+      double unshaded_rad_sw_W_m2; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colStreamRAD_SW, unshaded_rad_sw_W_m2);
+      double rad_sw_in_W_m2; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRAD_SW_IN, rad_sw_in_W_m2);
+      double rad_lw_out_W_m2; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRAD_LW_OUT, rad_lw_out_W_m2);
       double direction; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, direction);
       double shadecoeff; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachSHADECOEFF, shadecoeff);
 
@@ -3304,37 +3318,28 @@ bool FlowModel::DumpReachInsolationData(int downstreamComid, int upstreamComid, 
          avg_width_m += pSubreach->m_subreach_width_m;
       } // end of loop thru subreaches for calculating avg_width_m
       avg_width_m /= num_subreaches;
+      fprintf(insolation_ofile, "%d, %d, %d, "
+         "%f, %d, %f, %f, %f, %f, %f, %f, %f, "
+         "%d, %d, %d, %f, "
+         "%d, %d, %d, %f, "
+         "%d\n",
+         year, month, day_of_month,
+         river_km, comid, pReach->m_length, unshaded_rad_sw_W_m2, rad_sw_in_W_m2, rad_lw_out_W_m2, avg_width_m, direction, shadecoeff,
+         bank_l_idu_id, vegclass_l, ageclass_l, tree_ht_l_m,
+         bank_r_idu_id, vegclass_r, ageclass_r, tree_ht_r_m,
+         num_subreaches);
 
-      for (int subreach_ndx = 0; subreach_ndx < num_subreaches; subreach_ndx++)
-      {
-         ReachSubnode* pSubreach = pReach->GetReachSubnode(subreach_ndx);
-         double subreach_direction = direction; // ???
-
-         fprintf(ofile, "%f, %d, %f, %f, %f, %f, "
-            "%d, %d, %d, %f, "
-            "%d, %d, %d, %f, "
-            "%d, %f, %f, %f\n",
-            river_km, comid, avg_width_m, pReach->m_length, direction, shadecoeff,
-            bank_l_idu_id, vegclass_l, ageclass_l, tree_ht_l_m,
-            bank_r_idu_id, vegclass_r, ageclass_r, tree_ht_r_m,
-            subreach_ndx, pSubreach->m_subreach_length_m, pSubreach->m_subreach_width_m, subreach_direction);
-      } // end of loop thru subreaches to write lines to the output file
-
-      river_km += pReach->m_length/1000.;
-      if (comid == upstreamComid) done = true;
+      river_km -= pReach->m_length/1000.;
+      if (comid == downstreamComid) done = true;
       else
       { 
-         if (pReach->m_pLeft != NULL) pReach = (Reach *)pReach->m_pLeft;
-         else if (pReach->m_pRight != NULL) pReach = (Reach *)pReach->m_pRight;
-         else pReach = NULL;
-
+         pReach = (Reach *)pReach->m_pDown;
          if (pReach != NULL) comid = pReach->m_reachID;
          else done = true;
       }
 
    } // end of while (!done)
 
-   fclose(ofile);
    return(true);
 } // end of DumpReachInsolationData()
 
@@ -3646,6 +3651,8 @@ bool FlowModel::EndRun( EnvContext *pEnvContext )
 
    m_ResActiveRuleReport.Clear();
 */
+
+   if (insolation_ofile != NULL) fclose(insolation_ofile); // Close the file used by DumpReachInsolationData().
 
    return true;
    }
@@ -4960,6 +4967,7 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
    } // end of loop thru the Reach layer
 
    MagicReachWaterReport_m3(false); // Calculate ADDED_VOL and ADDED_Q.
+   DumpReachInsolationData(downstream_comid, upstream_comid, starting_river_km);
 
    return true;
 } // end of FlowModel::EndStep()
