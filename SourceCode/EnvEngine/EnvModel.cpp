@@ -5780,3 +5780,19 @@ bool EnvModel::CheckValidFieldNames( void )
    return true;
    }
 
+
+void EnvModel::ApplySubstituteStrings(CString& str)
+{
+   if (str.Find('{') < 0) return;
+
+   // iterate through the substitute stringss, applying substitutions as appropriate
+   for (int i = 0; i < (int)m_envContext.m_substituteStrings.GetSize(); i++)
+   {
+      SubstituteString * pSubstitute = m_envContext.m_substituteStrings.GetAt(i);
+      CString string_to_replace = pSubstitute->m_stringToReplace;
+      if (str.Find(string_to_replace) < 0) continue;
+      CString replacement_string = pSubstitute->m_replacementString;
+      str.Replace(string_to_replace, replacement_string);
+   }
+} // end of ApplySubstituteStrings()
+

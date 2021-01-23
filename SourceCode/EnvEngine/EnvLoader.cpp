@@ -243,7 +243,9 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          Report::LogMsg(msg);
 //         return(-2);
       }
-      else m_pModel->m_envContext.m_studyAreaName = study_area_name;
+
+      m_pModel->m_envContext.m_studyAreaName = SubstituteString("{studyAreaName}", study_area_name);
+      m_pModel->m_envContext.m_substituteStrings.Add(&m_pModel->m_envContext.m_studyAreaName);
 
       m_pModel->m_envContext.coldStartFlag = coldStartFlag == 1;
 
@@ -369,13 +371,14 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          int data = 1;
          int records = -1;
          int labelSize = 0;
-         LPCTSTR name=NULL, path=NULL, initField=NULL, overlayFields=NULL, color=NULL, fieldInfoFile=NULL,
+         CString path;
+         LPCTSTR name=NULL, initField=NULL, overlayFields=NULL, color=NULL, fieldInfoFile=NULL,
             labelField=NULL, labelFont=NULL, labelColor=NULL, labelQuery=NULL;
 
          XML_ATTR layerAttrs[] = 
             { // attr                 type        address                isReq checkCol
 	      { _T("name"),            TYPE_STRING,   (void*)&name,              true,   0 },
-            { _T("path"),            TYPE_STRING,   (void*)&path,              true,   0 },
+            { _T("path"),            TYPE_CSTRING,   (void*)&path,              true,   0 },
             { _T("initField"),       TYPE_STRING,   (void*)&initField,         false,  0 },
             { _T("overlayFields"),   TYPE_STRING,   (void*)&overlayFields,     false,  0 },
             { _T("color"),           TYPE_STRING,   (void*)&color,             true,   0 },
@@ -389,11 +392,12 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
             { _T("records"),         TYPE_INT,      &records,           false,  0 },
             { _T("includeData"),     TYPE_INT,      &data,              false,  0 },
             { NULL,                  TYPE_NULL,     NULL,               false,  0 } };
-		 
-		
+		   		
          bool ok = TiXmlGetAttributes( pXmlLayer, layerAttrs, filename );
          if ( ! ok )
             return -3;
+
+         m_pModel->ApplySubstituteStrings(path);
 
          // parse color
          int red=0, green=0, blue=0;
@@ -784,9 +788,14 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          int initRunOnStartup = 0;
 
          LPCTSTR name = pXmlProcess->Attribute( _T("name") );
-         LPCTSTR path = pXmlProcess->Attribute( _T("path") );
+
+         CString path = pXmlProcess->Attribute( _T("path") );
+         m_pModel->ApplySubstituteStrings(path);
+
          LPCTSTR fieldName  = pXmlProcess->Attribute( _T("fieldName") );
-         LPCTSTR initInfo = pXmlProcess->Attribute( _T("initInfo") );
+
+         CString initInfo = pXmlProcess->Attribute(_T("initInfo"));
+         m_pModel->ApplySubstituteStrings(initInfo);
 
          pXmlProcess->Attribute( _T("id"), &id );
          pXmlProcess->Attribute( _T("use"), &use );
@@ -1225,6 +1234,9 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       { NULL,                      TYPE_NULL,     NULL,                                false,   0 } };
 
    ok = TiXmlGetAttributes(pXmlScenarios, scenario_attrs, filename, NULL);
+   m_pModel->ApplySubstituteStrings(simulation_scenarios_file);
+   m_pModel->ApplySubstituteStrings(climate_scenarios_file);
+
    if (default_simulation_scenario < 0) default_simulation_scenario = 0;
    if (default_climate_scenario < 0) default_climate_scenario = 0;
 

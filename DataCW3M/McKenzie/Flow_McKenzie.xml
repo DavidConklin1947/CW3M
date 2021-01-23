@@ -909,7 +909,7 @@ flow_cms="1.10"
               query="COMID=23773411" value="Q*35.3146667" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
       <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="Q*35.3146667" type="sum" domain="reach"
+              query="COMID=23773405" value="Q*35.3146667*0.997" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
       <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
               query="COMID=23772909" value="Q*35.3146667" type="sum" domain="reach"
@@ -972,7 +972,7 @@ flow_cms="1.10"
               query="COMID=23773411" value="Q*35.3146667" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
       <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="Q*35.3146667" type="sum" domain="reach"
+              query="COMID=23773405" value="Q*35.3146667*0.997" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
       <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
               query="COMID=23772909" value="Q*35.3146667" type="sum" domain="reach"
@@ -1035,7 +1035,7 @@ flow_cms="1.10"
               query="COMID=23773411" value="Q*35.3146667" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
       <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="Q*35.3146667" type="sum" domain="reach"
+              query="COMID=23773405" value="Q*35.3146667*0.997" type="sum" domain="reach"
              obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
       <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
               query="COMID=23772909" value="Q*35.3146667" type="sum" domain="reach"

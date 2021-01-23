@@ -8,6 +8,8 @@
 #include <Vdata.h>
 #include <DATE.HPP>
 //x #include "..\Flow\Flow.h"
+#include "ptrarray.h"
+
 
 class ActorManager;
 class PolicyManager;
@@ -366,7 +368,22 @@ struct ENV_DATAMODULE : public ENV_EXTENSION
    virtual ~ENV_DATAMODULE() { }
    };
 
+class SubstituteString 
+{
+public:
+   SubstituteString() { m_stringToReplace = ""; m_replacementString = ""; }
 
+   SubstituteString(CString string_to_replace, CString replacement_string)
+   {
+      m_stringToReplace = string_to_replace;
+      m_replacementString = replacement_string;
+   }
+
+public:
+   CString m_stringToReplace;
+   CString m_replacementString;
+
+};
 
 
 
@@ -383,7 +400,8 @@ public:
    int             startYear;             // calendar year in which the simulation started (e.g. 2008)
    int             endYear;               // last calendar year of simulation (e.g. 2050)
    int             currentYear;           // current calendar year of run, incremented from startYear (e.g. 2010)
-   CString         m_studyAreaName;
+   SubstituteString m_studyAreaName;
+   PtrArray < SubstituteString > m_substituteStrings;
 
    FlowContext* m_pFlowContext;
    SYSDATE         m_simDate;               // date being simulated
