@@ -47,7 +47,6 @@
 -->
 <!--
                initial_conditions="flow.ic"
-             initial_conditions="Flow_WRB_31yr_spinup_2010.ic"
 -->
 <flow_model name="flow"
              time_step="1"
@@ -232,94 +231,55 @@
                DynamicWR_Appropriation_Date ="-1"
             />
 
-    <flux name="Blue River Reservoir drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=9"
-    value_domain="source"
-    value="-579"
-    dynamic="0"
-       />
-    <flux name="Cougar Reservoir Drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=8"
-    value_domain="source"
-    value="-1908"
-    dynamic="0"
-       />
-    <flux name="Walterville gage additional GW" use="1"
-source_domain="reach"
-source_query="HBVCALIB=34"
-value_domain="source"
-value="-4939"
-dynamic="0"
-       />
-    <flux name="Clackamas High Cascades Groundwater contribution" use="1"
-            source_domain="reach"
-            source_query="(ECO = 9 or ECO = 10) and SUB_AREA =3"
-            value_domain="source"
-            value="-7743.0"
-            dynamic="0"
-       />
-    <flux name="Detroit Reservoir Drainage HC GW contribution" use="1"
-     source_domain="reach"
-     source_query="HBVCALIB=12"
-     value_domain="source"
-     value="-2097"
-     dynamic="0"
-       />
-    <flux name="Hills Creek Reservoir Drainage additional GW" use="1"
-   source_domain="reach"
-   source_query="HBVCALIB=1"
-   value_domain="source"
-   value="-1546"
-   dynamic="0"
-       />
-    <flux name="Fall Creek Reservoir Drainage additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=4"
-    value_domain="source"
-    value="-155"
-    dynamic="0"
-       />
-    <flux name="Middle Fork at Jasper additional GW" use="1"
-    source_domain="reach"
-    source_query="HBVCALIB=38"
-    value_domain="source"
-    value="-814"
-    dynamic="0"
+     <Spring name="Springs feeding Clear Lake" 
+    COMID="23773373"
+    flow_cfs="32"
+     temp_C="4.9"
        />
 
-<!--    
-    <external name="StreamTemperature"  method="fn=hbv.dll:StreamTempReg" use="1" timing="1+32"/>
-    
-    <external name="StreamTemperature"  method="fn=StreamTemp.dll:StreamTempEntry" use="1" timing="1+32"/>
-    
-    <StreamTemp_model
-      query=""
-      latitude="" longitude=""
-      deltaTGMT=""
-      start_TOD=""
-      sun_positions=""
-      start_DOY="" end_DOY=""
-      initSurfaceWaterTemp="" initGroundWaterTemp="" >
-      <topo_shading 
-        start_TOD=""
-        sun_positions=""
-        max_distance=""
-        query=""
-        table="topo_shading.csv"
-      />
-     </StreamTemp_model>
--->    
-  </global_methods>
+    <Spring name="Springs feeding Lookout Creek" 
+     COMID="23773411"
+     flow_cms="0.14"
+     temp_C="4.9"
+       />
 
-  <!-- <climate> tag attributes note for single year NetCDF files:
-        1) The path should include the base name for the NETCDF files, but FLOW will add
-           "_YEAR.nc" to each.  ELEMENT must be either "prcp" or "temp". Each file must 
-           have a separate band for each day of the year it represents.
-           Units:  precipitation in mm/d, temperature degrees C
-        2) Paths which begin with a backslash will have the system environment variable CLIMATE_DRIVE prepended.
-  -->
+    <Spring name="Springs below Trail Bridge Dam" 
+    COMID="23773359"
+    flow_cms="9.67"
+     temp_C="4.9"
+       />
+
+    <Spring name="Foley Springs on West Fork" 
+    COMID="23773239"
+    flow_cms="3.31"
+      temp_C="4.9"
+       />
+
+    <Spring name="Springs feeding Blue R at and above Tidbit Creek" 
+    COMID="23773429"
+    flow_cms="1.60"
+     temp_C="4.9"
+       />
+
+    <Spring name="Springs above Smith R Reservoir"
+    COMID="23773393"
+    flow_cfs="4"
+     temp_C="4.9"
+       />
+
+    <Spring name="Springs above Cougar Reservoir" 
+COMID="23773037"
+flow_cfs="139"
+     temp_C="4.9"
+       />
+
+    <Spring name="South Fork near Rainbow" 
+COMID="23773009"
+flow_cms="1.10"
+     temp_C="4.9"
+       />
+      </global_methods>
+
   <controlPoints>
     <controlPoint id="1"      name="Min flow at Salem"                path="Reservoirs\ControlPoints\{ScenarioName}\"
       control_point="cp_Min_flow_at_Salem_23791083.csv"               reservoirs="1,2,4,5,6,8,9,10"
@@ -409,6 +369,7 @@ dynamic="0"
 
 
   <reservoirs col="RES_ID">
+  
     <reservoir id="1"   name="Hills Creek Reservoir (USACE)"      path="Reservoirs\"                                  initVolume="209709507"
                area_vol_curve="hills_creek_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="11"
                rule_curve="hills_creek_rule_curve.csv"            rc_dir="Rule_Curves\{ScenarioName}"                 maxVolume="461075511"
@@ -481,9 +442,9 @@ dynamic="0"
                composite_rc="Cougar_composite_rc.csv"             re_dir="Rel_Cap\"                                   maxPowerFlow="25.8"
                RO_rc="Cougar_RO_capacity.csv"                     spillway_rc="Cougar_spillway_capacity.csv"          cp_dir="ControlPoints\{ScenarioName}"
                rule_priorities="cougar_rule_priorities.csv"       rp_dir="Rules_Cougar\"                              tailwater_elev="408"
-               turbine_efficiency="0.9"                           td_elev="520.0"                                     fc1_elev="518.0"
+               turbine_efficiency="0.9"                           td_elev="519.68"                                     fc1_elev="517.86"
                buffer_zone="Cougar_buffer.csv"                    ressim_output_f="Cougar_ressim_flow_1935_2008.csv"  ressim_output_r="Cougar_ressim_rule_1935_2008.csv"
-               inactive_elev="466.65"                             reservoir_type="FloodControl"/>
+               inactive_elev="466.65"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="1.0" />
 
     <reservoir id="9"   name="Blue River Reservoir (USACE)"       path="Reservoirs\"     initVolume="5063443"
                area_vol_curve="blue_river_area_capacity.csv"      av_dir="Area_Capacity_Curves\"                      minOutflow="1.417"
@@ -492,7 +453,8 @@ dynamic="0"
                RO_rc="BR_RO_capacity.csv"                         spillway_rc="BR_spillway_capacity.csv"              cp_dir="ControlPoints\{ScenarioName}"
                rule_priorities="blue_river_rule_priorities.csv"   rp_dir="Rules_BR\"                                  td_elev="415.0"
                fc1_elev="414.0"                                   buffer_zone="BR_buffer.csv"                         ressim_output_f="BR_ressim_flow_1935_2008.csv"
-               ressim_output_r="BR_ressim_rule_1935_2008.csv"     inactive_elev="359.66"                              reservoir_type="FloodControl" />
+               ressim_output_r="BR_ressim_rule_1935_2008.csv"     inactive_elev="359.66"                              reservoir_type="FloodControl"
+               solar_radiation_multiplier="0.30" />
 
     <reservoir id="10"  name="Green Peter Reservoir (USACE)"      path="Reservoirs\"     initVolume="197233746"
                area_vol_curve="green_peter_area_capacity.csv"     av_dir="Area_Capacity_Curves\"                      minOutflow="22.6"
@@ -529,6 +491,7 @@ dynamic="0"
                composite_rc="BC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="79.6"
                RO_rc="BC_RO_capacity.csv"                         spillway_rc="BC_spillway_capacity.csv"              tailwater_elev="342"
                turbine_efficiency="0.9"                           inactive_elev="353.99"                              reservoir_type="RiverRun"/>
+  
   </reservoirs>
 
   <fluxes>
@@ -588,223 +551,10 @@ dynamic="0"
     domain:  target of calculation, one of "idu", "hru", "layer", "reach"    
     -->
 
-  <outputs>
-    <output_group name="FLOW NSantiam Reach Exchanges Daily (cms positive out of reach, negative into reach)" interval ="daily" >
-      <output in_use="1" name="Total OUT_IRRIG (cms)" query="SUB_AREA=6" value="OUT_IRRIG" type="sum" domain="reach" />
-      <output in_use="1" name="Total OUT_MUNI (cms)" query="SUB_AREA=6" value="OUT_MUNI" type="sum" domain="reach" />
-      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="SUB_AREA=6" value="-IN_MUNI" type="sum" domain="reach" />
-      <output in_use="1" name="Total XFLUX_D (cms)" query="SUB_AREA=6" value="XFLUX_D" type="sum" domain="reach" />
-    </output_group>
+  <outputs
+    output_groups_file="{studyAreaName}\FLOWreports_{studyAreaName}.xml"
+  />
 
-    <output_group name="FLOW NSantiam Reach Exchanges Yearly (cms positive out of reach, negative into reach)" interval ="yearly" >
-      <output in_use="1" name="Total OUT_IRRIG (cms)" query="SUB_AREA=6" value="OUT_IRRIG" type="sum" domain="reach" />
-      <output in_use="1" name="Total OUT_MUNI (cms)" query="SUB_AREA=6" value="OUT_MUNI" type="sum" domain="reach" />
-      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="SUB_AREA=6" value="-IN_MUNI" type="sum" domain="reach" />
-      <output in_use="1" name="Total XFLUX_D (cms)" query="SUB_AREA=6" value="XFLUX_D" type="sum" domain="reach" />
-    </output_group>
-
-    <output_group name="FLOW Reach Exchanges Daily (cms positive out of reach, negative into reach)" interval ="daily" >
-      <output in_use="1" name="Total OUT_IRRIG (cms)" query="1" value="OUT_IRRIG" type="sum" domain="reach" />
-      <output in_use="1" name="Total OUT_MUNI (cms)" query="1" value="OUT_MUNI" type="sum" domain="reach" />
-      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="1" value="-IN_MUNI" type="sum" domain="reach" />
-      <output in_use="1" name="Total XFLUX_D (cms)" query="1" value="XFLUX_D" type="sum" domain="reach" />
-    </output_group>
-
-    <output_group name="FLOW Reach Exchanges Yearly (cms positive out of reach, negative into reach)" interval ="yearly" >
-      <output in_use="1" name="Total OUT_IRRIG (cms)" query="1" value="OUT_IRRIG" type="sum" domain="reach" />
-      <output in_use="1" name="Total OUT_MUNI (cms)" query="1" value="OUT_MUNI" type="sum" domain="reach" />
-      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="1" value="-IN_MUNI" type="sum" domain="reach" />
-      <output in_use="1" name="Total XFLUX_D (cms)" query="1" value="XFLUX_D" type="sum" domain="reach" />
-    </output_group>
-
-    <output_group name="FLOW NSantiam monthly flows with Obs (cfs)" interval="monthly" >
-      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14178000.csv" format="E" />
-      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14179000.csv" format="E" />
-      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14180300.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14181500.csv" format="E" />
-      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14182500.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14183000.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14184100.csv" format="E" />
-    </output_group>
-
-    <output_group name="FLOW NSantiam daily flows with Obs (cfs)" interval="daily" >
-      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14178000.csv" format="E" />
-      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14179000.csv" format="E" />
-      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14180300.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14181500.csv" format="E" />
-      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14182500.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14183000.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14184100.csv" format="E" />
-    </output_group>
-
-    <output_group name="FLOW HBVCALIB daily outflows" >
-      <output in_use="1" name="HBVCALIB=44 outflow 23780877 lower NSantiam (cfs)" query="COMID=23780877" value="Q*35.3146667" type="sum" domain="reach" />
-      <output in_use="1" name="HBVCALIB=37 outflow 23780481 MEHO NSantiam at Mehama (cfs)" query="COMID=23780481" value="Q*35.3146667" type="sum" domain="reach" />
-      <output in_use="1" name="HBVCALIB=12 outflow 23780525 Detroit Reservoir (cfs)" query="COMID=23780525" value="Q*35.3146667" type="sum" domain="reach" />
-    </output_group>
-
-    <output_group name="FLOW HBVCALIB yearly outflows" interval="yearly" >
-      <output in_use="1" name="HBVCALIB=44 outflow 23780877 lower NSantiam (cfs)" query="COMID=23780877" value="Q*35.3146667" type="sum" domain="reach" />
-      <output in_use="1" name="HBVCALIB=37 outflow 23780481 MEHO NSantiam at Mehama (cfs)" query="COMID=23780481" value="Q*35.3146667" type="sum" domain="reach" />
-      <output in_use="1" name="HBVCALIB=12 outflow 23780525 Detroit Reservoir (cfs)" query="COMID=23780525" value="Q*35.3146667" type="sum" domain="reach" />
-    </output_group>
-    <!--
-    <output_group name="FLOW HRU 23780997" interval="daily" >
-      <output in_use="1" name="SNOW (mm SWE) in IDUs with HRU_ID=3880" query="HRU_ID=3880" value="SNOW" type="areaWtMean" domain="idu" />
-      <output in_use="1" name="SNOWPACK (mm SWE) in HRU 3880" query="HRU_ID=3880" value="SNOWPACK" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="ADDEDVOLM3 (m3 H2O) in HRU 3880" query="HRU_ID=3880" value="ADDEDVOLM3" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="PRECIP (mm H2O) in HRU 3880" query="HRU_ID=3880" value="PRECIP" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="TEMP (deg C) in HRU 3880" query="HRU_ID=3880" value="TEMP" type="areaWtMean" domain="hru" />
-    </output_group>
-
-    <output_group name="FLOW Reservoir Inflows and Outflows (cfs)">
-      <output in_use="1" name="res_id 12 Detroit inflow 23780525 (cfs)" query="COMID = 23780525" value="reachOutflow*35.3146667" type="sum" domain="reach" />
-      <output in_use="1" name="res_id 12 Detroit outflow 23780523 (cfs)" query="COMID = 23780523" value="reachOutflow*35.3146667" type="sum" domain="reach" />
-    </output_group>
-
--->
-
-    <output_group name="FLOW big list WRB flows with Obs and leapdays" interval="monthly" >
-      <output in_use="1" name="MF WILLAMETTE RIVER ABV SALT CRK NEAR OAKRIDGE 23751940" query="COMID = 23751940" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14145500.csv" format="E" />
-      <output in_use="1" name="MF WILLAMETTE RIVER BLW N FORK NR OAKRIDGE 23751880" query="COMID = 23751880" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14148000.csv" format="E" />
-      <output in_use="1" name="MIDDLE FORK WILLAMETTE RIVER NEAR DEXTER 23751830" query="COMID = 23751830" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14150000.csv" format="E" />
-      <output in_use="1" name="WINBERRY CREEK NEAR LOWELL 23752606" query="COMID = 23752606" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14150800.csv" format="E" />
-      <output in_use="1" name="FALL CREEK BLW WINBERRY CREEK NEAR FALL CREEK 23752598" query="COMID = 23752598" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14151000.csv" format="E" />
-      <output in_use="1" name="MIDDLE FORK WILLAMETTE RIVER AT JASPER 23751778" query="COMID = 23751778" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14152000.csv" format="E" />
-      <output in_use="1" name="COAST FORK WILLAMETTE R BLW COTTAGE GROVE DAM 23759308" query="COMID = 23759308" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14153500.csv" format="E" />
-      <output in_use="1" name="ROW RIVER ABOVE PITCHER CREEK NEAR DORENA 23759452" query="COMID = 23759452" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14154500.csv" format="E" />
-      <output in_use="1" name="ROW RIVER NEAR COTTAGE GROVE 23759440" query="COMID = 23759440" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14155500.csv" format="E" />
-      <output in_use="1" name="COAST FORK WILLAMETTE RIVER NEAR GOSHEN 23759228" query="COMID = 23759228" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14157500.csv" format="E" />
-      <output in_use="1" name="MCKENZIE RIVER AT OUTLET OF CLEAR LAKE 23773373" query="COMID = 23773373" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14158500.csv" format="E" />
-      <output in_use="1" name="SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRNGS 23773393" query="COMID = 23773393" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14158790.csv" format="E" />
-      <output in_use="1" name="MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS 23773359" query="COMID = 23773359" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14158850.csv" format="E" />
-      <output in_use="1" name="SO FK MCKENZIE RIVER ABV COUGAR LAKE NR RAINBOW 23773037" query="COMID = 23773037" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14159200.csv" format="E" />
-      <output in_use="1" name="SOUTH FORK MCKENZIE RIVER NEAR RAINBOW 23773009" query="COMID = 23773009" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14159500.csv" format="E" />
-      <output in_use="1" name="LOOKOUT CREEK NEAR BLUE RIVER 23773411" query="COMID = 23773411" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14161500.csv" format="E" />
-      <output in_use="1" name="BLUE RIVER AT BLUE RIVER 23773405" query="COMID = 23773405" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14162200.csv" format="E" />
-      <output in_use="1" name="MCKENZIE RIVER NEAR VIDA 23772909" query="COMID = 23772909" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14162500.csv" format="E" />
-      <output in_use="1" name="CEDAR CREEK AT SPRINGFIELD 23774369" query="COMID = 23774369" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14164700.csv" format="E" />
-      <output in_use="1" name="McKENZIE RIVER ABV HAYDEN BR AT SPRINGFIELD 23772751" query="COMID = 23772751" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14164900.csv" format="E" />
-      <output in_use="1" name="MOHAWK RIVER NEAR SPRINGFIELD 23773513" query="COMID = 23773513" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14165000.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT HARRISBURG 23763337" query="COMID = 23763337" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14166000.csv" format="E" />
-      <output in_use="1" name="LONG TOM RIVER NEAR NOTI 23763161" query="COMID = 23763161" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14166500.csv" format="E" />
-      <output in_use="1" name="LONG TOM RIVER NEAR ALVADORE 23763139" query="COMID = 23763139" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14169000.csv" format="E" />
-      <output in_use="1" name="LONG TOM RIVER AT MONROE 23763075" query="COMID = 23763075" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14170000.csv" format="E" />
-      <output in_use="1" name="MARYS RIVER NEAR PHILOMATH 23762895" query="COMID = 23762895" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14171000.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT CORVALLIS 23762877" query="COMID = 23762877" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14171600.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT ALBANY 23762845" query="COMID = 23762845" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14174000.csv" format="E" />
-      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14178000.csv" format="E" />
-      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14179000.csv" format="E" />
-      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14180300.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14181500.csv" format="E" />
-      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14182500.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14183000.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14184100.csv" format="E" />
-      <output in_use="1" name="SOUTH SANTIAM RIVER BELOW CASCADIA 23785793" query="COMID = 23785793" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14185000.csv" format="E" />
-      <output in_use="1" name="QUARTZVILLE CREEK NEAR CASCADIA 23786019" query="COMID = 23786019" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14185900.csv" format="E" />
-      <output in_use="1" name="WILEY CREEK NEAR FOSTER 23785721" query="COMID = 23785721" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14187000.csv" format="E" />
-      <output in_use="1" name="SOUTH SANTIAM RIVER NEAR FOSTER 23785717" query="COMID = 23785717" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14187200.csv" format="E" />
-      <output in_use="1" name="SOUTH SANTIAM RIVER AT WATERLOO 23785687" query="COMID = 23785687" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14187500.csv" format="E" />
-      <output in_use="1" name="SCHAFER CREEK NEAR LACOMB 23786665" query="COMID = 23786665" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14188610.csv" format="E" />
-      <output in_use="1" name="THOMAS CREEK NEAR SCIO 23786251" query="COMID = 23786251" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14188800.csv" format="E" />
-      <output in_use="1" name="SANTIAM RIVER AT JEFFERSON 23780423" query="COMID = 23780423" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14189000.csv" format="E" />
-      <output in_use="1" name="LUCKIAMUTE RIVER NEAR SUVER 23762661" query="COMID = 23762661" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14190500.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT SALEM 23791093" query="COMID = 23791093" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14191000.csv" format="E" />
-      <output in_use="1" name="SOUTH YAMHILL RIVER AT MCMINNVILLE 23796627" query="COMID = 23796627" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14194150.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT NEWBERG 23791305" query="COMID = 23791305" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14197900.csv" format="E" />
-      <output in_use="1" name="BULL CREEK NEAR WILHOIT 23801710" query="COMID = 23801710" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14198400.csv" format="E" />
-      <output in_use="1" name="NATE CREEK TRIBUTARY NEAR COLTON 23801184" query="COMID = 23801184" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14199704.csv" format="E" />
-      <output in_use="1" name="PUDDING RIVER NEAR WOODBURN 23800604" query="COMID = 23800604" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14201340.csv" format="E" />
-      <output in_use="1" name="PUDDING RIVER AT AURORA 23800594" query="COMID = 23800594" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14202000.csv" format="E" />
-      <output in_use="1" name="TUALATIN RIVER NEAR DILLEY 23805092" query="COMID = 23805092" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14203500.csv" format="E" />
-      <output in_use="1" name="EAST FORK DAIRY CREEK NEAR MEACHAM CORNER 23804986" query="COMID = 23804986" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14205400.csv" format="E" />
-      <output in_use="1" name="FANNO CREEK AT 56TH AVE AT PORTLAND 23805292" query="COMID = 23805292" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14206900.csv" format="E" />
-      <output in_use="1" name="FANNO CREEK AT DURHAM 23805270" query="COMID = 23805270" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14206950.csv" format="E" />
-      <output in_use="1" name="TUALATIN RIVER AT WEST LINN 23804832" query="COMID = 23804832" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14207500.csv" format="E" />
-      <output in_use="1" name="OAK GROVE FORK NEAR GOVERNMENT CAMP 23810706" query="COMID = 23810706" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14208700.csv" format="E" />
-      <output in_use="1" name="OAK GROVE FORK ABOVE POWERPLANT INTAKE 23809432" query="COMID = 23809432" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14209000.csv" format="E" />
-      <output in_use="1" name="CLACKAMAS RIVER ABOVE THREE LYNX CREEK 23809158" query="COMID = 23809158" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14209500.csv" format="E" />
-      <output in_use="1" name="CLACKAMAS RIVER AT ESTACADA 23809080" query="COMID = 23809080" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14210000.csv" format="E" />
-      <output in_use="1" name="CLACKAMAS RIVER NEAR OREGON CITY 23809000" query="COMID = 23809000" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211010.csv" format="E" />
-      <output in_use="1" name="TRYON CREEK NEAR LAKE OSWEGO 23815500" query="COMID = 23815500" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211315.csv" format="E" />
-      <output in_use="1" name="JOHNSON CREEK AT REGNER ROAD AT GRESHAM 23815070" query="COMID = 23815070" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211400.csv" format="E" />
-      <output in_use="1" name="KELLEY CREEK AT SE 159TH DRIVE AT PORTLAND 23815128" query="COMID = 23815128" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211499.csv" format="E" />
-      <output in_use="1" name="JOHNSON CREEK AT SYCAMORE 23815066" query="COMID = 23815066" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211500.csv" format="E" />
-      <output in_use="1" name="JOHNSON CREEK AT MILWAUKIE 23815062" query="COMID = 23815062" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211550.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT PORTLAND 23815040" query="COMID = 23815040" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\IncludingLeapDays\obs_usgs14211720.csv" format="E" />
-    </output_group>
-  
-    <output_group name="FLOW big list WRB flows with Obs without leapdays" interval="monthly" >
-      <output in_use="1" name="MF WILLAMETTE RIVER ABV SALT CRK NEAR OAKRIDGE 23751940" query="COMID = 23751940" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14145500.csv" format="E" />
-      <output in_use="1" name="MF WILLAMETTE RIVER BLW N FORK NR OAKRIDGE 23751880" query="COMID = 23751880" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14148000.csv" format="E" />
-      <output in_use="1" name="MIDDLE FORK WILLAMETTE RIVER NEAR DEXTER 23751830" query="COMID = 23751830" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14150000.csv" format="E" />
-      <output in_use="1" name="WINBERRY CREEK NEAR LOWELL 23752606" query="COMID = 23752606" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14150800.csv" format="E" />
-      <output in_use="1" name="FALL CREEK BLW WINBERRY CREEK NEAR FALL CREEK 23752598" query="COMID = 23752598" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14151000.csv" format="E" />
-      <output in_use="1" name="MIDDLE FORK WILLAMETTE RIVER AT JASPER 23751778" query="COMID = 23751778" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14152000.csv" format="E" />
-      <output in_use="1" name="COAST FORK WILLAMETTE R BLW COTTAGE GROVE DAM 23759308" query="COMID = 23759308" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14153500.csv" format="E" />
-      <output in_use="1" name="ROW RIVER ABOVE PITCHER CREEK NEAR DORENA 23759452" query="COMID = 23759452" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14154500.csv" format="E" />
-      <output in_use="1" name="ROW RIVER NEAR COTTAGE GROVE 23759440" query="COMID = 23759440" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14155500.csv" format="E" />
-      <output in_use="1" name="COAST FORK WILLAMETTE RIVER NEAR GOSHEN 23759228" query="COMID = 23759228" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14157500.csv" format="E" />
-      <output in_use="1" name="MCKENZIE RIVER AT OUTLET OF CLEAR LAKE 23773373" query="COMID = 23773373" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14158500.csv" format="E" />
-      <output in_use="1" name="SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRNGS 23773393" query="COMID = 23773393" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14158790.csv" format="E" />
-      <output in_use="1" name="MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS 23773359" query="COMID = 23773359" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14158850.csv" format="E" />
-      <output in_use="1" name="SO FK MCKENZIE RIVER ABV COUGAR LAKE NR RAINBOW 23773037" query="COMID = 23773037" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14159200.csv" format="E" />
-      <output in_use="1" name="SOUTH FORK MCKENZIE RIVER NEAR RAINBOW 23773009" query="COMID = 23773009" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14159500.csv" format="E" />
-      <output in_use="1" name="LOOKOUT CREEK NEAR BLUE RIVER 23773411" query="COMID = 23773411" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14161500.csv" format="E" />
-      <output in_use="1" name="BLUE RIVER AT BLUE RIVER 23773405" query="COMID = 23773405" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14162200.csv" format="E" />
-      <output in_use="1" name="MCKENZIE RIVER NEAR VIDA 23772909" query="COMID = 23772909" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14162500.csv" format="E" />
-      <output in_use="1" name="CEDAR CREEK AT SPRINGFIELD 23774369" query="COMID = 23774369" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14164700.csv" format="E" />
-      <output in_use="1" name="McKENZIE RIVER ABV HAYDEN BR AT SPRINGFIELD 23772751" query="COMID = 23772751" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14164900.csv" format="E" />
-      <output in_use="1" name="MOHAWK RIVER NEAR SPRINGFIELD 23773513" query="COMID = 23773513" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14165000.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT HARRISBURG 23763337" query="COMID = 23763337" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14166000.csv" format="E" />
-      <output in_use="1" name="LONG TOM RIVER NEAR NOTI 23763161" query="COMID = 23763161" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14166500.csv" format="E" />
-      <output in_use="1" name="LONG TOM RIVER NEAR ALVADORE 23763139" query="COMID = 23763139" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14169000.csv" format="E" />
-      <output in_use="1" name="LONG TOM RIVER AT MONROE 23763075" query="COMID = 23763075" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14170000.csv" format="E" />
-      <output in_use="1" name="MARYS RIVER NEAR PHILOMATH 23762895" query="COMID = 23762895" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14171000.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT CORVALLIS 23762877" query="COMID = 23762877" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14171600.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT ALBANY 23762845" query="COMID = 23762845" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14174000.csv" format="E" />
-      <output in_use="1" name="NO SANTIAM R BLW BOULDER CRK NR DETROIT 23780591" query="COMID = 23780591" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14178000.csv" format="E" />
-      <output in_use="1" name="BREITENBUSH R ABV FRENCH CR NR DETROIT 23780701" query="COMID = 23780701" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14179000.csv" format="E" />
-      <output in_use="1" name="BLOWOUT CREEK NEAR DETROIT 23780557" query="COMID = 23780557" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14180300.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT NIAGARA 23780511" query="COMID = 23780511" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14181500.csv" format="E" />
-      <output in_use="1" name="LITTLE NORTH SANTIAM RIVER NEAR MEHAMA 23780805" query="COMID = 23780805" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14182500.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM RIVER AT MEHAMA 23780481" query="COMID = 23780481" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14183000.csv" format="E" />
-      <output in_use="1" name="NORTH SANTIAM R AT GREENS BRIDGE NR JEFFERSON 23780883" query="COMID = 23780883" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14184100.csv" format="E" />
-      <output in_use="1" name="SOUTH SANTIAM RIVER BELOW CASCADIA 23785793" query="COMID = 23785793" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14185000.csv" format="E" />
-      <output in_use="1" name="QUARTZVILLE CREEK NEAR CASCADIA 23786019" query="COMID = 23786019" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14185900.csv" format="E" />
-      <output in_use="1" name="WILEY CREEK NEAR FOSTER 23785721" query="COMID = 23785721" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14187000.csv" format="E" />
-      <output in_use="1" name="SOUTH SANTIAM RIVER NEAR FOSTER 23785717" query="COMID = 23785717" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14187200.csv" format="E" />
-      <output in_use="1" name="SOUTH SANTIAM RIVER AT WATERLOO 23785687" query="COMID = 23785687" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14187500.csv" format="E" />
-      <output in_use="1" name="SCHAFER CREEK NEAR LACOMB 23786665" query="COMID = 23786665" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14188610.csv" format="E" />
-      <output in_use="1" name="THOMAS CREEK NEAR SCIO 23786251" query="COMID = 23786251" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14188800.csv" format="E" />
-      <output in_use="1" name="SANTIAM RIVER AT JEFFERSON 23780423" query="COMID = 23780423" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14189000.csv" format="E" />
-      <output in_use="1" name="LUCKIAMUTE RIVER NEAR SUVER 23762661" query="COMID = 23762661" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14190500.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT SALEM 23791093" query="COMID = 23791093" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14191000.csv" format="E" />
-      <output in_use="1" name="SOUTH YAMHILL RIVER AT MCMINNVILLE 23796627" query="COMID = 23796627" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14194150.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT NEWBERG 23791305" query="COMID = 23791305" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14197900.csv" format="E" />
-      <output in_use="1" name="BULL CREEK NEAR WILHOIT 23801710" query="COMID = 23801710" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14198400.csv" format="E" />
-      <output in_use="1" name="NATE CREEK TRIBUTARY NEAR COLTON 23801184" query="COMID = 23801184" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14199704.csv" format="E" />
-      <output in_use="1" name="PUDDING RIVER NEAR WOODBURN 23800604" query="COMID = 23800604" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14201340.csv" format="E" />
-      <output in_use="1" name="PUDDING RIVER AT AURORA 23800594" query="COMID = 23800594" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14202000.csv" format="E" />
-      <output in_use="1" name="TUALATIN RIVER NEAR DILLEY 23805092" query="COMID = 23805092" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14203500.csv" format="E" />
-      <output in_use="1" name="EAST FORK DAIRY CREEK NEAR MEACHAM CORNER 23804986" query="COMID = 23804986" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14205400.csv" format="E" />
-      <output in_use="1" name="FANNO CREEK AT 56TH AVE AT PORTLAND 23805292" query="COMID = 23805292" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14206900.csv" format="E" />
-      <output in_use="1" name="FANNO CREEK AT DURHAM 23805270" query="COMID = 23805270" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14206950.csv" format="E" />
-      <output in_use="1" name="TUALATIN RIVER AT WEST LINN 23804832" query="COMID = 23804832" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14207500.csv" format="E" />
-      <output in_use="1" name="OAK GROVE FORK NEAR GOVERNMENT CAMP 23810706" query="COMID = 23810706" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14208700.csv" format="E" />
-      <output in_use="1" name="OAK GROVE FORK ABOVE POWERPLANT INTAKE 23809432" query="COMID = 23809432" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14209000.csv" format="E" />
-      <output in_use="1" name="CLACKAMAS RIVER ABOVE THREE LYNX CREEK 23809158" query="COMID = 23809158" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14209500.csv" format="E" />
-      <output in_use="1" name="CLACKAMAS RIVER AT ESTACADA 23809080" query="COMID = 23809080" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14210000.csv" format="E" />
-      <output in_use="1" name="CLACKAMAS RIVER NEAR OREGON CITY 23809000" query="COMID = 23809000" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211010.csv" format="E" />
-      <output in_use="1" name="TRYON CREEK NEAR LAKE OSWEGO 23815500" query="COMID = 23815500" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211315.csv" format="E" />
-      <output in_use="1" name="JOHNSON CREEK AT REGNER ROAD AT GRESHAM 23815070" query="COMID = 23815070" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211400.csv" format="E" />
-      <output in_use="1" name="KELLEY CREEK AT SE 159TH DRIVE AT PORTLAND 23815128" query="COMID = 23815128" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211499.csv" format="E" />
-      <output in_use="1" name="JOHNSON CREEK AT SYCAMORE 23815066" query="COMID = 23815066" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211500.csv" format="E" />
-      <output in_use="1" name="JOHNSON CREEK AT MILWAUKIE 23815062" query="COMID = 23815062" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211550.csv" format="E" />
-      <output in_use="1" name="WILLAMETTE RIVER AT PORTLAND 23815040" query="COMID = 23815040" value="reachOutflow*35.3147" type="sum" domain="reach" obs="Observations\jd_csv\14211720.csv" format="E" />
-    </output_group>
-
-  </outputs>
   <!--
   <video_capture use='0' frameRate='30'>
     <movie col='TEMP'   file='\envision\studyareas\WW2100\Outputs\AVIs\Temp.avi' />

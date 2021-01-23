@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<!-- CW3M_McKenzie.envx -->
 
 <Envision ver='5.0'>
 
   <settings
+    studyAreaName='BLU'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'
@@ -11,7 +11,7 @@
     logMsgLevel                ='0'
     noBuffering                ='0'
     multiRunDecadalMapsModulus ='10'
-    defaultPeriod              ='9'
+    defaultPeriod              ='1'
     dynamicUpdate              ='15'
     spatialIndexDistance       ='0'
     areaCutoff                 ='0'
@@ -42,7 +42,7 @@
 
     <layer
       name         ='IDU'
-      path         ='BLU\IDU_BLU.shp'
+      path         ='{studyAreaName}\IDU_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,0'
@@ -53,7 +53,7 @@
 	/>
     <layer
   name         ='HRU'
-  path         ='BLU\HRU_BLU.shp'
+  path         ='{studyAreaName}\HRU_{studyAreaName}.shp'
   type         ='0'
   includeData  ='1'
   color        ='0,0,155'
@@ -65,7 +65,7 @@
 
   <layer
       name         ='Reach'
-      path         ='BLU\Reach_BLU.shp'
+      path         ='{studyAreaName}\Reach_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,155'
@@ -264,7 +264,7 @@ timing       ='0'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='BLU\Flow_BLU.xml'
+initInfo     ='Flow.xml'
    />
 
     <!-- Policies are applied here, i.e. after all the APs with timing=0 have run, but before any of the APs with timing=1 begin to run. -->
@@ -324,7 +324,7 @@ initInfo     ='APs.xml'
 dependencies =''
 initRunOnStartup ='0'
    />
-  
+-->    
 <autonomous_process
 name         ='FarmlandRent'
 path         ='APs.dll'
@@ -395,7 +395,7 @@ initInfo     ='Reporter.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
--->
+
 </autonomous_processes>
 
 
@@ -450,7 +450,7 @@ initRunOnStartup  ='0'
 -->
   <scenarios 
     climate_scenarios_file='ClimateScenarios.xml' default_climate_scenario='13' 
-    simulation_scenarios_file='SimulationScenarios_PEST.xml' default_simulation_scenario='0' 
+    simulation_scenarios_file='SimulationScenarios.xml' default_simulation_scenario='0' 
   />
 
 </Envision>

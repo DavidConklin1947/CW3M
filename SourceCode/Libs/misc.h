@@ -2,6 +2,8 @@
 #include "libs.h"
 
 #include "randgen/Randunif.hpp"
+#include "PtrArray.h"
+#include <../EnvEngine/EnvContext.h>
 
 #ifdef Yield
 #undef Yield
@@ -114,6 +116,7 @@ extern "C" {
 void LIBSAPI GetTileParams( int count, int &rows, CArray<int,int> &colArray );
 int  LIBSAPI CleanFileName(LPCTSTR filename);
 int  LIBSAPI Tokenize( const TCHAR* str, const TCHAR* delimiters, CStringArray &tokens);
+void LIBSAPI ApplySubstituteStrings(CString& str, PtrArray<SubstituteString> substitutes);
 
 #ifdef __cplusplus
 }

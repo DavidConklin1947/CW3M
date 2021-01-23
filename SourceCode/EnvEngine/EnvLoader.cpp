@@ -397,7 +397,7 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          if ( ! ok )
             return -3;
 
-         m_pModel->ApplySubstituteStrings(path);
+         ::ApplySubstituteStrings(path, m_pModel->m_envContext.m_substituteStrings);
 
          // parse color
          int red=0, green=0, blue=0;
@@ -790,12 +790,12 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          LPCTSTR name = pXmlProcess->Attribute( _T("name") );
 
          CString path = pXmlProcess->Attribute( _T("path") );
-         m_pModel->ApplySubstituteStrings(path);
+         ::ApplySubstituteStrings(path, m_pModel->m_envContext.m_substituteStrings);
 
          LPCTSTR fieldName  = pXmlProcess->Attribute( _T("fieldName") );
 
          CString initInfo = pXmlProcess->Attribute(_T("initInfo"));
-         m_pModel->ApplySubstituteStrings(initInfo);
+         ::ApplySubstituteStrings(initInfo, m_pModel->m_envContext.m_substituteStrings);
 
          pXmlProcess->Attribute( _T("id"), &id );
          pXmlProcess->Attribute( _T("use"), &use );
@@ -1234,8 +1234,8 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       { NULL,                      TYPE_NULL,     NULL,                                false,   0 } };
 
    ok = TiXmlGetAttributes(pXmlScenarios, scenario_attrs, filename, NULL);
-   m_pModel->ApplySubstituteStrings(simulation_scenarios_file);
-   m_pModel->ApplySubstituteStrings(climate_scenarios_file);
+   ::ApplySubstituteStrings(simulation_scenarios_file, m_pModel->m_envContext.m_substituteStrings);
+   ::ApplySubstituteStrings(climate_scenarios_file, m_pModel->m_envContext.m_substituteStrings);
 
    if (default_simulation_scenario < 0) default_simulation_scenario = 0;
    if (default_climate_scenario < 0) default_climate_scenario = 0;

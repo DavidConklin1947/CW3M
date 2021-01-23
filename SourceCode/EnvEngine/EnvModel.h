@@ -542,8 +542,6 @@ class /*ENV_EXPORT*/ EnvModel
 
       //void UpdateUI( int flags, LONG_PTR extra=NULL );  // 1=map, 2=year, 3=process 
 
-      void ApplySubstituteStrings(CString & str);
-
    protected:
 
       void  InitRun();
