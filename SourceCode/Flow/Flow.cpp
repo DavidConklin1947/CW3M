@@ -11684,7 +11684,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
          if (!output_groups_ok)
          {
             CString msg;
-            msg.Format("Error reading output_groups file, %s", (LPCTSTR)output_groups_path);
+            msg.Format("Error reading FLOW Reports file, %s", (LPCTSTR)output_groups_path);
             Report::ErrorMsg(msg);
          }
       }
