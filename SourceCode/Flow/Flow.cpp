@@ -11663,8 +11663,8 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
       ok = TiXmlGetAttributes(pXmlModelOutputs, output_groups_attrs, filename, NULL);
       ::ApplySubstituteStrings(output_groups_file, pEnvContext->m_substituteStrings);
       CString output_groups_path;
-      bool output_groups_ok = PathManager::FindPath(output_groups_file, output_groups_path) < 0; // return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found
-      if (!output_groups_ok)
+      bool output_groups_ok = PathManager::FindPath(output_groups_file, output_groups_path) >= 0; // return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found
+      if (output_groups_ok)
       {
          CString msg;
          msg.Format("Loading FLOW report specifications from file %s.", output_groups_path);
