@@ -959,6 +959,13 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
       pScenario->m_evalModelFreq    = evalModelFreq;
       pScenario->m_decisionElements = decisionElements;
 
+      const char * file_name = pXmlScenario->Attribute("Shade-A-Lator_input_file");
+      pScenario->m_shadeAlatorData.m_input_file_name = (file_name == NULL) ? CString("") : CString(file_name);
+      int comid;  pXmlScenario->Attribute("downstream_comid", &comid); 
+      pScenario->m_shadeAlatorData.m_comid_downstream = comid;
+      pXmlScenario->Attribute("upstream_comid", &comid);
+      pScenario->m_shadeAlatorData.m_comid_upstream = comid;
+
       //NormalizeWeights( pScenario->m_actorAltruismWt, pScenario->m_actorSelfInterestWt, pScenario->m_policyPrefWt );
       TiXmlNode *pXmlDescNode = pXmlScenarioNode->FirstChild( "description" );
       if ( pXmlDescNode )

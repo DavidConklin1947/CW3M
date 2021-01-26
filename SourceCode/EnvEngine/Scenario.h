@@ -11,6 +11,7 @@
 
 class ScenarioManager;
 class AppVar;
+class Shade_a_latorData;
 
 bool NormalizeWeights( float &w0, float &w1, float &w2 );
 bool NormalizeWeights( float &w0, float &w1, float &w2, float &w3 );
@@ -137,6 +138,18 @@ public:
 };
 
 
+class Shade_a_latorData
+{
+public:
+   Shade_a_latorData() { m_input_file_name = CString(""); m_comid_downstream = 0; };
+   ~Shade_a_latorData() {};
+public:
+   CString m_input_file_name;
+   int m_comid_downstream;
+   int m_comid_upstream;
+}; // end of class Shade_a_latorData
+
+
 class Scenario
 {
 friend class ScenarioManager;
@@ -165,6 +178,8 @@ public:
    int     m_evalModelFreq;    // Frequency (years) at which landscape evaluative models are run
 
    int    m_runCount;          // how many times has this scenario been run?
+
+   Shade_a_latorData m_shadeAlatorData;
 
    void Initialize();
    int  SetScenarioVars( int runFlag );   // see envModel.cpp for runFlag definition
@@ -229,4 +244,3 @@ public:
    static int CopyScenarioArray( CArray< Scenario*, Scenario* > &toScenarioArray, CArray< Scenario*, Scenario* > &fromScenarioArray );
 
 };
-

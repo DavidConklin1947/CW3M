@@ -265,7 +265,7 @@ timing       ='0'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='Flow.xml'
+initInfo     ='Flow_PEST.xml'
    />
 
     <!-- Policies are applied here, i.e. after all the APs with timing=0 have run, but before any of the APs with timing=1 begin to run. -->

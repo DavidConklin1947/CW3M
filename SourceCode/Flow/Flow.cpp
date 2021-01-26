@@ -3333,7 +3333,7 @@ bool FlowModel::DumpReachInsolationData(int downstreamComid, int upstreamComid, 
       if (comid == downstreamComid) done = true;
       else
       { 
-         pReach = (Reach *)pReach->m_pDown;
+         pReach = GetReachFromNode(pReach->m_pDown);
          if (pReach != NULL) comid = pReach->m_reachID;
          else done = true;
       }
@@ -3584,6 +3584,36 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       }
    } // end of logic for years to run = 0
 
+   // If there is a Shade-a-lator input file, process it.
+   Scenario * pSimulationScenario = pEnvContext->pEnvModel->GetScenario();
+   CString input_file_name = pSimulationScenario->m_shadeAlatorData.m_input_file_name;
+   ::ApplySubstituteStrings(input_file_name, pEnvContext->m_substituteStrings);
+   CString input_path;
+   bool input_path_ok = PathManager::FindPath(input_file_name, input_path) >= 0;
+   int data_rows = 0;
+   if (input_path_ok) 
+   { // Process the Shade-a-lator input file.
+      FDataObj * pData = new FDataObj;
+      data_rows = pData->ReadAscii(input_path);
+
+      // How many reaches correspond to the Shade-a-lator data?
+      Reach* pReach_upstream = GetReachFromCOMID(pSimulationScenario->m_shadeAlatorData.m_comid_upstream);
+      Reach* pReach_downstream = GetReachFromCOMID(pSimulationScenario->m_shadeAlatorData.m_comid_downstream);
+      Reach* pReach = pReach_upstream;
+      int reach_ct = pReach_upstream != NULL ? 1 : 0;
+      while (pReach != NULL && pReach != pReach_downstream)
+      {
+         reach_ct++;
+         pReach = GetReachFromNode(pReach->m_pDown);
+      }
+      CString msg;
+      msg.Format("FlowModel::InitRun() Shade-a-lator input file = %s, comid_upstream = %d, comid_downstream = %d, "
+         "data_rows = %d, reach_ct = %d", 
+         input_path, pSimulationScenario->m_shadeAlatorData.m_comid_upstream, pSimulationScenario->m_shadeAlatorData.m_comid_downstream, 
+         data_rows, reach_ct);
+      Report::LogMsg(msg);
+   } // end of logic to process the Shade-a-lator input file
+ 
    return TRUE;
    } // end of InitRun()
 
