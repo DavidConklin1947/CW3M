@@ -355,7 +355,7 @@
 
     Shade-A-Lator_input_file="McKenzieRiver_cc_input_Data.csv"
     downstream_comid="23765583"
-    upstream_comid="23772865">
+    upstream_comid="23772871">
 
     <description>
       Like Baseline_2010-current, except uses climate data from GriddedRecentWeather instead of \WeatherOnGrids\trunk\ActualWeather\

@@ -516,7 +516,10 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
 //       double subreach_precip_vol_m3 = pSubreach->m_subreach_surf_area_m2 * reach_precip_mm / 1000;
 //       WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
 //       pSubreach->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
-   rtnWP.Evaporate(evap_m3, evap_kJ);
+   if (!rtnWP.Evaporate(evap_m3, evap_kJ))
+   { // Evaporation was unsuccessful because it would have resulted in negative thermal energy or negative volume.
+      Report::LogMsg("ReachRouting::ApplyEnergyFluxes() Evaporation unsuccessful due to low temperature or low volume.");
+   }
 
    // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
    double net_rad_kJ = sw_kJ - lw_kJ;

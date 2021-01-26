@@ -2970,6 +2970,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachHBVCALIB, _T("HBVCALIB"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_Y, _T("XFLUX_Y"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachDIRECTION, _T("DIRECTION"), TYPE_INT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachSLength, _T("SLength"), TYPE_DOUBLE, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSHADECOEFF, _T("SHADECOEFF"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_L_IDU, _T("BANK_L_IDU"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_R_IDU, _T("BANK_R_IDU"), TYPE_INT, CC_AUTOADD);
@@ -3589,7 +3590,9 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    CString input_file_name = pSimulationScenario->m_shadeAlatorData.m_input_file_name;
    ::ApplySubstituteStrings(input_file_name, pEnvContext->m_substituteStrings);
    CString input_path;
-   bool input_path_ok = PathManager::FindPath(input_file_name, input_path) >= 0;
+   bool input_path_ok = !input_file_name.IsEmpty();
+   if (!input_path_ok) Report::LogMsg("FlowModel::InitRun() m_shadeAlatorData.m_input_file_name is empty.");
+   input_path_ok = input_path_ok && (PathManager::FindPath(input_file_name, input_path) >= 0);
    int data_rows = 0;
    if (input_path_ok) 
    { // Process the Shade-a-lator input file.
@@ -3607,10 +3610,42 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
          pReach = GetReachFromNode(pReach->m_pDown);
       }
       CString msg;
-      msg.Format("FlowModel::InitRun() Shade-a-lator input file = %s, comid_upstream = %d, comid_downstream = %d, "
-         "data_rows = %d, reach_ct = %d", 
-         input_path, pSimulationScenario->m_shadeAlatorData.m_comid_upstream, pSimulationScenario->m_shadeAlatorData.m_comid_downstream, 
+      msg.Format("FlowModel::InitRun() Shade-a-lator input file = %s, comid_upstream = %d, comid_downstream = %d, data_rows = %d, reach_ct = %d", 
+         input_path.GetString(), pSimulationScenario->m_shadeAlatorData.m_comid_upstream, pSimulationScenario->m_shadeAlatorData.m_comid_downstream, 
          data_rows, reach_ct);
+      Report::LogMsg(msg);
+
+      // Column numbers in the Shade-a-lator input file
+      // 0 Downstream_end - River km of downstream end of segment
+      // 1 Elevation
+      // 2 Bottom Width (m)
+      // 3, 4, 5 West, South, East - topographic elevations, degrees
+      // 6 Emergent Veg
+      // 7-15 Veg_<i>_NE - i = 1...9, vegetation heights, NE from center of stream
+      // 16-24 Veg_<i>_E - vegetation heights, E from center of stream
+      // 25-33 Veg_<i>_SE
+      // 34-42 Veg_<i>_S
+      // 43-51 Veg_<i>_SW
+      // 52-60 Veg_<i>_W
+      // 61-69 Veg_<i>_NW
+      // 70-78 Elv_<i>_NE - Elevations, NE from center of stream
+      // 79-132 Elv_<i>_E, Elv_<i>_SE, ..., Elv_<i>_NW
+      float downstream_end_of_final_segment_km; pData->Get(0, 0, downstream_end_of_final_segment_km);
+      float downstream_end_of_first_segment_km; pData->Get(0, data_rows - 1, downstream_end_of_first_segment_km);
+      double adj_SAL_len_m = // adjusted Shade-a-lator length in meters = Shade-a-lator length not counting the final segment
+         1000. * (double)(downstream_end_of_final_segment_km - downstream_end_of_first_segment_km);
+      double reaches_len_m = 0.;
+      double reaches_slen_m = 0;
+      pReach = pReach_upstream;
+      for (int i = 0; i < reach_ct; i++)
+      {
+         reaches_len_m += pReach->m_length;
+         double slen_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachSLength, slen_m);
+         reaches_slen_m += slen_m;
+
+         pReach = GetReachFromNode(pReach->m_pDown);
+      } // end of loop through reaches
+      msg.Format("adj_SAL_len_m = %f, reaches_len_m = %f, reaches_slen_m = %f", adj_SAL_len_m, reaches_len_m, reaches_slen_m);
       Report::LogMsg(msg);
    } // end of logic to process the Shade-a-lator input file
  
@@ -15161,11 +15196,17 @@ WaterParcel WaterParcel::Discharge(double outflowVolume_m3)
 } // end of WaterParcel WaterParcel::Discharge(double)
 
 
-void WaterParcel::Evaporate(double evap_volume_m3, double evap_energy_kJ)
+bool WaterParcel::Evaporate(double evap_volume_m3, double evap_energy_kJ)
 {
-   double WP_energy_kJ = this->ThermalEnergy() - evap_energy_kJ; ASSERT(WP_energy_kJ >= 0.);
-   m_volume_m3 -= evap_volume_m3; ASSERT(m_volume_m3 >= 0.);
+   double WP_energy_kJ = this->ThermalEnergy() - evap_energy_kJ; 
+   if (WP_energy_kJ <= 0.) return(false);
+
+   double WP_volume_m3 = m_volume_m3 - evap_volume_m3;
+   if (WP_volume_m3 <= 0.) return(false);
+
+   m_volume_m3 = WP_volume_m3;
    m_temp_degC = WaterParcel::WaterTemperature(m_volume_m3, WP_energy_kJ);
+   return(true);
 } // end of Evaporate()
 
 

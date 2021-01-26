@@ -309,7 +309,7 @@ public:
 
    void Discharge(WaterParcel outflowWP);
    WaterParcel Discharge(double volume_m3);
-   void Evaporate(double evap_volume_m3, double evap_energy_kJ);
+   bool Evaporate(double evap_volume_m3, double evap_energy_kJ);
    void MixIn(WaterParcel inflow);
    double WaterTemperature();
    double WaterTemperature(double thermalEnergy_kJ);
@@ -1845,6 +1845,7 @@ public:
    int m_colReachQ_MIN;
    int m_colReachHBVCALIB;
    int m_colReachDIRECTION;
+   int m_colReachSLength;
    int m_colReachSHADECOEFF;
    int m_colReachBANK_L_IDU; // IDU index of IDU representative of the left bank of the reach
    int m_colReachBANK_R_IDU; // IDU index of IDU representative of the right bank of the reach
