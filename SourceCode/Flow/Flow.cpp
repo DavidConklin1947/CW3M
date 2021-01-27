@@ -3647,6 +3647,65 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       } // end of loop through reaches
       msg.Format("adj_SAL_len_m = %f, reaches_len_m = %f, reaches_slen_m = %f", adj_SAL_len_m, reaches_len_m, reaches_slen_m);
       Report::LogMsg(msg);
+
+      // Make sure the Shade-a-lator segments overlap the upstream reach entirely.
+      // Since we don't know for sure how long segment 0 is, start with segment 1.
+      ASSERT(data_rows >= 2);
+      int s = 1; // index to Shade-a-lator river segment
+      // The upper end of segment 1 is the lower end of segment 0.
+      float segment_upstream_end_km = downstream_end_of_final_segment_km;
+
+      double reach_upstream_end_km = reaches_len_m / 1000.;
+      pReach = pReach_upstream;
+      while (reach_upstream_end_km > segment_upstream_end_km)
+      { // Move downstream by one reach.
+         reach_upstream_end_km -= pReach->m_length / 1000.;
+         pReach = GetReachFromNode(pReach->m_pDown);
+         ASSERT(pReach != NULL);
+      }
+
+      // For each reach, average the Shade-a-lator data over all the segments which overlap it.
+      while (pReach != NULL)
+      {
+         double topo_E_deg = 0., topo_S_deg = 0., topo_W_deg = 0.;
+         double veg_ht_m[7]; for (int direction = 0; direction < 7; direction++) veg_ht_m[direction] = 0.;
+         double elv_m[7]; for (int direction = 0; direction < 7; direction++) elv_m[direction] = 0.;
+         double emergent_veg_ht_m = 0;
+         double width_m = 0.;
+         double elev_m = 0.;
+
+         double frac_of_reach = 0.;
+         while (frac_of_reach < 1.)
+         {
+            float segment_downstream_end_km; pData->Get(0, s, segment_downstream_end_km);
+            double segment_len_m = (segment_upstream_end_km - segment_downstream_end_km) * 1000.;
+            double seg_frac_of_reach = segment_len_m / pReach->m_length;
+            frac_of_reach += seg_frac_of_reach;
+            if (frac_of_reach >= 1.) seg_frac_of_reach -= frac_of_reach - 1.;
+
+            float seg_elev_m; pData->Get(2, s, seg_elev_m); elev_m += seg_frac_of_reach * seg_elev_m;
+            float seg_width_m; pData->Get(3, s, seg_width_m); width_m += seg_frac_of_reach * seg_width_m;
+            float seg_topo_elev_deg;
+            pData->Get(3, s, seg_topo_elev_deg); topo_E_deg += seg_frac_of_reach * seg_topo_elev_deg;
+            pData->Get(4, s, seg_topo_elev_deg); topo_S_deg += seg_frac_of_reach * seg_topo_elev_deg;
+            pData->Get(5, s, seg_topo_elev_deg); topo_W_deg += seg_frac_of_reach * seg_topo_elev_deg;
+            float seg_veg_ht_m; pData->Get(6, s, seg_veg_ht_m); emergent_veg_ht_m += seg_frac_of_reach * seg_veg_ht_m;
+
+            for (int direction = 0; direction < 7; direction++) // NE, E, SE, S, SW, W, NW
+            {
+               for (int j = 0; j < 9; j++)
+               {
+                  pData->Get(7 + direction * 9 + j, s, seg_veg_ht_m);
+                  veg_ht_m[direction] += seg_frac_of_reach * seg_veg_ht_m;
+
+                  float seg_elv_m; pData->Get(70 + direction * 9 + j, s, seg_veg_ht_m);
+                  elv_m[direction] += seg_frac_of_reach * seg_elv_m;
+               } // end of loop on j, sample position relative to center of stream
+            } // end of loop on direction
+         } // end of while (frac_of_reach < 1.)
+      } // end of while (pReach != NULL)
+
+
    } // end of logic to process the Shade-a-lator input file
  
    return TRUE;
