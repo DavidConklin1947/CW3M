@@ -2975,6 +2975,13 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_L_IDU, _T("BANK_L_IDU"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_R_IDU, _T("BANK_R_IDU"), TYPE_INT, CC_AUTOADD);
 
+   m_pReachLayer->CheckCol(m_colReachWIDTHGIVEN, "WIDTHGIVEN", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachTOPOELEV_E, "TOPOELEV_E", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachTOPOELEV_S, "TOPOELEV_S", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachTOPOELEV_W, "TOPOELEV_W", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachVEG_HT_R, "VEG_HT_R", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachVEG_HT_L, "VEG_HT_L", TYPE_DOUBLE, CC_AUTOADD);
+
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
 
@@ -3683,8 +3690,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
             frac_of_reach += seg_frac_of_reach;
             if (frac_of_reach >= 1.) seg_frac_of_reach -= frac_of_reach - 1.;
 
-            float seg_elev_m; pData->Get(2, s, seg_elev_m); elev_m += seg_frac_of_reach * seg_elev_m;
-            float seg_width_m; pData->Get(3, s, seg_width_m); width_m += seg_frac_of_reach * seg_width_m;
+            float seg_elev_m; pData->Get(1, s, seg_elev_m); elev_m += seg_frac_of_reach * seg_elev_m;
+            float seg_width_m; pData->Get(2, s, seg_width_m); width_m += seg_frac_of_reach * seg_width_m;
             float seg_topo_elev_deg;
             pData->Get(3, s, seg_topo_elev_deg); topo_E_deg += seg_frac_of_reach * seg_topo_elev_deg;
             pData->Get(4, s, seg_topo_elev_deg); topo_S_deg += seg_frac_of_reach * seg_topo_elev_deg;
@@ -3693,18 +3700,80 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
             for (int direction = 0; direction < 7; direction++) // NE, E, SE, S, SW, W, NW
             {
+               double veg_ht_accum_m = 0.;
+               double elv_accum_m = 0.;
                for (int j = 0; j < 9; j++)
                {
                   pData->Get(7 + direction * 9 + j, s, seg_veg_ht_m);
-                  veg_ht_m[direction] += seg_frac_of_reach * seg_veg_ht_m;
+                  veg_ht_accum_m += seg_frac_of_reach * seg_veg_ht_m;
 
-                  float seg_elv_m; pData->Get(70 + direction * 9 + j, s, seg_veg_ht_m);
+                  float seg_elv_m = 0.f; pData->Get(70 + direction * 9 + j, s, seg_elv_m);
                   elv_m[direction] += seg_frac_of_reach * seg_elv_m;
                } // end of loop on j, sample position relative to center of stream
+               veg_ht_m[direction] = veg_ht_accum_m / 9.;
+               elv_m[direction] = elv_accum_m / 9.;
             } // end of loop on direction
          } // end of while (frac_of_reach < 1.)
-      } // end of while (pReach != NULL)
 
+         // Now we have reach values for topographic elevations, width, and vegetation heights.
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_E, topo_E_deg);
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_S, topo_S_deg);
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_W, topo_W_deg);
+
+         double reach_direction_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, reach_direction_deg);
+         double r_bank_direction_deg = reach_direction_deg + 90.; if (r_bank_direction_deg >= 360.) r_bank_direction_deg -= 360.;
+         double l_bank_direction_deg = reach_direction_deg - 90.; if (l_bank_direction_deg < 0.) l_bank_direction_deg += 360.;
+         int r_compass_pt = (int)(r_bank_direction_deg / 45.); // N => 0, NE => 1, ..., NW => 7
+         int l_compass_pt = (int)(l_bank_direction_deg / 45.); // N => 0, NE => 1, ..., NW => 7
+
+         int r_direction_ndx;
+         double r_2nd_pt_frac;
+         switch (r_compass_pt)
+         {
+            case 0: // N -> NW, NE
+               r_direction_ndx = 6;
+               r_2nd_pt_frac = (45. + r_bank_direction_deg) / 90.;
+               break;
+            case 7: // NW -> NW, NE
+               r_direction_ndx = 6;
+               r_2nd_pt_frac = (r_bank_direction_deg - 315.) / 90.;
+               break;
+            default:
+               r_direction_ndx = r_compass_pt - 1;
+               r_2nd_pt_frac = (r_bank_direction_deg - r_compass_pt * 45.) / 45.;
+               break;
+         } // end of switch on r_compass_pt
+         double r_veg_ht_m;
+         if (r_2nd_pt_frac == 0.) r_veg_ht_m = veg_ht_m[r_direction_ndx];
+         else r_veg_ht_m = (1. - r_2nd_pt_frac) * veg_ht_m[r_direction_ndx] + r_2nd_pt_frac * veg_ht_m[(r_direction_ndx + 1) % 7];
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEG_HT_R, r_veg_ht_m);
+
+         int l_direction_ndx;
+         double l_2nd_pt_frac;
+         switch (l_compass_pt)
+         {
+            case 0: // N -> NW, NE
+               l_direction_ndx = 6;
+               l_2nd_pt_frac = (45. + l_bank_direction_deg) / 90.;
+               break;
+            case 7: // NW -> NW, NE
+               l_direction_ndx = 6;
+               l_2nd_pt_frac = (l_bank_direction_deg - 315.) / 90.;
+               break;
+            default:
+               l_direction_ndx = l_compass_pt - 1;
+               l_2nd_pt_frac = (l_bank_direction_deg - l_compass_pt * 45.) / 45.;
+               break;
+         } // end of switch on l_compass_pt
+         double l_veg_ht_m;
+         if (l_2nd_pt_frac == 0.) l_veg_ht_m = veg_ht_m[l_direction_ndx];
+         else l_veg_ht_m = (1. - l_2nd_pt_frac) * veg_ht_m[l_direction_ndx] + l_2nd_pt_frac * veg_ht_m[(l_direction_ndx + 1) % 7];
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEG_HT_L, l_veg_ht_m);
+
+         if (pReach->m_reachID == downstream_comid) pReach = NULL;
+         else pReach = GetReachFromNode(pReach->m_pDown);
+      } // end of while (pReach != NULL)
 
    } // end of logic to process the Shade-a-lator input file
  

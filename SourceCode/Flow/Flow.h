@@ -1850,6 +1850,13 @@ public:
    int m_colReachBANK_L_IDU; // IDU index of IDU representative of the left bank of the reach
    int m_colReachBANK_R_IDU; // IDU index of IDU representative of the right bank of the reach
 
+   int m_colReachWIDTHGIVEN;
+   int m_colReachTOPOELEV_E;
+   int m_colReachTOPOELEV_S;
+   int m_colReachTOPOELEV_W;
+   int m_colReachVEG_HT_R;
+   int m_colReachVEG_HT_L;
+
    int m_colHbvW2A_SLP;
    int m_colHbvW2A_INT;
 
