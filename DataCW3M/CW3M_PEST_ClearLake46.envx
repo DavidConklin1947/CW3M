@@ -4,6 +4,7 @@
 <Envision ver='5.0'>
 
   <settings
+    studyAreaName='PEST_ClearLake46'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'
@@ -42,7 +43,7 @@
 
     <layer
       name         ='IDU'
-      path         ='PEST_ClearLake46\IDU_ClearLake46.shp'
+      path         ='{studyAreaName}\IDU_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,0'
@@ -53,7 +54,7 @@
 	/>
     <layer
   name         ='HRU'
-  path         ='PEST_ClearLake46\HRU_ClearLake46.shp'
+  path         ='{studyAreaName}\HRU_{studyAreaName}.shp'
   type         ='0'
   includeData  ='1'
   color        ='0,0,155'
@@ -65,7 +66,7 @@
 
   <layer
       name         ='Reach'
-      path         ='PEST_ClearLake46\Reach_ClearLake46.shp'
+      path         ='{studyAreaName}\Reach_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,155'
@@ -264,7 +265,7 @@ timing       ='0'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='PEST_ClearLake46\Flow_PEST_ClearLake46.xml'
+initInfo     ='Flow_PEST.xml'
    />
 
     <!-- Policies are applied here, i.e. after all the APs with timing=0 have run, but before any of the APs with timing=1 begin to run. -->

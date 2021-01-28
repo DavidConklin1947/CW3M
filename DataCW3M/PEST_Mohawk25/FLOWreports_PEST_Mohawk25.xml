@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<outputs>
+  <output_group name="FLOW Q at gage daily" interval="daily" >
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773513" value="Q*35.315*0.989" type="sum" domain="reach"
+    obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
+  </output_group>
+
+  <output_group name="FLOW Q at gage monthly" interval="monthly" >
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773513" value="Q*35.315*0.989" type="sum" domain="reach"
+  obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
+  </output_group>
+
+</outputs>

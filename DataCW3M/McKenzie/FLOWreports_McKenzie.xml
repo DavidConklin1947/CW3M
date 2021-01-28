@@ -1,0 +1,737 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+  <!-- 
+    name:     name assigned to variable
+    query:    query constraining calculations
+    value:    expression to be evaulated.  Can be any mathematical expression using IDU field names or
+               internally defined variables, including:
+                "hruVolMelt"     - HRU Melt Volume
+                "hruVolSwe"      - HRU SWE Volume
+                "hruPrecip"      - HRU Total Precip
+                "hruRainThrufall"    - HRU Rain thrufall
+                "hruSnowThrufall"    - HRU Snow thrufall
+                "hruAirTemp"     - HRU Air Temp (C)
+                "hruET"          - HRU ET
+                "hruCumMaxET"      - HRU Cumulutive Maximum ET
+                "hruCumET"       - HRU Cumulutive ET
+                "hruCumP"        - HRU Cumulutive P
+                
+                "obs"            - 
+    type:    calculation type, one of "sum", "areaWtMean" or "pctArea".  For pctArea, the "value" expression is ignored.
+    domain:  target of calculation, one of "idu", "hru", "layer", "reach"    
+    -->
+
+  <outputs>
+    <output_group name="FLOW Shade-a-lator comparison" interval="daily" >
+      <output name="23772865 RAD_SW_IN (W per m2)" query="COMID=23772865" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output name="23772865 WIDTH (m)" query="COMID=23772865" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772865 LENGTH (m)" query="COMID=23772865" value="LENGTH" type="sum" domain="reach" />
+      <output name="23772865 DEPTH (m)" query="COMID=23772865" value="DEPTH" type="sum" domain="reach" />
+      <output name="23772863 RAD_SW_IN (W per m2)" query="COMID=23772863" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output name="23772863 WIDTH (m)" query="COMID=23772863" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772863 LENGTH (m)" query="COMID=23772863" value="LENGTH" type="sum" domain="reach" />
+      <output name="23772863 DEPTH (m)" query="COMID=23772863" value="DEPTH" type="sum" domain="reach" />
+      <output name="23772861 RAD_SW_IN (W per m2)" query="COMID=23772861" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output name="23772861 WIDTH (m)" query="COMID=23772861" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772861 LENGTH (m)" query="COMID=23772861" value="LENGTH" type="sum" domain="reach" />
+      <output name="23772861 DEPTH (m)" query="COMID=23772861" value="DEPTH" type="sum" domain="reach" />
+    </output_group>
+    
+    <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
+      <output in_use="1" name="ET from HBVCALIB 46 Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 46 Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 8 CGR mm" query="HBVCALIB=8" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 8 CGR m3" query="HBVCALIB=8" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="evaporation from the CGR reservoir (mm)" query="RESOUTFALL=8" value="RES_EVAPMM" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the CGR reservoir (m3)" query="RESOUTFALL=8" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the CGR reservoir (mJ)" query="RESOUTFALL=8" value="((RES_EVAPMM/1000)*(RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" 
+              type="sum" domain="reach" />
+      <output in_use="1" name="ET from HBVCALIB 9 BLU mm" query="HBVCALIB=9" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 9 BLU m3" query="HBVCALIB=9" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mm)" query="RESOUTFALL=9" value="RES_EVAPMM" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (m3)" query="RESOUTFALL=9" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mJ)" query="RESOUTFALL=9" value="((RES_EVAPMM/1000)*(RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)"
+              type="sum" domain="reach" />
+      <output in_use="1" name="ET from HBVCALIB 34 Upper McKenzie mm" query="HBVCALIB=34" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 34 Upper McKenzie m3" query="HBVCALIB=34" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 25 Mohawk mm" query="HBVCALIB=25" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 25 Mohawk m3" query="HBVCALIB=25" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 16 McKenzie outlet mm" query="HBVCALIB=16" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from HBVCALIB 16 McKenzie outlet m3" query="HBVCALIB=16" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie Thermal Energy Budget for streams daily" interval="daily" >
+      <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (MJ)" query="1" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="added by model (MJ)" query="1" value="ADDEDVOL_C*ADDED_VOL*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="insolation of reaches (MJ)" query="1" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="insolation of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out of reaches (MJ)" query="1" value="AREA_H2O*RAD_LW_OUT*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_LW_OUT*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" type="sum" domain="reach" />
+      <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="OUTIRRIG_C*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_Q (cms)" query="1" value="ADDED_Q" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RES_H2O (m3 H2O)" query="1" value="RES_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RESAREA_HA (ha)" query="1" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="RES_SW_IN*RESAREA_HA (W)" query="1" value="RES_SW_IN*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="RES_LW_OUT*RESAREA_HA (W)" query="1" value="RES_LW_OUT*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output name="OUT_MUNI (m3 H2O)" query="1" value="OUT_MUNI*86400" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (m3 H2O)" query="1" value="OUT_IRRIG*86400" type="sum" domain="reach" />
+      <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="RAD_SW over entire basin (W per m2)" query="1" value="RAD_SW" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie Thermal Energy Budget for streams monthly" interval="monthly" >
+      <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (MJ)" query="1" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="added by model (MJ)" query="1" value="ADDEDVOL_C*ADDED_VOL*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="insolation of reaches (MJ)" query="1" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="insolation of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out of reaches (MJ)" query="1" value="AREA_H2O*RAD_LW_OUT*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_LW_OUT*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" type="sum" domain="reach" />
+      <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="OUTIRRIG_C*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_Q (cms)" query="1" value="ADDED_Q" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RES_H2O (m3 H2O)" query="1" value="RES_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RESAREA_HA (ha)" query="1" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="RES_SW_IN*RESAREA_HA (W)" query="1" value="RES_SW_IN*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="RES_LW_OUT*RESAREA_HA (W)" query="1" value="RES_LW_OUT*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output name="OUT_MUNI (m3 H2O)" query="1" value="OUT_MUNI*86400" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (m3 H2O)" query="1" value="OUT_IRRIG*86400" type="sum" domain="reach" />
+      <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="RAD_SW over entire basin (W per m2)" query="1" value="RAD_SW" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie Thermal Energy Budget for streams yearly" interval="yearly" >
+      <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (MJ)" query="1" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="added by model (MJ)" query="1" value="ADDEDVOL_C*ADDED_VOL*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="insolation of reaches (MJ)" query="1" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="insolation of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out of reaches (MJ)" query="1" value="AREA_H2O*RAD_LW_OUT*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_LW_OUT*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" type="sum" domain="reach" />
+      <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="OUTIRRIG_C*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="thermal energy in basin discharge (MJ)" query="COMID=23765583" value="TEMP_H2O*Q*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_Q (cms)" query="1" value="ADDED_Q" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RES_H2O (m3 H2O)" query="1" value="RES_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RESAREA_HA (ha)" query="1" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="RES_SW_IN*RESAREA_HA (W)" query="1" value="RES_SW_IN*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="RES_LW_OUT*RESAREA_HA (W)" query="1" value="RES_LW_OUT*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output name="OUT_MUNI (m3 H2O)" query="1" value="OUT_MUNI*86400" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (m3 H2O)" query="1" value="OUT_IRRIG*86400" type="sum" domain="reach" />
+      <output name="basin discharge (m3 H2O)" query="COMID=23765583" value="Q*86400" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="RAD_SW over entire basin (W per m2)" query="1" value="RAD_SW" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW Thermal Energy Budget for 8 CGR yearly" interval="yearly" >
+      <output in_use="1" name="REACH_H2O (m3 H2O)" query="HBVCALIB=8" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy reach water (MJ)" query="HBVCALIB=8" value="TEMP_H2O*REACH_H2O*998.2*4.187" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O (m2)" query="HBVCALIB=8" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RES_H2O (m3 H2O)" query="RESOUTFALL=8" value="RES_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy in reservoir water (MJ)" query="RESOUTFALL=8" value="RES_TEMP*RES_H2O*998.2*4.187" type="sum" domain="reach" />
+      <output in_use="1" name="RESAREA_HA (ha)" query="RESOUTFALL=8" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="insolation (MJ)" query="HBVCALIB=8" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out (MJ)" query="HBVCALIB=8" value="AREA_H2O*RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation (m3 H2O)" query="HBVCALIB=8" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation (MJ)" query="HBVCALIB=8" value="EVAP_MM*AREA_H2O*(2.5-0.00236*TEMP_H2O)/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (m3 H2O)" query="HBVCALIB=8" value="IN_RUNOFF*86400" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (MJ)" query="HBVCALIB=8" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (m3 H2O)" query="HBVCALIB=8" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (MJ)" query="HBVCALIB=8" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="HBVCALIB=8" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="HBVCALIB=8" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="RAD_SW over entire basin (W per m2)" query="HBVCALIB=8" value="RAD_SW" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="HBVCALIB=8" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="HBVCALIB=8" value="TMIN" type="areaWtMean" domain="idu" />
+      <output name="basin discharge (m3 H2O) 23773009" query="COMID=23773009" value="Q*86400" type="sum" domain="reach" />
+      <output in_use="1" name="basin discharge (cfs) 23773009"
+               query="COMID=23773009" value="Q*35.3146667" type="sum" domain="reach"
+              obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="basin discharge temperature (deg C) 23773009"
+              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie basin daily weather" interval="daily" >
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
+    
+    <output_group name="FLOW McKenzie basin monthly weather" interval="monthly" >
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
+    
+    <output_group name="FLOW McKenzie basin yearly weather" interval="yearly" >
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie Stream Temperatures deg C" interval ="monthly" >
+      <output in_use="1" name="Blue R above BLU" query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Blue R below BLU" query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="S Fork above CGR" query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="S Fork below CGR" query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Vida" query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Walterville" query="COMID=23772801" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Mohawk" query="COMID=23773507" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="McKenzie outlet" query="COMID=23765583" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Blue R above BLU" query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Blue R below BLU" query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="S Fork above CGR" query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="S Fork below CGR" query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Vida" query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Walterville" query="COMID=23772801" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Mohawk" query="COMID=23773507" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="McKenzie outlet" query="COMID=23765583" value="TEMP_H2O" type="sum" domain="reach" />
+    </output_group>
+    
+      <output_group name="FLOW Clear Lake thermal energy daily 23773373" interval ="daily" >
+      <output in_use="1" name="PRECIP mmH2O 23773373 McKenzie R" query="COMID=23773373" value="PRECIP" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_AIR degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 23773373 McKenzie R" query="COMID=23773373" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="DEPTHMANNG m 23773373 McKenzie R" query="COMID=23773373" value="DEPTHMANNG" type="sum" domain="reach" />
+      <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23773373 McKenzie R" query="COMID=23773373" value="EVAP_MM" type="sum" domain="reach" />
+        <output in_use="1" name="Spring water cfs 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS*35.315" type="sum" domain="reach" />
+        <output in_use="1" name="SPRING_CMS 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
+        <output in_use="1" name="SPRINGTEMP (deg C) 23773373 McKenzie R" query="COMID=23773373" value="SPRINGTEMP" type="sum" domain="reach" />
+        <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
+        <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
+        <output in_use="1" name="ET from Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+        <output in_use="1" name="ET from Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      </output_group>
+
+    <output_group name="FLOW monthly thermal energy OUTLET OF CLEAR LAKE, OR_23773373 USGS_14158500" interval ="monthly" >
+      <output in_use="1" name="PRECIP mmH2O 23773373 McKenzie R" query="COMID=23773373" value="PRECIP" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_AIR degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 23773373 McKenzie R" query="COMID=23773373" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="DEPTHMANNG m 23773373 McKenzie R" query="COMID=23773373" value="DEPTHMANNG" type="sum" domain="reach" />
+      <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23773373 McKenzie R" query="COMID=23773373" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="Spring water cfs 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS*35.315" type="sum" domain="reach" />
+      <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
+      <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
+      <output in_use="1" name="ET from Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW yearly thermal energy OUTLET OF CLEAR LAKE, OR_23773373 USGS_14158500" interval ="yearly" >
+      <output in_use="1" name="PRECIP mmH2O 23773373 McKenzie R" query="COMID=23773373" value="PRECIP" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_AIR degC 23773373 McKenzie R" query="COMID=23773373" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 23773373 McKenzie R" query="COMID=23773373" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="DEPTHMANNG m 23773373 McKenzie R" query="COMID=23773373" value="DEPTHMANNG" type="sum" domain="reach" />
+      <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23773373 McKenzie R" query="COMID=23773373" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="Spring water cfs 23773373 McKenzie R" query="COMID=23773373" value="SPRING_CMS*35.315" type="sum" domain="reach" />
+      <output in_use="1" name="outflow Q cfs 23773373 McKenzie R" query="COMID=23773373" value="Q*35.315" type="sum" domain="reach" />
+      <output in_use="1" name="TURNOVER 23773373 McKenzie R" query="COMID=23773373" value="TURNOVER" type="sum" domain="reach" />
+      <output in_use="1" name="ET from Clear Lake watershed mm" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from Clear Lake watershed m3" query="HBVCALIB=46" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW Vida Stream Temp Analysis" interval ="monthly" >
+      <output in_use="1" name="Stream temp in Blue R near Vida degC"
+              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
+              obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="Air temp at Blue R near Vida deg C"
+              query="COMID=23772909" value="TEMP" type="areawtmean" domain="idu" />
+      <output in_use="1" name="Air temp for HBVCALIB=34 McKenzie above Walterville deg C"
+              query="HBVCALIB=34" value="TEMP" type="areawtmean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW S Hayden Br Stream Temp Analysis" interval ="monthly" >
+      <output in_use="1" name="Stream temp abv Hayden Br degC"
+            query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
+            obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+      <output in_use="1" name="Air temp at the McKenzie outlet degC"
+           query="COMID=23765583" value="TEMP" type="areawtmean" domain="idu" />
+      <output in_use="1" name="Air temp for HBVCALIB=16 McKenzie outlet degC"
+           query="HBVCALIB=16" value="TEMP" type="areawtmean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW Tidbit Cr Stream Temp Analysis" interval ="monthly" >
+      <output in_use="1" name="Stream temp in Blue R below Tidbits Cr degC"
+              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
+      <output in_use="1" name="Air temp at Blue R below Tidbits Cr deg C"
+              query="COMID=23773429" value="TEMP" type="areawtmean" domain="idu" />
+      <output in_use="1" name="Air temp for HBVCALIB=9 BLU deg C"
+              query="HBVCALIB=9" value="TEMP" type="areawtmean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW S Fork Abv CGR Stream Temp Analysis" interval ="monthly" >
+      <output in_use="1" name="Stream temp in S Fork abv CGR degC"
+            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="Air temp at S Fork abv CGR degC"
+           query="COMID=23773037" value="TEMP" type="areawtmean" domain="idu" />
+      <output in_use="1" name="Air temp for HBVCALIB=8 CGR degC"
+           query="HBVCALIB=8" value="TEMP" type="areawtmean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW Daily McKenzie flow skill assessment" interval ="daily" >
+      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
+              query="COMID=23773363" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
+      <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
+              query="COMID=23773393" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393.csv" format="E0" />
+      <output in_use="1" name="USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359"
+              query="COMID=23773359" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
+      <output in_use="1" name="USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
+              query="COMID=23773037" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
+              query="COMID=23773009" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411"
+              query="COMID=23773411" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
+      <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
+              query="COMID=23773405" value="Q*35.3146667*0.997" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
+              query="COMID=23772909" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857"
+              query="COMID=23772857" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857.csv" format="E0" />
+      <output in_use="1" name="USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801"
+              query="COMID=23772801" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801.csv" format="E0" />
+      <output in_use="1" name="USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369"
+              query="COMID=23774369" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369.csv" format="E0" />
+      <output in_use="1" name="USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
+              query="COMID=23772751" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+      <output in_use="1" name="USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513"
+              query="COMID=23773513" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Daily McKenzie temperature skill assessment" interval ="daily" >
+      <output in_use="1" name="USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
+            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
+              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429"
+              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
+      <output in_use="1" name="USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405"
+              query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      <output in_use="1" name="USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909"
+              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
+              query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+    </output_group>
+    
+    <output_group name="FLOW Yearly McKenzie flow skill assessment" interval ="yearly" >
+      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
+              query="COMID=23773363" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
+      <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
+              query="COMID=23773393" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393.csv" format="E0" />
+      <output in_use="1" name="USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359"
+              query="COMID=23773359" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
+      <output in_use="1" name="USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
+              query="COMID=23773037" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
+              query="COMID=23773009" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411"
+              query="COMID=23773411" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
+      <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
+              query="COMID=23773405" value="Q*35.3146667*0.997" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
+              query="COMID=23772909" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857"
+              query="COMID=23772857" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857.csv" format="E0" />
+      <output in_use="1" name="USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801"
+              query="COMID=23772801" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801.csv" format="E0" />
+      <output in_use="1" name="USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369"
+              query="COMID=23774369" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369.csv" format="E0" />
+      <output in_use="1" name="USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
+              query="COMID=23772751" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+      <output in_use="1" name="USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513"
+              query="COMID=23773513" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Yearly McKenzie temperature skill assessment" interval ="yearly" >
+      <output in_use="1" name="USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
+            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
+              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429"
+              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
+      <output in_use="1" name="USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405"
+              query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      <output in_use="1" name="USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909"
+              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
+              query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Monthly McKenzie flow skill assessment" interval ="monthly" >
+      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
+              query="COMID=23773363" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
+      <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
+              query="COMID=23773393" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393.csv" format="E0" />
+      <output in_use="1" name="USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359"
+              query="COMID=23773359" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
+      <output in_use="1" name="USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
+              query="COMID=23773037" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
+              query="COMID=23773009" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411"
+              query="COMID=23773411" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
+      <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
+              query="COMID=23773405" value="Q*35.3146667*0.997" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
+              query="COMID=23772909" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857"
+              query="COMID=23772857" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857.csv" format="E0" />
+      <output in_use="1" name="USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801"
+              query="COMID=23772801" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801.csv" format="E0" />
+      <output in_use="1" name="USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369"
+              query="COMID=23774369" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369.csv" format="E0" />
+      <output in_use="1" name="USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
+              query="COMID=23772751" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+      <output in_use="1" name="USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513"
+              query="COMID=23773513" value="Q*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Monthly McKenzie temperature skill assessment" interval ="monthly" >
+      <output in_use="1" name="USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
+            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
+              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429"
+              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
+      <output in_use="1" name="USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405"
+              query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      <output in_use="1" name="USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909"
+              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
+              query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+    </output_group>
+
+<!-- 
+    <output_group name="FLOW BLU analysis" interval="daily" >
+      <output in_use="1" name="Q from 23773403 upstream into BLU outfall reach" query="COMID=23773403" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="Q from 23773407 upstream into BLU outfall reach" query="COMID=23773407" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="Q_UPSTREAM into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOFF into BLU outfall reach" query="COMID=23773405" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM from BLU outfall reach" query="COMID=23773405" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 of BLU outfall reach" query="COMID=23773405" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 in BLU outfall reach" query="COMID=23773405" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="Q from BLU outfall reach" query="COMID=23773405" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="total cms into BLU outfall reach" query="COMID=23773405" value="Q_UPSTREAM + IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="total cms out of BLU outfall reach" query="COMID=23773405" value="Q + (EVAP_MM/1000)*AREA_H2O/86400" type="sum" domain="reach" />
+    </output_group>
+    
+    <output_group name="FLOW McKenzie Ditch analysis" interval="daily" >
+      <output in_use="1" name="23774421 IN_RUNOFF cms" query="COMID=23774421" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="23774421 Q_MIN cms" query="COMID=23774421" value="Q_MIN" type="sum" domain="reach" />
+      <output in_use="1" name="23774421 Q cms" query="COMID=23774421" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 IN_RUNOFF cms" query="COMID=23774417" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 Q_MIN cms" query="COMID=23774417" value="Q_MIN" type="sum" domain="reach" />
+      <output in_use="1" name="23774417 Q cms" query="COMID=23774417" value="Q" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW Clear Lake Springs Daily (cms and m3)" interval="daily" >
+      <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
+      <output in_use="1" name="ET_DAY for HBVCALIB = 46 Clear Lake drainage (mmH2O)" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+    </output_group>
+    
+    <output_group name="FLOW Clear Lake Springs Monthly (cms m3 and mm)" interval="monthly" >
+      <output in_use="1" name="SPRING_CMS for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773373, the outlet of Clear Lake" query="COMID=23773373" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3 for 23773363, the reach below the outlet" query="COMID=23773363" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="SPRING_CMS in m3/day for the whole study area" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="total AREA (m2) of the whole study area" query="1" value="AREA" type="sum" domain="idu" />
+      <output in_use="1" name="ET_DAY for HBVCALIB = 46 Clear Lake drainage (mmH2O)" query="HBVCALIB=46" value="ET_DAY" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie wetland yearly outflows (cms)" interval ="yearly" >
+      <output in_use="1" name="WETL 1 outflow 23765583 McKenzie R outlet 113m elev" query="COMID=23765583" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 2 outflow 23772709 McKenzie R 116m elev" query="COMID=23772709" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 3 outflow 23772721 McKenzie R 118m elev" query="COMID=23772721" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 4-7 outflow 23772727 McKenzie R 120-125m elev" query="COMID=23772727" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 8 outflow 23774181 129m elev" query="COMID=23774181" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 9 outflow 23772731 McKenzie R 129m elev" query="COMID=23772731" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 10-11 outflow 23772737 McKenzie R 131-132m elev" query="COMID=23772737" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 12-14 outflow 23772745 McKenzie R 134-139m elev" query="COMID=23772745" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 15 outflow 23772753 McKenzie R 162m elev" query="COMID=23772753" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 16 outflow 23772765 McKenzie R 148m elev" query="COMID=23772765" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 17 outflow 23774413 Cedar Cr 162m elev" query="COMID=23774413" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 18 outflow 23773619 McGowan Cr 539m elev" query="COMID=23773619" value="Q" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW daily thermal energy 23772751 MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR USGS_14164900" interval ="daily" >
+      <output in_use="1" name="PRECIP mmH2O 23772751 McKenzie R" query="COMID=23772751" value="PRECIP" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O degC 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach" 
+            obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+      <output in_use="1" name="TEMP_AIR degC 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTH m 23772751 McKenzie R" query="COMID=23772751" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="DEPTHMANNG m 23772751 McKenzie R" query="COMID=23772751" value="DEPTHMANNG" type="sum" domain="reach" />
+      <output in_use="1" name="LENGTH m 23772751 McKenzie R" query="COMID=23772751" value="LENGTH" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 23772751 McKenzie R" query="COMID=23772751" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23772751 McKenzie R" query="COMID=23772751" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="outflow Q cfs 23772751 McKenzie R gage 14164900" query="COMID=23772751" value="Q*35.315" type="sum" domain="reach" 
+              obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+      <output in_use="1" name="TURNOVER 23772751 McKenzie R" query="COMID=23772751" value="TURNOVER" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie daily thermal energy 23774077" interval ="daily" >
+      <output in_use="1" name="PRECIP mmH2O 23774077 McKenzie R" query="COMID=23774077" value="PRECIP" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O degC 23774077 McKenzie R" query="COMID=23774077" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_AIR degC 23774077 McKenzie R" query="COMID=23774077" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23774077 McKenzie R" query="COMID=23774077" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 23774077 McKenzie R" query="COMID=23774077" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTH m 23774077 McKenzie R" query="COMID=23774077" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="DEPTHMANNG m 23774077 McKenzie R" query="COMID=23774077" value="DEPTHMANNG" type="sum" domain="reach" />
+      <output in_use="1" name="LENGTH m 23774077 McKenzie R" query="COMID=23774077" value="LENGTH" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 23774077 McKenzie R" query="COMID=23774077" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23774077 McKenzie R" query="COMID=23774077" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="outflow Q cfs 23774077 McKenzie R" query="COMID=23774077" value="Q*35.315" type="sum" domain="reach" />
+      <output in_use="1" name="TURNOVER 23774077 McKenzie R" query="COMID=23774077" value="TURNOVER" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW 23773359 MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRING USGS 14158850" interval ="daily" >
+      <output in_use="1" name="PRECIP mmH2O 23773359 McKenzie R" query="COMID=23773359" value="PRECIP" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O degC 23773359 McKenzie R" query="COMID=23773359" value="TEMP_H2O" type="sum" domain="reach" 
+              obs="..\Observations\McKenzie\USGS_14158850_temp_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
+      <output in_use="1" name="TEMP_AIR degC 23773359 McKenzie R" query="COMID=23773359" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output in_use="1" name="Net radiation in W per m2 23773359 McKenzie R" query="COMID=23773359" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O m2 23773359 McKenzie R" query="COMID=23773359" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTH m 23773359 McKenzie R" query="COMID=23773359" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="DEPTHMANNG m 23773359 McKenzie R" query="COMID=23773359" value="DEPTHMANNG" type="sum" domain="reach" />
+      <output in_use="1" name="LENGTH m 23773359 McKenzie R" query="COMID=23773359" value="LENGTH" type="sum" domain="reach" />
+      <output in_use="1" name="REACH_H2O m3 23773359 McKenzie R" query="COMID=23773359" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="EVAP_MM 23773359 McKenzie R" query="COMID=23773359" value="EVAP_MM" type="sum" domain="reach" />
+      <output in_use="1" name="outflow Q cfs 23773359 McKenzie R" query="COMID=23773359" value="Q*35.315" type="sum" domain="reach"
+              obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
+      <output in_use="1" name="TURNOVER 23773359 McKenzie R" query="COMID=23773359" value="TURNOVER" type="sum" domain="reach" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie wetland daily outflows (cms)" interval ="daily" >
+      <output in_use="1" name="outflow 23774417 McKenzie Ditch into 23774421" query="COMID=23774417" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774431 McKenzie Ditch into 23774421" query="COMID=23774431" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774421 McKenzie Ditch into 23774419" query="COMID=23774421" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774419 McKenzie Ditch into 23774413" query="COMID=23774419" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774441 Cedar Cr into 23774413" query="COMID=23774441" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774413 Cedar Cr into 23774369" query="COMID=23774413" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774369 Cedar Cr into 23774329" query="COMID=23774369" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774329 Cedar Cr into 23772765" query="COMID=23774329" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23772765 McKenzie R into 23772763" query="COMID=23772765" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="outflow 23774107 into 23774113" query="COMID=23774107" value="Q" type="sum" domain="reach" />
+      <output in_use="1" name="WETL 3 outflow 23774113 118m elev" query="COMID=23774113" value="Q" type="sum" domain="reach" />
+    </output_group>
+
+
+    <output_group name="FLOW McKenzie wetland yearly precip (mmH2O)" interval ="yearly" >
+      <output in_use="1" name="WETL 1 precip McKenzie R outlet 113m elev" query="WETL_ID=1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 2 precip McKenzie R 116m elev" query="WETL_ID=2" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 3 precip 118m elev" query="WETL_ID=3" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 4 precip McKenzie R 120m elev" query="WETL_ID=4" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 5 precip McKenzie R 124m elev" query="WETL_ID=5" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 6 precip McKenzie R 123m elev" query="WETL_ID=6" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 7 precip McKenzie R 125m elev" query="WETL_ID=7" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 8 precip 129m elev" query="WETL_ID=8" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 9 precip McKenzie R 129m elev" query="WETL_ID=9" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 10 precip McKenzie R 132m elev" query="WETL_ID=10" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 11 precip McKenzie R 131m elev" query="WETL_ID=11" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 12 precip McKenzie R 134m elev" query="WETL_ID=12" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 13 precip McKenzie R 135m elev" query="WETL_ID=13" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 14 precip McKenzie R 139m elev" query="WETL_ID=14" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 15 precip McKenzie R 162m elev" query="WETL_ID=15" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 16 precip Cedar Cr 149m elev" query="WETL_ID=16"  value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 17 precip Cedar Cr 162m elev" query="WETL_ID=17" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 18 precip McGowan Cr 539m elev" query="WETL_ID=18" value="PRECIP" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie wetland yearly temperature (mmH2O)" interval ="yearly" >
+      <output in_use="1" name="WETL 1 temperature McKenzie R outlet 113m elev" query="WETL_ID=1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 2 temperature McKenzie R 116m elev" query="WETL_ID=2" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 3 temperature 118m elev" query="WETL_ID=3" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 4 temperature McKenzie R 120m elev" query="WETL_ID=4" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 5 temperature McKenzie R 124m elev" query="WETL_ID=5" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 6 temperature McKenzie R 123m elev" query="WETL_ID=6" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 7 temperature McKenzie R 125m elev" query="WETL_ID=7" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 8 temperature 129m elev" query="WETL_ID=8" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 9 temperature McKenzie R 129m elev" query="WETL_ID=9" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 10 temperature McKenzie R 132m elev" query="WETL_ID=10" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 11 temperature McKenzie R 131m elev" query="WETL_ID=11" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 12 temperature McKenzie R 134m elev" query="WETL_ID=12" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 13 temperature McKenzie R 135m elev" query="WETL_ID=13" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 14 temperature McKenzie R 139m elev" query="WETL_ID=14" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 15 temperature McKenzie R 162m elev" query="WETL_ID=15" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 16 temperature Cedar Cr 149m elev" query="WETL_ID=16"  value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 17 temperature Cedar Cr 162m elev" query="WETL_ID=17" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="WETL 18 temperature McGowan Cr 539m elev" query="WETL_ID=18" value="TEMP" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW_McKenzie SLOPE_DEG" interval="yearly" >
+      <output in_use="1" name="SLOPE_DEG" query="1" value="SLOPE_DEG" type="areawtmean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW McKenzie elevations by HBVCALIB" interval="yearly" >
+      <output in_use="1" name="46 Clear Lake" query="HBVCALIB=46" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="8 CGR" query="HBVCALIB=8" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="9 BLU" query="HBVCALIB=9" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="34 McKenzie above Walterville" query="HBVCALIB=34" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="25 Mohawk" query="HBVCALIB=25" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+      <output in_use="1" name="16 McKenzie outlet" query="HBVCALIB=16" value="ELEV_MEAN" type="areawtmean" domain="idu" />
+    </output_group>
+-->
+  </outputs>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+  <outputs>
+    <output_group name="FLOW Q at gage daily" interval="daily" >
+      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773405" value="Q*35.315*0.997" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Q at gage monthly" interval="monthly" >
+      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773405" value="Q*35.315*0.997" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+    </output_group>
+
+  </outputs>

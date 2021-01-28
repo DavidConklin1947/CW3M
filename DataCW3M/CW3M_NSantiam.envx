@@ -1,9 +1,10 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<!-- CW3M_NSantiam.envx -->
+<!-- CW3M_McKenzie.envx -->
 
 <Envision ver='5.0'>
 
   <settings
+    studyAreaName='NSantiam'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'
@@ -35,6 +36,7 @@
     exportDeltas               ='0'
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
+    useWaterYears              ='0'
   />
   <!-- for debugging, to run for just 1 day in each year    maxDaysInYear ='1'
 -->
@@ -43,7 +45,7 @@
 
     <layer
       name         ='IDU'
-      path         ='NSantiam\IDU_NSantiam.shp'
+      path         ='{studyAreaName}\IDU_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,0'
@@ -54,7 +56,7 @@
 	/>
     <layer
   name         ='HRU'
-  path         ='NSantiam\HRU_NSantiam.shp'
+  path         ='{studyAreaName}\HRU_{studyAreaName}.shp'
   type         ='0'
   includeData  ='1'
   color        ='0,0,155'
@@ -66,7 +68,7 @@
 
   <layer
       name         ='Reach'
-      path         ='NSantiam\Reach_NSantiam.shp'
+      path         ='{studyAreaName}\Reach_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,155'
@@ -266,7 +268,7 @@ timing       ='0'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='NSantiam\Flow_NSantiam.xml'
+initInfo     ='Flow.xml'
    />
 
     <!-- Policies are applied here, i.e. after all the APs with timing=0 have run, but before any of the APs with timing=1 begin to run. -->
@@ -393,7 +395,7 @@ timing       ='1'
 freq         ='10'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='NSantiam\Reporter_NSantiam.xml'
+initInfo     ='{studyAreaName}\Reporter_{studyAreaName}.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
@@ -450,7 +452,6 @@ initRunOnStartup  ='0'
                       S C E N A R I O S 
 ===================================================================================
 -->
-
   <scenarios
     climate_scenarios_file='ClimateScenarios.xml' default_climate_scenario='13'
     simulation_scenarios_file='SimulationScenarios.xml' default_simulation_scenario='0'
