@@ -981,12 +981,11 @@ double Reach::LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC) // returns MJ
 } // end of LatentHeadOfEvaporation()
 
 
-void VegCharacteristics(int vegclass, int ageclass, double& height_m, double& overhang_m, double& densityFrac)
+void VegCharacteristics(int vegclass, int ageclass, double * pHeight_m, double * pDensityFrac)
 {
    // ??? placeholder
-   height_m = 10;
-   overhang_m = 2;
-   densityFrac = 0.7;
+   *pHeight_m = 10;
+   *pDensityFrac = 0.7;
 } // end of VegCharacteristics()
 
 
@@ -1002,36 +1001,89 @@ double VegShade(double streamWidth_m, double angleFromBankAcrossStream_deg, doub
 
    double shade_frac_guess = 0.25;
    return(shade_frac_guess);
+
+
 } // end of VegShade()
+
+
+double TopoShade(int jday0, double latitude_deg, double topoelev_e, double topoelev_s, double topoelev_w)
+{
+   return(0.1); // ??? placeholder
+} // end of TopoShade()
+
+
+int RatioIndex(double ratio)
+{
+   int ndx;
+   if (ratio <= 0.01) ndx = 0;
+   else if (ratio <= 0.05) ndx = 1;
+   else if (ratio <= 0.1) ndx = 2;
+   else if (ratio <= 0.2) ndx = 3;
+   else if (ratio <= 0.3) ndx = 4;
+   else if (ratio <= 0.4) ndx = 5;
+   else if (ratio <= 0.5) ndx = 6;
+   else if (ratio <= 0.6) ndx = 7;
+   else if (ratio <= 0.7) ndx = 8;
+   else if (ratio <= 0.8) ndx = 9;
+   else if (ratio <= 0.9) ndx = 10;
+   else if (ratio <= 1.0) ndx = 11;
+   else if (ratio <= 1.25) ndx = 12;
+   else if (ratio <= 1.5) ndx = 13;
+   else ndx = 14;
+
+   return(ndx);
+} // end of RatioIndex()
 
 
 double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
 {
-   ReachSubnode* pSubreach = pReach->GetReachSubnode(subreachNdx);
-   // ??? For now, we're approximating the direction of the subreach by the net direction of the reach itself.
-   double subreach_orientation_deg = 0; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, subreach_orientation_deg);
-   int jday = m_flowContext.dayOfYear;
-   double subreach_width_m = pSubreach->m_subreach_width_m;
-   double veg_height_m = 0; double& rVeg_height_m = veg_height_m;
-   double veg_overhang_m = 0; double& rVeg_overhang_m = veg_overhang_m;
-   double veg_density_frac = 0; double& rVeg_density_frac = veg_density_frac;
-   double shade_frac = 0;
+   int jday0 = m_flowContext.dayOfYear;
+   double topoelev_e; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_E, topoelev_e);
+   double topoelev_s; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_S, topoelev_s);
+   double topoelev_w; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_W, topoelev_w);
+   double latitude_deg = 44.3333; // about 44deg 20' N for the McKenzie basin
+   double topo_transmission_frac = 1. - TopoShade(jday0, latitude_deg, topoelev_e, topoelev_s, topoelev_w);
+   
+   double flow_direction_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, flow_direction_deg);
+   double stream_axis_deg = (flow_direction_deg > 180.) ? flow_direction_deg - 180. : flow_direction_deg;
+   int axis_ndx;
+   if (stream_axis_deg < 67.5) axis_ndx = 0; // NE-SW
+   else if (stream_axis_deg < 112.5) axis_ndx = 1; // E-W
+   else if (stream_axis_deg < 157.5) axis_ndx = 2; // SE-NW
+   else axis_ndx = 3; // S-N
 
-   int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
-   int vegclass_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
-   int ageclass_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
-   VegCharacteristics(vegclass_l, ageclass_l, rVeg_height_m, rVeg_overhang_m, rVeg_density_frac);
-   double angle_from_bank_across_reach_deg = subreach_orientation_deg + 90.;
-   double shade_frac_l = VegShade(subreach_width_m, angle_from_bank_across_reach_deg, veg_height_m, veg_overhang_m, veg_density_frac, jday);
+   double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
+   if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
+   double veg_ht_r_m, veg_ht_l_m, veg_ht_m;
+   double veg_density_r_frac, veg_density_l_frac, veg_density_frac;
 
+   double veg_shade_frac;
    int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
    int vegclass_r = -1;  m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
-   int ageclass_r = -1; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
-   VegCharacteristics(vegclass_r, ageclass_r, rVeg_height_m, rVeg_overhang_m, rVeg_density_frac);
-   angle_from_bank_across_reach_deg = subreach_orientation_deg - 90.;
-   double shade_frac_r = VegShade(subreach_width_m, angle_from_bank_across_reach_deg, veg_height_m, veg_overhang_m, veg_density_frac, jday);
+   int ageclass_r = -1; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colAGECLASS, ageclass_r);
+   VegCharacteristics(vegclass_r, ageclass_r, &veg_ht_r_m, &veg_density_r_frac);
 
-   double sw_shaded_W_m2 = (1 - (shade_frac_l + shade_frac_r)) * SW_unshaded_W_m2;
+   int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
+   if (bank_l_idu_ndx == bank_r_idu_ndx)
+   {
+      veg_ht_m = veg_ht_r_m;
+      veg_density_frac = veg_density_r_frac;
+   }
+   else
+   {
+      int vegclass_l = -1;  m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
+      int ageclass_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass_l);
+      VegCharacteristics(vegclass_l, ageclass_l, &veg_ht_l_m, &veg_density_l_frac);
+      veg_ht_m = (veg_ht_r_m + veg_ht_l_m) / 2.;
+      veg_density_frac = (veg_density_r_frac + veg_density_l_frac) / 2.;
+   }
+
+   double ratio = veg_ht_m / width_m;
+   int ratio_ndx = RatioIndex(ratio);
+   int col_ndx = 1 + axis_ndx * 15 + ratio_ndx;
+   veg_shade_frac = m_SALtable.GetAsDouble(col_ndx, jday0);
+
+   double sw_shaded_W_m2 = topo_transmission_frac * (1. - veg_shade_frac) * SW_unshaded_W_m2;
    if (sw_shaded_W_m2 < 0) sw_shaded_W_m2 = 0;
 
    return(sw_shaded_W_m2);
