@@ -24,6 +24,16 @@
     -->
 
   <outputs>
+    <output_group name="FLOW Q at gage daily" interval="daily" >
+      <output in_use="1" name="Lookout49 adjusted Q (cfs)" query="COMID=23773411" value="Q*35.315*0.983" type="sum" domain="reach"
+      obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Q at gage monthly" interval="monthly" >
+      <output in_use="1" name="Lookout49 adjusted Q (cfs)" query="COMID=23773411" value="Q*35.315*0.983" type="sum" domain="reach"
+      obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
+    </output_group>
+
     <output_group name="FLOW Shade-a-lator comparison" interval="daily" >
       <output name="23772865 RAD_SW_IN (W per m2)" query="COMID=23772865" value="RAD_SW_IN" type="sum" domain="reach" />
       <output name="23772865 WIDTH (m)" query="COMID=23772865" value="WIDTH" type="sum" domain="reach" />
