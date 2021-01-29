@@ -233,7 +233,7 @@
 
      <Spring name="Springs feeding Clear Lake" 
     COMID="23773373"
-    flow_cfs="32"
+    flow_cms="5.7"
      temp_C="4.9"
        />
 
@@ -263,13 +263,13 @@
 
     <Spring name="Springs above Smith R Reservoir"
     COMID="23773393"
-    flow_cfs="4"
+    flow_cms="0.76"
      temp_C="4.9"
        />
 
     <Spring name="Springs above Cougar Reservoir" 
 COMID="23773037"
-flow_cfs="139"
+flow_cms="6.06"
      temp_C="4.9"
        />
 
