@@ -12,4 +12,10 @@
   obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
   </output_group>
 
+  <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
+    <output in_use="1" name="ET from Mohawk25 avg mm/day" query="HBVCALIB=25" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="ET from Mohawk25 avg m3/day" query="HBVCALIB=25" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    <output in_use="1" name="ET from Mohawk25 avg cfs" query="HBVCALIB=25" value="(ET_DAY*Area/1000)/86400" type="sum" domain="idu" />
+  </output_group>
+
 </outputs>

@@ -256,6 +256,7 @@ initRunOnStartup ='0'
   initRunOnStartup ='0'
    />
 
+
 <autonomous_process
 name         ='Flow'
 path         ='Flow.dll'
@@ -339,7 +340,7 @@ initInfo     ='APs.xml'
 dependencies =''
 initRunOnStartup ='0'
    />
-<!--
+
 <autonomous_process
   name         ='LandUseTransitions'
   path         ='APs.dll'
@@ -396,7 +397,7 @@ initInfo     ='Reporter.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
--->
+
 </autonomous_processes>
 
 
