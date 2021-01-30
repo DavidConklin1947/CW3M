@@ -1081,7 +1081,7 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
    double ratio = veg_ht_m / width_m;
    int ratio_ndx = RatioIndex(ratio);
    int col_ndx = 1 + axis_ndx * 15 + ratio_ndx;
-   veg_shade_frac = m_SALtable.GetAsDouble(col_ndx, jday0);
+   veg_shade_frac = 0.25; // m_SALtable.GetAsDouble(col_ndx, jday0);
 
    double sw_shaded_W_m2 = topo_transmission_frac * (1. - veg_shade_frac) * SW_unshaded_W_m2;
    if (sw_shaded_W_m2 < 0) sw_shaded_W_m2 = 0;

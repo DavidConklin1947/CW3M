@@ -325,7 +325,7 @@ initInfo     ='APs.xml'
 dependencies =''
 initRunOnStartup ='0'
    />
-  
+-->  
 <autonomous_process
 name         ='FarmlandRent'
 path         ='APs.dll'
@@ -339,7 +339,7 @@ initInfo     ='APs.xml'
 dependencies =''
 initRunOnStartup ='0'
    />
-
+<!--
 <autonomous_process
   name         ='LandUseTransitions'
   path         ='APs.dll'
