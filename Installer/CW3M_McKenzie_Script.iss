@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CW3M_McKenzie"
-#define MyAppVersion "McKenzie_0.4.6"
+#define MyAppVersion "McKenzie_0.4.7"
 ;#define MyAppVersion "x.x.x"
 #define MyAppPublisher "Oregon Freshwater Simulations, Inc."
 #define MyAppURL "http:/www.freshwatersim.com"
@@ -202,7 +202,7 @@ Source: "{#InputPath}\DataCW3M\PEST_Lookout49\Reach_PEST_Lookout49*"; DestDir: "
 Source: "{#InputPath}\DataCW3M\CW3M_PEST_Smith47.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\PEST_Smith47\FLOWreports_PEST_Smith47.xml"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Smith47"; 
 Source: "{#InputPath}\DataCW3M\PEST_Smith47\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Smith47"; 
-Source: "{#InputPath}\DataCW3M\PEST_Smith47\HRU_PEST_Smith47*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Smith47"; 
+                                                                     Source: "{#InputPath}\DataCW3M\PEST_Smith47\HRU_PEST_Smith47*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Smith47"; 
 Source: "{#InputPath}\DataCW3M\PEST_Smith47\IDU_PEST_Smith47.cpg"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Smith47"; 
 Source: "{#InputPath}\DataCW3M\PEST_Smith47\IDU_PEST_Smith47.dbf"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Smith47"; 
 Source: "{#InputPath}\DataCW3M\PEST_Smith47\IDU_PEST_Smith47.prj"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Smith47"; 

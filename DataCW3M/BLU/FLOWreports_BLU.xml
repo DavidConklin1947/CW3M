@@ -12,4 +12,14 @@
              obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
     </output_group>
 
+    <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
+      <output in_use="1" name="ET from BLU avg mm/day" query="HBVCALIB=49 or HBVCALIB=9" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="ET from BLU avg m3/day" query="HBVCALIB=49 or HBVCALIB=9" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+      <output in_use="1" name="ET from BLU avg cms" query="HBVCALIB=49 or HBVCALIB=9" value="(ET_DAY*Area/1000)/86400" type="sum" domain="idu" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mm)" query="RESOUTFALL=9" value="RES_EVAPMM" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (m3)" query="RESOUTFALL=9" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from the BLU reservoir (mJ)" query="RESOUTFALL=9" value="((RES_EVAPMM/1000)*(RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)"
+              type="sum" domain="reach" />
+    </output_group>
+
   </outputs>
