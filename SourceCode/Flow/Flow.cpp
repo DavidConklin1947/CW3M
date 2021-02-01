@@ -1034,6 +1034,77 @@ int RatioIndex(double ratio)
    return(ndx);
 } // end of RatioIndex()
 
+class TopoSetting
+{
+   TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
+   ~TopoSetting() {};
+
+   double ShadeFrac(int jday);
+   bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
+   double SolarDeclination_deg(int jday, double time_hr);
+   double SolarElev_deg(int jday, double time_hr);
+   double SolarAzimuth_deg(int jday, double time_hr);
+
+   double m_elev_m; // elevation above sea level
+   double m_topoElev_E_deg, m_topoElev_S_deg, m_topoElev_W_deg;
+   double m_lat_deg, m_long_deg;
+}; // end of class TopoSetting
+
+
+double TopoSetting::SolarDeclination_deg(int jday, double time_hr)
+{
+   // from Wikipedia article "Position of the Sun" on 1/28/21
+   double N = jday + (8. + time_hr / 24.); // Number of days since midnight UT as January 1 begins.
+   double declination_radians;
+   double sin_arg_deg = 0.98565 * (N - 2.);
+   double cos_arg_deg = 0.98565 * (N + 10.) + 1.914 * sin(sin_arg_deg * (PI / 180.));
+   
+   declination_radians = -asin(0.39779 * cos(cos_arg_deg * (PI / 180.)));
+   double declination_deg = declination_radians * (180. / PI);
+
+   return(declination_deg);
+} // end of SolarDeclination_deg()
+
+
+double TopoSetting::SolarElev_deg(int jday, double time_hr)
+{
+   double declination_deg = SolarDeclination_deg(jday, time_hr);
+   double solar_elev_deg = declination_deg - m_lat_deg;
+   return(solar_elev_deg);
+} // end of SolarElev_deg()
+
+
+bool TopoSetting::IsTopoShaded(double solarElev_deg, double solarAzimuth_deg)
+{
+   // Interpolate the topographic elevation in the direction of the sun.
+   ASSERT(0. <= solarAzimuth_deg && solarAzimuth_deg < 360.);
+   double topo_elev_N_deg = (m_topoElev_W_deg + m_topoElev_E_deg) / 2.;
+   double topo_elev_deg;
+   if (solarAzimuth_deg < 90.) topo_elev_deg = topo_elev_N_deg + (solarAzimuth_deg / 90.) * (m_topoElev_E_deg - topo_elev_N_deg);
+   else if (solarAzimuth_deg < 180.) topo_elev_deg = m_topoElev_E_deg + ((solarAzimuth_deg - 90.) / 90.) * (m_topoElev_S_deg - m_topoElev_E_deg);
+   else if (solarAzimuth_deg < 270.) topo_elev_deg = m_topoElev_S_deg + ((solarAzimuth_deg - 180.) / 90.) * (m_topoElev_W_deg - m_topoElev_S_deg);
+   else topo_elev_deg = m_topoElev_W_deg + ((solarAzimuth_deg - 270.) / 90.) * (topo_elev_N_deg - m_topoElev_W_deg);
+
+   return(topo_elev_deg >= solarElev_deg);
+} // end of IsTopoShaded()
+
+
+TopoSetting::TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg = 44.21228, double long_deg = -122.25528)
+// 44.21228 N, 122.25528 W is the location of the H.J. Andrews Experimental Forest (44deg 12' 44.2"N, 122deg 15' 19" W)
+{
+   m_elev_m = elev_m;
+   m_topoElev_E_deg = topoElev_E_deg;
+   m_topoElev_S_deg = topoElev_S_deg;
+   m_topoElev_W_deg = topoElev_W_deg;
+   m_lat_deg = lat_deg;
+   m_long_deg = long_deg;
+} // end of TopoSetting constructor
+
+double FlowModel::GetReachTopoShadedSW_W_m2(Reach* pReach, double SW_unshaded_W_m2)
+{
+
+} // end of GetReachTopoShadedSW_W_m2()
+
 
 double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
 {
