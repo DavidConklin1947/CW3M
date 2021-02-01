@@ -1034,6 +1034,7 @@ int RatioIndex(double ratio)
    return(ndx);
 } // end of RatioIndex()
 
+/*x
 class TopoSetting
 {
    TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
@@ -1049,6 +1050,56 @@ class TopoSetting
    double m_topoElev_E_deg, m_topoElev_S_deg, m_topoElev_W_deg;
    double m_lat_deg, m_long_deg;
 }; // end of class TopoSetting
+x*/
+
+double TopoSetting::ShadeFrac(int jday)
+// This is a crude first approximation.
+{
+   double delta_t_min = 15; // timestep in minutes
+   double delta_t_hr = delta_t_min / 60.;
+   double noon_solar_elev_deg = SolarElev_deg(jday, 12.);
+
+   double solar_elev_deg = noon_solar_elev_deg;
+   double time_hr = 12.;
+   while (solar_elev_deg > 0)
+   {
+      time_hr -= delta_t_hr;
+      solar_elev_deg = SolarElev_deg(jday, time_hr);
+   } // end of loop from noon back to dawn
+   double nominal_sunrise = time_hr;
+
+   solar_elev_deg = noon_solar_elev_deg;
+   time_hr = 12.;
+   while (solar_elev_deg > 0.)
+   {
+      time_hr += delta_t_hr;
+      solar_elev_deg = SolarElev_deg(jday, time_hr);
+   } // end of loop from noon ahead to sunset
+   double nominal_sunset = time_hr;
+
+   double nominal_day_length_hr = nominal_sunset - nominal_sunrise;
+
+   // Now determine the shaded part of the day.
+   double shaded_time_hr = 0.;
+   time_hr = nominal_sunrise + delta_t_hr / 2.;
+   solar_elev_deg = 0.;
+   double azimuth_deg;
+   while (time_hr < nominal_sunset)
+   {
+      solar_elev_deg = SolarElev_deg(jday, time_hr);
+      azimuth_deg = SolarAzimuth_deg(jday, time_hr);
+      if (IsTopoShaded(solar_elev_deg, azimuth_deg)) shaded_time_hr += delta_t_hr;
+
+      time_hr += delta_t_hr;
+   } // end of loop from sunrise to sunset
+    
+   double shade_frac = shaded_time_hr / nominal_day_length_hr; // ??? This is a stand-in.
+   // The amount by which the shortwave is reduced by topographic shading is not linear in time.
+   // At low angles from the horizon, the unshaded shortwave is less than at high angles because of the 
+   // longer path through the atmosphere.
+
+   return(shade_frac);
+} // end of ShadeFrac()
 
 
 double TopoSetting::SolarDeclination_deg(int jday, double time_hr)
@@ -1072,6 +1123,29 @@ double TopoSetting::SolarElev_deg(int jday, double time_hr)
    double solar_elev_deg = declination_deg - m_lat_deg;
    return(solar_elev_deg);
 } // end of SolarElev_deg()
+
+
+double TopoSetting::SolarAzimuth_deg(int jday, double time_hr)
+// From Wikipedia "Solar azimuth angle" 2/1/21 and "Solar zenith angle" 2/1/21
+{
+   double delta_radian = SolarDeclination_deg(jday, time_hr) * (PI / 180.);
+   double cos_delta = cos(delta_radian);
+
+   double h_radian = (time_hr * (PI / 12.)); // hour angle
+
+   double phi_radian = m_lat_deg * (PI / 180);
+
+   double cos_theta_s = sin(phi_radian) * sin(delta_radian) + cos(phi_radian) * cos_delta * cos(h_radian);
+   double theta_s_radian = acos(cos_theta_s); // solar zenith angle
+
+
+   double sin_phi_s = -sin(h_radian) * cos(delta_radian) / sin(theta_s_radian);
+   double azimuth_radians = asin(sin_phi_s);
+   double azimuth_deg = azimuth_radians * (180. / PI);
+
+   return(azimuth_deg);
+} // end of SolarAzimuth_deg()
+
 
 
 bool TopoSetting::IsTopoShaded(double solarElev_deg, double solarAzimuth_deg)
@@ -1100,12 +1174,56 @@ TopoSetting::TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S
    m_long_deg = long_deg;
 } // end of TopoSetting constructor
 
+
 double FlowModel::GetReachTopoShadedSW_W_m2(Reach* pReach, double SW_unshaded_W_m2)
 {
-
+   double elev_m2; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachZ_MEAN, elev_m2);
+   double topo_elev_E_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_E, topo_elev_E_deg);
+   double topo_elev_S_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_S, topo_elev_S_deg);
+   double topo_elev_W_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_W, topo_elev_W_deg);
+   TopoSetting topo(elev_m2, topo_elev_E_deg, topo_elev_S_deg, topo_elev_W_deg);
+   double shade_frac = topo.ShadeFrac(m_flowContext.dayOfYear);
+   double shaded_SW_W_m2 = (1. - shade_frac) * SW_unshaded_W_m2;
+   
+   return(shaded_SW_W_m2);
 } // end of GetReachTopoShadedSW_W_m2()
 
 
+double GetVegShadedSW_W_m2(double vegDensityFrac, double ht2widthRatio, double incoming_W_m2)
+{
+   double shade_frac;
+   if (ht2widthRatio == 0.) shade_frac = 0.;
+   else if (ht2widthRatio < 0.5) shade_frac = 0.25;
+   else if (ht2widthRatio < 1.0) shade_frac = 0.5;
+   else shade_frac = 0.75;
+
+   double veg_shaded_SW_W_m2 = incoming_W_m2 * (1. - shade_frac * vegDensityFrac);
+   return(veg_shaded_SW_W_m2);
+} // GetVegShadedSW_W_m2()
+
+
+double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
+{
+   double topo_shaded_W_m2 = GetReachTopoShadedSW_W_m2(pReach, SW_unshaded_W_m2);
+
+//x   double shaded_W_m2 = topo_shaded_W_m2; // ??? This is where we should take the LAI and height of the streambank vegetation into account.
+   double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
+   if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
+   double veg_ht_m;
+   double veg_density_frac;
+
+   int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
+   int vegclass = -1;  m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass);
+   int ageclass = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass);
+   VegCharacteristics(vegclass, ageclass, &veg_ht_m, &veg_density_frac);
+
+   double ht2width_ratio = veg_ht_m / width_m;
+   double shaded_W_m2 = GetVegShadedSW_W_m2(veg_density_frac, ht2width_ratio, topo_shaded_W_m2);
+
+   return(shaded_W_m2);
+} // end of GetSubreachShade_a_lator_W_m2()
+
+/*x
 double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
 {
    int jday0 = m_flowContext.dayOfYear;
@@ -1159,7 +1277,7 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
 
    return(sw_shaded_W_m2);
 } // end of GetSubreachShade_a_lator_W_m2()
-
+x*/
 
 double Reach::GetSubreachViewToSky_frac(int subreachNdx)
 {

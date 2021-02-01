@@ -165,6 +165,7 @@ class Catchment;
 class StateVar;
 class VideoRecorder;
 class ResConstraint;
+class TopoSetting;
 
 #include <MovingAvg.h>
 
@@ -1389,6 +1390,25 @@ public:
 };
 
 
+class TopoSetting // Topographical Setting class
+{
+public:
+   TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
+   ~TopoSetting() {};
+
+   double ShadeFrac(int jday);
+   bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
+   double SolarDeclination_deg(int jday, double time_hr);
+   double SolarElev_deg(int jday, double time_hr);
+   double SolarAzimuth_deg(int jday, double time_hr);
+
+public:
+   double m_elev_m; // elevation above sea level
+   double m_topoElev_E_deg, m_topoElev_S_deg, m_topoElev_W_deg;
+   double m_lat_deg, m_long_deg;
+}; // end of class TopoSetting
+
+
 class FLOWAPI FlowModel
 {
 friend class FlowProcess;
@@ -1478,6 +1498,7 @@ public:
    bool UpdateIDUclimateTemporalAverages(int tau, EnvContext * pContext);
    double MagicReachWaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in reaches.
    double MagicHRUwaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in HRUs.
+   double GetReachTopoShadedSW_W_m2(Reach* pReach, double SW_unshaded_W_m2);
    double GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreach_ndx, double SW_unshaded_W_m2);
    bool DumpReachInsolationData(int downstreamCOMID, int upstreamCOMID, double startingRiver_km);
 
