@@ -965,6 +965,16 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
       pScenario->m_shadeAlatorData.m_comid_downstream = comid;
       pXmlScenario->Attribute("upstream_comid", &comid);
       pScenario->m_shadeAlatorData.m_comid_upstream = comid;
+      const char* output_file_name = pXmlScenario->Attribute("Shade-A-Lator_output_file");
+      pScenario->m_shadeAlatorData.m_output_file_name = (output_file_name == NULL) ? CString("") : CString(output_file_name);
+
+      // Example: SAL_start_year = "2019" SAL_start_month = "11" SAL_start_day = "1" >
+      int SAL_start_year;  pXmlScenario->Attribute("SAL_start_year", &SAL_start_year);
+      int SAL_start_month;  pXmlScenario->Attribute("SAL_start_month", &SAL_start_month);
+      int SAL_start_day;  pXmlScenario->Attribute("SAL_start_day", &SAL_start_day);
+      pScenario->m_shadeAlatorData.m_startYear = SAL_start_year;
+      pScenario->m_shadeAlatorData.m_startMonth = SAL_start_month;
+      pScenario->m_shadeAlatorData.m_startDay = SAL_start_day;
 
       //NormalizeWeights( pScenario->m_actorAltruismWt, pScenario->m_actorSelfInterestWt, pScenario->m_policyPrefWt );
       TiXmlNode *pXmlDescNode = pXmlScenarioNode->FirstChild( "description" );

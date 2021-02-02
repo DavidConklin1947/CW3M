@@ -8,6 +8,7 @@
 #endif
 #include "EnvContext.h"
 #include "tixml.h"
+#include "FDATAOBJ.H"
 
 class ScenarioManager;
 class AppVar;
@@ -141,12 +142,17 @@ public:
 class Shade_a_latorData
 {
 public:
-   Shade_a_latorData() { m_input_file_name = CString(""); m_comid_downstream = 0; };
+   Shade_a_latorData() { m_input_file_name = CString(""); m_comid_downstream = 0; m_output_file_name = CString(""); };
    ~Shade_a_latorData() {};
 public:
    CString m_input_file_name;
    int m_comid_downstream;
    int m_comid_upstream;
+   CString m_output_file_name;
+   FDataObj m_SALoutputData;
+   int m_startYear;
+   int m_startMonth;
+   int m_startDay;
 }; // end of class Shade_a_latorData
 
 

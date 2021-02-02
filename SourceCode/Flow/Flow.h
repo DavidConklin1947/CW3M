@@ -1875,6 +1875,7 @@ public:
    int m_colReachBANK_R_IDU; // IDU index of IDU representative of the right bank of the reach
 
    int m_colReachWIDTHGIVEN;
+   int m_colReachRADSWGIVEN;
    int m_colReachTOPOELEV_E;
    int m_colReachTOPOELEV_S;
    int m_colReachTOPOELEV_W;

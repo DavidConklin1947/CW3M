@@ -1034,23 +1034,6 @@ int RatioIndex(double ratio)
    return(ndx);
 } // end of RatioIndex()
 
-/*x
-class TopoSetting
-{
-   TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
-   ~TopoSetting() {};
-
-   double ShadeFrac(int jday);
-   bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
-   double SolarDeclination_deg(int jday, double time_hr);
-   double SolarElev_deg(int jday, double time_hr);
-   double SolarAzimuth_deg(int jday, double time_hr);
-
-   double m_elev_m; // elevation above sea level
-   double m_topoElev_E_deg, m_topoElev_S_deg, m_topoElev_W_deg;
-   double m_lat_deg, m_long_deg;
-}; // end of class TopoSetting
-x*/
 
 double TopoSetting::ShadeFrac(int jday)
 // This is a crude first approximation.
@@ -1206,7 +1189,6 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
 {
    double topo_shaded_W_m2 = GetReachTopoShadedSW_W_m2(pReach, SW_unshaded_W_m2);
 
-//x   double shaded_W_m2 = topo_shaded_W_m2; // ??? This is where we should take the LAI and height of the streambank vegetation into account.
    double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
    if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
    double veg_ht_m;
@@ -1223,61 +1205,6 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
    return(shaded_W_m2);
 } // end of GetSubreachShade_a_lator_W_m2()
 
-/*x
-double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
-{
-   int jday0 = m_flowContext.dayOfYear;
-   double topoelev_e; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_E, topoelev_e);
-   double topoelev_s; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_S, topoelev_s);
-   double topoelev_w; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_W, topoelev_w);
-   double latitude_deg = 44.3333; // about 44deg 20' N for the McKenzie basin
-   double topo_transmission_frac = 1. - TopoShade(jday0, latitude_deg, topoelev_e, topoelev_s, topoelev_w);
-   
-   double flow_direction_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, flow_direction_deg);
-   double stream_axis_deg = (flow_direction_deg > 180.) ? flow_direction_deg - 180. : flow_direction_deg;
-   int axis_ndx;
-   if (stream_axis_deg < 67.5) axis_ndx = 0; // NE-SW
-   else if (stream_axis_deg < 112.5) axis_ndx = 1; // E-W
-   else if (stream_axis_deg < 157.5) axis_ndx = 2; // SE-NW
-   else axis_ndx = 3; // S-N
-
-   double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
-   if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
-   double veg_ht_r_m, veg_ht_l_m, veg_ht_m;
-   double veg_density_r_frac, veg_density_l_frac, veg_density_frac;
-
-   double veg_shade_frac;
-   int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
-   int vegclass_r = -1;  m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
-   int ageclass_r = -1; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colAGECLASS, ageclass_r);
-   VegCharacteristics(vegclass_r, ageclass_r, &veg_ht_r_m, &veg_density_r_frac);
-
-   int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
-   if (bank_l_idu_ndx == bank_r_idu_ndx)
-   {
-      veg_ht_m = veg_ht_r_m;
-      veg_density_frac = veg_density_r_frac;
-   }
-   else
-   {
-      int vegclass_l = -1;  m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
-      int ageclass_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass_l);
-      VegCharacteristics(vegclass_l, ageclass_l, &veg_ht_l_m, &veg_density_l_frac);
-      veg_ht_m = (veg_ht_r_m + veg_ht_l_m) / 2.;
-      veg_density_frac = (veg_density_r_frac + veg_density_l_frac) / 2.;
-   }
-
-   double ratio = veg_ht_m / width_m;
-   int ratio_ndx = RatioIndex(ratio);
-   int col_ndx = 1 + axis_ndx * 15 + ratio_ndx;
-   veg_shade_frac = 0.25; // m_SALtable.GetAsDouble(col_ndx, jday0);
-
-   double sw_shaded_W_m2 = topo_transmission_frac * (1. - veg_shade_frac) * SW_unshaded_W_m2;
-   if (sw_shaded_W_m2 < 0) sw_shaded_W_m2 = 0;
-
-   return(sw_shaded_W_m2);
-} // end of GetSubreachShade_a_lator_W_m2()
-x*/
 
 double Reach::GetSubreachViewToSky_frac(int subreachNdx)
 {
@@ -3217,6 +3144,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_R_IDU, _T("BANK_R_IDU"), TYPE_INT, CC_AUTOADD);
 
    m_pReachLayer->CheckCol(m_colReachWIDTHGIVEN, "WIDTHGIVEN", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachRADSWGIVEN, "RADSWGIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachTOPOELEV_E, "TOPOELEV_E", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachTOPOELEV_S, "TOPOELEV_S", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachTOPOELEV_W, "TOPOELEV_W", TYPE_DOUBLE, CC_AUTOADD);
@@ -3833,15 +3761,33 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       }
    } // end of logic for years to run = 0
 
-   // If there is a Shade-a-lator input file, process it.
+   // If there are Shade-a-lator files, process them.
+   m_pReachLayer->SetColDataU(m_colReachRADSWGIVEN, 0);
    Scenario * pSimulationScenario = pEnvContext->pEnvModel->GetScenario();
+
+   CString SAL_output_data_file_name = pSimulationScenario->m_shadeAlatorData.m_output_file_name;
+   ::ApplySubstituteStrings(SAL_output_data_file_name, pEnvContext->m_substituteStrings);
+   CString SAL_output_data_path;
+   bool SAL_output_data_path_ok = !SAL_output_data_file_name.IsEmpty();
+   if (!SAL_output_data_path_ok) Report::LogMsg("FlowModel::InitRun() m_shadeAlatorData.m_output_file_name is empty.");
+   SAL_output_data_path_ok = SAL_output_data_path_ok && (PathManager::FindPath(SAL_output_data_file_name, SAL_output_data_path) >= 0);
+   int data_rows = 0;
+   if (SAL_output_data_path_ok)
+   {
+      data_rows = pSimulationScenario->m_shadeAlatorData.m_SALoutputData.ReadAscii(SAL_output_data_path);
+      CString msg;
+      msg.Format("FlowModel::InitRun() Shade-a-lator output data file = %s, data_rows = %d",
+         SAL_output_data_path.GetString(), data_rows);
+      Report::LogMsg(msg);
+   }
+
    CString input_file_name = pSimulationScenario->m_shadeAlatorData.m_input_file_name;
    ::ApplySubstituteStrings(input_file_name, pEnvContext->m_substituteStrings);
    CString input_path;
    bool input_path_ok = !input_file_name.IsEmpty();
    if (!input_path_ok) Report::LogMsg("FlowModel::InitRun() m_shadeAlatorData.m_input_file_name is empty.");
    input_path_ok = input_path_ok && (PathManager::FindPath(input_file_name, input_path) >= 0);
-   int data_rows = 0;
+   data_rows = 0;
    if (input_path_ok) 
    { // Process the Shade-a-lator input file.
       FDataObj * pData = new FDataObj;
