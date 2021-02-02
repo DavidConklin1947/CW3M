@@ -11,6 +11,14 @@
   <const name="gal_per_ccf" value="748.052" />
   <const name="inches_per_mm" value="0.039370" />
   <const name="ft_per_m" value="3.28084" />
+
+  <output_group name="REP Mohawk25 water budget" >
+    <output name="ET_yr (mm H2O) Mohawk25" query="HBVCALIB=25" value="GET_yr" type="areaWtMean" />
+    <output name="GWMUNALL_Y (cms) Mohawk25" query="HBVCALIB=25" value="GWMUNALL_Y" type="sum" />
+    <output name="SWMUNALL_Y (cms) Mohawk25" query="HBVCALIB=25" value="SWMUNALL_Y" type="sum" />
+    <output name="IRRALAF_Y (ac-ft) Mohawk25" query="HBVCALIB=25" value="IRRALAF_Y" type="sum" />
+    <output name="IRRALLO_Y (mm H2O) Mohawk25" query="HBVCALIB=25" value="IRRALLO_Y" type="sum" />
+  </output_group>
 <!--
   <output_group name="REP McKenzie wetland elevations (m ASL)" >
     <output name="WETL 1 ELEV_MEAN McKenzie R outlet 113m elev" query="WETL_ID=1" value="ELEV_MEAN" type="areaWtMean" />

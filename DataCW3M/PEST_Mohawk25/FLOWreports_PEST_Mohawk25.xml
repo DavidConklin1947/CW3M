@@ -18,15 +18,22 @@
     <output in_use="1" name="ET from Mohawk25 avg cfs" query="HBVCALIB=25" value="(ET_DAY*Area/1000)/86400" type="sum" domain="idu" />
   </output_group>
 
-  <output_group name="Mohawk25 water budget" interval="yearly" >
-    <output name="SNOWPACK (mm SWE)" query="HBVCALIB=25" value="SNOWPACK" type="areaWtMean" domain="idu" />
-    <output name="MELTBOX (mm H2O)" query="HBVCALIB=25" value="MELT_BOX" type="areaWtMean" domain="idu" />
-    <output name="NAT_SOIL (mm H2O)" query="HBVCALIB=25" value="NAT_SOIL" type="areaWtMean" domain="idu" />
-    <output name="IRRIG_SOIL (mm H2O)" query="HBVCALIB=25" value="IRRIG_SOIL" type="areaWtMean" domain="idu" />
-    <output name="GW_FASTBOX (mm H2O)" query="HBVCALIB=25" value="GW_FASTBOX" type="areaWtMean" domain="idu" />
-    <output name="GW_SLOWBOX (mm H2O)" query="HBVCALIB=25" value="GW_SLOWBOX" type="areaWtMean" domain="idu" />
+  <output_group name="FLOW Mohawk25 water budget" interval="yearly" >
     <output name="PRECIP (mm H2O)" query="HBVCALIB=25" value="PRECIP" type="areaWtMean" domain="idu" />
-
+    <output name="SNOW_EVAP (mm SWE)" query="HBVCALIB=25" value="SNOW_EVAP" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="ET from HBVCALIB 25 Mohawk mm" query="HBVCALIB=25" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output name="SPRING_CMS" query="HBVCALIB=25" value="SPRING_CMS" type="sum" domain="reach" />
+    <output name="ADDED_VOL (m3)" query="HBVCALIB=25" value="ADDED_VOL" type="sum" domain="reach" />
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773513" value="Q*35.315*0.989" type="sum" domain="reach"
+  obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
   </output_group>
-
+<!--
+  <output name="SNOWPACK (mm SWE)" query="HBVCALIB=25" value="SNOWPACK" type="areaWtMean" domain="hru" />
+  <output name="MELTBOX (mm H2O)" query="HBVCALIB=25" value="MELT_BOX" type="areaWtMean" domain="hru" />
+  <output name="NAT_SOIL (mm H2O)" query="HBVCALIB=25" value="NAT_SOIL" type="areaWtMean" domain="hru" />
+  <output name="IRRIG_SOIL (mm H2O)" query="HBVCALIB=25" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
+  <output name="GW_FASTBOX (mm H2O)" query="HBVCALIB=25" value="GW_FASTBOX" type="areaWtMean" domain="hru" />
+  <output name="GW_SLOWBOX (mm H2O)" query="HBVCALIB=25" value="GW_SLOWBOX" type="areaWtMean" domain="hru" />
+  <output name="ADDED_CMS" query="HBVCALIB=25" value="ADDED_CMS" type="sum" domain="reach" />
+-->
 </outputs>
