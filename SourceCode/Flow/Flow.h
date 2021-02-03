@@ -1396,11 +1396,11 @@ public:
    TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
    ~TopoSetting() {};
 
-   double ShadeFrac(int jday);
+   double ShadeFrac(int jday0);
    bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
-   double SolarDeclination_deg(int jday, double time_hr);
-   double SolarElev_deg(int jday, double time_hr);
-   double SolarAzimuth_deg(int jday, double time_hr);
+   double SolarDeclination_deg(int jday0);
+   double SolarElev_deg(int jday0, double time_hr);
+   double SolarAzimuth_deg(int jday0, double time_hr);
 
 public:
    double m_elev_m; // elevation above sea level

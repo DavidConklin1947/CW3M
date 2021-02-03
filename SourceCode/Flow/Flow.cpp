@@ -1085,33 +1085,48 @@ double TopoSetting::ShadeFrac(int jday)
 } // end of ShadeFrac()
 
 
-double TopoSetting::SolarDeclination_deg(int jday, double time_hr)
+double TopoSetting::SolarDeclination_deg(int jday0)
 {
-   // from Wikipedia article "Position of the Sun" on 1/28/21
-   double N = jday + (8. + time_hr / 24.); // Number of days since midnight UT as January 1 begins.
-   double declination_radians;
-   double sin_arg_deg = 0.98565 * (N - 2.);
-   double cos_arg_deg = 0.98565 * (N + 10.) + 1.914 * sin(sin_arg_deg * (PI / 180.));
-   
-   declination_radians = -asin(0.39779 * cos(cos_arg_deg * (PI / 180.)));
-   double declination_deg = declination_radians * (180. / PI);
+   // from Wikipedia article "Position of the Sun" on 2/3/21
+   double N_day = jday0; // Jan 1 = 0
+   // First approximation
+   // declination_deg = -23.44deg * cos((360deg/365days) * (N_days + 10days))
+   double arg_for_cos_deg = (360. / 365.) * (N_day + 10.);
+   double arg1_for_cos_radian = arg_for_cos_deg * PI / 180.;
+   double declination1_deg = -23.44 * cos(arg1_for_cos_radian);
 
-   return(declination_deg);
+   // Second approximation
+   // declination_deg = asin(sin(-23.44deg) * 
+   //    cos((360deg/365.24days)*(N_day + 10) + (360deg/PI) *  0.0167 * sin((360deg/365.24day)*(N_day - 2))))
+   const double W = 360. / 365.24; // mean angular orbital velocity in degrees per day 
+   double axial_tilt_deg = 23.44;
+   double axial_tilt_radian = axial_tilt_deg * PI / 180.;
+   double time_since_perihelion_day = N_day - 2.;
+   double arg_for_sin_deg = W * time_since_perihelion_day;
+   double arg_for_sin_radian = arg_for_sin_deg * PI / 180.;
+   double arg2_for_cos_deg = W * (N_day + 10.) + W * 0.0167 * sin(arg_for_sin_radian);
+   double arg2_for_cos_radian = arg2_for_cos_deg * PI / 180.;
+   double arg_for_asin = sin(-axial_tilt_radian) * cos(arg2_for_cos_radian);
+   double declination2_radian = asin(arg_for_asin);
+   double declination2_deg = (180. / PI) * declination2_radian;
+
+   return(declination2_deg);
 } // end of SolarDeclination_deg()
 
 
-double TopoSetting::SolarElev_deg(int jday, double time_hr)
+double TopoSetting::SolarElev_deg(int jday0, double time_hr)
 {
-   double declination_deg = SolarDeclination_deg(jday, time_hr);
-   double solar_elev_deg = declination_deg - m_lat_deg;
-   return(solar_elev_deg);
+   double declination_deg = SolarDeclination_deg(jday0);
+   double solar_elev_at_equator_deg = 90. - abs(declination_deg);
+   double solar_elev_in_northern_hemisphere_deg = solar_elev_at_equator_deg - m_lat_deg;
+   return(solar_elev_in_northern_hemisphere_deg);
 } // end of SolarElev_deg()
 
 
 double TopoSetting::SolarAzimuth_deg(int jday, double time_hr)
 // From Wikipedia "Solar azimuth angle" 2/1/21 and "Solar zenith angle" 2/1/21
 {
-   double delta_radian = SolarDeclination_deg(jday, time_hr) * (PI / 180.);
+   double delta_radian = SolarDeclination_deg(jday); // ???
    double cos_delta = cos(delta_radian);
 
    double h_radian = (time_hr * (PI / 12.)); // hour angle
