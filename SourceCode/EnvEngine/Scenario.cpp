@@ -972,9 +972,10 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
       int SAL_start_year;  pXmlScenario->Attribute("SAL_start_year", &SAL_start_year);
       int SAL_start_month;  pXmlScenario->Attribute("SAL_start_month", &SAL_start_month);
       int SAL_start_day;  pXmlScenario->Attribute("SAL_start_day", &SAL_start_day);
-      pScenario->m_shadeAlatorData.m_startYear = SAL_start_year;
-      pScenario->m_shadeAlatorData.m_startMonth = SAL_start_month;
-      pScenario->m_shadeAlatorData.m_startDay = SAL_start_day;
+      pScenario->m_shadeAlatorData.m_startDate = SYSDATE(SAL_start_month, SAL_start_day, SAL_start_year);
+//x      pScenario->m_shadeAlatorData.m_startYear = SAL_start_year;
+//x      pScenario->m_shadeAlatorData.m_startMonth = SAL_start_month;
+//x      pScenario->m_shadeAlatorData.m_startDay = SAL_start_day;
 
       //NormalizeWeights( pScenario->m_actorAltruismWt, pScenario->m_actorSelfInterestWt, pScenario->m_policyPrefWt );
       TiXmlNode *pXmlDescNode = pXmlScenarioNode->FirstChild( "description" );

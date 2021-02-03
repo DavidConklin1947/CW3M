@@ -148,11 +148,12 @@ public:
    CString m_input_file_name;
    int m_comid_downstream;
    int m_comid_upstream;
+   int m_reachCt;
+   double m_reachesLength_m;
    CString m_output_file_name;
    FDataObj m_SALoutputData;
-   int m_startYear;
-   int m_startMonth;
-   int m_startDay;
+   SYSDATE m_startDate;
+   int m_numCols;
 }; // end of class Shade_a_latorData
 
 
