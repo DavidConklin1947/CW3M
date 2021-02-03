@@ -356,7 +356,7 @@
     Shade-A-Lator_input_file="Shade_a_latorData\cc_input_Data.csv"
     downstream_comid="23765583"
     upstream_comid="23772871"
-    Shade-A-Lator_output_file="Shade_a_latorData\cc36_kcal.csv" 
+    Shade-A-Lator_output_file="Shade_a_latorData\cc36_kcal_transposed.csv" 
     SAL_start_year="2019" SAL_start_month="11" SAL_start_day="1" >
 
     <description>
