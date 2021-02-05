@@ -82,6 +82,54 @@ int GetJulianDay(int month, int calDay, int year, int maxDaysInYear) // Returns 
 } // end of int GetJulianDay(int month, int calDay, int year, int maxDaysInYear)
 
 
+bool DateComesBefore(SYSDATE date1, SYSDATE date2)
+{
+   if (date1.year < date2.year) return(true);
+   if (date1.year > date2.year) return(false);
+
+   if (date1.month < date2.month) return(true);
+   if (date1.month > date2.month) return(false);
+
+   if (date1.day < date2.day) return(true);
+   return(false);
+} // end of DateComesBefore()
+
+
+int DaysBetweenDates(SYSDATE date1, SYSDATE date2)
+{
+   if (date1.month == date2.month && date1.day == date2.day && date1.year == date2.year) return(0);
+
+   SYSDATE first_date, last_date;
+   int sign;
+   if (DateComesBefore(date1, date2))
+   {
+      first_date = date1;
+      last_date = date2;
+      sign = 1;
+   }
+   else
+   {
+      first_date = date2;
+      last_date = date1;
+      sign = -1;
+   }
+
+   int first_jday = GetJulianDay(first_date.month, first_date.day, first_date.year, 366);
+   int last_jday = GetJulianDay(last_date.month, last_date.day, last_date.year, 366);
+
+   int days_between = -first_jday;
+   int year = first_date.year;
+   while (year < last_date.year)
+   {
+      days_between += GetDaysInCalendarYear(year);
+      year++;
+   }
+   days_between += last_jday;
+
+   return(days_between * sign);
+} // end of DaysBetweenDates()
+
+
 BOOL GetCalDate0(int jday0, int *pMonth, int *pCalDay, int daysInYear)
 {
    if (!((daysInYear == 365 || daysInYear == 366 || daysInYear == 360) && (jday0 >= 0 && jday0 < daysInYear)))

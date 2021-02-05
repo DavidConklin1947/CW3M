@@ -154,6 +154,7 @@ using namespace std;
 //--------------------------------------------------------------------------------------------------
 
 class WaterParcel;
+class Shade_a_latorData;
 class Reach;
 class Reservoir;
 class HRULayer;
@@ -1500,7 +1501,7 @@ public:
    double MagicHRUwaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in HRUs.
    double GetReachTopoShadedSW_W_m2(Reach* pReach, double SW_unshaded_W_m2);
    double GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreach_ndx, double SW_unshaded_W_m2);
-   bool DumpReachInsolationData(int downstreamCOMID, int upstreamCOMID, double startingRiver_km);
+   bool DumpReachInsolationData(Shade_a_latorData* pSAL);
 
    FDataObj m_SALtable; // Shade-a-lator table 366 rows (jday0) x 61 columns (jday0 + 4 directions x 15 veg ht / stream width ratios)
    // The value in the SALtable is the %shade on jday given a veg ht:stream width ratio and a stream axis direction from NE-SW, E-W, SE-NW, S-N

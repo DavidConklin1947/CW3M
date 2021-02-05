@@ -9,6 +9,7 @@
 #include "EnvContext.h"
 #include "tixml.h"
 #include "FDATAOBJ.H"
+#include "Flow\Flow.h"
 
 class ScenarioManager;
 class AppVar;
@@ -147,7 +148,10 @@ public:
 public:
    CString m_input_file_name;
    int m_comid_downstream;
+   Reach* m_pReach_downstream;
    int m_comid_upstream;
+   double m_riverKmAtUpperEnd; // river km at upstream end of upstream reach
+   Reach* m_pReach_upstream;
    int m_reachCt;
    double m_reachesLength_m;
    CString m_output_file_name;

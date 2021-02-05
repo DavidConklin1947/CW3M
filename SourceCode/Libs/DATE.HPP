@@ -18,15 +18,18 @@ const int JD_INVALID_YEAR  = -3;
 
 
 //-- Prototypes. ----------------------------------------------------
+class SYSDATE;
 
    //-- Time methods. -----------------------------------------------
    int  LIBSAPI GetDaysInMonth0( int month0, int daysInYear );
    int  LIBSAPI GetDaysInCalendarMonth(int calendarMonth, int calendarYear);
    int  LIBSAPI GetDaysInCalendarYear(int calendarYear);
    int  LIBSAPI GetJulianDay ( int month, int calDay, int year, int maxDaysInYear );
+   int LIBSAPI DaysBetweenDates(SYSDATE date1, SYSDATE date2);
 
    BOOL LIBSAPI GetCalDate(int julDay, int *pYear, int *pMonth, int *pCalDay, BOOL updateYear);
    BOOL LIBSAPI GetCalDate0(int jday0, int *pMonth, int *pCalDay, int daysInYear);
+   bool LIBSAPI DateComesBefore(SYSDATE date1, SYSDATE date2);
 
 
 #ifndef NO_MFC
