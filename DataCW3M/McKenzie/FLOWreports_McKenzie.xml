@@ -103,18 +103,24 @@
              obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
     </output_group>
     <output_group name="FLOW Shade-a-lator comparison" interval="daily" >
+      <output name="23772865 DIRECTION (deg)" query="COMID=23772865" value="DIRECTION" type="sum" domain="reach" />
+      <output name="23772865 RAD_SW (W per m2)" query="COMID=23772865" value="RAD_SW" type="sum" domain="reach" />
       <output name="23772865 RAD_SW_IN (W per m2)" query="COMID=23772865" value="RAD_SW_IN" type="sum" domain="reach" />
       <output name="23772865 RADSWGIVEN (W per m2)" query="COMID=23772865" value="RADSWGIVEN" type="sum" domain="reach" />
       <output name="23772865 WIDTH (m)" query="COMID=23772865" value="WIDTH" type="sum" domain="reach" />
       <output name="23772865 WIDTHGIVEN (m)" query="COMID=23772865" value="WIDTHGIVEN" type="sum" domain="reach" />
       <output name="23772865 LENGTH (m)" query="COMID=23772865" value="LENGTH" type="sum" domain="reach" />
       <output name="23772865 DEPTH (m)" query="COMID=23772865" value="DEPTH" type="sum" domain="reach" />
+      <output name="23772863 DIRECTION (deg)" query="COMID=23772863" value="DIRECTION" type="sum" domain="reach" />
+      <output name="23772863 RAD_SW (W per m2)" query="COMID=23772863" value="RAD_SW" type="sum" domain="reach" />
       <output name="23772863 RAD_SW_IN (W per m2)" query="COMID=23772863" value="RAD_SW_IN" type="sum" domain="reach" />
       <output name="23772863 RADSWGIVEN (W per m2)" query="COMID=23772863" value="RADSWGIVEN" type="sum" domain="reach" />
       <output name="23772863 WIDTH (m)" query="COMID=23772863" value="WIDTH" type="sum" domain="reach" />
       <output name="23772863 WIDTHGIVEN (m)" query="COMID=23772863" value="WIDTHGIVEN" type="sum" domain="reach" />
       <output name="23772863 LENGTH (m)" query="COMID=23772863" value="LENGTH" type="sum" domain="reach" />
       <output name="23772863 DEPTH (m)" query="COMID=23772863" value="DEPTH" type="sum" domain="reach" />
+      <output name="23772861 DIRECTION (deg)" query="COMID=23772861" value="DIRECTION" type="sum" domain="reach" />
+      <output name="23772861 RAD_SW (W per m2)" query="COMID=23772861" value="RAD_SW" type="sum" domain="reach" />
       <output name="23772861 RAD_SW_IN (W per m2)" query="COMID=23772861" value="RAD_SW_IN" type="sum" domain="reach" />
       <output name="23772861 RADSWGIVEN (W per m2)" query="COMID=23772861" value="RADSWGIVEN" type="sum" domain="reach" />
       <output name="23772861 WIDTH (m)" query="COMID=23772861" value="WIDTH" type="sum" domain="reach" />

@@ -3144,6 +3144,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_IN, _T("RAD_SW_IN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachAREA_H2O, _T("AREA_H2O"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachWIDTH, _T("WIDTH"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachDEPTH, _T("DEPTH"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachDEPTHMANNG, _T("DEPTHMANNG"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTURNOVER, _T("TURNOVER"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_D, _T("XFLUX_D"), TYPE_FLOAT, CC_AUTOADD);
@@ -3528,6 +3529,7 @@ bool FlowModel::DumpReachInsolationData(Shade_a_latorData* pSAL)
 
    } // end of while (!done)
 
+   return(true);
 } // end of DumpReachInsolationData(pSALdata)
 
 void FlowModel::SummarizeIDULULC()
@@ -5420,32 +5422,64 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
       // Now we have assured that the upstream segment goes at least as far upstream as the current reach.
 
       // For each reach, average the Shade-a-lator data over all the segments which overlap it.
-      while (pReach != NULL)
+      double below_the_bottom_m = 0.;
+      double reach_kcal = 0.;
+      float seg_kcal = 0.;
+      double segment_len_m = 0.;
+//x      double leftover_kcal = 0.;
+      while (pReach != NULL && row < data_rows)
       {
-         double reach_kcal = 0.;
          double frac_of_reach = 0.;
-         while (frac_of_reach < 1.)
+         reach_kcal = 0; 
+//x         reach_kcal = leftover_kcal;
+//x         leftover_kcal = 0.;
+         while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows) // frac_of_reach < 1. && row < data_rows)
          {
-            double segment_len_m = ((double)segment_upstream_end_km - (double)segment_downstream_end_km) * 1000.;
+            segment_len_m = ((double)segment_upstream_end_km - (double)segment_downstream_end_km) * 1000.;
             // What part of this segment overlaps the current reach?
             double over_the_top_m = (segment_upstream_end_km > reach_upstream_end_km) ?
                (segment_upstream_end_km - reach_upstream_end_km) * 1000. : 0;
-            double below_the_bottom_m = (segment_downstream_end_km < reach_downstream_end_km) ?
+            below_the_bottom_m = (segment_downstream_end_km < reach_downstream_end_km) ?
                (reach_downstream_end_km - segment_downstream_end_km) * 1000. : 0;
             double overlap_m = segment_len_m - over_the_top_m - below_the_bottom_m;
-               
-            float seg_kcal; pData->Get(tgt_col, row, seg_kcal); 
-            reach_kcal += (overlap_m / segment_len_m) * seg_kcal;
-
-            frac_of_reach += overlap_m / pReach->m_length;
-            if (frac_of_reach < 1.)
+            if (overlap_m > 0.)
             {
-               segment_upstream_end_km = segment_downstream_end_km;
-               row++;
-               pData->Get(0, row, segment_downstream_end_km);
+               pData->Get(tgt_col, row, seg_kcal);
+               double seg_contrib_to_reach_kcal = (overlap_m / segment_len_m) * seg_kcal;
+               reach_kcal += seg_contrib_to_reach_kcal;
+               frac_of_reach += overlap_m / pReach->m_length;
             }
-         } // end of while (frac_of_reach < 1.)
 
+            if (segment_downstream_end_km >= reach_downstream_end_km) // (frac_of_reach < 1.)
+            { // The downstream end of this segment is within the reach
+               ASSERT(below_the_bottom_m == 0.);
+               row++;
+               ASSERT(row <= data_rows);
+               segment_upstream_end_km = segment_downstream_end_km;
+               if (row < data_rows) pData->Get(0, row, segment_downstream_end_km);
+               else segment_downstream_end_km = segment_upstream_end_km;
+            }
+            else break; // Go on to the next reach without advancing to the next segment.
+/*x
+            { // The downstream end of this segment is below the downstream end of the reach.
+               // Go on to the next reach without advancing to the next segment.
+               ASSERT(below_the_bottom_m > 0.);
+               leftover_kcal = (below_the_bottom_m / segment_len_m) * seg_kcal;
+               // row, segment_upstream_end_km, and segment_downstream_end_km remain the same
+               break; // jump out of the segment loop back into the reach loop, to finish this reach and advance to the next
+            }
+
+            if (segment_upstream_end_km > reach_downstream_end_km) // (frac_of_reach < 1.)
+            { // The downstream end of this segment is within the reach
+               segment_upstream_end_km = segment_downstream_end_km;
+               row++; 
+               if (row < data_rows) pData->Get(0, row, segment_downstream_end_km);
+            }
+x*/
+         } // end of while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows)
+         ASSERT(close_enough(frac_of_reach, 1., 1e-7));
+         ASSERT(row <= data_rows);
+ 
          // Convert kcal to W/m2, using Reach attribute WIDTHGIVEN, which is derived from the Shade-a-lator input file.
          double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
          double reach_surface_area_m2 = width_m * pReach->m_length;
@@ -5461,8 +5495,17 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
          {
             reach_upstream_end_km = reach_downstream_end_km;
             reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
+/*x
+            reach_kcal = (below_the_bottom_m / segment_len_m) * seg_kcal;
+            row++;
+            if (row < data_rows)
+            {
+               segment_upstream_end_km = segment_downstream_end_km;
+               pData->Get(0, row, segment_downstream_end_km);
+            }
+x*/
          }
-      } // end of while (pReach != NULL)
+      } // end of while (pReach != NULL && row < data_rows)
    } // end of block to get the SAL output data for the current date
 
 //////////////// end of code for reading SAL output data file ///////////////////////////

@@ -1858,6 +1858,7 @@ public:
    int m_colReachRAD_SW_IN; // W/m2
    int m_colReachAREA_H2O;
    int m_colReachWIDTH;
+   int m_colReachDEPTH;
    int m_colReachDEPTHMANNG;
    int m_colReachTURNOVER;
    int m_colReachXFLUX_D;

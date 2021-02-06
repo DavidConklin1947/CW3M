@@ -634,6 +634,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       pReach->m_reach_evap_m3 = 0.;
       pReach->m_reach_evap_kJ = 0.;
       double width_x_length_accum = 0.;
+      double depth_x_length_accum = 0.;
       double manning_depth_x_length_accum = 0;
       double volume_accum_m3 = 0.;
       double temp_h2o_air_slope = 0;
@@ -692,6 +693,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
          pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
          pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, pReach->m_wdRatio);
          width_x_length_accum += pSubreach->m_subreach_width_m * pSubreach->m_subreach_length_m;
+         depth_x_length_accum += pSubreach->m_subreach_depth_m * pSubreach->m_subreach_length_m;
          manning_depth_x_length_accum += pSubreach->m_manning_depth_m * pSubreach->m_subreach_length_m;
          volume_accum_m3 += pSubreach->m_waterParcel.m_volume_m3;
 
@@ -715,6 +717,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
 
       double reach_width_m = width_x_length_accum / pReach->m_length;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachWIDTH, reach_width_m);
+      double reach_depth_m = depth_x_length_accum / pReach->m_length;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachDEPTH, reach_depth_m);
       double reach_manning_depth_m = manning_depth_x_length_accum / pReach->m_length;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachDEPTHMANNG, reach_manning_depth_m);
       double turnover = (pReach->GetDischarge() * SEC_PER_DAY) / volume_accum_m3;
