@@ -1035,8 +1035,6 @@ int RatioIndex(double ratio)
 double TopoSetting::ShadeFrac(int jday)
 // This is a crude first approximation.
 {
-   return(0); // ???
-   /*
    double delta_t_min = 15; // timestep in minutes
    double delta_t_hr = delta_t_min / 60.;
    double noon_solar_elev_deg = SolarElev_deg(jday, 12.); ASSERT(noon_solar_elev_deg > 0.);
@@ -1069,8 +1067,11 @@ double TopoSetting::ShadeFrac(int jday)
    while (time_hr < nominal_sunset)
    {
       solar_elev_deg = SolarElev_deg(jday, time_hr);
-      azimuth_deg = SolarAzimuth_deg(jday, time_hr);
-      if (IsTopoShaded(solar_elev_deg, azimuth_deg)) shaded_time_hr += delta_t_hr;
+      if (solar_elev_deg > 0.)
+      {
+         azimuth_deg = SolarAzimuth_deg(jday, time_hr);
+         if (IsTopoShaded(solar_elev_deg, azimuth_deg)) shaded_time_hr += delta_t_hr;
+      }
 
       time_hr += delta_t_hr;
    } // end of loop from sunrise to sunset
@@ -1081,8 +1082,7 @@ double TopoSetting::ShadeFrac(int jday)
    // longer path through the atmosphere.
 
    return(shade_frac);
-   */
-} // end of ShadeFrac()
+/} // end of ShadeFrac()
 
 
 double TopoSetting::SolarDeclination_deg(int jday0)
@@ -1115,18 +1115,33 @@ double TopoSetting::SolarDeclination_deg(int jday0)
 
 
 double TopoSetting::SolarElev_deg(int jday0, double time_hr)
+// from itacanet.org/the-sun-as-a-source-of-energy/part-3-calculating-solar-angles
+// alpha = altitude angle
+// delta = declination
+// omega = hour angle (noon = 0)
+// phi = latitude
+// alpha = sin(delta) * sin(phi) + cos(delta) * cos(omega) * cos (phi)
 {
    double declination_deg = SolarDeclination_deg(jday0);
-   double solar_elev_at_equator_deg = 90. - abs(declination_deg);
-   double solar_elev_in_northern_hemisphere_deg = solar_elev_at_equator_deg - m_lat_deg;
+   double delta = declination_deg * PI / 180.;
+
+   double phi = m_lat_deg * PI / 180.;
+
+   double hour_angle_deg = ((time_hr - 12.) / 24.) * 360.;
+   double omega = hour_angle_deg * PI / 180.;
+
+   double alpha = sin(delta) * sin(phi) + cos(delta) * cos(omega) * cos(phi);
+
+   double solar_elev_in_northern_hemisphere_deg = alpha * 180. / PI;
    return(solar_elev_in_northern_hemisphere_deg);
 } // end of SolarElev_deg()
 
 
-double TopoSetting::SolarAzimuth_deg(int jday, double time_hr)
+double TopoSetting::SolarAzimuth_deg(int jday, double time_hr) // 0 deg is north
 // From Wikipedia "Solar azimuth angle" 2/1/21 and "Solar zenith angle" 2/1/21
 {
-   double delta_radian = SolarDeclination_deg(jday); // ???
+   double delta_deg = SolarDeclination_deg(jday); // ???
+   double delta_radian = delta_deg * PI / 180.;
    double cos_delta = cos(delta_radian);
 
    double h_radian = (time_hr * (PI / 12.)); // hour angle
@@ -1138,10 +1153,10 @@ double TopoSetting::SolarAzimuth_deg(int jday, double time_hr)
 
 
    double sin_phi_s = -sin(h_radian) * cos(delta_radian) / sin(theta_s_radian);
-   double azimuth_radians = asin(sin_phi_s);
-   double azimuth_deg = azimuth_radians * (180. / PI);
+   double azimuth_radians_from_south = asin(sin_phi_s);
+   double azimuth_deg_from_north = (azimuth_radians_from_south * (180. / PI)) + 180.;
 
-   return(azimuth_deg);
+   return(azimuth_deg_from_north);
 } // end of SolarAzimuth_deg()
 
 
@@ -3507,7 +3522,7 @@ bool FlowModel::DumpReachInsolationData(Shade_a_latorData* pSAL)
          avg_width_m += pSubreach->m_subreach_width_m;
       } // end of loop thru subreaches for calculating avg_width_m
       avg_width_m /= num_subreaches;
-      fprintf(insolation_ofile, "%d, %d, %d, "
+      if (insolation_ofile != NULL) fprintf(insolation_ofile, "%d, %d, %d, "
          "%f, %d, %f, %f, %f, %f, %f, %f, %f, "
          "%d, %d, %d, %f, "
          "%d, %d, %d, %f, "
@@ -5426,13 +5441,10 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
       double reach_kcal = 0.;
       float seg_kcal = 0.;
       double segment_len_m = 0.;
-//x      double leftover_kcal = 0.;
       while (pReach != NULL && row < data_rows)
       {
          double frac_of_reach = 0.;
          reach_kcal = 0; 
-//x         reach_kcal = leftover_kcal;
-//x         leftover_kcal = 0.;
          while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows) // frac_of_reach < 1. && row < data_rows)
          {
             segment_len_m = ((double)segment_upstream_end_km - (double)segment_downstream_end_km) * 1000.;
@@ -5460,22 +5472,6 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
                else segment_downstream_end_km = segment_upstream_end_km;
             }
             else break; // Go on to the next reach without advancing to the next segment.
-/*x
-            { // The downstream end of this segment is below the downstream end of the reach.
-               // Go on to the next reach without advancing to the next segment.
-               ASSERT(below_the_bottom_m > 0.);
-               leftover_kcal = (below_the_bottom_m / segment_len_m) * seg_kcal;
-               // row, segment_upstream_end_km, and segment_downstream_end_km remain the same
-               break; // jump out of the segment loop back into the reach loop, to finish this reach and advance to the next
-            }
-
-            if (segment_upstream_end_km > reach_downstream_end_km) // (frac_of_reach < 1.)
-            { // The downstream end of this segment is within the reach
-               segment_upstream_end_km = segment_downstream_end_km;
-               row++; 
-               if (row < data_rows) pData->Get(0, row, segment_downstream_end_km);
-            }
-x*/
          } // end of while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows)
          ASSERT(close_enough(frac_of_reach, 1., 1e-7));
          ASSERT(row <= data_rows);
@@ -5495,15 +5491,6 @@ x*/
          {
             reach_upstream_end_km = reach_downstream_end_km;
             reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
-/*x
-            reach_kcal = (below_the_bottom_m / segment_len_m) * seg_kcal;
-            row++;
-            if (row < data_rows)
-            {
-               segment_upstream_end_km = segment_downstream_end_km;
-               pData->Get(0, row, segment_downstream_end_km);
-            }
-x*/
          }
       } // end of while (pReach != NULL && row < data_rows)
    } // end of block to get the SAL output data for the current date
