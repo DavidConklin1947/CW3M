@@ -1032,57 +1032,122 @@ int RatioIndex(double ratio)
 } // end of RatioIndex()
 
 
-double TopoSetting::ShadeFrac(int jday)
-// This is a crude first approximation.
+double TopoSetting::OpticalAirMassThickness(double solarElev_deg)
+// Uses eq. 2-31, p.39 in Boyd & Kasper
 {
+   double M_A = (35. * exp(-0.0001184 * m_elev_m)) /
+      sqrt(1224. * sin(solarElev_deg * PI / 180.) + 1.);
+
+   return(M_A);
+} // end of OpticalAirMassThickness()
+
+
+double TopoSetting::DiffuseFrac(double C_I, int jday0)
+{
+   int JD = jday0 + 1; // Julian Day as in Boyd in Kasper (aka jday1 in CW3M)
+   
+   double D_F = (0.938 + 1.071 * C_I) - (5.14 * C_I * C_I) + (2.98 * C_I * C_I * C_I)
+      - (sin(2. * PI * (JD - 40) / 365)) * (0.009 - 0.078 * C_I);
+
+   return(D_F);
+} // end of DiffuseFrac()
+
+
+double TopoSetting::ShadeFrac(int jday0)
+// Integrate over time from solar noon back to sunrise and then from noon to sunset.
+// Calculate direct and diffuse shortwave with and without topographic shading.
+// Uses equations from sec. 2.2.4 Solar Radiation Heat Above Topographic Features, pp. 38-41 in Boyd and Kasper.
+// Uses variable names from Boyd & Kasper.
+{
+   int JD = jday0 + 1; // Julian Day as in Boyd in Kasper (aka jday1 in CW3M)
+   double direct_unshaded_kJ_m2 = 0.;
+   double net_direct_kJ_m2 = 0.;
+   double diffuse_unshaded_kJ_m2 = 0.;
+   double net_diffuse_kJ_m2 = 0.;
+
    double delta_t_min = 15; // timestep in minutes
    double delta_t_hr = delta_t_min / 60.;
-   double noon_solar_elev_deg = SolarElev_deg(jday, 12.); ASSERT(noon_solar_elev_deg > 0.);
+   double delta_t_sec = delta_t_min * 60.;
+   double noon_solar_elev_deg = SolarElev_deg(jday0, 12.); ASSERT(noon_solar_elev_deg > 0.);
 
+   double phi_SRG_W_m2 = 1367.; // global solar flux
+   double phi_SRB_W_m2 = 0.; // total unshaded shortwave, including direct and diffuse
+   double phi_SRB1_W_m2 = 0.; // direct unshaded shortwave
+   double phi_SRD1_W_m2 = 0.; // diffuse unshaded shortwave
+   double azimuth_deg = 0.; // 0 is north.
+
+   double T_A = // atmospheric transmissivity as a function of the day of the year
+      0.0685 * cos((2. * PI / 365.) * (JD + 10.)) + 0.8; // eq. 2-30
+
+   // First add up the energy from just before solar noon back to sunrise.
    double solar_elev_deg = noon_solar_elev_deg;
    double time_hr = 12.;
    while (solar_elev_deg > 0)
    {
       time_hr -= delta_t_hr;
-      solar_elev_deg = SolarElev_deg(jday, time_hr);
-   } // end of loop from noon back to dawn
-   double nominal_sunrise = time_hr;
-
-   solar_elev_deg = noon_solar_elev_deg;
-   time_hr = 12.;
-   while (solar_elev_deg > 0.)
-   {
-      time_hr += delta_t_hr;
-      solar_elev_deg = SolarElev_deg(jday, time_hr);
-   } // end of loop from noon ahead to sunset
-   double nominal_sunset = time_hr;
-
-   double nominal_day_length_hr = nominal_sunset - nominal_sunrise;
-
-   // Now determine the shaded part of the day.
-   double shaded_time_hr = 0.;
-   time_hr = nominal_sunrise + delta_t_hr / 2.;
-   solar_elev_deg = 0.;
-   double azimuth_deg;
-   while (time_hr < nominal_sunset)
-   {
-      solar_elev_deg = SolarElev_deg(jday, time_hr);
+      solar_elev_deg = SolarElev_deg(jday0, time_hr);
       if (solar_elev_deg > 0.)
       {
-         azimuth_deg = SolarAzimuth_deg(jday, time_hr);
-         if (IsTopoShaded(solar_elev_deg, azimuth_deg)) shaded_time_hr += delta_t_hr;
+         double M_A = OpticalAirMassThickness(solar_elev_deg);
+         phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
+         double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
+         double D_F = DiffuseFrac(C_I, jday0);
+         phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
+         phi_SRD1_W_m2 = phi_SRB_W_m2 * D_F;
+         double direct_kJ_m2 = phi_SRB1_W_m2 * delta_t_sec / 1000.;
+         direct_unshaded_kJ_m2 += direct_kJ_m2;
+         double diffuse_kJ_m2 = phi_SRD1_W_m2 * delta_t_sec / 1000.;
+         diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
+
+         double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
+         if (!IsTopoShaded(solar_elev_deg, azimuth_deg))
+         {
+            net_direct_kJ_m2 += direct_unshaded_kJ_m2;
+            double phi_SRD2_W_m2 = phi_SRD1_W_m2 * m_topoViewToSky;
+            net_diffuse_kJ_m2 += diffuse_unshaded_kJ_m2;
+         }
+      }
+
+   } // end of loop from noon back to dawn
+   double nominal_sunrise = time_hr;
+   double morning_hours = (12. - delta_t_hr) - time_hr;
+
+   // Now add up the energy at noon and forward until sunset.
+   solar_elev_deg = noon_solar_elev_deg;
+   time_hr = 12.;
+   while (solar_elev_deg > 0)
+   {
+      solar_elev_deg = SolarElev_deg(jday0, time_hr);
+      if (solar_elev_deg > 0.)
+      {
+         double M_A = OpticalAirMassThickness(solar_elev_deg);
+         phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
+         double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
+         double D_F = DiffuseFrac(C_I, jday0);
+         phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
+         phi_SRD1_W_m2 = phi_SRB_W_m2 * D_F;
+         double direct_kJ_m2 = phi_SRB1_W_m2 * delta_t_sec / 1000.;
+         direct_unshaded_kJ_m2 += direct_kJ_m2;
+         double diffuse_kJ_m2 = phi_SRD1_W_m2 * delta_t_sec / 1000.;
+         diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
+
+         double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
+         if (!IsTopoShaded(solar_elev_deg, azimuth_deg))
+         {
+            net_direct_kJ_m2 += direct_unshaded_kJ_m2;
+            double phi_SRD2_W_m2 = phi_SRD1_W_m2 * m_topoViewToSky;
+            net_diffuse_kJ_m2 += diffuse_unshaded_kJ_m2;
+         }
       }
 
       time_hr += delta_t_hr;
-   } // end of loop from sunrise to sunset
-    
-   double shade_frac = shaded_time_hr / nominal_day_length_hr; // ??? This is a stand-in.
-   // The amount by which the shortwave is reduced by topographic shading is not linear in time.
-   // At low angles from the horizon, the unshaded shortwave is less than at high angles because of the 
-   // longer path through the atmosphere.
+   } // end of loop from noon forward to sunset
+   double nominal_sunset = time_hr;
+
+   double shade_frac = 1. - (net_direct_kJ_m2 + net_diffuse_kJ_m2) / (direct_unshaded_kJ_m2 + diffuse_unshaded_kJ_m2);
 
    return(shade_frac);
-/} // end of ShadeFrac()
+} // end of ShadeFrac()
 
 
 double TopoSetting::SolarDeclination_deg(int jday0)
@@ -1183,6 +1248,8 @@ TopoSetting::TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S
    m_topoElev_E_deg = topoElev_E_deg;
    m_topoElev_S_deg = topoElev_S_deg;
    m_topoElev_W_deg = topoElev_W_deg;
+   double avg_topo_elev_deg = (topoElev_E_deg + topoElev_S_deg + topoElev_W_deg) / 3.;
+   m_topoViewToSky = 1. - avg_topo_elev_deg / 90.;
    m_lat_deg = lat_deg;
    m_long_deg = long_deg;
 } // end of TopoSetting constructor
@@ -1229,10 +1296,15 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
    int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
    int vegclass = -1;  m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass);
    int ageclass = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass);
+   int lai = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colLAI, lai);
    VegCharacteristics(vegclass, ageclass, &veg_ht_m, &veg_density_frac);
 
    double ht2width_ratio = veg_ht_m / width_m;
-   double shaded_W_m2 = GetVegShadedSW_W_m2(veg_density_frac, ht2width_ratio, topo_shaded_W_m2);
+
+   double shaded_W_m2 = topo_shaded_W_m2; // ??? should be GetVegShadedSW_W_m2(veg_density_frac, ht2width_ratio, topo_shaded_W_m2);
+
+   double shade_coeff = shaded_W_m2 / SW_unshaded_W_m2; // ??? doesn't yet include vegetative shading
+   m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSHADECOEFF, shade_coeff);
 
    return(shaded_W_m2);
 } // end of GetSubreachShade_a_lator_W_m2()
@@ -3004,6 +3076,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colPVT, _T("PVT"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colVEGCLASS, _T("VEGCLASS"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colAGECLASS, _T("AGECLASS"), TYPE_INT, CC_MUST_EXIST);
+   EnvExtension::CheckCol(m_pCatchmentLayer, m_colLAI, _T("LAI"), TYPE_FLOAT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colCatchmentJoin, m_catchmentJoinCol, TYPE_INT, CC_MUST_EXIST);
 
    EnvExtension::CheckCol(m_pIDUlayer, m_colPRECIP_YR, "PRECIP_YR", TYPE_FLOAT, CC_AUTOADD);

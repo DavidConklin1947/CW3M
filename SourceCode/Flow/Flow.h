@@ -885,7 +885,7 @@ public:
    double GetUpstreamInflow();
    bool GetUpstreamInflow(double &QLeft, double &QRight);
    double SubreachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from this subreach.
-   double GetSubreachShade_a_lator_W_m2(int subreach_ndx, double SW_unshaded_W_m2);
+//x   double GetSubreachShade_a_lator_W_m2(int subreach_ndx, double SW_unshaded_W_m2);
    double GetSubreachViewToSky_frac(int subreachNdx);
    double GetSubreachArea_m2(int subreachNdx);
    float GetCatchmentArea( void );
@@ -1402,10 +1402,13 @@ public:
    double SolarDeclination_deg(int jday0);
    double SolarElev_deg(int jday0, double time_hr);
    double SolarAzimuth_deg(int jday0, double time_hr);
+   double OpticalAirMassThickness(double solarElev_deg);
+   double DiffuseFrac(double C_I, int jday0);
 
 public:
    double m_elev_m; // elevation above sea level
    double m_topoElev_E_deg, m_topoElev_S_deg, m_topoElev_W_deg;
+   double m_topoViewToSky; 
    double m_lat_deg, m_long_deg;
 }; // end of class TopoSetting
 
@@ -1708,6 +1711,7 @@ public:
    int m_colPVT;
    int m_colVEGCLASS;
    int m_colAGECLASS;
+   int m_colLAI;
 
    int m_colCatchmentReachIndex;
    int m_colCatchmentCatchID;
