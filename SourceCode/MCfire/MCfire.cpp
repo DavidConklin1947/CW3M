@@ -19,7 +19,7 @@
 #include "MCFire.h"
 
 
-WWMfire::WWMfire() :
+CW3Mfire::CW3Mfire() :
    m_colFIRE_BUI(-1)
    , m_colFIRE_FFMC(-1)
    , m_colFIRE_ROS(-1)
@@ -47,7 +47,7 @@ WWMfire::WWMfire() :
 {}
 
 
-bool WWMfire::WWMfire_DailyProcess(FlowContext * pFlowContext)
+bool CW3Mfire::CW3Mfire_DailyProcess(FlowContext * pFlowContext)
 {
    m_pFlowContext = pFlowContext;
    m_pEnvContext = m_pFlowContext->pEnvContext;
@@ -56,20 +56,20 @@ bool WWMfire::WWMfire_DailyProcess(FlowContext * pFlowContext)
 
    int timing = pFlowContext->timing;
 
-   if (timing & GMT_INIT) return(WWMfire_Init());
-   if (timing & GMT_INITRUN) return(WWMfire_InitRun());
-   if (timing & GMT_START_YEAR) return(WWMfire_StartYear());
-   if (timing & GMT_CATCHMENT) return(WWMfire_Step());
+   if (timing & GMT_INIT) return(CW3Mfire_Init());
+   if (timing & GMT_INITRUN) return(CW3Mfire_InitRun());
+   if (timing & GMT_START_YEAR) return(CW3Mfire_StartYear());
+   if (timing & GMT_CATCHMENT) return(CW3Mfire_Step());
 
    return(false);
-} // end of WWMfire_DailyProcess()
+} // end of CW3Mfire_DailyProcess()
 
 
-bool WWMfire::WWMfire_Init()
+bool CW3Mfire::CW3Mfire_Init()
 {
    if (m_pFlowContext->m_extFnInitInfo.GetLength() <= 0)
    {
-      CString msg; msg.Format("WWMfire_Init() m_pFlowContext->m_extFnInitInfo.GetLength() = %d", m_pFlowContext->m_extFnInitInfo.GetLength());
+      CString msg; msg.Format("CW3Mfire_Init() m_pFlowContext->m_extFnInitInfo.GetLength() = %d", m_pFlowContext->m_extFnInitInfo.GetLength());
       Report::ErrorMsg(msg);
       return(false);
    }
@@ -114,11 +114,11 @@ bool WWMfire::WWMfire_Init()
    m_pIDUlayer->CheckCol(m_colTREE_HT, "TREE_HT", TYPE_FLOAT, CC_AUTOADD);
 
    CString deterministic_filename = PathManager::MakeAbsolutePath(m_pFlowContext->m_extFnInitInfo, PM_IDU_DIR);
-   CString msg; msg.Format("WWMfire_Init() deterministic_filename = %s", deterministic_filename); Report::LogMsg(msg);
+   CString msg; msg.Format("CW3Mfire_Init() deterministic_filename = %s", deterministic_filename); Report::LogMsg(msg);
    int records = m_Fm.m_deterministic_inputtable.ReadAscii(deterministic_filename, ',', TRUE);
    if (records <= 0)
    {
-      msg.Format("WWMfire_Init() could not load deterministic transition .csv file. records = %d", records);
+      msg.Format("CW3Mfire_Init() could not load deterministic transition .csv file. records = %d", records);
       Report::ErrorMsg(msg);
       return(false);
    }
@@ -150,22 +150,22 @@ bool WWMfire::WWMfire_Init()
       || m_Fm.m_colDetFUEL_DEPTH < 0 || m_Fm.m_colDetFINE_FUEL_FRAC < 0
       || m_Fm.m_colDetFRAC_1HR_LIVE < 0 || m_Fm.m_colDetFRAC_100HR_LIVE < 0)
    {
-      msg.Format("WWMfire_Init() One or more column headings are incorrect or missing in the deterministic lookup file");
+      msg.Format("CW3Mfire_Init() One or more column headings are incorrect or missing in the deterministic lookup file");
       Report::ErrorMsg(msg);
       return(false);
    }
 
    if (m_pEnvContext->coldStartFlag)
    {
-      WWMfire_InitRun();
-      WWMfire_StartYear();
+      CW3Mfire_InitRun();
+      CW3Mfire_StartYear();
    } // end of coldstart logic
 
    return(true);
-} // end of WWMfire_Init()
+} // end of CW3Mfire_Init()
 
 
-bool WWMfire::WWMfire_InitRun()
+bool CW3Mfire::CW3Mfire_InitRun()
 {
    // Initialize the m_fire array.
    m_fire.RemoveAll();
@@ -209,10 +209,10 @@ bool WWMfire::WWMfire_InitRun()
    }
 
    return(true);
-} // end of WWMfire_InitRun()
+} // end of CW3Mfire_InitRun()
 
 
-bool WWMfire::WWMfire_StartYear()
+bool CW3Mfire::CW3Mfire_StartYear()
 {
    bool retval = true;
 
@@ -246,7 +246,7 @@ bool WWMfire::WWMfire_StartYear()
       { // Land use change may have moved an IDU from forest to ag or developed.
         // IDUs newly moved from ag to forest are being ignored; there are very few.
          CString msg;
-         msg.Format("WWMfire_StartYear() Turning off WWMfire for idu_ndx = %d due to lulc_a = %d", idu_ndx, lulc_a);
+         msg.Format("CW3Mfire_StartYear() Turning off CW3Mfire for idu_ndx = %d due to lulc_a = %d", idu_ndx, lulc_a);
          Report::LogMsg(msg);
          pFS->idu_ndx = -idu_ndx - TOKEN_FOR_NO_LONGER_FOREST;
          continue;
@@ -262,7 +262,7 @@ bool WWMfire::WWMfire_StartYear()
       if (!m_Fm.FuelLoad(pvt, vegclass, ageclass, standStartYear, stm_index))
       {
          CString msg;
-         msg.Format("WWMfire_StartYear() Turning off WWMfire for idu_ndx = %d due to FuelLoad() failure", idu_ndx);
+         msg.Format("CW3Mfire_StartYear() Turning off CW3Mfire for idu_ndx = %d due to FuelLoad() failure", idu_ndx);
          Report::WarningMsg(msg);
          msg.Format("pvt = %d, vegclass = %d, ageclass = %d, standStartYear = %d, stm_index = %d", pvt, vegclass, standStartYear, stm_index);
          Report::LogMsg(msg);
@@ -279,10 +279,10 @@ bool WWMfire::WWMfire_StartYear()
    } // end of loop thru array of fire states
 
    return(retval);
-} // end of WWMfire_StartYear()
+} // end of CW3Mfire_StartYear()
 
 
-bool WWMfire::WWMfire_Step()
+bool CW3Mfire::CW3Mfire_Step()
 {
    bool retval = true;
 
@@ -335,7 +335,7 @@ bool WWMfire::WWMfire_Step()
       if (!m_Fm.FireBehav(vegclass, slope_deg))
       {
          CString msg;
-         msg.Format("WWMfire_Step() Turning off WWMfire for idu_ndx = %d due to FireBehav() failure", idu_ndx);
+         msg.Format("CW3Mfire_Step() Turning off CW3Mfire for idu_ndx = %d due to FireBehav() failure", idu_ndx);
          Report::WarningMsg(msg);
          msg.Format("vegclass = %d, slope_deg = %f", vegclass, slope_deg);
          Report::LogMsg(msg);

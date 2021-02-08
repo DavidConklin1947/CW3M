@@ -194,6 +194,7 @@
     <ClCompile Include="ReachTree.cpp" />
     <ClCompile Include="Report.cpp" />
     <ClCompile Include="CacheManager.cpp" />
+    <ClCompile Include="ScienceFcns.cpp" />
     <ClCompile Include="SpatialIndex.cpp" />
     <ClCompile Include="SplitPath.cpp" />
     <ClCompile Include="SriRandomPath.cpp" />
@@ -307,6 +308,7 @@
     <ClInclude Include="RANDOM.HPP" />
     <ClInclude Include="reachtree.h" />
     <ClInclude Include="Report.h" />
+    <ClInclude Include="ScienceFcns.h" />
     <ClInclude Include="SERIAL.HPP" />
     <ClInclude Include="shapefil.h" />
     <ClInclude Include="SpatialIndex.h" />

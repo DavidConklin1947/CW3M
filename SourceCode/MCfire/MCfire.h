@@ -211,23 +211,23 @@ class MCfire
 }; // end of class MCfire
 
  
-class WWMfire
+class CW3Mfire
 {
 public:
-   WWMfire(void);
-   ~WWMfire(void) {}
+   CW3Mfire(void);
+   ~CW3Mfire(void) {}
 
-   bool WWMfire_DailyProcess(FlowContext * pFlowContext);
+   bool CW3Mfire_DailyProcess(FlowContext * pFlowContext);
 
 protected:
-   bool WWMfire_Init(void);
-   bool WWMfire_InitRun(void);
-   bool WWMfire_StartYear(void);
-   // bool WWMfire_StartStep(void);
-   bool WWMfire_Step(void);
-   // bool WWMfire_EndStep();
-   // bool WWMfire_EndYear();
-   // bool WWMfire_EndRun();
+   bool CW3Mfire_Init(void);
+   bool CW3Mfire_InitRun(void);
+   bool CW3Mfire_StartYear(void);
+   // bool CW3Mfire_StartStep(void);
+   bool CW3Mfire_Step(void);
+   // bool CW3Mfire_EndStep();
+   // bool CW3Mfire_EndYear();
+   // bool CW3Mfire_EndRun();
 
    CArray< FireState, FireState > m_fire;
    MCfire m_Fm;
@@ -276,6 +276,6 @@ protected:
    int m_colDMC;
    int m_colTREE_HT;
    int m_colGAP_FRAC;
-}; // end of class WWMfire
+}; // end of class CW3Mfire
 
 

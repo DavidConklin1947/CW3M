@@ -15,9 +15,9 @@
 #endif
 
 
-static AFX_EXTENSION_MODULE WWMfireDLL = { NULL, NULL };
+static AFX_EXTENSION_MODULE CW3MfireDLL = { NULL, NULL };
 
-WWMfire * theModel = NULL;
+CW3Mfire * theModel = NULL;
 
 
 extern "C" int APIENTRY
@@ -29,11 +29,11 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
       /**** TODO: update trace string with module name ****/
-		TRACE0("WWMfire.DLL Initializing!\n");
+		TRACE0("CW3Mfire.DLL Initializing!\n");
 		
 		// Extension DLL one-time initialization
       /**** TODO: update AfxInitExtensionModule with module name ****/
-		if (!AfxInitExtensionModule(WWMfireDLL, hInstance))
+		if (!AfxInitExtensionModule(CW3MfireDLL, hInstance))
 			return 0;
 
 		// Insert this DLL into the resource chain
@@ -49,10 +49,10 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 		//  result.
 
       /**** TODO: update CDynLinkLibrary constructor with module name ****/
-		new CDynLinkLibrary(WWMfireDLL);
+		new CDynLinkLibrary(CW3MfireDLL);
      
       ASSERT( theModel == NULL );
-      theModel = new WWMfire;
+      theModel = new CW3Mfire;
       ASSERT( theModel != NULL );
 
  	}
@@ -60,7 +60,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 	else if (dwReason == DLL_PROCESS_DETACH)
 	{
       /**** TODO: Update module name in trace string ****/
-		TRACE0("WWMfire.DLL Terminating!\n");
+		TRACE0("CW3Mfire.DLL Terminating!\n");
 
       /**** TODO: Delete any instantiated models ****/
       if ( theModel != NULL)
@@ -68,11 +68,11 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 
 		// Terminate the library before destructors are called
       /**** TODO: Update module name in AfxTermExtensionModule ****/
-		AfxTermExtensionModule(WWMfireDLL);
+		AfxTermExtensionModule(CW3MfireDLL);
 	}
 	return 1;   // ok
 }
 
-extern "C" bool PASCAL EXPORT WWMfire_DailyProcess(FlowContext *pFlowContext);
-bool PASCAL WWMfire_DailyProcess(FlowContext *pFlowContext) { return theModel->WWMfire_DailyProcess(pFlowContext); }
+extern "C" bool PASCAL EXPORT CW3Mfire_DailyProcess(FlowContext *pFlowContext);
+bool PASCAL CW3Mfire_DailyProcess(FlowContext *pFlowContext) { return theModel->CW3Mfire_DailyProcess(pFlowContext); }
 

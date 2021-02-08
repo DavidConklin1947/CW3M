@@ -978,11 +978,11 @@ double Reach::LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC) // returns MJ
 } // end of LatentHeadOfEvaporation()
 
 
-void VegCharacteristics(int vegclass, int ageclass, double * pHeight_m, double * pDensityFrac)
+void VegCharacteristics(int vegclass, int ageclass, double lai, double * pHeight_m, double * pDensityFrac)
 {
-   // ??? placeholder
+   double Beers_law_k = 0.5;
    *pHeight_m = 10;
-   *pDensityFrac = 0.7;
+   *pDensityFrac = exp(-Beers_law_k * lai);
 } // end of VegCharacteristics()
 
 
@@ -1290,14 +1290,15 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
 
    double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
    if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
-   double veg_ht_m;
-   double veg_density_frac;
+   double veg_ht_m = 0.;
+   double veg_density_frac = 0.;
 
    int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
    int vegclass = -1;  m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass);
    int ageclass = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass);
-   int lai = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colLAI, lai);
-   VegCharacteristics(vegclass, ageclass, &veg_ht_m, &veg_density_frac);
+   double lai = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colLAI, lai);
+
+   VegCharacteristics(vegclass, ageclass, lai, &veg_ht_m, &veg_density_frac);
 
    double ht2width_ratio = veg_ht_m / width_m;
 
@@ -5566,11 +5567,11 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
             reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
          }
       } // end of while (pReach != NULL && row < data_rows)
+
+      DumpReachInsolationData(pSAL);
    } // end of block to get the SAL output data for the current date
 
 //////////////// end of code for reading SAL output data file ///////////////////////////
-
-   DumpReachInsolationData(pSAL);
 
    return true;
 } // end of FlowModel::EndStep()

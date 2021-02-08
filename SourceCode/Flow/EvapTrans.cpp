@@ -1236,7 +1236,7 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
             float fTheta = 0.f;
 
             int lulc_a = -1; pIDUlayer->GetData(idu, m_colLULC_A, lulc_a);
-            if (lulc_a = LULCA_FOREST)
+            if (lulc_a == LULCA_FOREST)
             {
                float vpdMin = 0.610f; // 1.5f; // kPa
                float vpdMax = 3.100f; // 4.0f; // kPa

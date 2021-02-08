@@ -297,6 +297,9 @@
     <ClCompile Include="DMatrix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ScienceFcns.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Libs.def">
@@ -639,6 +642,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScienceFcns.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
