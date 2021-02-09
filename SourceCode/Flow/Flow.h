@@ -1712,6 +1712,7 @@ public:
    int m_colVEGCLASS;
    int m_colAGECLASS;
    int m_colLAI;
+   int m_colTREE_HT;
 
    int m_colCatchmentReachIndex;
    int m_colCatchmentCatchID;

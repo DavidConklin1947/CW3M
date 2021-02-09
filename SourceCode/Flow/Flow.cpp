@@ -1102,9 +1102,9 @@ double TopoSetting::ShadeFrac(int jday0)
          double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
          if (!IsTopoShaded(solar_elev_deg, azimuth_deg))
          {
-            net_direct_kJ_m2 += direct_unshaded_kJ_m2;
+            net_direct_kJ_m2 += direct_kJ_m2;
             double phi_SRD2_W_m2 = phi_SRD1_W_m2 * m_topoViewToSky;
-            net_diffuse_kJ_m2 += diffuse_unshaded_kJ_m2;
+            net_diffuse_kJ_m2 += diffuse_kJ_m2;
          }
       }
 
@@ -1134,9 +1134,9 @@ double TopoSetting::ShadeFrac(int jday0)
          double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
          if (!IsTopoShaded(solar_elev_deg, azimuth_deg))
          {
-            net_direct_kJ_m2 += direct_unshaded_kJ_m2;
+            net_direct_kJ_m2 += direct_kJ_m2;
             double phi_SRD2_W_m2 = phi_SRD1_W_m2 * m_topoViewToSky;
-            net_diffuse_kJ_m2 += diffuse_unshaded_kJ_m2;
+            net_diffuse_kJ_m2 += diffuse_kJ_m2;
          }
       }
 
@@ -1277,7 +1277,7 @@ double GetVegShadedSW_W_m2(double vegDensityFrac, double ht2widthRatio, double i
    if (ht2widthRatio == 0.) shade_frac = 0.;
    else if (ht2widthRatio < 0.5) shade_frac = 0.25;
    else if (ht2widthRatio < 1.0) shade_frac = 0.5;
-   else shade_frac = 0.75;
+   else shade_frac = 0.75; // ??? a crude first approximation of vegetation shade frac as a function of ht2widthRatio
 
    double veg_shaded_SW_W_m2 = incoming_W_m2 * (1. - shade_frac * vegDensityFrac);
    return(veg_shaded_SW_W_m2);
@@ -1290,21 +1290,21 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
 
    double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
    if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
-   double veg_ht_m = 0.;
-   double veg_density_frac = 0.;
-
+ 
    int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
    int vegclass = -1;  m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass);
    int ageclass = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass);
    double lai = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colLAI, lai);
+   double veg_ht_m = 0.; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colTREE_HT, veg_ht_m);
 
-   VegCharacteristics(vegclass, ageclass, lai, &veg_ht_m, &veg_density_frac);
+   double Beers_law_k = 0.5;
+   double veg_density_frac = exp(-Beers_law_k * lai);
 
    double ht2width_ratio = veg_ht_m / width_m;
 
-   double shaded_W_m2 = topo_shaded_W_m2; // ??? should be GetVegShadedSW_W_m2(veg_density_frac, ht2width_ratio, topo_shaded_W_m2);
+   double shaded_W_m2 = GetVegShadedSW_W_m2(veg_density_frac, ht2width_ratio, topo_shaded_W_m2);
 
-   double shade_coeff = shaded_W_m2 / SW_unshaded_W_m2; // ??? doesn't yet include vegetative shading
+   double shade_coeff = shaded_W_m2 / SW_unshaded_W_m2; 
    m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSHADECOEFF, shade_coeff);
 
    return(shaded_W_m2);
@@ -3078,6 +3078,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colVEGCLASS, _T("VEGCLASS"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colAGECLASS, _T("AGECLASS"), TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colLAI, _T("LAI"), TYPE_FLOAT, CC_MUST_EXIST);
+   EnvExtension::CheckCol(m_pCatchmentLayer, m_colTREE_HT, _T("TREE_HT"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colCatchmentJoin, m_catchmentJoinCol, TYPE_INT, CC_MUST_EXIST);
 
    EnvExtension::CheckCol(m_pIDUlayer, m_colPRECIP_YR, "PRECIP_YR", TYPE_FLOAT, CC_AUTOADD);
