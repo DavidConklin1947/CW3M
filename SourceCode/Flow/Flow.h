@@ -76,6 +76,7 @@ using namespace std;
 // 0.030 s/ft^(1/3) = 0.030 / 0.673 = 0.045 s/m^(1/3)
 #define DEFAULT_MANNING_N 0.045f /* s/m^(1/3), = 0.030 s/ft^(1/3) */
 
+#define BEERS_LAW_K 0.5
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *
@@ -868,6 +869,34 @@ public:
 };
 
 
+class TopoSetting // Topographical Setting class
+{
+public:
+   TopoSetting() {};
+   TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
+   ~TopoSetting() {};
+
+   double ShadeFrac(int jday0, double* pRadSWestimate_W_m2);
+   bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
+   bool IsVegShaded(double solarElev_deg, double solarAzimuth_deg);
+   double SolarDeclination_deg(int jday0);
+   double SolarElev_deg(int jday0, double time_hr);
+   double SolarAzimuth_deg(int jday0, double time_hr);
+   double OpticalAirMassThickness(double solarElev_deg);
+   double DiffuseFrac(double C_I, int jday0);
+   double VegElevEW_deg(double direction_deg, double reach_width_m, double veg_ht_m);
+   double VegElevNS_deg(double direction_deg, double reach_width_m, double veg_ht_m);
+
+public:
+   double m_elev_m; // elevation above sea level
+   double m_topoElevE_deg, m_topoElevS_deg, m_topoElevW_deg;
+   double m_vegElevEW_deg, m_vegElevNS_deg;
+   double m_topoViewToSky;
+   double m_lat_deg, m_long_deg;
+   double m_vegDensity; // in the sense of Shade-a-lator = the fraction of direct shortwave which is intercepted by the vegetation before it gets to the stream
+}; // end of class TopoSetting
+
+
 class FLOWAPI Reach : public ReachNode, public FluxContainer          // extends the ReachNode class
 {
 public:  
@@ -885,7 +914,6 @@ public:
    double GetUpstreamInflow();
    bool GetUpstreamInflow(double &QLeft, double &QRight);
    double SubreachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from this subreach.
-//x   double GetSubreachShade_a_lator_W_m2(int subreach_ndx, double SW_unshaded_W_m2);
    double GetSubreachViewToSky_frac(int subreachNdx);
    double GetSubreachArea_m2(int subreachNdx);
    float GetCatchmentArea( void );
@@ -945,6 +973,7 @@ public:
 
 public:
    // reach-level parameters
+   TopoSetting m_topo;
    double m_reach_volume_m3;
    float m_wdRatio;
    float m_cumUpstreamArea;   // cumulative upslope area, in map units, above this reach in the network
@@ -1391,28 +1420,6 @@ public:
 };
 
 
-class TopoSetting // Topographical Setting class
-{
-public:
-   TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
-   ~TopoSetting() {};
-
-   double ShadeFrac(int jday0, double * pRadSWestimate_W_m2);
-   bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
-   double SolarDeclination_deg(int jday0);
-   double SolarElev_deg(int jday0, double time_hr);
-   double SolarAzimuth_deg(int jday0, double time_hr);
-   double OpticalAirMassThickness(double solarElev_deg);
-   double DiffuseFrac(double C_I, int jday0);
-
-public:
-   double m_elev_m; // elevation above sea level
-   double m_topoElev_E_deg, m_topoElev_S_deg, m_topoElev_W_deg;
-   double m_topoViewToSky; 
-   double m_lat_deg, m_long_deg;
-}; // end of class TopoSetting
-
-
 class FLOWAPI FlowModel
 {
 friend class FlowProcess;
@@ -1502,7 +1509,6 @@ public:
    bool UpdateIDUclimateTemporalAverages(int tau, EnvContext * pContext);
    double MagicReachWaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in reaches.
    double MagicHRUwaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in HRUs.
-   double GetReachTopoShadedSW_W_m2(Reach* pReach, double SW_unshaded_W_m2);
    double GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreach_ndx, double SW_unshaded_W_m2);
    bool DumpReachInsolationData(Shade_a_latorData* pSAL);
 
