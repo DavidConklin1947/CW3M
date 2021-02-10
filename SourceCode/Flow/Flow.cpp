@@ -1053,13 +1053,37 @@ double TopoSetting::DiffuseFrac(double C_I, int jday0)
 } // end of DiffuseFrac()
 
 
-double TopoSetting::ShadeFrac(int jday0)
+double TopoSetting::VegElevE_deg(double direction_deg, double reach_width_m, double veg_ht_m)
+{
+   double veg_elev_deg = 0.;
+   double eff_dir_deg = direction_deg;
+   if (eff_dir_deg > 180.) eff_dir_deg -= 180.;
+
+   double hw_m = reach_width_m / 2.; 
+
+   double theta_deg = abs(90. - eff_dir_deg);
+   double sin_theta = sin(theta_deg * PI / 180.);
+   ASSERT(sin_theta > 0.); if (sin_theta <= 0.) sin_theta = 0.;
+   if (sin_theta == 0.) veg_elev_deg = 0.; // center line of stream runs E-W
+   else
+   { // center line of stream runs NE-SW or SE-NW, including N-S (eff_dir_deg = 0) but not including E-W (eff_dir_deg = 90)
+      double shadow_m = hw_m / sin_theta;
+      double tan_elev = veg_ht_m / shadow_m;
+      veg_elev_deg = atan(tan_elev) * 180. / PI;
+   }
+
+   return(veg_elev_deg);
+ } // end of VegElevE_deg()
+
+
+double TopoSetting::TopoShadeFrac(int jday0, double* pRadSWestimate_W_m2)
 // Integrate over time from solar noon back to sunrise and then from noon to sunset.
 // Calculate direct and diffuse shortwave with and without topographic shading.
 // Uses equations from sec. 2.2.4 Solar Radiation Heat Above Topographic Features, pp. 38-41 in Boyd and Kasper.
 // Uses variable names from Boyd & Kasper.
 {
    int JD = jday0 + 1; // Julian Day as in Boyd in Kasper (aka jday1 in CW3M)
+   double SW_est_J_m2 = 0.;
    double direct_unshaded_kJ_m2 = 0.;
    double net_direct_kJ_m2 = 0.;
    double diffuse_unshaded_kJ_m2 = 0.;
@@ -1090,6 +1114,7 @@ double TopoSetting::ShadeFrac(int jday0)
       {
          double M_A = OpticalAirMassThickness(solar_elev_deg);
          phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
+         SW_est_J_m2 += phi_SRB_W_m2 * delta_t_sec;
          double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
          double D_F = DiffuseFrac(C_I, jday0);
          phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
@@ -1122,6 +1147,7 @@ double TopoSetting::ShadeFrac(int jday0)
       {
          double M_A = OpticalAirMassThickness(solar_elev_deg);
          phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
+         SW_est_J_m2 += phi_SRB_W_m2 * delta_t_sec;
          double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
          double D_F = DiffuseFrac(C_I, jday0);
          phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
@@ -1146,8 +1172,110 @@ double TopoSetting::ShadeFrac(int jday0)
 
    double shade_frac = 1. - (net_direct_kJ_m2 + net_diffuse_kJ_m2) / (direct_unshaded_kJ_m2 + diffuse_unshaded_kJ_m2);
 
+   *pRadSWestimate_W_m2 = SW_est_J_m2 / SEC_PER_DAY;
    return(shade_frac);
-} // end of ShadeFrac()
+} // end of TopoShadeFrac()
+
+
+
+double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
+// Integrate over time from solar noon back to sunrise and then from noon to sunset.
+// Calculate direct and diffuse shortwave with and without topographic and vegetative shading.
+// Uses equations from sec. 2.2.4 Solar Radiation Heat Above Topographic Features, pp. 38-41 in Boyd and Kasper.
+// Uses variable names from Boyd & Kasper.
+{
+   int JD = jday0 + 1; // Julian Day as in Boyd in Kasper (aka jday1 in CW3M)
+   double SW_est_J_m2 = 0.;
+   double direct_unshaded_kJ_m2 = 0.;
+   double diffuse_unshaded_kJ_m2 = 0.;
+   double net_diffuse_kJ_m2 = 0.;
+
+   double delta_t_min = 15; // timestep in minutes
+   double delta_t_hr = delta_t_min / 60.;
+   double delta_t_sec = delta_t_min * 60.;
+   double noon_solar_elev_deg = SolarElev_deg(jday0, 12.); ASSERT(noon_solar_elev_deg > 0.);
+
+   double phi_SRG_W_m2 = 1367.; // global solar flux
+   double phi_SRB_W_m2 = 0.; // total unshaded shortwave, including direct and diffuse
+   double phi_SRB1_W_m2 = 0.; // direct unshaded shortwave
+   double phi_SRD1_W_m2 = 0.; // diffuse unshaded shortwave
+   double azimuth_deg = 0.; // 0 is north.
+
+   double T_A = // atmospheric transmissivity as a function of the day of the year
+      0.0685 * cos((2. * PI / 365.) * (JD + 10.)) + 0.8; // eq. 2-30
+
+   double direct_lost_to_shade_kJ_m2 = 0.;
+   double diffuse_lost_to_shade_kJ_m2 = 0.;
+
+   // First add up the energy from just before solar noon back to sunrise.
+   double solar_elev_deg = noon_solar_elev_deg;
+   double time_hr = 12.;
+   while (solar_elev_deg > 0)
+   {
+      time_hr -= delta_t_hr;
+      solar_elev_deg = SolarElev_deg(jday0, time_hr);
+      if (solar_elev_deg > 0.)
+      {
+         double M_A = OpticalAirMassThickness(solar_elev_deg);
+         phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
+         SW_est_J_m2 += phi_SRB_W_m2 * delta_t_sec;
+         double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
+         double D_F = DiffuseFrac(C_I, jday0);
+         phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
+         phi_SRD1_W_m2 = phi_SRB_W_m2 * D_F;
+         double direct_kJ_m2 = phi_SRB1_W_m2 * delta_t_sec / 1000.;
+         direct_unshaded_kJ_m2 += direct_kJ_m2;
+         double diffuse_kJ_m2 = phi_SRD1_W_m2 * delta_t_sec / 1000.;
+         diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
+
+         double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
+         if (IsTopoShaded(solar_elev_deg, azimuth_deg)) direct_kJ_lost_to_shade += direct_kJ_m2;
+         else if (IsVegShaded(solar_elev_deg, azimuth_deg)) direct_kJ_lost_to_shade += m_vegDensity * direct_kJ_m2;
+       }
+   } // end of loop from noon back to dawn
+   double nominal_sunrise = time_hr;
+   double morning_hours = (12. - delta_t_hr) - time_hr;
+
+   // Now add up the energy at noon and forward until sunset.
+   solar_elev_deg = noon_solar_elev_deg;
+   time_hr = 12.;
+   while (solar_elev_deg > 0)
+   {
+      solar_elev_deg = SolarElev_deg(jday0, time_hr);
+      if (solar_elev_deg > 0.)
+      {
+         double M_A = OpticalAirMassThickness(solar_elev_deg);
+         phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
+         SW_est_J_m2 += phi_SRB_W_m2 * delta_t_sec;
+         double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
+         double D_F = DiffuseFrac(C_I, jday0);
+         phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
+         phi_SRD1_W_m2 = phi_SRB_W_m2 * D_F;
+         double direct_kJ_m2 = phi_SRB1_W_m2 * delta_t_sec / 1000.;
+         direct_unshaded_kJ_m2 += direct_kJ_m2;
+         double diffuse_kJ_m2 = phi_SRD1_W_m2 * delta_t_sec / 1000.;
+         diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
+
+         double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
+         double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
+         if (IsTopoShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
+         else if (IsVegShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
+      }
+
+      time_hr += delta_t_hr;
+   } // end of loop from noon forward to sunset
+   double nominal_sunset = time_hr;
+
+   double net_direct_kJ_m2 = direct_unshaded_kJ_m2 - direct_lost_to_shade_kJ_m2;
+   double net_diffuse_kJ_m2 = diffuse_unshaded_kJ_m2;
+
+   double shade_frac = 1. - (net_direct_kJ_m2 + net_diffuse_kJ_m2) / (direct_unshaded_kJ_m2 + diffuse_unshaded_kJ_m2);
+
+   *pRadSWestimate_W_m2 = SW_est_J_m2 / SEC_PER_DAY;
+   return(shade_frac);
+} // end of VegShadeFrac()
+
+
 
 
 double TopoSetting::SolarDeclination_deg(int jday0)
@@ -1241,38 +1369,53 @@ bool TopoSetting::IsTopoShaded(double solarElev_deg, double solarAzimuth_deg)
 } // end of IsTopoShaded()
 
 
-TopoSetting::TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg = 44.21228, double long_deg = -122.25528)
+TopoSetting::TopoSetting(double elev_m, double topoElevE_deg, double topoElevS_deg, double topoElevW_deg, double lat_deg = 44.21228, double long_deg = -122.25528)
 // 44.21228 N, 122.25528 W is the location of the H.J. Andrews Experimental Forest (44deg 12' 44.2"N, 122deg 15' 19" W)
 {
    m_elev_m = elev_m;
-   m_topoElev_E_deg = topoElev_E_deg;
-   m_topoElev_S_deg = topoElev_S_deg;
-   m_topoElev_W_deg = topoElev_W_deg;
-   double avg_topo_elev_deg = (topoElev_E_deg + topoElev_S_deg + topoElev_W_deg) / 3.;
+   m_topoElevE_deg = topoElevE_deg;
+   m_topoElevS_deg = topoElevS_deg;
+   m_topoElevW_deg = topoElevW_deg;
+   double avg_topo_elev_deg = (topoElevE_deg + topoElevS_deg + topoElevW_deg) / 3.;
    m_topoViewToSky = 1. - avg_topo_elev_deg / 90.;
    m_lat_deg = lat_deg;
    m_long_deg = long_deg;
 } // end of TopoSetting constructor
 
 
-double FlowModel::GetReachTopoShadedSW_W_m2(Reach* pReach, double SW_unshaded_W_m2)
+double FlowModel::GetReachShadedSW_W_m2(Reach* pReach, double SW_unshaded_W_m2)
 {
    double topo_elev_E_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_E, topo_elev_E_deg);
    double topo_elev_S_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_S, topo_elev_S_deg);
    double topo_elev_W_deg; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTOPOELEV_W, topo_elev_W_deg);
-   if (topo_elev_E_deg == 0 && topo_elev_S_deg == 0 && topo_elev_W_deg == 0) return(SW_unshaded_W_m2);
+//x   if (topo_elev_E_deg == 0 && topo_elev_S_deg == 0 && topo_elev_W_deg == 0) return(SW_unshaded_W_m2);
 
    double elev_m2; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachZ_MEAN, elev_m2);
-   TopoSetting topo(elev_m2, topo_elev_E_deg, topo_elev_S_deg, topo_elev_W_deg);
-   double shade_frac = topo.ShadeFrac(m_flowContext.dayOfYear);
+   pReach->m_topo = TopoSetting(elev_m2, topo_elev_E_deg, topo_elev_S_deg, topo_elev_W_deg);
+
+   double rad_sw_est_W_m2 = 0.;
+   double shade_frac = pReach->m_topo.ShadeFrac(m_flowContext.dayOfYear, &rad_sw_est_W_m2);
+//x   double SW_topo_shaded_W_m2 = (1. - topo_shade_frac) * SW_unshaded_W_m2;
+
+   m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachRAD_SW_EST, rad_sw_est_W_m2);
+//   m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSHADE_F, shade_frac);
+
    double shaded_SW_W_m2 = (1. - shade_frac) * SW_unshaded_W_m2;
    
    return(shaded_SW_W_m2);
 } // end of GetReachTopoShadedSW_W_m2()
 
 
-double GetVegShadedSW_W_m2(double vegDensityFrac, double ht2widthRatio, double incoming_W_m2)
+double Reach::GetVegShadedSW_W_m2(double direction_deg, double vegDensityFrac, double reachWidth_m, double vegHt_m, double incoming_W_m2)
 {
+   m_topo.m_vegElevE_deg = m_topo.VegElevE_deg(direction_deg, reachWidth_m, vegHt_m);
+   m_topo.m_vegElevS_deg = m_topo.VegElevS_deg(direction_deg, reachWidth_m, vegHt_m);
+   m_topo.m_vegElevW_deg = m_topo.VegElevW_deg(direction_deg, reachWidth_m, vegHt_m);
+
+   double veg_shade_frac = m_topo.VegShadeFrac(m_flowContext.dayOfYear, &rad_sw_est_W_m2);
+
+
+
    double shade_frac;
    if (ht2widthRatio == 0.) shade_frac = 0.;
    else if (ht2widthRatio < 0.5) shade_frac = 0.25;
@@ -1286,23 +1429,37 @@ double GetVegShadedSW_W_m2(double vegDensityFrac, double ht2widthRatio, double i
 
 double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
 {
-   double topo_shaded_W_m2 = GetReachTopoShadedSW_W_m2(pReach, SW_unshaded_W_m2);
 
    double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
    if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
- 
+
+   double veg_ht_l_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEG_HT_L, veg_ht_l_m);
+   double veg_ht_r_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEG_HT_R, veg_ht_r_m);
+   double veg_ht_m = 0;
+   if (veg_ht_l_m <= 0. && veg_ht_r_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_m);
+   else veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
+
    int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
-   int vegclass = -1;  m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass);
-   int ageclass = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass);
-   double lai = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colLAI, lai);
-   double veg_ht_m = 0.; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colTREE_HT, veg_ht_m);
+   int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
+
+   double lai_reach = 0;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachLAI_REACH, lai_reach);
 
    double Beers_law_k = 0.5;
-   double veg_density_frac = exp(-Beers_law_k * lai);
+   pReach->m_topo.m_vegDensity = 1. - exp(-Beers_law_k * lai_reach);
+   m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEG_DENS, pReach->m_topo.m_vegDensity);
 
-   double ht2width_ratio = veg_ht_m / width_m;
+//x   double ht2width_ratio = veg_ht_m / width_m;
+//x   m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachHT2WIDTH, ht2width_ratio);
 
-   double shaded_W_m2 = GetVegShadedSW_W_m2(veg_density_frac, ht2width_ratio, topo_shaded_W_m2);
+   double direction_deg = 0.;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, direction_deg);
+   pReach->m_topo.m_vegElevE_deg = pReach->m_topo.VegElevE_deg(direction_deg, width_m, veg_ht_m);
+   pReach->m_topo.m_vegElevS_deg = pReach->m_topo.VegElevS_deg(direction_deg, width_m, veg_ht_m);
+   pReach->m_topo.m_vegElevW_deg = pReach->m_topo.VegElevW_deg(direction_deg, width_m, veg_ht_m);
+
+   double shaded_W_m2 = GetReachShadedSW_W_m2(pReach, SW_unshaded_W_m2);
+//x   double shaded_W_m2 = GetShadedSW_W_m2(veg_density_frac, ht2width_ratio, topo_shaded_W_m2);
+//x   double shade_veg = 1. - shaded_W_m2 / topo_shaded_W_m2;
+//x   m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSHADE_VEG, shade_veg);
 
    double shade_coeff = shaded_W_m2 / SW_unshaded_W_m2; 
    m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSHADECOEFF, shade_coeff);
@@ -3250,6 +3407,13 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSHADECOEFF, _T("SHADECOEFF"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_L_IDU, _T("BANK_L_IDU"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachBANK_R_IDU, _T("BANK_R_IDU"), TYPE_INT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_EST, _T("RAD_SW_EST"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachSHADE_TOPO, _T("SHADE_TOPO"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachVEG_DENS, _T("VEG_DENS"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachSHADE_VEG, _T("SHADE_VEG"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachLAI_REACH, _T("LAI_REACH"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachVEGHTREACH, _T("VEGHTREACH"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachHT2WIDTH, _T("HT2WIDTH"), TYPE_DOUBLE, CC_AUTOADD);
 
    m_pReachLayer->CheckCol(m_colReachWIDTHGIVEN, "WIDTHGIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachRADSWGIVEN, "RADSWGIVEN", TYPE_DOUBLE, CC_AUTOADD);
@@ -4002,17 +4166,19 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
             for (int direction = 0; direction < 7; direction++) // NE, E, SE, S, SW, W, NW
             {
-               double veg_ht_accum_m = 0.;
+//               double veg_ht_accum_m = 0.;
+               double veg_ht_max_m = 0.;
                double elv_accum_m = 0.;
                for (int j = 0; j < 9; j++)
                {
                   pData->Get(7 + direction * 9 + j, s, seg_veg_ht_m);
-                  veg_ht_accum_m += seg_frac_of_reach * seg_veg_ht_m;
-
+//x                  veg_ht_accum_m += seg_frac_of_reach * seg_veg_ht_m;
+                  if (seg_veg_ht_m > veg_ht_max_m) veg_ht_max_m = seg_veg_ht_m;
                   float seg_elv_m = 0.f; pData->Get(70 + direction * 9 + j, s, seg_elv_m);
                   elv_m[direction] += seg_frac_of_reach * seg_elv_m;
                } // end of loop on j, sample position relative to center of stream
-               veg_ht_m[direction] = veg_ht_accum_m / 9.;
+//x               veg_ht_m[direction] = veg_ht_accum_m / 9.;
+               veg_ht_m[direction] = veg_ht_max_m;
                elv_m[direction] = elv_accum_m / 9.;
             } // end of loop on direction
          } // end of while (frac_of_reach < 1.)
@@ -5262,6 +5428,19 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
       pReach->m_addedDischarge_cms = 0;
       pReach->m_reachAddedVolumeWP = WaterParcel(0,0);
       pReach->m_nanOccurred = false;
+
+      int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
+      int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
+      double lai_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colLAI, lai_l);
+      double lai_r = -1; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colLAI, lai_r);
+      double lai_reach = (lai_l + lai_r) / 2.;
+      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachLAI_REACH, lai_reach);
+      double veg_ht_l_m = 0.; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colTREE_HT, veg_ht_l_m);
+      double veg_ht_r_m = 0.; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colTREE_HT, veg_ht_r_m);
+      double veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
+      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_m);
+
+
       for (int node_ndx = 0; node_ndx < pReach->GetSubnodeCount(); node_ndx++)
       {
          ReachSubnode * pNode = pReach->GetReachSubnode(node_ndx);

@@ -1397,7 +1397,7 @@ public:
    TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
    ~TopoSetting() {};
 
-   double ShadeFrac(int jday0);
+   double ShadeFrac(int jday0, double * pRadSWestimate_W_m2);
    bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
    double SolarDeclination_deg(int jday0);
    double SolarElev_deg(int jday0, double time_hr);
@@ -1880,6 +1880,13 @@ public:
    int m_colReachSHADECOEFF;
    int m_colReachBANK_L_IDU; // IDU index of IDU representative of the left bank of the reach
    int m_colReachBANK_R_IDU; // IDU index of IDU representative of the right bank of the reach
+   int m_colReachRAD_SW_EST;
+   int m_colReachSHADE_TOPO;
+   int m_colReachVEG_DENS;
+   int m_colReachSHADE_VEG;
+   int m_colReachLAI_REACH;
+   int m_colReachVEGHTREACH;
+   int m_colReachHT2WIDTH;
 
    int m_colReachWIDTHGIVEN;
    int m_colReachRADSWGIVEN;
