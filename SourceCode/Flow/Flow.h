@@ -1509,7 +1509,7 @@ public:
    bool UpdateIDUclimateTemporalAverages(int tau, EnvContext * pContext);
    double MagicReachWaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in reaches.
    double MagicHRUwaterReport_m3(bool msgFlag = false); // Report on NaNs and added amounts in HRUs.
-   double GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreach_ndx, double SW_unshaded_W_m2);
+   double GetReachShade_a_lator_W_m2(Reach* pReach, double SW_unshaded_W_m2);
    bool DumpReachInsolationData(Shade_a_latorData* pSAL);
 
    FDataObj m_SALtable; // Shade-a-lator table 366 rows (jday0) x 61 columns (jday0 + 4 directions x 15 veg ht / stream width ratios)

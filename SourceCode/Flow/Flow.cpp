@@ -1042,12 +1042,14 @@ double TopoSetting::OpticalAirMassThickness(double solarElev_deg)
 
 
 double TopoSetting::DiffuseFrac(double C_I, int jday0)
-{
+{ // Boyd & Kasper eq. 2-35, p. 39.
+   // ??? for C_I ~0.8 this produces non-physical diffuse fractions < 0
    int JD = jday0 + 1; // Julian Day as in Boyd in Kasper (aka jday1 in CW3M)
    
    double D_F = (0.938 + 1.071 * C_I) - (5.14 * C_I * C_I) + (2.98 * C_I * C_I * C_I)
       - (sin(2. * PI * (JD - 40) / 365)) * (0.009 - 0.078 * C_I);
 
+   if (D_F < 0.) D_F = 0.;
    return(D_F);
 } // end of DiffuseFrac()
 
@@ -1318,7 +1320,7 @@ TopoSetting::TopoSetting(double elev_m, double topoElevE_deg, double topoElevS_d
 } // end of TopoSetting constructor
 
 
-double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, double SW_unshaded_W_m2)
+double FlowModel::GetReachShade_a_lator_W_m2(Reach* pReach, double SW_unshaded_W_m2)
 {
 
    double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
@@ -1335,13 +1337,9 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
 
    double lai_reach = 0;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachLAI_REACH, lai_reach);
 
-   double Beers_law_k = 0.5;
-   pReach->m_topo.m_vegDensity = 1. - exp(-Beers_law_k * lai_reach);
+   pReach->m_topo.m_vegDensity = VegDensity(lai_reach); // = 1. - exp(-Beers_law_k * lai_reach);
    m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEG_DENS, pReach->m_topo.m_vegDensity);
 
-   double direction_deg = 0.;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, direction_deg);
-   pReach->m_topo.m_vegElevEW_deg = pReach->m_topo.VegElevEW_deg(direction_deg, width_m, veg_ht_m);
-   pReach->m_topo.m_vegElevNS_deg = pReach->m_topo.VegElevNS_deg(direction_deg, width_m, veg_ht_m);
 
    double rad_sw_est_W_m2 = 0.;
    double shade_frac = pReach->m_topo.ShadeFrac(m_flowContext.dayOfYear, &rad_sw_est_W_m2);
@@ -1351,7 +1349,7 @@ double FlowModel::GetSubreachShade_a_lator_W_m2(Reach* pReach, int subreachNdx, 
 
    double shaded_SW_W_m2 = shade_coeff * SW_unshaded_W_m2;
    return(shaded_SW_W_m2);
-} // end of GetSubreachShade_a_lator_W_m2()
+} // end of GetReachShade_a_lator_W_m2()
 
 
 double Reach::GetSubreachViewToSky_frac(int subreachNdx)
@@ -5459,22 +5457,10 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
    {
       Reach* pReach = m_reachArray[reach_ndx];
 
-      int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
-      int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
-      double lai_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colLAI, lai_l);
-      double lai_r = -1; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colLAI, lai_r);
-      double lai_reach = (lai_l + lai_r) / 2.;
-      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachLAI_REACH, lai_reach);
-      pReach->m_topo.m_vegDensity = VegDensity(lai_reach);
-
-      double veg_ht_l_m = 0.; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colTREE_HT, veg_ht_l_m);
-      double veg_ht_r_m = 0.; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colTREE_HT, veg_ht_r_m);
-      double veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
-      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_m);
-
       double width_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
       if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
       double direction_deg = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, direction_deg);
+      double veg_ht_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_m);
       pReach->m_topo.m_vegElevEW_deg = pReach->m_topo.VegElevEW_deg(direction_deg, width_m, veg_ht_m);
       pReach->m_topo.m_vegElevNS_deg = pReach->m_topo.VegElevNS_deg(direction_deg, width_m, veg_ht_m);
    } // end of loop thru reaches
