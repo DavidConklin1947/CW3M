@@ -330,7 +330,7 @@
                var_name="wind_speed" units="m/s" />
     </climate_scenario>
 -->
-    <climate_scenario name="BaselineGridMultiyearFiles" id="14" maxDaysInClimateYear="366" firstYear="1979" lastYear="2020" NetCDF_row_0_location_N_or_S="S" >
+    <climate_scenario name="BaselineGridMultiyearFiles" id="14" maxDaysInClimateYear="366" firstYear="1979" lastYear="2020" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2020.nc"
                var_name="precipitation_amount" units="mm" />
