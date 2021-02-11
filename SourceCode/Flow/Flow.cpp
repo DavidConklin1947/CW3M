@@ -1132,7 +1132,7 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
       time_hr += delta_t_hr;
       solar_elev_deg = SolarElev_deg(jday0, time_hr);
    } // end of loop from noon forward to sunset
-/
+
    double net_direct_kJ_m2 = direct_unshaded_kJ_m2 - direct_lost_to_shade_kJ_m2;
    double net_diffuse_kJ_m2 = diffuse_unshaded_kJ_m2;
 
@@ -13677,6 +13677,7 @@ bool FlowModel::OpenClimateDataFiles(int tgtYear)
       // Open this input file.
       CString msg;
       msg.Format("Opening Climate file %s", filePathAndName.GetString());
+      Report::LogMsg(msg);
       int rtnval = 0;
       pInfo->m_ncid = -1;
       pInfo->m_mostRecentIndexYear = -1; // A calendar year will go here

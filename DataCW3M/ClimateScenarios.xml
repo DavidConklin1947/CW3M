@@ -308,7 +308,7 @@
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_2000-09_multiyear\UofIMETDATA_wind_speed_2000-2009.nc"
                var_name="wind_speed" units="m/s" />
     </climate_scenario>
-
+<!--
     <climate_scenario name="BaselineGridMultiyearFiles" id="14" maxDaysInClimateYear="366" firstYear="1979" lastYear="2018" NetCDF_row_0_location_N_or_S="S" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2018.nc"
@@ -329,8 +329,28 @@
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2018.nc"
                var_name="wind_speed" units="m/s" />
     </climate_scenario>
-
-<!--
+-->
+    <climate_scenario name="BaselineGridMultiyearFiles" id="14" maxDaysInClimateYear="366" firstYear="1979" lastYear="2020" NetCDF_row_0_location_N_or_S="S" >
+      <climate type="precip"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_precipitation_amount_1979-2020.nc"
+               var_name="precipitation_amount" units="mm" />
+      <climate type="tmax"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_max_air_temperature_1979-2020.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="tmin"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_min_air_temperature_1979-2020.nc"
+               var_name="air_temperature" units="K" />
+      <climate type="humidity"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_specific_humidity_1979-2020.nc"
+               var_name="specific_humidity" units="kg/kg" />
+      <climate type="solrad"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_1979-2020.nc"
+               var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
+      <climate type="windspd"
+               path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\UofIMETDATA_wind_speed_1979-2020.nc"
+               var_name="wind_speed" units="m/s" />
+    </climate_scenario>
+    <!--
     <climate_scenario name="BaselineGridMultiyearFiles" id="14" maxDaysInClimateYear="366" firstYear="1979" lastYear="2019" NetCDF_row_0_location_N_or_S="S" >
       <climate type="precip"
                path="\WeatherOnGrids\trunk\ActualWeather\WRB_4km_1979-latest\gridmet_precipitation_amount_1979-2020.nc"
