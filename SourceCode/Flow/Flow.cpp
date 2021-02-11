@@ -980,55 +980,9 @@ double Reach::LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC) // returns MJ
 
 double VegDensity(double lai)
 {
-   double veg_density = exp(-BEERS_LAW_K * lai);
+   double veg_density = 1. - exp(-BEERS_LAW_K * lai);
    return(veg_density);
 } // end of VegDensity()
-
-
-double VegShade(double streamWidth_m, double angleFromBankAcrossStream_deg, double height_m, double overhang_m, double densityFrac, int julianDay)
-{
-   // ??? placeholder
-   // Do the math for the case where the reach runs N-S, the veg is on the east bank, the veg height is the same as the stream width, and the density fraction is 1.
-   // When the sun is due east and 45 deg above the eastern horizon, then the veg shadow extends just across to the other bank.
-   // When the sun rises to 60 deg above the horizon, then the shadow extends only sin(30 deg) = 0.5 halfway across the stream.
-   // So the shadow extends sin(90 - sun_angle_above_horizon) * veg_height.
-   // What about if the veg is shorter than the width of the stream?
-   // Heuristic: downscale the shade by veg_ht / stream_width.
-
-   double shade_frac_guess = 0.25;
-   return(shade_frac_guess);
-
-
-} // end of VegShade()
-
-
-double TopoShade(int jday0, double latitude_deg, double topoelev_e, double topoelev_s, double topoelev_w)
-{
-   return(0.1); // ??? placeholder
-} // end of TopoShade()
-
-
-int RatioIndex(double ratio)
-{
-   int ndx;
-   if (ratio <= 0.01) ndx = 0;
-   else if (ratio <= 0.05) ndx = 1;
-   else if (ratio <= 0.1) ndx = 2;
-   else if (ratio <= 0.2) ndx = 3;
-   else if (ratio <= 0.3) ndx = 4;
-   else if (ratio <= 0.4) ndx = 5;
-   else if (ratio <= 0.5) ndx = 6;
-   else if (ratio <= 0.6) ndx = 7;
-   else if (ratio <= 0.7) ndx = 8;
-   else if (ratio <= 0.8) ndx = 9;
-   else if (ratio <= 0.9) ndx = 10;
-   else if (ratio <= 1.0) ndx = 11;
-   else if (ratio <= 1.25) ndx = 12;
-   else if (ratio <= 1.5) ndx = 13;
-   else ndx = 14;
-
-   return(ndx);
-} // end of RatioIndex()
 
 
 double TopoSetting::OpticalAirMassThickness(double solarElev_deg)
@@ -1116,7 +1070,6 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
    double delta_t_min = 15; // timestep in minutes
    double delta_t_hr = delta_t_min / 60.;
    double delta_t_sec = delta_t_min * 60.;
-   double noon_solar_elev_deg = SolarElev_deg(jday0, 12.); ASSERT(noon_solar_elev_deg > 0.);
 
    double phi_SRG_W_m2 = 1367.; // global solar flux
    double phi_SRB_W_m2 = 0.; // total unshaded shortwave, including direct and diffuse
@@ -1131,63 +1084,55 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
    double diffuse_lost_to_shade_kJ_m2 = 0.;
 
    // First add up the energy from just before solar noon back to sunrise.
-   double solar_elev_deg = noon_solar_elev_deg;
-   double time_hr = 12.;
+   double time_hr = 12. - delta_t_hr;
+   double solar_elev_deg = SolarElev_deg(jday0, time_hr);
    while (solar_elev_deg > 0)
    {
+      double M_A = OpticalAirMassThickness(solar_elev_deg);
+      phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
+      SW_est_J_m2 += phi_SRB_W_m2 * delta_t_sec;
+      double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
+      double D_F = DiffuseFrac(C_I, jday0);
+      phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
+      phi_SRD1_W_m2 = phi_SRB_W_m2 * D_F;
+      double direct_kJ_m2 = phi_SRB1_W_m2 * delta_t_sec / 1000.;
+      direct_unshaded_kJ_m2 += direct_kJ_m2;
+      double diffuse_kJ_m2 = phi_SRD1_W_m2 * delta_t_sec / 1000.;
+      diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
+
+      double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
+      if (IsTopoShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
+      else if (IsVegShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
+
       time_hr -= delta_t_hr;
       solar_elev_deg = SolarElev_deg(jday0, time_hr);
-      if (solar_elev_deg > 0.)
-      {
-         double M_A = OpticalAirMassThickness(solar_elev_deg);
-         phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
-         SW_est_J_m2 += phi_SRB_W_m2 * delta_t_sec;
-         double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
-         double D_F = DiffuseFrac(C_I, jday0);
-         phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
-         phi_SRD1_W_m2 = phi_SRB_W_m2 * D_F;
-         double direct_kJ_m2 = phi_SRB1_W_m2 * delta_t_sec / 1000.;
-         direct_unshaded_kJ_m2 += direct_kJ_m2;
-         double diffuse_kJ_m2 = phi_SRD1_W_m2 * delta_t_sec / 1000.;
-         diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
-
-         double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
-         if (IsTopoShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
-         else if (IsVegShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
-       }
    } // end of loop from noon back to dawn
-   double nominal_sunrise = time_hr;
-   double morning_hours = (12. - delta_t_hr) - time_hr;
 
    // Now add up the energy at noon and forward until sunset.
-   solar_elev_deg = noon_solar_elev_deg;
    time_hr = 12.;
+   solar_elev_deg = SolarElev_deg(jday0, time_hr);
    while (solar_elev_deg > 0)
    {
-      solar_elev_deg = SolarElev_deg(jday0, time_hr);
-      if (solar_elev_deg > 0.)
-      {
-         double M_A = OpticalAirMassThickness(solar_elev_deg);
-         phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
-         SW_est_J_m2 += phi_SRB_W_m2 * delta_t_sec;
-         double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
-         double D_F = DiffuseFrac(C_I, jday0);
-         phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
-         phi_SRD1_W_m2 = phi_SRB_W_m2 * D_F;
-         double direct_kJ_m2 = phi_SRB1_W_m2 * delta_t_sec / 1000.;
-         direct_unshaded_kJ_m2 += direct_kJ_m2;
-         double diffuse_kJ_m2 = phi_SRD1_W_m2 * delta_t_sec / 1000.;
-         diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
+      double M_A = OpticalAirMassThickness(solar_elev_deg);
+      phi_SRB_W_m2 = phi_SRG_W_m2 * pow(T_A, M_A); // * (1 - 0.65 * C_L^2) cloudiness can be ignored here
+      SW_est_J_m2 += phi_SRB_W_m2 * delta_t_sec;
+      double C_I = phi_SRB_W_m2 / phi_SRG_W_m2; // clearness index, eq. 2-34
+      double D_F = DiffuseFrac(C_I, jday0);
+      phi_SRB1_W_m2 = phi_SRB_W_m2 * (1. - D_F);
+      phi_SRD1_W_m2 = phi_SRB_W_m2 * D_F;
+      double direct_kJ_m2 = phi_SRB1_W_m2 * delta_t_sec / 1000.;
+      direct_unshaded_kJ_m2 += direct_kJ_m2;
+      double diffuse_kJ_m2 = phi_SRD1_W_m2 * delta_t_sec / 1000.;
+      diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
 
-         double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
-         if (IsTopoShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
-         else if (IsVegShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
-      }
+      double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
+      if (IsTopoShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
+      else if (IsVegShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
 
       time_hr += delta_t_hr;
+      solar_elev_deg = SolarElev_deg(jday0, time_hr);
    } // end of loop from noon forward to sunset
-   double nominal_sunset = time_hr;
-
+/
    double net_direct_kJ_m2 = direct_unshaded_kJ_m2 - direct_lost_to_shade_kJ_m2;
    double net_diffuse_kJ_m2 = diffuse_unshaded_kJ_m2;
 
@@ -1273,7 +1218,6 @@ double TopoSetting::SolarAzimuth_deg(int jday, double time_hr) // 0 deg is north
 } // end of SolarAzimuth_deg()
 
 
-
 bool TopoSetting::IsTopoShaded(double solarElev_deg, double solarAzimuth_deg)
 {
    // Interpolate the topographic elevation in the direction of the sun.
@@ -1285,7 +1229,8 @@ bool TopoSetting::IsTopoShaded(double solarElev_deg, double solarAzimuth_deg)
    else if (solarAzimuth_deg < 270.) topo_elev_deg = m_topoElevS_deg + ((solarAzimuth_deg - 180.) / 90.) * (m_topoElevW_deg - m_topoElevS_deg);
    else topo_elev_deg = m_topoElevW_deg + ((solarAzimuth_deg - 270.) / 90.) * (topo_elev_N_deg - m_topoElevW_deg);
 
-   return(topo_elev_deg >= solarElev_deg);
+   bool return_val = topo_elev_deg >= solarElev_deg;
+   return(return_val);
 } // end of IsTopoShaded()
 
 
@@ -1293,14 +1238,14 @@ bool TopoSetting::IsVegShaded(double solarElev_deg, double solarAzimuth_deg)
 {
    // Interpolate the veg elevation in the direction of the sun.
    ASSERT(0. <= solarAzimuth_deg && solarAzimuth_deg < 360.);
-   double veg_elev_N_deg = m_vegElevNS_deg;
    double veg_elev_deg;
    if (solarAzimuth_deg < 90.) veg_elev_deg = m_vegElevNS_deg + (solarAzimuth_deg / 90.) * (m_vegElevEW_deg - m_vegElevNS_deg);
    else if (solarAzimuth_deg < 180.) veg_elev_deg = m_vegElevEW_deg + ((solarAzimuth_deg - 90.) / 90.) * (m_vegElevNS_deg - m_vegElevEW_deg);
    else if (solarAzimuth_deg < 270.) veg_elev_deg = m_vegElevNS_deg + ((solarAzimuth_deg - 180.) / 90.) * (m_vegElevEW_deg - m_vegElevNS_deg);
    else veg_elev_deg = m_vegElevEW_deg + ((solarAzimuth_deg - 270.) / 90.) * (m_vegElevNS_deg - m_vegElevEW_deg);
 
-   return(veg_elev_deg >= solarElev_deg);
+   bool return_val = veg_elev_deg >= solarElev_deg;
+   return(return_val);
 } // end of IsTopoShaded()
 
 
@@ -3297,7 +3242,6 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSHADE_VEG, _T("SHADE_VEG"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachLAI_REACH, _T("LAI_REACH"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachVEGHTREACH, _T("VEGHTREACH"), TYPE_DOUBLE, CC_AUTOADD);
-   EnvExtension::CheckCol(m_pStreamLayer, m_colReachHT2WIDTH, _T("HT2WIDTH"), TYPE_DOUBLE, CC_AUTOADD);
 
    m_pReachLayer->CheckCol(m_colReachWIDTHGIVEN, "WIDTHGIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachRADSWGIVEN, "RADSWGIVEN", TYPE_DOUBLE, CC_AUTOADD);

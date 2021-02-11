@@ -1892,7 +1892,6 @@ public:
    int m_colReachSHADE_VEG;
    int m_colReachLAI_REACH;
    int m_colReachVEGHTREACH;
-   int m_colReachHT2WIDTH;
 
    int m_colReachWIDTHGIVEN;
    int m_colReachRADSWGIVEN;

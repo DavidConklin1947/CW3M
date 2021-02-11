@@ -120,7 +120,6 @@
       <output name="23772865 VEG_HT_L (m)" query="COMID=23772865" value="VEG_HT_L" type="sum" domain="reach" />
       <output name="23772865 VEG_HT_R (m)" query="COMID=23772865" value="VEG_HT_R" type="sum" domain="reach" />
       <output name="23772865 VEGHTREACH (m)" query="COMID=23772865" value="VEGHTREACH" type="sum" domain="reach" />
-      <output name="23772865 HT2WIDTH" query="COMID=23772865" value="HT2WIDTH" type="sum" domain="reach" />
       <output name="23772863 DIRECTION (deg)" query="COMID=23772863" value="DIRECTION" type="sum" domain="reach" />
       <output name="23772863 SHADECOEFF" query="COMID=23772863" value="SHADECOEFF" type="sum" domain="reach" />
       <output name="23772863 SHADE_TOPO" query="COMID=23772863" value="SHADE_TOPO" type="sum" domain="reach" />
@@ -138,7 +137,6 @@
       <output name="23772863 VEG_HT_L (m)" query="COMID=23772863" value="VEG_HT_L" type="sum" domain="reach" />
       <output name="23772863 VEG_HT_R (m)" query="COMID=23772863" value="VEG_HT_R" type="sum" domain="reach" />
       <output name="23772863 VEGHTREACH (m)" query="COMID=23772863" value="VEGHTREACH" type="sum" domain="reach" />
-      <output name="23772863 HT2WIDTH" query="COMID=23772863" value="HT2WIDTH" type="sum" domain="reach" />
       <output name="23772861 DIRECTION (deg)" query="COMID=23772861" value="DIRECTION" type="sum" domain="reach" />
       <output name="23772861 SHADECOEFF" query="COMID=23772861" value="SHADECOEFF" type="sum" domain="reach" />
       <output name="23772861 SHADE_TOPO" query="COMID=23772861" value="SHADE_TOPO" type="sum" domain="reach" />
@@ -156,7 +154,6 @@
       <output name="23772861 VEG_HT_L (m)" query="COMID=23772861" value="VEG_HT_L" type="sum" domain="reach" />
       <output name="23772861 VEG_HT_R (m)" query="COMID=23772861" value="VEG_HT_R" type="sum" domain="reach" />
       <output name="23772861 VEGHTREACH (m)" query="COMID=23772861" value="VEGHTREACH" type="sum" domain="reach" />
-      <output name="23772861 HT2WIDTH" query="COMID=23772861" value="HT2WIDTH" type="sum" domain="reach" />
     </output_group>
     
     <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
