@@ -216,6 +216,7 @@ public:
    float time;             // time, in days. since the start of a run
    float timeStep;         // current time step used by the model
    int   dayOfYear;        // 0-based day of year
+   bool m_SALmode; // Shade-a-lator mode
 
    HRULayer  *pHRULayer;   // memory managed elsewhere
    HRU       *pHRU;        // memory managed elsewhere

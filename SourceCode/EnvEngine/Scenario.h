@@ -156,8 +156,11 @@ public:
    double m_reachesLength_m;
    CString m_output_file_name;
    FDataObj m_SALoutputData;
-   SYSDATE m_startDate;
+   SYSDATE m_startDate, m_endDate;
    int m_numCols;
+   double m_canopyDensity_pct;
+   double m_heightThreshold_m;
+   double m_futureHeight_m;
 }; // end of class Shade_a_latorData
 
 

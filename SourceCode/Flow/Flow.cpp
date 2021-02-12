@@ -5420,8 +5420,118 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
 
    GlobalMethodManager::StartStep( &m_flowContext );  // Calls any global methods with ( m_timing & GMT_START_STEP ) == true
 
+   m_pReachLayer->SetColDataU(m_colReachRADSWGIVEN, 0);
+   Scenario* pSimulationScenario = pFlowContext->pEnvContext->pEnvModel->GetScenario();
+   Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
+   SYSDATE current_date = pFlowContext->pEnvContext->m_simDate;
+   if (m_flowContext.m_SALmode 
+      && !DateComesBefore(current_date, pSAL->m_startDate) 
+      && !DateComesBefore(pSAL->m_endDate, current_date))
+   { // Read Shade-a-lator output data file
+      FDataObj* pData = &(pSAL->m_SALoutputData);
+
+      // Shade-a-lator "Processed_kcal_transposed" files have one row for each stream segment and one column for each day in the study period.
+      // The row headers are the river kilometers of the downstream ends of the segments, in order from upstream to downstream.
+      // The column headers are dates, for example "2019-11-01"
+      // This block of code will read the column for the current date, aggregate the kcal values for the segments 
+      // into kJ values for the reaches, convert to W/m2 using Reach attribute WIDTHGIVEN, and store the values into the Reach layer attribute RADSWGIVEN.
+
+      int days_since_start_date = DaysBetweenDates(pSAL->m_startDate, current_date);
+      int tgt_col = days_since_start_date + 1; // data for start date is in col 1
+      ASSERT(tgt_col >= 1 &&  pData->GetColCount() > tgt_col);
+      // Get the SAL output data for the current date 
+      int data_rows = pData->GetRowCount();
+      Reach* pReach_upstream = pSAL->m_pReach_upstream;
+      int reach_ct = pSAL->m_reachCt;
+
+      // "final segment" here means the most upstream segment; its data is in row 0
+      // river kilometers increase in the upstream direction
+      float downstream_end_of_final_segment_km; pData->Get(0, 0, downstream_end_of_final_segment_km);
+      float downstream_end_of_first_segment_km; pData->Get(0, data_rows - 1, downstream_end_of_first_segment_km);
+      double adj_SAL_len_m = // adjusted Shade-a-lator length in meters = Shade-a-lator length not counting the final segment
+      1000. * ((double)downstream_end_of_final_segment_km - (double)downstream_end_of_first_segment_km);
+
+      // Make sure the Shade-a-lator segments overlap the upstream reach entirely.
+      // Since we don't know for sure how long the final segment in row 0 is, start with row 1.
+      ASSERT(data_rows >= 2);
+      int row = 1; // index to Shade-a-lator river segment
+      // The upper end of the segment in row 1 is the lower end of the final segment in row 0.
+      float segment_upstream_end_km = downstream_end_of_final_segment_km;
+      float segment_downstream_end_km; pData->Get(0, 1, segment_downstream_end_km);
+
+      double reach_upstream_end_km = pSAL->m_reachesLength_m / 1000.; // ??? This only works when the downstream end is at river mile 0.
+      Reach* pReach = pReach_upstream;
+      while (reach_upstream_end_km > segment_upstream_end_km)
+      { // Move downstream by one reach.
+         reach_upstream_end_km -= pReach->m_length / 1000.;
+         pReach = GetReachFromNode(pReach->m_pDown);
+         ASSERT(pReach != NULL);
+      }
+      double reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
+      // Now we have assured that the upstream segment goes at least as far upstream as the current reach.
+
+      // For each reach, average the Shade-a-lator data over all the segments which overlap it.
+      double below_the_bottom_m = 0.;
+      double reach_kcal = 0.;
+      float seg_kcal = 0.;
+      double segment_len_m = 0.;
+      while (pReach != NULL && row < data_rows)
+      {
+         double frac_of_reach = 0.;
+         reach_kcal = 0;
+         while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows) // frac_of_reach < 1. && row < data_rows)
+         {
+            segment_len_m = ((double)segment_upstream_end_km - (double)segment_downstream_end_km) * 1000.;
+            // What part of this segment overlaps the current reach?
+            double over_the_top_m = (segment_upstream_end_km > reach_upstream_end_km) ?
+               (segment_upstream_end_km - reach_upstream_end_km) * 1000. : 0;
+            below_the_bottom_m = (segment_downstream_end_km < reach_downstream_end_km) ?
+               (reach_downstream_end_km - segment_downstream_end_km) * 1000. : 0;
+            double overlap_m = segment_len_m - over_the_top_m - below_the_bottom_m;
+            if (overlap_m > 0.)
+            {
+               pData->Get(tgt_col, row, seg_kcal);
+               double seg_contrib_to_reach_kcal = (overlap_m / segment_len_m) * seg_kcal;
+               reach_kcal += seg_contrib_to_reach_kcal;
+               frac_of_reach += overlap_m / pReach->m_length;
+            }
+
+            if (segment_downstream_end_km >= reach_downstream_end_km) // (frac_of_reach < 1.)
+            { // The downstream end of this segment is within the reach
+               ASSERT(below_the_bottom_m == 0.);
+               row++;
+               ASSERT(row <= data_rows);
+               segment_upstream_end_km = segment_downstream_end_km;
+               if (row < data_rows) pData->Get(0, row, segment_downstream_end_km);
+               else segment_downstream_end_km = segment_upstream_end_km;
+            }
+            // else go on to the next reach without advancing to the next segment.
+         } // end of while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows)
+         ASSERT(close_enough(frac_of_reach, 1., 1e-7));
+         ASSERT(row <= data_rows);
+
+         // Convert kcal to W/m2, using Reach attribute WIDTHGIVEN, which is derived from the Shade-a-lator input file.
+         double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
+         double reach_surface_area_m2 = width_m * pReach->m_length;
+         double kJ = 4.184 * reach_kcal;
+         double J_m2 = kJ * 1000. / reach_surface_area_m2;
+         double W_m2 = J_m2 / SEC_PER_DAY;
+
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachRADSWGIVEN, W_m2);
+
+         if (pReach->m_reachID == pSAL->m_comid_downstream) pReach = NULL;
+         else pReach = GetReachFromNode(pReach->m_pDown);
+         if (pReach != NULL)
+         {
+            reach_upstream_end_km = reach_downstream_end_km;
+            reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
+         }
+      } // end of while (pReach != NULL && row < data_rows)
+
+   } // end of block to get the SAL output data for the current date
+ 
    return true;
-   }
+} // end of FlowModel::StartStep()
 
 
 bool FlowModel::EndStep( FlowContext *pFlowContext )
@@ -5488,117 +5598,10 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
    } // end of loop thru the Reach layer
 
    MagicReachWaterReport_m3(false); // Calculate ADDED_VOL and ADDED_Q.
-
-///////////////// Read Shade-a-lator output data file ////////////////////////////////////
    Scenario* pSimulationScenario = pFlowContext->pEnvContext->pEnvModel->GetScenario();
    Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
    FDataObj* pData = &(pSAL->m_SALoutputData);
-   // Shade-a-lator "Processed_kcal_transposed" files have one row for each stream segment and one column for each day in the study period.
-   // The row headers are the river kilometers of the downstream ends of the segments, in order from upstream to downstream.
-   // The column headers are dates, for example "2019-11-01"
-   // This block of code will read the column for the current date, aggregate the kcal values for the segments 
-   // into kJ values for the reaches, convert to W/m2 using Reach attribute WIDTHGIVEN, and store the values into the Reach layer attribute RADSWGIVEN.
-
-   SYSDATE start_date = pSAL->m_startDate;
-   SYSDATE current_date = pFlowContext->pEnvContext->m_simDate;
-   int days_since_start_date = DaysBetweenDates(start_date, current_date);
-   int tgt_col = days_since_start_date + 1; // data for start date is in col 1
-   if (tgt_col < 1 || pData->GetColCount() <= tgt_col) m_pReachLayer->SetColDataU(m_colReachRADSWGIVEN, 0);
-   else
-   { // Get the SAL output data for the current date 
-
-      int data_rows = pData->GetRowCount();
-      Reach* pReach_upstream = pSAL->m_pReach_upstream; 
-      int reach_ct = pSAL->m_reachCt;
-
-      // "final segment" here means the most upstream segment; its data is in row 0
-      // river kilometers increase in the upstream direction
-      float downstream_end_of_final_segment_km; pData->Get(0, 0, downstream_end_of_final_segment_km);
-      float downstream_end_of_first_segment_km; pData->Get(0, data_rows - 1, downstream_end_of_first_segment_km);
-      double adj_SAL_len_m = // adjusted Shade-a-lator length in meters = Shade-a-lator length not counting the final segment
-         1000. * ((double)downstream_end_of_final_segment_km - (double)downstream_end_of_first_segment_km);
-
-      // Make sure the Shade-a-lator segments overlap the upstream reach entirely.
-      // Since we don't know for sure how long the final segment in row 0 is, start with row 1.
-      ASSERT(data_rows >= 2);
-      int row = 1; // index to Shade-a-lator river segment
-      // The upper end of the segment in row 1 is the lower end of the final segment in row 0.
-      float segment_upstream_end_km = downstream_end_of_final_segment_km;
-      float segment_downstream_end_km; pData->Get(0, 1, segment_downstream_end_km);
-
-      double reach_upstream_end_km = pSAL->m_reachesLength_m / 1000.; // ??? This only works when the downstream end is at river mile 0.
-      Reach* pReach = pReach_upstream;
-      while (reach_upstream_end_km > segment_upstream_end_km)
-      { // Move downstream by one reach.
-         reach_upstream_end_km -= pReach->m_length / 1000.;
-         pReach = GetReachFromNode(pReach->m_pDown);
-         ASSERT(pReach != NULL);
-      }
-      double reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
-      // Now we have assured that the upstream segment goes at least as far upstream as the current reach.
-
-      // For each reach, average the Shade-a-lator data over all the segments which overlap it.
-      double below_the_bottom_m = 0.;
-      double reach_kcal = 0.;
-      float seg_kcal = 0.;
-      double segment_len_m = 0.;
-      while (pReach != NULL && row < data_rows)
-      {
-         double frac_of_reach = 0.;
-         reach_kcal = 0; 
-         while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows) // frac_of_reach < 1. && row < data_rows)
-         {
-            segment_len_m = ((double)segment_upstream_end_km - (double)segment_downstream_end_km) * 1000.;
-            // What part of this segment overlaps the current reach?
-            double over_the_top_m = (segment_upstream_end_km > reach_upstream_end_km) ?
-               (segment_upstream_end_km - reach_upstream_end_km) * 1000. : 0;
-            below_the_bottom_m = (segment_downstream_end_km < reach_downstream_end_km) ?
-               (reach_downstream_end_km - segment_downstream_end_km) * 1000. : 0;
-            double overlap_m = segment_len_m - over_the_top_m - below_the_bottom_m;
-            if (overlap_m > 0.)
-            {
-               pData->Get(tgt_col, row, seg_kcal);
-               double seg_contrib_to_reach_kcal = (overlap_m / segment_len_m) * seg_kcal;
-               reach_kcal += seg_contrib_to_reach_kcal;
-               frac_of_reach += overlap_m / pReach->m_length;
-            }
-
-            if (segment_downstream_end_km >= reach_downstream_end_km) // (frac_of_reach < 1.)
-            { // The downstream end of this segment is within the reach
-               ASSERT(below_the_bottom_m == 0.);
-               row++;
-               ASSERT(row <= data_rows);
-               segment_upstream_end_km = segment_downstream_end_km;
-               if (row < data_rows) pData->Get(0, row, segment_downstream_end_km);
-               else segment_downstream_end_km = segment_upstream_end_km;
-            }
-            else break; // Go on to the next reach without advancing to the next segment.
-         } // end of while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows)
-         ASSERT(close_enough(frac_of_reach, 1., 1e-7));
-         ASSERT(row <= data_rows);
- 
-         // Convert kcal to W/m2, using Reach attribute WIDTHGIVEN, which is derived from the Shade-a-lator input file.
-         double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
-         double reach_surface_area_m2 = width_m * pReach->m_length;
-         double kJ = 4.184 * reach_kcal;
-         double J_m2 = kJ * 1000. / reach_surface_area_m2;
-         double W_m2 = J_m2 / SEC_PER_DAY;
-
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachRADSWGIVEN, W_m2);
-
-         if (pReach->m_reachID == pSAL->m_comid_downstream) pReach = NULL;
-         else pReach = GetReachFromNode(pReach->m_pDown);
-         if (pReach != NULL)
-         {
-            reach_upstream_end_km = reach_downstream_end_km;
-            reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
-         }
-      } // end of while (pReach != NULL && row < data_rows)
-
-      DumpReachInsolationData(pSAL);
-   } // end of block to get the SAL output data for the current date
-
-//////////////// end of code for reading SAL output data file ///////////////////////////
+   DumpReachInsolationData(pSAL);
 
    return true;
 } // end of FlowModel::EndStep()

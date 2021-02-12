@@ -973,9 +973,23 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
       int SAL_start_month;  pXmlScenario->Attribute("SAL_start_month", &SAL_start_month);
       int SAL_start_day;  pXmlScenario->Attribute("SAL_start_day", &SAL_start_day);
       pScenario->m_shadeAlatorData.m_startDate = SYSDATE(SAL_start_month, SAL_start_day, SAL_start_year);
-//x      pScenario->m_shadeAlatorData.m_startYear = SAL_start_year;
-//x      pScenario->m_shadeAlatorData.m_startMonth = SAL_start_month;
-//x      pScenario->m_shadeAlatorData.m_startDay = SAL_start_day;
+      int SAL_end_year;  pXmlScenario->Attribute("SAL_end_year", &SAL_end_year);
+      int SAL_end_month;  pXmlScenario->Attribute("SAL_end_month", &SAL_end_month);
+      int SAL_end_day;  pXmlScenario->Attribute("SAL_end_day", &SAL_end_day);
+      pScenario->m_shadeAlatorData.m_endDate = SYSDATE(SAL_end_month, SAL_end_day, SAL_end_year);
+
+      double canopy_density_pct = 0; pXmlScenario->Attribute("SAL_canopy_density", &canopy_density_pct);
+      pScenario->m_shadeAlatorData.m_canopyDensity_pct = canopy_density_pct;
+      double height_threshold_m = 0;
+      const char* height_threshold_attribute = pXmlScenario->Attribute("SAL_height_threshold_m", &height_threshold_m);
+      double future_height_m = 0;
+      const char* future_height_attribute = pXmlScenario->Attribute("SAL_future_height_m", &future_height_m);
+      if (height_threshold_attribute != NULL && future_height_attribute != NULL)
+      {
+         pScenario->m_shadeAlatorData.m_heightThreshold_m = height_threshold_m;
+         pScenario->m_shadeAlatorData.m_futureHeight_m = future_height_m;
+      }
+
 
       //NormalizeWeights( pScenario->m_actorAltruismWt, pScenario->m_actorSelfInterestWt, pScenario->m_policyPrefWt );
       TiXmlNode *pXmlDescNode = pXmlScenarioNode->FirstChild( "description" );
