@@ -111,6 +111,8 @@
       <output name="23772865 RAD_SW (W per m2)" query="COMID=23772865" value="RAD_SW" type="sum" domain="reach" />
       <output name="23772865 RAD_SW_IN (W per m2)" query="COMID=23772865" value="RAD_SW_IN" type="sum" domain="reach" />
       <output name="23772865 RADSWGIVEN (W per m2)" query="COMID=23772865" value="RADSWGIVEN" type="sum" domain="reach" />
+      <output name="23772865 KCAL_REACH (kcal)" query="COMID=23772865" value="KCAL_REACH" type="sum" domain="reach" />
+      <output name="23772865 KCAL_GIVEN (kcal)" query="COMID=23772865" value="KCAL_GIVEN" type="sum" domain="reach" />
       <output name="23772865 WIDTH (m)" query="COMID=23772865" value="WIDTH" type="sum" domain="reach" />
       <output name="23772865 WIDTHGIVEN (m)" query="COMID=23772865" value="WIDTHGIVEN" type="sum" domain="reach" />
       <output name="23772865 LENGTH (m)" query="COMID=23772865" value="LENGTH" type="sum" domain="reach" />
@@ -128,6 +130,8 @@
       <output name="23772863 RAD_SW (W per m2)" query="COMID=23772863" value="RAD_SW" type="sum" domain="reach" />
       <output name="23772863 RAD_SW_IN (W per m2)" query="COMID=23772863" value="RAD_SW_IN" type="sum" domain="reach" />
       <output name="23772863 RADSWGIVEN (W per m2)" query="COMID=23772863" value="RADSWGIVEN" type="sum" domain="reach" />
+      <output name="23772863 KCAL_REACH (kcal)" query="COMID=23772863" value="KCAL_REACH" type="sum" domain="reach" />
+      <output name="23772863 KCAL_GIVEN (kcal)" query="COMID=23772863" value="KCAL_GIVEN" type="sum" domain="reach" />
       <output name="23772863 WIDTH (m)" query="COMID=23772863" value="WIDTH" type="sum" domain="reach" />
       <output name="23772863 WIDTHGIVEN (m)" query="COMID=23772863" value="WIDTHGIVEN" type="sum" domain="reach" />
       <output name="23772863 LENGTH (m)" query="COMID=23772863" value="LENGTH" type="sum" domain="reach" />
@@ -145,6 +149,8 @@
       <output name="23772861 RAD_SW (W per m2)" query="COMID=23772861" value="RAD_SW" type="sum" domain="reach" />
       <output name="23772861 RAD_SW_IN (W per m2)" query="COMID=23772861" value="RAD_SW_IN" type="sum" domain="reach" />
       <output name="23772861 RADSWGIVEN (W per m2)" query="COMID=23772861" value="RADSWGIVEN" type="sum" domain="reach" />
+      <output name="23772861 KCAL_REACH (kcal)" query="COMID=23772861" value="KCAL_REACH" type="sum" domain="reach" />
+      <output name="23772861 KCAL_GIVEN (kcal)" query="COMID=23772861" value="KCAL_GIVEN" type="sum" domain="reach" />
       <output name="23772861 WIDTH (m)" query="COMID=23772861" value="WIDTH" type="sum" domain="reach" />
       <output name="23772861 WIDTHGIVEN (m)" query="COMID=23772861" value="WIDTHGIVEN" type="sum" domain="reach" />
       <output name="23772861 LENGTH (m)" query="COMID=23772861" value="LENGTH" type="sum" domain="reach" />

@@ -817,6 +817,7 @@ class ReachSubnode : public SubNode, public StateVarContainer
 {
 public:
    void SetSubreachGeometry(double volume_m3, double wdRatio);
+   void SetSubreachGeometry(double volume_m3, double dummy, double widthGiven_m);
 
    // Values which remain the same over time
    double m_subreach_length_m;
@@ -1895,6 +1896,8 @@ public:
 
    int m_colReachWIDTHGIVEN;
    int m_colReachRADSWGIVEN;
+   int m_colReachKCAL_GIVEN;
+   int m_colReachKCAL_REACH;
    int m_colReachTOPOELEV_E;
    int m_colReachTOPOELEV_S;
    int m_colReachTOPOELEV_W;

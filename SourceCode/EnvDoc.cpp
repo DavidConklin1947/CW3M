@@ -1741,6 +1741,13 @@ void CEnvDoc::OnAnalysisRun()
 
    // get run info from command bar
    m_model.m_startYear  = gpMain->GetStartYear();
+   if (m_model.m_startYear > 2099)
+   {
+      CString msg;
+      msg.Format("LoadProject() start year = %d is > 2099", m_model.m_startYear);
+      Report::WarningMsg(msg);
+   }
+
    m_model.m_currentYear = m_model.m_startYear;
    m_model.m_yearsToRun = gpMain->GetRunLength();  
    m_model.m_endYear    = m_model.m_startYear + m_model.m_yearsToRun;
@@ -1877,6 +1884,13 @@ void CEnvDoc::OnAnalysisRunmultiple()
       return;
 
    m_model.m_startYear  = gpMain->GetStartYear();
+   if (m_model.m_startYear > 2099)
+   {
+      CString msg;
+      msg.Format("LoadProject() start year = %d is > 2099", m_model.m_startYear);
+      Report::WarningMsg(msg);
+   }
+
    m_model.m_currentYear = m_model.m_startYear;
    m_model.m_yearsToRun = gpMain->GetRunLength();  
    m_model.m_endYear    = m_model.m_startYear + m_model.m_yearsToRun;

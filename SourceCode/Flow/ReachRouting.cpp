@@ -691,7 +691,18 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
 
          pSubreach->m_discharge = outflowWP.m_volume_m3 / SEC_PER_DAY;  // convert units to m3/s
          pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
-         pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, pReach->m_wdRatio);
+         if (pFlowContext->m_SALmode)
+         {
+            double rad_sw_given_W_m2 = 0.; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachRADSWGIVEN, rad_sw_given_W_m2);
+            if (rad_sw_given_W_m2 == 0.) pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, pReach->m_wdRatio);
+            else
+            {
+               double width_given_m = 0.; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachWIDTHGIVEN, width_given_m);
+               double dummy = 0;
+               pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, dummy, width_given_m);
+            }
+         }
+         else pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, pReach->m_wdRatio);
          width_x_length_accum += pSubreach->m_subreach_width_m * pSubreach->m_subreach_length_m;
          depth_x_length_accum += pSubreach->m_subreach_depth_m * pSubreach->m_subreach_length_m;
          manning_depth_x_length_accum += pSubreach->m_manning_depth_m * pSubreach->m_subreach_length_m;
@@ -707,13 +718,16 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
             pSubreach->m_discharge = NOMINAL_LOW_FLOW_CMS;
          }
       } // end of loop through subreaches
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_subreaches_m2);
       pReach->m_reach_volume_m3 = volume_accum_m3;
       pReach->m_rad_lw_kJ = reach_net_lw_kJ;
       double reach_lw_W_m2 = lw_x_surface_accum_W / total_surface_in_subreaches_m2;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_LW_OUT, reach_lw_W_m2);
       double reach_sw_W_m2 = sw_x_surface_accum_W / total_surface_in_subreaches_m2;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachRAD_SW_IN, reach_sw_W_m2);
-      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_subreaches_m2);
+      double reach_kJ = reach_sw_W_m2 * SEC_PER_DAY * total_surface_in_subreaches_m2 / 1000.;
+      double reach_kcal = 0.2390057361 * reach_kJ;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachKCAL_REACH, reach_kcal);
 
       double reach_width_m = width_x_length_accum / pReach->m_length;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachWIDTH, reach_width_m);

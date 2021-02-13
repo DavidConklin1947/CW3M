@@ -3218,6 +3218,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachZ_MEAN, _T("Z_MEAN"), TYPE_DOUBLE, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_LW_OUT, _T("RAD_LW_OUT"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRAD_SW_IN, _T("RAD_SW_IN"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachKCAL_REACH, _T("KCAL_REACH"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachAREA_H2O, _T("AREA_H2O"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachWIDTH, _T("WIDTH"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachDEPTH, _T("DEPTH"), TYPE_DOUBLE, CC_AUTOADD);
@@ -3245,6 +3246,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    m_pReachLayer->CheckCol(m_colReachWIDTHGIVEN, "WIDTHGIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachRADSWGIVEN, "RADSWGIVEN", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachKCAL_GIVEN, "KCAL_GIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachTOPOELEV_E, "TOPOELEV_E", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachTOPOELEV_S, "TOPOELEV_S", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachTOPOELEV_W, "TOPOELEV_W", TYPE_DOUBLE, CC_AUTOADD);
@@ -3856,6 +3858,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
    // If there are Shade-a-lator files, process them.
    m_pReachLayer->SetColDataU(m_colReachRADSWGIVEN, 0);
+   m_pReachLayer->SetColDataU(m_colReachKCAL_GIVEN, 0);
    Scenario * pSimulationScenario = pEnvContext->pEnvModel->GetScenario();
 
    Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
@@ -3994,18 +3997,15 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
             for (int direction = 0; direction < 7; direction++) // NE, E, SE, S, SW, W, NW
             {
-//               double veg_ht_accum_m = 0.;
                double veg_ht_max_m = 0.;
                double elv_accum_m = 0.;
                for (int j = 0; j < 9; j++)
                {
                   pData->Get(7 + direction * 9 + j, s, seg_veg_ht_m);
-//x                  veg_ht_accum_m += seg_frac_of_reach * seg_veg_ht_m;
                   if (seg_veg_ht_m > veg_ht_max_m) veg_ht_max_m = seg_veg_ht_m;
                   float seg_elv_m = 0.f; pData->Get(70 + direction * 9 + j, s, seg_elv_m);
                   elv_m[direction] += seg_frac_of_reach * seg_elv_m;
                } // end of loop on j, sample position relative to center of stream
-//x               veg_ht_m[direction] = veg_ht_accum_m / 9.;
                veg_ht_m[direction] = veg_ht_max_m;
                elv_m[direction] = elv_accum_m / 9.;
             } // end of loop on direction
@@ -4072,7 +4072,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       } // end of while (pReach != NULL)
 
    } // end of logic to process the Shade-a-lator input file
- 
+   m_flowContext.m_SALmode = input_path_ok;
+
    return TRUE;
    } // end of InitRun()
 
@@ -5421,6 +5422,7 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
    GlobalMethodManager::StartStep( &m_flowContext );  // Calls any global methods with ( m_timing & GMT_START_STEP ) == true
 
    m_pReachLayer->SetColDataU(m_colReachRADSWGIVEN, 0);
+   m_pReachLayer->SetColDataU(m_colReachKCAL_GIVEN, 0);
    Scenario* pSimulationScenario = pFlowContext->pEnvContext->pEnvModel->GetScenario();
    Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
    SYSDATE current_date = pFlowContext->pEnvContext->m_simDate;
@@ -5505,10 +5507,12 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
                if (row < data_rows) pData->Get(0, row, segment_downstream_end_km);
                else segment_downstream_end_km = segment_upstream_end_km;
             }
-            // else go on to the next reach without advancing to the next segment.
+            else break; // go on to the next reach without advancing to the next segment.
          } // end of while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows)
          ASSERT(close_enough(frac_of_reach, 1., 1e-7));
          ASSERT(row <= data_rows);
+
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachKCAL_GIVEN, reach_kcal);
 
          // Convert kcal to W/m2, using Reach attribute WIDTHGIVEN, which is derived from the Shade-a-lator input file.
          double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
@@ -15544,7 +15548,15 @@ void ReachSubnode::SetSubreachGeometry(double volume_m3, double wdRatio)
    m_subreach_depth_m = xsec_m2 / (1. + wdRatio);
    m_subreach_width_m = m_subreach_depth_m * wdRatio;
    m_subreach_surf_area_m2 = m_subreach_width_m * m_subreach_length_m;
-} // end of SetSubreachGeometry()
+} // end of SetSubreachGeometry(volume_m3, wdRatio)
+
+
+void ReachSubnode::SetSubreachGeometry(double volume_m3, double dummy, double widthGiven_m)
+{
+   m_subreach_width_m = widthGiven_m;
+   m_subreach_surf_area_m2 = widthGiven_m * m_subreach_length_m;
+   m_subreach_depth_m = volume_m3 / m_subreach_surf_area_m2;
+} // end of SetSubreachGeometry(volume_m3, dummy, widthGiven_m)
 
 
 float Reach::GetManningDepthFromQ(double Q, float wdRatio)  // ASSUMES A SPECIFIC CHANNEL GEOMETRY

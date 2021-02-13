@@ -279,7 +279,14 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       m_pModel->m_dynamicUpdate = dynamicUpdate;
       m_pModel->m_allowActorIDUChange = dynamicActors ? true : false;
       
-      m_pModel->m_startYear  = startYear;
+      if (startYear > 2099)
+      {
+         CString msg;
+         msg.Format("LoadProject() startYear = %d is > 2099", startYear);
+         Report::WarningMsg(msg);
+      }
+      m_pModel->m_startYear = startYear;
+
       m_pModel->m_referenceStartYear = referenceStartYear;
       m_pModel->m_envContext.m_yearsInStartingClimateAverages = yearsInStartingClimateAverages;
       m_pModel->m_yearsToRun = defaultPeriod;

@@ -251,7 +251,16 @@ inline
 int CMainFrame::GetStartYear( void )
    {
    CString year = m_pStartYear->GetEditText();
-   return atoi( year );
+   int year_int = atoi(year);
+
+   if (year_int > 2099)
+   {
+      CString msg;
+      msg.Format("LoadProject() start year = %d is > 2099", year_int);
+ //     Report::WarningMsg(msg);
+   }
+
+   return(year_int);
    }
 
 
