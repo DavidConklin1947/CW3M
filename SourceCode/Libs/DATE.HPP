@@ -30,6 +30,7 @@ class SYSDATE;
    BOOL LIBSAPI GetCalDate(int julDay, int *pYear, int *pMonth, int *pCalDay, BOOL updateYear);
    BOOL LIBSAPI GetCalDate0(int jday0, int *pMonth, int *pCalDay, int daysInYear);
    bool LIBSAPI DateComesBefore(SYSDATE date1, SYSDATE date2);
+   SYSDATE LIBSAPI DayAfter(SYSDATE date);
 
 
 #ifndef NO_MFC

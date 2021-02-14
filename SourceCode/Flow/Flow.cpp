@@ -1067,7 +1067,7 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
    double direct_unshaded_kJ_m2 = 0.;
    double diffuse_unshaded_kJ_m2 = 0.;
 
-   double delta_t_min = 15; // timestep in minutes
+   double delta_t_min = 30; // timestep in minutes
    double delta_t_hr = delta_t_min / 60.;
    double delta_t_sec = delta_t_min * 60.;
 
@@ -1086,6 +1086,8 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
    // First add up the energy from just before solar noon back to sunrise.
    double time_hr = 12. - delta_t_hr;
    double solar_elev_deg = SolarElev_deg(jday0, time_hr);
+   bool topo_shaded_already = false;
+   bool veg_shaded_already = false;
    while (solar_elev_deg > 0)
    {
       double M_A = OpticalAirMassThickness(solar_elev_deg);
@@ -1101,8 +1103,16 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
       diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
 
       double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
-      if (IsTopoShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
-      else if (IsVegShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
+      if (topo_shaded_already || IsTopoShaded(solar_elev_deg, azimuth_deg))
+      {
+         direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
+         topo_shaded_already = true;
+      }
+      else if (veg_shaded_already || IsVegShaded(solar_elev_deg, azimuth_deg))
+      {
+         direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
+         veg_shaded_already = true;
+      }
 
       time_hr -= delta_t_hr;
       solar_elev_deg = SolarElev_deg(jday0, time_hr);
@@ -1111,6 +1121,8 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
    // Now add up the energy at noon and forward until sunset.
    time_hr = 12.;
    solar_elev_deg = SolarElev_deg(jday0, time_hr);
+   topo_shaded_already = false;
+   veg_shaded_already = false;
    while (solar_elev_deg > 0)
    {
       double M_A = OpticalAirMassThickness(solar_elev_deg);
@@ -1126,8 +1138,16 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
       diffuse_unshaded_kJ_m2 += diffuse_kJ_m2;
 
       double azimuth_deg = SolarAzimuth_deg(jday0, time_hr);
-      if (IsTopoShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
-      else if (IsVegShaded(solar_elev_deg, azimuth_deg)) direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
+      if (topo_shaded_already || IsTopoShaded(solar_elev_deg, azimuth_deg))
+      {
+         direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
+         topo_shaded_already = true;
+      }
+      else if (veg_shaded_already || IsVegShaded(solar_elev_deg, azimuth_deg))
+      {
+         direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
+         veg_shaded_already = true;
+      }
 
       time_hr += delta_t_hr;
       solar_elev_deg = SolarElev_deg(jday0, time_hr);
@@ -1267,25 +1287,41 @@ TopoSetting::TopoSetting(double elev_m, double topoElevE_deg, double topoElevS_d
 
 double FlowModel::GetReachShade_a_lator_W_m2(Reach* pReach, double SW_unshaded_W_m2)
 {
+/*x
+   Scenario* pSimulationScenario = m_flowContext.pEnvContext->pEnvModel->GetScenario();
+   Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
 
-   double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
-   if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
+   bool SALmode = m_flowContext.m_SALmode;
+   if (SALmode)
+   {
+      double rad_sw_given_W_m2 = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachRADSWGIVEN, rad_sw_given_W_m2);
+      SALmode = rad_sw_given_W_m2 != 0.;
+   }
 
-   double veg_ht_l_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEG_HT_L, veg_ht_l_m);
-   double veg_ht_r_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEG_HT_R, veg_ht_r_m);
+   double width_m = 0.; 
+   if (SALmode) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
+   else m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
+
    double veg_ht_m = 0;
-   if (veg_ht_l_m <= 0. && veg_ht_r_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_m);
-   else veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
-
-   int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
-   int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
-
-   double lai_reach = 0;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachLAI_REACH, lai_reach);
-
-   pReach->m_topo.m_vegDensity = VegDensity(lai_reach); // = 1. - exp(-Beers_law_k * lai_reach);
+   if (SALmode) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_m);
+   else
+   {
+      double veg_ht_l_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEG_HT_L, veg_ht_l_m);
+      double veg_ht_r_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEG_HT_R, veg_ht_r_m);
+      veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
+   }
+   
+   double veg_density_frac = 0.;
+   if (SALmode)veg_density_frac = pSAL->m_canopyDensity_pct / 100.;
+   else
+   {
+//x      int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
+//x      int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
+      double lai_reach = 0;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachLAI_REACH, lai_reach);
+      pReach->m_topo.m_vegDensity = VegDensity(lai_reach); // = 1. - exp(-Beers_law_k * lai_reach);
+   }
    m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEG_DENS, pReach->m_topo.m_vegDensity);
-
-
+x*/
    double rad_sw_est_W_m2 = 0.;
    double shade_frac = pReach->m_topo.ShadeFrac(m_flowContext.dayOfYear, &rad_sw_est_W_m2);
    m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachRAD_SW_EST, rad_sw_est_W_m2);
@@ -3244,6 +3280,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachLAI_REACH, _T("LAI_REACH"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachVEGHTREACH, _T("VEGHTREACH"), TYPE_DOUBLE, CC_AUTOADD);
 
+   m_pReachLayer->CheckCol(m_colReachWIDTHREACH, "WIDTHREACH", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachWIDTHGIVEN, "WIDTHGIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachRADSWGIVEN, "RADSWGIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachKCAL_GIVEN, "KCAL_GIVEN", TYPE_DOUBLE, CC_AUTOADD);
@@ -4020,6 +4057,9 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
          // Now we have reach values for topographic elevations, width, and vegetation heights.
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
+         pReach->m_topo.m_topoElevE_deg = topo_E_deg;
+         pReach->m_topo.m_topoElevS_deg = topo_S_deg;
+         pReach->m_topo.m_topoElevW_deg = topo_W_deg;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_E, topo_E_deg);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_S, topo_S_deg);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_W, topo_W_deg);
@@ -5228,6 +5268,78 @@ bool FlowModel::Run( EnvContext *pEnvContext )
    }
 
 
+bool Reach::CalcReachVegParamsIfNecessary()
+{
+   bool SALmode = gpModel->m_flowContext.m_SALmode;
+   Scenario* pSimulationScenario = gpModel->m_flowContext.pEnvContext->pEnvModel->GetScenario();
+   Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
+   if (SALmode)
+   {
+      double rad_sw_given_W_m2 = 0.; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachRADSWGIVEN, rad_sw_given_W_m2);
+      SALmode = rad_sw_given_W_m2 != 0.;
+   }
+
+   // Calculate the reach vegetation parameters only on the first day of every year, and for reaches in
+   // a Shade-a-lator study, on the first day of the study period and
+   // on the day after the end of the study period.
+   SYSDATE today = gpModel->m_flowContext.pEnvContext->m_simDate;
+   bool calculate = today.month == 1 && today.day == 1;
+   if (!calculate && SALmode)
+   {
+      SYSDATE start = pSAL->m_startDate;
+      SYSDATE day_after = DayAfter(pSAL->m_endDate);
+      calculate = (today.month == start.month && today.day == start.day && today.year == start.year)
+         || (today.month == day_after.month && today.day == day_after.day && today.year == day_after.year);
+   }
+
+   if (!calculate) return(false);
+
+   double veg_ht_l_m = 0.;
+   double veg_ht_r_m = 0.;
+   double veg_ht_m = 0.;
+   double lai_reach = 0.;
+   double width_reach_m = 0.;
+   if (SALmode)
+   { // Shade-a-lator mode for this reach
+      gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_L, veg_ht_l_m);
+      gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_R, veg_ht_r_m);
+
+      m_topo.m_vegDensity = pSAL->m_canopyDensity_pct / 100.;
+      lai_reach = -(log(m_topo.m_vegDensity) / BEERS_LAW_K);
+
+      gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachWIDTHGIVEN, width_reach_m);
+   }
+   else 
+   { // not Shade-a-lator mode
+      int bank_l_idu_ndx = -1; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachBANK_L_IDU, bank_l_idu_ndx);
+      int bank_r_idu_ndx = -1; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachBANK_R_IDU, bank_r_idu_ndx);
+      gpModel->m_pIDUlayer->GetData(bank_l_idu_ndx, gpModel->m_colTREE_HT, veg_ht_l_m);
+      gpModel->m_pIDUlayer->GetData(bank_r_idu_ndx, gpModel->m_colTREE_HT, veg_ht_r_m);
+
+      double lai_l = -1; gpModel->m_pIDUlayer->GetData(bank_l_idu_ndx, gpModel->m_colLAI, lai_l);
+      double lai_r = -1; gpModel->m_pIDUlayer->GetData(bank_r_idu_ndx, gpModel->m_colLAI, lai_r);
+      lai_reach = (lai_l + lai_r) / 2.;
+      m_topo.m_vegDensity = VegDensity(lai_reach);
+
+      gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachWIDTH, width_reach_m);
+   }
+
+   veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
+   gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVEGHTREACH, veg_ht_m);
+
+   gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachLAI_REACH, lai_reach);
+   gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVEG_DENS, m_topo.m_vegDensity);
+
+   gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachWIDTHREACH, width_reach_m);
+   
+   double direction_deg = 0.; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachDIRECTION, direction_deg);
+   m_topo.m_vegElevEW_deg = m_topo.VegElevEW_deg(direction_deg, width_reach_m, veg_ht_m);
+   m_topo.m_vegElevNS_deg = m_topo.VegElevNS_deg(direction_deg, width_reach_m, veg_ht_m);
+
+   return(true);
+} // end of CalcReachVegParamsIfNecessary()
+
+
 bool FlowModel::StartYear( FlowContext *pFlowContext )
    {
    pFlowContext->pEnvContext->m_simDate.MoveToNextDay(pFlowContext->pEnvContext->m_maxDaysInYear);
@@ -5265,24 +5377,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
       pReach->m_reachAddedVolumeWP = WaterParcel(0,0);
       pReach->m_nanOccurred = false;
 
-      int bank_l_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
-      int bank_r_idu_ndx = -1; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
-      double lai_l = -1; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colLAI, lai_l);
-      double lai_r = -1; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colLAI, lai_r);
-      double lai_reach = (lai_l + lai_r) / 2.;
-      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachLAI_REACH, lai_reach);
-      pReach->m_topo.m_vegDensity = VegDensity(lai_reach);
-
-      double veg_ht_l_m = 0.; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colTREE_HT, veg_ht_l_m);
-      double veg_ht_r_m = 0.; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colTREE_HT, veg_ht_r_m);
-      double veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
-      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_m);
-
-      double width_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
-      if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
-      double direction_deg = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, direction_deg);
-      pReach->m_topo.m_vegElevEW_deg = pReach->m_topo.VegElevEW_deg(direction_deg, width_m, veg_ht_m);
-      pReach->m_topo.m_vegElevNS_deg = pReach->m_topo.VegElevNS_deg(direction_deg, width_m, veg_ht_m);
+      pReach->CalcReachVegParamsIfNecessary();
 
       for (int node_ndx = 0; node_ndx < pReach->GetSubnodeCount(); node_ndx++)
       {
@@ -5405,18 +5500,6 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
    m_pReachLayer->SetColDataU(m_colReachXFLUX_D, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
 
-   for (int reach_ndx = 0; reach_ndx < m_reachArray.GetSize(); reach_ndx++)
-   {
-      Reach* pReach = m_reachArray[reach_ndx];
-
-      double width_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
-      if (width_m <= 0.) m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTH, width_m);
-      double direction_deg = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, direction_deg);
-      double veg_ht_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_m);
-      pReach->m_topo.m_vegElevEW_deg = pReach->m_topo.VegElevEW_deg(direction_deg, width_m, veg_ht_m);
-      pReach->m_topo.m_vegElevNS_deg = pReach->m_topo.VegElevNS_deg(direction_deg, width_m, veg_ht_m);
-   } // end of loop thru reaches
-
    // Make sure today's weather is loaded into the IDU and HRU layers.
    GetTodaysWeatherField(CDT_PRECIP);
    GetTodaysWeatherField(CDT_TMAX);
@@ -5427,6 +5510,12 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
    GetTodaysWeatherField(CDT_WINDSPEED);
 
    GlobalMethodManager::StartStep( &m_flowContext );  // Calls any global methods with ( m_timing & GMT_START_STEP ) == true
+
+   for (int reach_ndx = 0; reach_ndx < m_reachArray.GetSize(); reach_ndx++)
+   {
+      Reach* pReach = m_reachArray[reach_ndx];
+      pReach->CalcReachVegParamsIfNecessary();
+   } // end of loop thru reaches
 
    m_pReachLayer->SetColDataU(m_colReachRADSWGIVEN, 0);
    m_pReachLayer->SetColDataU(m_colReachKCAL_GIVEN, 0);
@@ -5541,7 +5630,7 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
 
    } // end of block to get the SAL output data for the current date
  
-   return true;
+   return(true);
 } // end of FlowModel::StartStep()
 
 

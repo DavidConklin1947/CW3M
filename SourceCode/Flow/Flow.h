@@ -915,6 +915,7 @@ public:
    double GetUpstreamInflow();
    bool GetUpstreamInflow(double &QLeft, double &QRight);
    double SubreachNetRad_kJ(int subreachIndex); // Totals up the incoming shortwave and outgoing longwave from this subreach.
+   bool CalcReachVegParamsIfNecessary();
    double GetSubreachViewToSky_frac(int subreachNdx);
    double GetSubreachArea_m2(int subreachNdx);
    float GetCatchmentArea( void );
@@ -1893,7 +1894,7 @@ public:
    int m_colReachSHADE_VEG;
    int m_colReachLAI_REACH;
    int m_colReachVEGHTREACH;
-
+   int m_colReachWIDTHREACH;
    int m_colReachWIDTHGIVEN;
    int m_colReachRADSWGIVEN;
    int m_colReachKCAL_GIVEN;

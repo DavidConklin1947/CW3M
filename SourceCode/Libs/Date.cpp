@@ -130,6 +130,27 @@ int DaysBetweenDates(SYSDATE date1, SYSDATE date2)
 } // end of DaysBetweenDates()
 
 
+SYSDATE DayAfter(SYSDATE date)
+{
+   int month = date.month;
+   int year = date.year;
+   int day = date.day + 1;
+   if (day > GetDaysInCalendarMonth(date.month, date.year))
+   {
+      day = 1;
+      month++;
+      if (month > 12)
+      {
+         month = 1;
+         year++;
+      }
+   }
+   
+   SYSDATE rtn_val(month, day, year);
+   return(rtn_val);
+} // end of DayAfter()
+
+
 BOOL GetCalDate0(int jday0, int *pMonth, int *pCalDay, int daysInYear)
 {
    if (!((daysInYear == 365 || daysInYear == 366 || daysInYear == 360) && (jday0 >= 0 && jday0 < daysInYear)))
