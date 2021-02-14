@@ -497,7 +497,7 @@
     </vars>
   </scenario>
   
-  <scenario name='SAL36FC Test'
+  <scenario name='SAL36FC_Test'
    originator='Dave Conklin, Oregon Freshwater Simulations'
    isEditable='1'
    isShared='1'

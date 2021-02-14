@@ -117,6 +117,7 @@
       <output name="23772865 WIDTHGIVEN (m)" query="COMID=23772865" value="WIDTHGIVEN" type="sum" domain="reach" />
       <output name="23772865 LENGTH (m)" query="COMID=23772865" value="LENGTH" type="sum" domain="reach" />
       <output name="23772865 DEPTH (m)" query="COMID=23772865" value="DEPTH" type="sum" domain="reach" />
+      <output name="23772865 REACH_H2O (m3)" query="COMID=23772865" value="REACH_H2O" type="sum" domain="reach" />
       <output name="23772865 LAI_REACH" query="COMID=23772865" value="LAI_REACH" type="sum" domain="reach" />
       <output name="23772865 VEG_DENS" query="COMID=23772865" value="VEG_DENS" type="sum" domain="reach" />
       <output name="23772865 VEG_HT_L (m)" query="COMID=23772865" value="VEG_HT_L" type="sum" domain="reach" />

@@ -3604,12 +3604,13 @@ bool FlowModel::DumpReachInsolationData(Shade_a_latorData* pSAL)
 
       river_km -= pReach->m_length / 1000.;
       if (comid == pSAL->m_comid_downstream) done = true;
-      else
+      else if (pReach->m_pDown != NULL)
       {
          pReach = GetReachFromNode(pReach->m_pDown);
-         if (pReach != NULL) comid = pReach->m_reachID;
+         if (pReach > 0) comid = pReach->m_reachID;
          else done = true;
       }
+      else done = true;
 
    } // end of while (!done)
 
@@ -3885,7 +3886,13 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    CString input_path;
    bool input_path_ok = !input_file_name.IsEmpty();
    if (!input_path_ok) Report::LogMsg("FlowModel::InitRun() m_shadeAlatorData.m_input_file_name is empty.");
-   input_path_ok = input_path_ok && (PathManager::FindPath(input_file_name, input_path) >= 0);
+   if (input_path_ok && PathManager::FindPath(input_file_name, input_path) < 0)
+   {
+      CString msg;
+      msg.Format("FlowModel::InitRun() Can't find Shade-a-lator input file %s", input_file_name.GetString());
+      Report::WarningMsg(msg);
+      input_path_ok = false;
+   }
    data_rows = 0;
    if (input_path_ok) 
    { // Process the Shade-a-lator input file.
