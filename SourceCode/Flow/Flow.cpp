@@ -3283,6 +3283,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    m_pReachLayer->CheckCol(m_colReachWIDTHREACH, "WIDTHREACH", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachWIDTHGIVEN, "WIDTHGIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachRADSWGIVEN, "RADSWGIVEN", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachSAL_REACH, "SAL_REACH", TYPE_BOOL, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachKCAL_GIVEN, "KCAL_GIVEN", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachTOPOELEV_E, "TOPOELEV_E", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachTOPOELEV_S, "TOPOELEV_S", TYPE_DOUBLE, CC_AUTOADD);
@@ -3895,6 +3896,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    } // end of logic for years to run = 0
 
    // If there are Shade-a-lator files, process them.
+   m_pReachLayer->SetColDataU(m_colReachSAL_REACH, false);
    m_pReachLayer->SetColDataU(m_colReachRADSWGIVEN, 0);
    m_pReachLayer->SetColDataU(m_colReachKCAL_GIVEN, 0);
    Scenario * pSimulationScenario = pEnvContext->pEnvModel->GetScenario();
@@ -3942,11 +3944,13 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       Reach* pReach_downstream = GetReachFromCOMID(pSimulationScenario->m_shadeAlatorData.m_comid_downstream);
       pSAL->m_pReach_downstream = pReach_downstream;
       Reach* pReach = pReach_upstream;
-      int reach_ct = pReach_upstream != NULL ? 1 : 0;
-      while (pReach != NULL && pReach != pReach_downstream)
+      int reach_ct = 0;
+      while (pReach != NULL)
       {
          reach_ct++;
-         pReach = GetReachFromNode(pReach->m_pDown);
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSAL_REACH, true); // flag this reach as a Shade-a-lator reach
+         pReach = (pReach->m_reachID == pSAL->m_comid_downstream) ? 
+            NULL : GetReachFromNode(pReach->m_pDown);
       }
       pSimulationScenario->m_shadeAlatorData.m_reachCt = reach_ct;
       CString msg;
@@ -5270,26 +5274,27 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
 bool Reach::CalcReachVegParamsIfNecessary()
 {
-   bool SALmode = gpModel->m_flowContext.m_SALmode;
+   SYSDATE today = gpModel->m_flowContext.pEnvContext->m_simDate;
    Scenario* pSimulationScenario = gpModel->m_flowContext.pEnvContext->pEnvModel->GetScenario();
    Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
-   if (SALmode)
-   {
-      double rad_sw_given_W_m2 = 0.; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachRADSWGIVEN, rad_sw_given_W_m2);
-      SALmode = rad_sw_given_W_m2 != 0.;
-   }
+   SYSDATE start = pSAL->m_startDate;
 
    // Calculate the reach vegetation parameters only on the first day of every year, and for reaches in
    // a Shade-a-lator study, on the first day of the study period and
    // on the day after the end of the study period.
-   SYSDATE today = gpModel->m_flowContext.pEnvContext->m_simDate;
    bool calculate = today.month == 1 && today.day == 1;
-   if (!calculate && SALmode)
+   bool SALmodeForThisReach = false;
+   if (gpModel->m_flowContext.m_SALmode)
    {
-      SYSDATE start = pSAL->m_startDate;
-      SYSDATE day_after = DayAfter(pSAL->m_endDate);
-      calculate = (today.month == start.month && today.day == start.day && today.year == start.year)
-         || (today.month == day_after.month && today.day == day_after.day && today.year == day_after.year);
+      bool sal_reach = false; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachSAL_REACH, sal_reach);
+      if (sal_reach)
+      {
+         SALmodeForThisReach =
+            !DateComesBefore(today, pSAL->m_startDate) && !DateComesBefore(pSAL->m_endDate, today);
+         SYSDATE day_after = DayAfter(pSAL->m_endDate);
+         calculate = calculate || (today.month == start.month && today.day == start.day && today.year == start.year)
+            || (today.month == day_after.month && today.day == day_after.day && today.year == day_after.year);
+      }
    }
 
    if (!calculate) return(false);
@@ -5299,7 +5304,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
    double veg_ht_m = 0.;
    double lai_reach = 0.;
    double width_reach_m = 0.;
-   if (SALmode)
+   if (SALmodeForThisReach)
    { // Shade-a-lator mode for this reach
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_L, veg_ht_l_m);
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_R, veg_ht_r_m);
@@ -5310,7 +5315,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachWIDTHGIVEN, width_reach_m);
    }
    else 
-   { // not Shade-a-lator mode
+   { // not Shade-a-lator mode for this reach
       int bank_l_idu_ndx = -1; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachBANK_L_IDU, bank_l_idu_ndx);
       int bank_r_idu_ndx = -1; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachBANK_R_IDU, bank_r_idu_ndx);
       gpModel->m_pIDUlayer->GetData(bank_l_idu_ndx, gpModel->m_colTREE_HT, veg_ht_l_m);

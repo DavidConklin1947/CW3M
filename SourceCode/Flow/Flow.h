@@ -1897,6 +1897,7 @@ public:
    int m_colReachWIDTHREACH;
    int m_colReachWIDTHGIVEN;
    int m_colReachRADSWGIVEN;
+   int m_colReachSAL_REACH;
    int m_colReachKCAL_GIVEN;
    int m_colReachKCAL_REACH;
    int m_colReachTOPOELEV_E;

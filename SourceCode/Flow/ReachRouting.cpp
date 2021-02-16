@@ -693,8 +693,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
          pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
          if (pFlowContext->m_SALmode)
          {
-            double rad_sw_given_W_m2 = 0.; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachRADSWGIVEN, rad_sw_given_W_m2);
-            if (rad_sw_given_W_m2 == 0.) pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, pReach->m_wdRatio);
+            bool sal_reach; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachSAL_REACH, sal_reach);
+            if (!sal_reach) pSubreach->SetSubreachGeometry(pSubreach->m_waterParcel.m_volume_m3, pReach->m_wdRatio);
             else
             {
                double width_given_m = 0.; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachWIDTHGIVEN, width_given_m);

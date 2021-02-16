@@ -978,7 +978,7 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
       int SAL_end_day;  pXmlScenario->Attribute("SAL_end_day", &SAL_end_day);
       pScenario->m_shadeAlatorData.m_endDate = SYSDATE(SAL_end_month, SAL_end_day, SAL_end_year);
 
-      double canopy_density_pct = 0; pXmlScenario->Attribute("SAL_canopy_density", &canopy_density_pct);
+      double canopy_density_pct = 0; pXmlScenario->Attribute("SAL_canopy_density_pct", &canopy_density_pct);
       pScenario->m_shadeAlatorData.m_canopyDensity_pct = canopy_density_pct;
       double height_threshold_m = 0;
       const char* height_threshold_attribute = pXmlScenario->Attribute("SAL_height_threshold_m", &height_threshold_m);
