@@ -399,11 +399,12 @@
 
     Shade-A-Lator_input_file="Shade_a_latorData\cc_input_Data.csv"
     downstream_comid="23765583"
-    upstream_comid="23772871"
+    upstream_comid="23772865"
     Shade-A-Lator_output_file="Shade_a_latorData\36CC_kcal_transposed.csv"
     SAL_start_year="2019" SAL_start_month="11" SAL_start_day="1"
     SAL_end_year = "2020" SAL_end_month="3" SAL_end_day = "31"
-    SAL_canopy_density_pct ="36" >
+    SAL_canopy_density_pct ="36" 
+    SAL_height_threshold_m="0" SAL_future_height_m="0"       >
 
     <description>
       Like Baseline.
@@ -453,11 +454,12 @@
 
     Shade-A-Lator_input_file="Shade_a_latorData\cc_input_Data.csv"
     downstream_comid="23765583"
-    upstream_comid="23772871"
+    upstream_comid="23772865"
     Shade-A-Lator_output_file="Shade_a_latorData\75CC_kcal_transposed.csv"
     SAL_start_year="2020" SAL_start_month="4" SAL_start_day="1"
     SAL_end_year = "2020" SAL_end_month="10" SAL_end_day = "31"
-    SAL_canopy_density_pct ="75" >
+    SAL_canopy_density_pct ="75" 
+    SAL_height_threshold_m="0" SAL_future_height_m="0"       >
 
     <description>
       Like Baseline.
@@ -506,7 +508,7 @@
 
     Shade-A-Lator_input_file="Shade_a_latorData\fc_input_Data.csv"
     downstream_comid="23765583"
-    upstream_comid="23772871"
+    upstream_comid="23772865"
     Shade-A-Lator_output_file="Shade_a_latorData\36FC_kcal_transposed.csv"
     SAL_start_year="2019" SAL_start_month="11" SAL_start_day="1"
     SAL_end_year="2020" SAL_end_month="3" SAL_end_day="31"
@@ -560,7 +562,7 @@
 
     Shade-A-Lator_input_file="Shade_a_latorData\fc_input_Data.csv"
     downstream_comid="23765583"
-    upstream_comid="23772871"
+    upstream_comid="23772865"
     Shade-A-Lator_output_file="Shade_a_latorData\75FC_kcal_transposed.csv"
     SAL_start_year="2020" SAL_start_month="4" SAL_start_day="1"
     SAL_end_year ="2020" SAL_end_month="10" SAL_end_day="31"

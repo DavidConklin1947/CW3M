@@ -159,6 +159,7 @@ public:
    SYSDATE m_startDate, m_endDate;
    int m_numCols;
    double m_canopyDensity_pct;
+   double m_SALlai;
    double m_heightThreshold_m;
    double m_futureHeight_m;
 }; // end of class Shade_a_latorData

@@ -980,6 +980,7 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
 
       double canopy_density_pct = 0; pXmlScenario->Attribute("SAL_canopy_density_pct", &canopy_density_pct);
       pScenario->m_shadeAlatorData.m_canopyDensity_pct = canopy_density_pct;
+      pScenario->m_shadeAlatorData.m_SALlai = -(log(1. - (canopy_density_pct / 100.)) / BEERS_LAW_K);
       double height_threshold_m = 0;
       const char* height_threshold_attribute = pXmlScenario->Attribute("SAL_height_threshold_m", &height_threshold_m);
       double future_height_m = 0;

@@ -3584,7 +3584,8 @@ bool FlowModel::Init( EnvContext *pEnvContext )
       "RIVER_KM, COMID, LENGTH, RAD_SW, RAD_SW_IN, RAD_LW_OUT, WIDTH, DIRECTION, SHADECOEFF, "
       "BANK_L_IDU, VEGCLASS_L, AGE_CLASS_L, TREE_HT_L, "
       "BANK_R_IDU, VEGCLASS_R, AGE_CLASS_R, TREE_HT_R, "
-      "NUM_SUBREACHES\n");
+      "NUM_SUBREACHES, VEG_HT_L, VEG_HT_R, VEGHTREACH, "
+      "WIDTHGIVEN, RADSWGIVEN\n");
 
    return true;
 } // end of FlowModel::Init()
@@ -3605,23 +3606,8 @@ bool FlowModel::DumpReachInsolationData(Shade_a_latorData* pSAL)
       double unshaded_rad_sw_W_m2; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colStreamRAD_SW, unshaded_rad_sw_W_m2);
       double rad_sw_in_W_m2; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRAD_SW_IN, rad_sw_in_W_m2);
       double rad_lw_out_W_m2; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRAD_LW_OUT, rad_lw_out_W_m2);
-      double direction; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, direction);
-      double shadecoeff; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachSHADECOEFF, shadecoeff);
-
-      int bank_l_idu_ndx; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
-      int bank_l_idu_id; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colIDU_ID, bank_l_idu_id);
-      int vegclass_l; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
-      int ageclass_l; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass_l);
-      double tree_ht_l_m = 10; // ??? TreeHeight_m(vegclass_r, ageclass_r);
-
-      int bank_r_idu_ndx; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
-      int bank_r_idu_id; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colIDU_ID, bank_r_idu_id);
-      int vegclass_r; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
-      int ageclass_r; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colAGECLASS, ageclass_r);
-      double tree_ht_r_m = 10; // ??? TreeHeight_m(vegclass_r, ageclass_r);
 
       int num_subreaches = (int)pReach->m_subnodeArray.GetCount();
-
       double avg_width_m = 0;
       for (int subreach_ndx = 0; subreach_ndx < num_subreaches; subreach_ndx++)
       {
@@ -3629,16 +3615,40 @@ bool FlowModel::DumpReachInsolationData(Shade_a_latorData* pSAL)
          avg_width_m += pSubreach->m_subreach_width_m;
       } // end of loop thru subreaches for calculating avg_width_m
       avg_width_m /= num_subreaches;
+
+      double direction; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachDIRECTION, direction);
+      double shadecoeff; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachSHADECOEFF, shadecoeff);
+
+      int bank_l_idu_ndx; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachBANK_L_IDU, bank_l_idu_ndx);
+      int bank_l_idu_id; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colIDU_ID, bank_l_idu_id);
+      int vegclass_l; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colVEGCLASS, vegclass_l);
+      int ageclass_l; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colAGECLASS, ageclass_l);
+      double tree_ht_l_m = 0; m_pIDUlayer->GetData(bank_l_idu_ndx, m_colTREE_HT, tree_ht_l_m);
+
+      int bank_r_idu_ndx; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachBANK_R_IDU, bank_r_idu_ndx);
+      int bank_r_idu_id; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colIDU_ID, bank_r_idu_id);
+      int vegclass_r; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colVEGCLASS, vegclass_r);
+      int ageclass_r; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colAGECLASS, ageclass_r);
+      double tree_ht_r_m = 0; m_pIDUlayer->GetData(bank_r_idu_ndx, m_colTREE_HT, tree_ht_r_m);
+
+      double veg_ht_l_m = 0; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachVEG_HT_L, veg_ht_l_m);
+      double veg_ht_r_m = 0; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachVEG_HT_R, veg_ht_r_m);
+      double veg_ht_reach_m = 0; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_reach_m);
+      double width_given_m = 0; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_given_m);
+      double rad_sw_given_W_m2 = 0; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRADSWGIVEN, rad_sw_given_W_m2);
+
       if (insolation_ofile != NULL) fprintf(insolation_ofile, "%d, %d, %d, "
          "%f, %d, %f, %f, %f, %f, %f, %f, %f, "
          "%d, %d, %d, %f, "
          "%d, %d, %d, %f, "
-         "%d\n",
+         "%d, %f, %f, %f, "
+         "%f, %f\n",
          current_date.year, current_date.month, current_date.day,
          river_km, comid, pReach->m_length, unshaded_rad_sw_W_m2, rad_sw_in_W_m2, rad_lw_out_W_m2, avg_width_m, direction, shadecoeff,
          bank_l_idu_id, vegclass_l, ageclass_l, tree_ht_l_m,
          bank_r_idu_id, vegclass_r, ageclass_r, tree_ht_r_m,
-         num_subreaches);
+         num_subreaches, veg_ht_l_m, veg_ht_r_m, veg_ht_reach_m,
+         width_given_m, rad_sw_given_W_m2);
 
       river_km -= pReach->m_length / 1000.;
       if (comid == pSAL->m_comid_downstream) done = true;
@@ -4010,7 +4020,10 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       double reach_upstream_end_km = reaches_len_m / 1000.;
       pReach = pReach_upstream;
       while (reach_upstream_end_km > segment_upstream_end_km)
-      { // Move downstream by one reach.
+      { // Move downstream by one reach until we come to a reach which is completely covered by the Shade-a-lator stream segments.
+         // Turn off SAL_REACH for the reaches that we're skipping over.
+         ASSERT(pReach->m_reachID != pSAL->m_comid_downstream);
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSAL_REACH, 0); 
          reach_upstream_end_km -= pReach->m_length / 1000.;
          pReach = GetReachFromNode(pReach->m_pDown);
          ASSERT(pReach != NULL);
@@ -5308,9 +5321,11 @@ bool Reach::CalcReachVegParamsIfNecessary()
    { // Shade-a-lator mode for this reach
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_L, veg_ht_l_m);
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_R, veg_ht_r_m);
+      veg_ht_m = (veg_ht_l_m < pSAL->m_heightThreshold_m || veg_ht_r_m < pSAL->m_heightThreshold_m) ?
+      pSAL->m_futureHeight_m : ((veg_ht_l_m + veg_ht_r_m) / 2.);
 
       m_topo.m_vegDensity = pSAL->m_canopyDensity_pct / 100.;
-      lai_reach = -(log(m_topo.m_vegDensity) / BEERS_LAW_K);
+      lai_reach = pSAL->m_SALlai;
 
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachWIDTHGIVEN, width_reach_m);
    }
@@ -5320,6 +5335,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
       int bank_r_idu_ndx = -1; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachBANK_R_IDU, bank_r_idu_ndx);
       gpModel->m_pIDUlayer->GetData(bank_l_idu_ndx, gpModel->m_colTREE_HT, veg_ht_l_m);
       gpModel->m_pIDUlayer->GetData(bank_r_idu_ndx, gpModel->m_colTREE_HT, veg_ht_r_m);
+      veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
 
       double lai_l = -1; gpModel->m_pIDUlayer->GetData(bank_l_idu_ndx, gpModel->m_colLAI, lai_l);
       double lai_r = -1; gpModel->m_pIDUlayer->GetData(bank_r_idu_ndx, gpModel->m_colLAI, lai_r);
@@ -5329,7 +5345,6 @@ bool Reach::CalcReachVegParamsIfNecessary()
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachWIDTH, width_reach_m);
    }
 
-   veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
    gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVEGHTREACH, veg_ht_m);
 
    gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachLAI_REACH, lai_reach);
