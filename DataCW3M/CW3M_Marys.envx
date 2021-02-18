@@ -4,6 +4,7 @@
 <Envision ver='5.0'>
 
   <settings
+    studyAreaName='Marys'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'
@@ -35,6 +36,7 @@
     exportDeltas               ='0'
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
+    useWaterYears              ='0'
   />
   <!-- for debugging, to run for just 1 day in each year: maxDaysInYear ='1'
   not working as of 6/4/19: useWaterYears ='1'
@@ -44,7 +46,7 @@
 
     <layer
       name         ='IDU'
-      path         ='Marys\IDU_Marys.shp'
+      path         ='{studyAreaName}\IDU_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,0'
@@ -55,7 +57,7 @@
 	/>
     <layer
   name         ='HRU'
-  path         ='Marys\HRU_Marys.shp'
+  path         ='{studyAreaName}\HRU_{studyAreaName}.shp'
   type         ='0'
   includeData  ='1'
   color        ='0,0,155'
@@ -67,7 +69,7 @@
 
   <layer
       name         ='Reach'
-      path         ='Marys\Reach_Marys.shp'
+      path         ='{studyAreaName}\Reach_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,155'
@@ -267,7 +269,7 @@ timing       ='0'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='Marys\Flow_Marys.xml'
+initInfo     ='Flow.xml'
    />
 
     <!-- Policies are applied here, i.e. after all the APs with timing=0 have run, but before any of the APs with timing=1 begin to run. -->
@@ -451,9 +453,11 @@ initRunOnStartup  ='0'
                       S C E N A R I O S 
 ===================================================================================
 -->
+  <scenarios 
+    climate_scenarios_file='ClimateScenarios.xml' default_climate_scenario='13' 
+    simulation_scenarios_file='SimulationScenarios.xml' default_simulation_scenario='0' 
+  />
   
-  <scenarios default ='0' file='Scenarios.xml' />
-
 </Envision>
   
 

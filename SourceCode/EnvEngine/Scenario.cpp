@@ -959,38 +959,53 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
       pScenario->m_evalModelFreq    = evalModelFreq;
       pScenario->m_decisionElements = decisionElements;
 
+      Shade_a_latorData* pSAL = &(pScenario->m_shadeAlatorData);
+      pSAL->m_valid = false;
       const char * file_name = pXmlScenario->Attribute("Shade-A-Lator_input_file");
-      pScenario->m_shadeAlatorData.m_input_file_name = (file_name == NULL) ? CString("") : CString(file_name);
-      int comid;  pXmlScenario->Attribute("downstream_comid", &comid); 
-      pScenario->m_shadeAlatorData.m_comid_downstream = comid;
-      pXmlScenario->Attribute("upstream_comid", &comid);
-      pScenario->m_shadeAlatorData.m_comid_upstream = comid;
-      const char* output_file_name = pXmlScenario->Attribute("Shade-A-Lator_output_file");
-      pScenario->m_shadeAlatorData.m_output_file_name = (output_file_name == NULL) ? CString("") : CString(output_file_name);
-
-      // Example: SAL_start_year = "2019" SAL_start_month = "11" SAL_start_day = "1" >
-      int SAL_start_year;  pXmlScenario->Attribute("SAL_start_year", &SAL_start_year);
-      int SAL_start_month;  pXmlScenario->Attribute("SAL_start_month", &SAL_start_month);
-      int SAL_start_day;  pXmlScenario->Attribute("SAL_start_day", &SAL_start_day);
-      pScenario->m_shadeAlatorData.m_startDate = SYSDATE(SAL_start_month, SAL_start_day, SAL_start_year);
-      int SAL_end_year;  pXmlScenario->Attribute("SAL_end_year", &SAL_end_year);
-      int SAL_end_month;  pXmlScenario->Attribute("SAL_end_month", &SAL_end_month);
-      int SAL_end_day;  pXmlScenario->Attribute("SAL_end_day", &SAL_end_day);
-      pScenario->m_shadeAlatorData.m_endDate = SYSDATE(SAL_end_month, SAL_end_day, SAL_end_year);
-
-      double canopy_density_pct = 0; pXmlScenario->Attribute("SAL_canopy_density_pct", &canopy_density_pct);
-      pScenario->m_shadeAlatorData.m_canopyDensity_pct = canopy_density_pct;
-      pScenario->m_shadeAlatorData.m_SALlai = -(log(1. - (canopy_density_pct / 100.)) / BEERS_LAW_K);
-      double height_threshold_m = 0;
-      const char* height_threshold_attribute = pXmlScenario->Attribute("SAL_height_threshold_m", &height_threshold_m);
-      double future_height_m = 0;
-      const char* future_height_attribute = pXmlScenario->Attribute("SAL_future_height_m", &future_height_m);
-      if (height_threshold_attribute != NULL && future_height_attribute != NULL)
+      if (file_name != NULL)
       {
-         pScenario->m_shadeAlatorData.m_heightThreshold_m = height_threshold_m;
-         pScenario->m_shadeAlatorData.m_futureHeight_m = future_height_m;
-      }
+         pSAL->m_valid = true;
+         pScenario->m_shadeAlatorData.m_input_file_name = CString(file_name);
+         int comid;  pXmlScenario->Attribute("downstream_comid", &comid);
+         pSAL->m_valid = pSAL->m_valid && comid > 0;
+         pScenario->m_shadeAlatorData.m_comid_downstream = comid;
+         pXmlScenario->Attribute("upstream_comid", &comid);
+         pSAL->m_valid = pSAL->m_valid && comid > 0;
+         pScenario->m_shadeAlatorData.m_comid_upstream = comid;
+         const char* output_file_name = pXmlScenario->Attribute("Shade-A-Lator_output_file");
+         pSAL->m_valid = pSAL->m_valid && output_file_name != NULL;
+         pScenario->m_shadeAlatorData.m_output_file_name = (output_file_name == NULL) ? CString("") : CString(output_file_name);
 
+         // Example: SAL_start_year = "2019" SAL_start_month = "11" SAL_start_day = "1" >
+         int SAL_start_year;  pXmlScenario->Attribute("SAL_start_year", &SAL_start_year);
+         int SAL_start_month;  pXmlScenario->Attribute("SAL_start_month", &SAL_start_month);
+         int SAL_start_day;  pXmlScenario->Attribute("SAL_start_day", &SAL_start_day);
+         pScenario->m_shadeAlatorData.m_startDate = SYSDATE(SAL_start_month, SAL_start_day, SAL_start_year);
+         int SAL_end_year;  pXmlScenario->Attribute("SAL_end_year", &SAL_end_year);
+         int SAL_end_month;  pXmlScenario->Attribute("SAL_end_month", &SAL_end_month);
+         int SAL_end_day;  pXmlScenario->Attribute("SAL_end_day", &SAL_end_day);
+         pScenario->m_shadeAlatorData.m_endDate = SYSDATE(SAL_end_month, SAL_end_day, SAL_end_year);
+// ???      pSAL->m_valid = pSAL->m_valid && IsValidDate(pSAL->m_startDate) && IsValidDate(pSAL->m_endDate);
+
+         double canopy_density_pct = 0; pXmlScenario->Attribute("SAL_canopy_density_pct", &canopy_density_pct);
+         pScenario->m_shadeAlatorData.m_canopyDensity_pct = canopy_density_pct;
+         pScenario->m_shadeAlatorData.m_SALlai = -(log(1. - (canopy_density_pct / 100.)) / BEERS_LAW_K);
+         double height_threshold_m = 0;
+         const char* height_threshold_attribute = pXmlScenario->Attribute("SAL_height_threshold_m", &height_threshold_m);
+         double future_height_m = 0;
+         const char* future_height_attribute = pXmlScenario->Attribute("SAL_future_height_m", &future_height_m);
+         if (height_threshold_attribute != NULL && future_height_attribute != NULL)
+         {
+            pScenario->m_shadeAlatorData.m_heightThreshold_m = height_threshold_m;
+            pScenario->m_shadeAlatorData.m_futureHeight_m = future_height_m;
+         }
+         if (!pSAL->m_valid)
+         {
+            CString msg;
+            msg.Format("ScenarioManager::LoadXml() Unable to interpret Shade-a-lator fields in scenario %s.", pScenario->m_name);
+            Report::WarningMsg(msg);
+         }
+      } // end of if (file_name != NULL)
 
       //NormalizeWeights( pScenario->m_actorAltruismWt, pScenario->m_actorSelfInterestWt, pScenario->m_policyPrefWt );
       TiXmlNode *pXmlDescNode = pXmlScenarioNode->FirstChild( "description" );

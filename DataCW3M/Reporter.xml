@@ -19,7 +19,7 @@
     <output name="IRRALAF_Y (ac-ft) Mohawk25" query="HBVCALIB=25" value="IRRALAF_Y" type="sum" />
     <output name="IRRALLO_Y (mm H2O) Mohawk25" query="HBVCALIB=25" value="IRRALLO_Y" type="sum" />
   </output_group>
-
+<!--
   <output_group name="REP Clackamas wetland elevations (m ASL)" >
     <output name="WETL 19 ELEV_MEAN Clackamas R 6m elev" query="WETL_ID=19" value="ELEV_MEAN" type="areaWtMean" />
     <output name="WETL 20 ELEV_MEAN Clackamas R 12m elev" query="WETL_ID=20" value="ELEV_MEAN" type="areaWtMean" />
@@ -34,6 +34,7 @@
     <output name="WETL 29 ELEV_MEAN Clackamas R 87m elev" query="WETL_ID=29" value="ELEV_MEAN" type="areaWtMean" />
     <output name="WETL 30 ELEV_MEAN Oak Grove Fork 666m elev" query="WETL_ID=30" value="ELEV_MEAN" type="areaWtMean" />
   </output_group>
+  -->
 
 
   <output_group name="REP Population Analysis" >

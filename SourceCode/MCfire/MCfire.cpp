@@ -1409,6 +1409,7 @@ int MCfire::MCvtypeOfForestVEGCLASS(int vegclass)
       case 7055210: mc_vtype = 8; break; //46,139,164)" label = "7055210 LP:Pm1" / > 8 temperate needleleaf forest
       case 7056320: mc_vtype = 8; break; //37,111,80)" label = "7056320 LP:Sc2" / > 8 temperate needleleaf forest
       case 7057320: mc_vtype = 8; break; //127,127,127)" label = "7057320 LP:Mc2" / > 8 temperate needleleaf forest
+      case 7702100: mc_vtype = 17; break; // 7702100 JP:GFp Jeffrey Pine grass-forb post disturbance C3 grassland
       default: mc_vtype = 0; break;
    }
 

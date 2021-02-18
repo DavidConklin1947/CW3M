@@ -82,24 +82,24 @@
     </climate_scenario>
 
     <!-- Gridded recent actual weather used for demos - 2010-17 -->
-    <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="366"  firstYear="2010" lastYear="2019" NetCDF_row_0_location_N_or_S="N" >
+    <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="366"  firstYear="2010" lastYear="2020" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"
-               path="GriddedRecentWeather\UofIMETDATA_precipitation_amount_2010-2019.nc"
+               path="GriddedRecentWeather\UofIMETDATA_precipitation_amount_2010-2020.nc"
                var_name="precipitation_amount" units="mm" />
       <climate type="tmax"
-               path="GriddedRecentWeather\UofIMETDATA_max_air_temperature_2010-2019.nc"
+               path="GriddedRecentWeather\UofIMETDATA_max_air_temperature_2010-2020.nc"
                var_name="air_temperature" units="K" />
       <climate type="tmin"
-               path="GriddedRecentWeather\UofIMETDATA_min_air_temperature_2010-2019.nc"
+               path="GriddedRecentWeather\UofIMETDATA_min_air_temperature_2010-2020.nc"
                var_name="air_temperature" units="K" />
       <climate type="humidity"
-               path="GriddedRecentWeather\UofIMETDATA_specific_humidity_2010-2019.nc"
+               path="GriddedRecentWeather\UofIMETDATA_specific_humidity_2010-2020.nc"
                var_name="specific_humidity" units="kg/kg" />
       <climate type="solrad"
-               path="GriddedRecentWeather\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_2010-2019.nc"
+               path="GriddedRecentWeather\UofIMETDATA_surface_downwelling_shortwave_flux_in_air_2010-2020.nc"
                var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2" />
       <climate type="windspd"
-               path="GriddedRecentWeather\UofIMETDATA_wind_speed_2010-2019.nc"
+               path="GriddedRecentWeather\UofIMETDATA_wind_speed_2010-2020.nc"
                var_name="wind_speed" units="m/s" />
     </climate_scenario>
 

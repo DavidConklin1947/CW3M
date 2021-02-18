@@ -143,9 +143,10 @@ public:
 class Shade_a_latorData
 {
 public:
-   Shade_a_latorData() { m_input_file_name = CString(""); m_comid_downstream = 0; m_output_file_name = CString(""); };
+   Shade_a_latorData() { m_input_file_name = CString(""); m_comid_downstream = 0; m_output_file_name = CString(""); m_valid = false; };
    ~Shade_a_latorData() {};
 public:
+   bool m_valid;
    CString m_input_file_name;
    int m_comid_downstream;
    Reach* m_pReach_downstream;
