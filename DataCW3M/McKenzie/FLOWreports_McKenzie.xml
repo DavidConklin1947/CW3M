@@ -159,8 +159,12 @@
       <output name="23772739 RAD_SW_EST (W per m2)" query="COMID=23772739" value="RAD_SW_EST" type="sum" domain="reach" />
       <output name="23772739 RAD_SW (W per m2)" query="COMID=23772739" value="RAD_SW" type="sum" domain="reach" />
       <output name="23772739 RAD_SW_IN (W per m2)" query="COMID=23772739" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output name="23772739 RAD_LW_OUT (W per m2)" query="COMID=23772739" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output name="23772739 net radiation (W per m2)" query="COMID=23772739" value="RAD_SW_IN-RAD_LW_OUT" type="sum" domain="reach" />
       <output name="23772739 RADSWGIVEN (W per m2)" query="COMID=23772739" value="RADSWGIVEN" type="sum" domain="reach" />
+      <output name="23772739 AREA_H2O (m2)" query="COMID=23772739" value="AREA_H2O" type="sum" domain="reach" />
       <output name="23772739 KCAL_REACH (kcal)" query="COMID=23772739" value="KCAL_REACH" type="sum" domain="reach" />
+      <output name="23772739 net KCAL" query="COMID=23772739" value="(RAD_SW_IN-RAD_LW_OUT)*AREA_H2O*86.4/4.184" type="sum" domain="reach" />
       <output name="23772739 KCAL_GIVEN (kcal)" query="COMID=23772739" value="KCAL_GIVEN" type="sum" domain="reach" />
       <output name="23772739 WIDTH (m)" query="COMID=23772739" value="WIDTH" type="sum" domain="reach" />
       <output name="23772739 WIDTHGIVEN (m)" query="COMID=23772739" value="WIDTHGIVEN" type="sum" domain="reach" />

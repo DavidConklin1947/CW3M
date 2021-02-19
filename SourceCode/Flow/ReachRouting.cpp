@@ -582,7 +582,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
             msg.Format("SolveReachKinematicWave() For hbvcalib = %d, w2a_slp = %f and w2a_int = %f.  "
                "Will use DEFAULT_SOIL_H2O_TEMP_DEGC = %f for the temperature of runoff water going into the streams.",
                hbvcalib, w2a_slp, w2a_int, DEFAULT_SOIL_H2O_TEMP_DEGC);
-            Report::WarningMsg(msg);
+            Report::LogMsg(msg);
          }
          w2a_int = DEFAULT_SOIL_H2O_TEMP_DEGC;
          w2a_slp = 0;
