@@ -972,9 +972,12 @@ int ScenarioManager::LoadXml( TiXmlNode *pScenarios, bool appendToExisting )
          pXmlScenario->Attribute("upstream_comid", &comid);
          pSAL->m_valid = pSAL->m_valid && comid > 0;
          pScenario->m_shadeAlatorData.m_comid_upstream = comid;
-         const char* output_file_name = pXmlScenario->Attribute("Shade-A-Lator_output_file");
-         pSAL->m_valid = pSAL->m_valid && output_file_name != NULL;
-         pScenario->m_shadeAlatorData.m_output_file_name = (output_file_name == NULL) ? CString("") : CString(output_file_name);
+         const char* radiation_output_file_name = pXmlScenario->Attribute("Shade-A-Lator_radiation_output_file");
+         pSAL->m_valid = pSAL->m_valid && radiation_output_file_name != NULL;
+         pScenario->m_shadeAlatorData.m_radiation_output_file_name = (radiation_output_file_name == NULL) ? CString("") : CString(radiation_output_file_name);
+         const char* energy_output_file_name = pXmlScenario->Attribute("Shade-A-Lator_energy_output_file");
+         pSAL->m_valid = pSAL->m_valid && energy_output_file_name != NULL;
+         pScenario->m_shadeAlatorData.m_energy_output_file_name = (energy_output_file_name == NULL) ? CString("") : CString(energy_output_file_name);
 
          // Example: SAL_start_year = "2019" SAL_start_month = "11" SAL_start_day = "1" >
          int SAL_start_year;  pXmlScenario->Attribute("SAL_start_year", &SAL_start_year);

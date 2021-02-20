@@ -143,7 +143,11 @@ public:
 class Shade_a_latorData
 {
 public:
-   Shade_a_latorData() { m_input_file_name = CString(""); m_comid_downstream = 0; m_output_file_name = CString(""); m_valid = false; };
+   Shade_a_latorData() 
+   { 
+      m_input_file_name = CString(""); m_comid_downstream = 0; 
+      m_radiation_output_file_name = CString(""); m_radiation_output_file_name = CString(""); m_valid = false; 
+   };
    ~Shade_a_latorData() {};
 public:
    bool m_valid;
@@ -155,10 +159,13 @@ public:
    Reach* m_pReach_upstream;
    int m_reachCt;
    double m_reachesLength_m;
-   CString m_output_file_name;
-   FDataObj m_SALoutputData;
+   CString m_radiation_output_file_name;
+   int m_radiation_numCols;
+   FDataObj m_SALradiationOutputData;
+   CString m_energy_output_file_name;
+   int m_energy_numCols;
+   FDataObj m_SALenergyOutputData;
    SYSDATE m_startDate, m_endDate;
-   int m_numCols;
    double m_canopyDensity_pct;
    double m_SALlai;
    double m_heightThreshold_m;

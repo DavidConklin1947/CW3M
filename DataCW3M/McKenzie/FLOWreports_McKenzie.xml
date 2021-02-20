@@ -133,25 +133,29 @@
       <output name="23772865 VEG_HT_L (m)" query="COMID=23772865" value="VEG_HT_L" type="sum" domain="reach" />
       <output name="23772865 VEG_HT_R (m)" query="COMID=23772865" value="VEG_HT_R" type="sum" domain="reach" />
       <output name="23772865 VEGHTREACH (m)" query="COMID=23772865" value="VEGHTREACH" type="sum" domain="reach" />
-      <output name="23772863 DIRECTION (deg)" query="COMID=23772863" value="DIRECTION" type="sum" domain="reach" />
-      <output name="23772863 SHADECOEFF" query="COMID=23772863" value="SHADECOEFF" type="sum" domain="reach" />
-      <output name="23772863 SHADE_TOPO" query="COMID=23772863" value="SHADE_TOPO" type="sum" domain="reach" />
-      <output name="23772863 SHADE_VEG" query="COMID=23772863" value="SHADE_VEG" type="sum" domain="reach" />
-      <output name="23772863 RAD_SW_EST (W per m2)" query="COMID=23772863" value="RAD_SW_EST" type="sum" domain="reach" />
-      <output name="23772863 RAD_SW (W per m2)" query="COMID=23772863" value="RAD_SW" type="sum" domain="reach" />
-      <output name="23772863 RAD_SW_IN (W per m2)" query="COMID=23772863" value="RAD_SW_IN" type="sum" domain="reach" />
-      <output name="23772863 RADSWGIVEN (W per m2)" query="COMID=23772863" value="RADSWGIVEN" type="sum" domain="reach" />
-      <output name="23772863 KCAL_REACH (kcal)" query="COMID=23772863" value="KCAL_REACH" type="sum" domain="reach" />
-      <output name="23772863 KCAL_GIVEN (kcal)" query="COMID=23772863" value="KCAL_GIVEN" type="sum" domain="reach" />
-      <output name="23772863 WIDTH (m)" query="COMID=23772863" value="WIDTH" type="sum" domain="reach" />
-      <output name="23772863 WIDTHGIVEN (m)" query="COMID=23772863" value="WIDTHGIVEN" type="sum" domain="reach" />
-      <output name="23772863 LENGTH (m)" query="COMID=23772863" value="LENGTH" type="sum" domain="reach" />
-      <output name="23772863 DEPTH (m)" query="COMID=23772863" value="DEPTH" type="sum" domain="reach" />
-      <output name="23772863 LAI_REACH" query="COMID=23772863" value="LAI_REACH" type="sum" domain="reach" />
-      <output name="23772863 VEG_DENS" query="COMID=23772863" value="VEG_DENS" type="sum" domain="reach" />
-      <output name="23772863 VEG_HT_L (m)" query="COMID=23772863" value="VEG_HT_L" type="sum" domain="reach" />
-      <output name="23772863 VEG_HT_R (m)" query="COMID=23772863" value="VEG_HT_R" type="sum" domain="reach" />
-      <output name="23772863 VEGHTREACH (m)" query="COMID=23772863" value="VEGHTREACH" type="sum" domain="reach" />
+      <output name="23772707 DIRECTION (deg)" query="COMID=23772707" value="DIRECTION" type="sum" domain="reach" />
+      <output name="23772707 SHADECOEFF" query="COMID=23772707" value="SHADECOEFF" type="sum" domain="reach" />
+      <output name="23772707 SHADE_TOPO" query="COMID=23772707" value="SHADE_TOPO" type="sum" domain="reach" />
+      <output name="23772707 SHADE_VEG" query="COMID=23772707" value="SHADE_VEG" type="sum" domain="reach" />
+      <output name="23772707 RAD_SW_EST (W per m2)" query="COMID=23772707" value="RAD_SW_EST" type="sum" domain="reach" />
+      <output name="23772707 RAD_SW (W per m2)" query="COMID=23772707" value="RAD_SW" type="sum" domain="reach" />
+      <output name="23772707 RAD_SW_IN (W per m2)" query="COMID=23772707" value="RAD_SW_IN" type="sum" domain="reach" />
+      <output name="23772707 RAD_LW_OUT (W per m2)" query="COMID=23772707" value="RAD_LW_OUT" type="sum" domain="reach" />
+      <output name="23772707 net radiation (W per m2)" query="COMID=23772707" value="RAD_SW_IN-RAD_LW_OUT" type="sum" domain="reach" />
+      <output name="23772707 RADSWGIVEN (W per m2)" query="COMID=23772707" value="RADSWGIVEN" type="sum" domain="reach" />
+      <output name="23772707 AREA_H2O (m2)" query="COMID=23772707" value="AREA_H2O" type="sum" domain="reach" />
+      <output name="23772707 KCAL_REACH (kcal)" query="COMID=23772707" value="KCAL_REACH" type="sum" domain="reach" />
+      <output name="23772707 net KCAL" query="COMID=23772707" value="(RAD_SW_IN-RAD_LW_OUT)*AREA_H2O*86.4/4.184" type="sum" domain="reach" />
+      <output name="23772707 KCAL_GIVEN (kcal)" query="COMID=23772707" value="KCAL_GIVEN" type="sum" domain="reach" />
+      <output name="23772707 WIDTH (m)" query="COMID=23772707" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772707 WIDTHGIVEN (m)" query="COMID=23772707" value="WIDTHGIVEN" type="sum" domain="reach" />
+      <output name="23772707 LENGTH (m)" query="COMID=23772707" value="LENGTH" type="sum" domain="reach" />
+      <output name="23772707 DEPTH (m)" query="COMID=23772707" value="DEPTH" type="sum" domain="reach" />
+      <output name="23772707 LAI_REACH" query="COMID=23772707" value="LAI_REACH" type="sum" domain="reach" />
+      <output name="23772707 VEG_DENS" query="COMID=23772707" value="VEG_DENS" type="sum" domain="reach" />
+      <output name="23772707 VEG_HT_L (m)" query="COMID=23772707" value="VEG_HT_L" type="sum" domain="reach" />
+      <output name="23772707 VEG_HT_R (m)" query="COMID=23772707" value="VEG_HT_R" type="sum" domain="reach" />
+      <output name="23772707 VEGHTREACH (m)" query="COMID=23772707" value="VEGHTREACH" type="sum" domain="reach" />
       <output name="23772739 DIRECTION (deg)" query="COMID=23772739" value="DIRECTION" type="sum" domain="reach" />
       <output name="23772739 SHADECOEFF" query="COMID=23772739" value="SHADECOEFF" type="sum" domain="reach" />
       <output name="23772739 SHADE_TOPO" query="COMID=23772739" value="SHADE_TOPO" type="sum" domain="reach" />
