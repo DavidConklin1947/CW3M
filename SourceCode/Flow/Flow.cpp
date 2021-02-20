@@ -4096,6 +4096,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
                   veg_ht_m[direction] = veg_ht_max_m;
                   elv_m[direction] = elv_accum_m / 9.;
                } // end of loop on direction
+
+               s++;
             } // end of while (frac_of_reach < 1.)
 
             // Now we have reach values for topographic elevations, width, and vegetation heights.
