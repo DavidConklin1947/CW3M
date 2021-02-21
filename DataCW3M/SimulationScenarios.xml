@@ -516,7 +516,7 @@
     SAL_start_year="2019" SAL_start_month="11" SAL_start_day="1"
     SAL_end_year="2020" SAL_end_month="3" SAL_end_day="31"
     SAL_canopy_density_pct="36" 
-     SAL_height_threshold_m="10" SAL_future_height_m="30.48"       >
+     SAL_height_threshold_m="5" SAL_future_height_m="30.48"       >
 
     <description>
       Like Baseline.
@@ -571,7 +571,7 @@
     SAL_start_year="2020" SAL_start_month="4" SAL_start_day="1"
     SAL_end_year ="2020" SAL_end_month="10" SAL_end_day="31"
     SAL_canopy_density_pct="75" 
-     SAL_height_threshold_m="10" SAL_future_height_m="30.48"       >
+     SAL_height_threshold_m="5" SAL_future_height_m="30.48"       >
 
     <description>
       Like Baseline.

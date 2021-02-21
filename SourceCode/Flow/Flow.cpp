@@ -5365,12 +5365,9 @@ bool Reach::CalcReachVegParamsIfNecessary()
    { // Shade-a-lator mode for this reach
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_L, veg_ht_l_m);
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_R, veg_ht_r_m);
-      veg_ht_m = (veg_ht_l_m < pSAL->m_heightThreshold_m || veg_ht_r_m < pSAL->m_heightThreshold_m) ?
-      pSAL->m_futureHeight_m : ((veg_ht_l_m + veg_ht_r_m) / 2.);
-
+      veg_ht_m = (veg_ht_l_m + veg_ht_r_m) / 2.;
       m_topo.m_vegDensity = pSAL->m_canopyDensity_pct / 100.;
       lai_reach = pSAL->m_SALlai;
-
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachWIDTHGIVEN, width_reach_m);
    }
    else 
@@ -5405,7 +5402,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
 
 
 bool FlowModel::ProcessShade_a_latorInputData(Shade_a_latorData* pSAL, FDataObj* pData, int dataRows, int reachCt)
-{
+{ // For each reach, average the Shade-a-lator data over all the segments which overlap it.
    // Column numbers in the Shade-a-lator input file
    // 0 Downstream_end - River km of downstream end of segment
    // 1 Elevation
@@ -5421,56 +5418,28 @@ bool FlowModel::ProcessShade_a_latorInputData(Shade_a_latorData* pSAL, FDataObj*
    // 61-69 Veg_<i>_NW
    // 70-78 Elv_<i>_NE - Elevations, NE from center of stream
    // 79-132 Elv_<i>_E, Elv_<i>_SE, ..., Elv_<i>_NW
-/*x
-   float downstream_end_of_final_segment_km; pData->Get(0, 0, downstream_end_of_final_segment_km);
-   float downstream_end_of_first_segment_km; pData->Get(0, (int)(dataRows - 1), downstream_end_of_first_segment_km);
-   double adj_SAL_len_m = // adjusted Shade-a-lator length in meters = Shade-a-lator length not counting the final segment
-      1000. * ((double)downstream_end_of_final_segment_km - (double)downstream_end_of_first_segment_km);
-x*/
+
+   // The sum of the lengths of the reaches from the specified upstream reach to the specified downstream reach
+   // may be different from the sum of the segment lengths in the data.
    double reaches_len_m = 0.;
-   double reaches_slen_m = 0;
    Reach * pReach = pSAL->m_pReach_upstream;
    for (int i = 0; i < reachCt; i++)
    {
       reaches_len_m += pReach->m_length;
-//x      double slen_m = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachSLength, slen_m);
-//x      reaches_slen_m += slen_m;
-
       pReach = GetReachFromNode(pReach->m_pDown);
    } // end of loop through reaches
    pSAL->m_reachesLength_m = reaches_len_m;
+
+   // Now, if there are any reaches below the specified downstream reach,
+   // add up the lengths of all the reaches below the downstream reach
+   // to determine the river km of the downstream end of the specified downstream reach.
    double river_km_at_lower_end = 0.;
    while (pReach != NULL)
    {
       pReach = GetReachFromNode(pReach->m_pDown);
-      river_km_at_lower_end += pReach->m_length;
+      river_km_at_lower_end += pReach->m_length / 1000.;
    }
    pSAL->m_riverKmAtUpperEnd = river_km_at_lower_end + reaches_len_m / 1000.;
-/*x
-   // Make sure the Shade-a-lator segments overlap the upstream reach entirely.
-   // Since we don't know for sure how long segment 0 is, start with segment 1.
-   ASSERT(data_rows >= 2);
-   int s = 1; // index to Shade-a-lator river segment
-   // The upper end of segment 1 is the lower end of segment 0.
-   float segment_upstream_end_km = downstream_end_of_final_segment_km;
-
-   double reach_upstream_end_km = reaches_len_m / 1000.;
-   pReach = pSAL->m_pReach_upstream;
-   while (reach_upstream_end_km > segment_upstream_end_km)
-   { // Move downstream by one reach until we come to a reach which is completely covered by the Shade-a-lator stream segments.
-      // Turn off SAL_REACH for the reaches that we're skipping over.
-      ASSERT(pReach->m_reachID != pSAL->m_comid_downstream);
-      m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSAL_REACH, 0);
-      reach_upstream_end_km -= pReach->m_length / 1000.;
-      pReach = GetReachFromNode(pReach->m_pDown);
-      ASSERT(pReach != NULL);
-   }
-x*/
-   // For each reach, average the Shade-a-lator data over all the segments which overlap it.
-
-   
-   
-   
    
    // "final segment" here means the most upstream segment; its data is in row 0
    // river kilometers increase in the upstream direction
@@ -5484,13 +5453,12 @@ x*/
 
    // Make sure the Shade-a-lator segments overlap the upstream reach entirely.
    // Since we don't know for sure how long the final segment in row 0 is, start with row 1.
-   ASSERT(data_rows >= 2);
+   ASSERT(dataRows >= 2);
    int row = 1; // index to Shade-a-lator river segment
    // The upper end of the segment in row 1 is the lower end of the final segment in row 0.
    float segment_upstream_end_km = downstream_end_of_final_segment_km;
    float segment_downstream_end_km = 0.; pData->Get(0, 1, segment_downstream_end_km);
-
-   double reach_upstream_end_km = pSAL->m_reachesLength_m / 1000.; // ??? This only works when the downstream end is at river mile 0.
+   double reach_upstream_end_km = pSAL->m_riverKmAtUpperEnd;
    pReach = pSAL->m_pReach_upstream;
    while (reach_upstream_end_km > segment_upstream_end_km)
    { // Move downstream by one reach.
@@ -5503,18 +5471,13 @@ x*/
 
    // For each reach, average the Shade-a-lator data over all the segments which overlap it.
    double below_the_bottom_m = 0.;
-   double reach_kcal = 0.;
-   double reach_W_m_accumulator = 0.;
    double total_length_m = 0.;
-   float seg_kcal = 0.;
-   float seg_W_m2 = 0.;
    double segment_len_m = 0.;
    while (pReach != NULL && row < dataRows)
-   {
+   { // This is the reach loop
       double topo_E_deg = 0., topo_S_deg = 0., topo_W_deg = 0.;
       double reach_veg_ht_m = 0;
-      double elv_m[7]; for (int direction = 0; direction < 7; direction++) elv_m[direction] = 0.;
-//x      double emergent_veg_ht_m = 0;
+      double elv_m[7] = {0., 0., 0., 0., 0., 0., 0.}; 
       double width_m = 0.;
       double elev_m = 0.;
 
@@ -5532,9 +5495,9 @@ x*/
          total_length_m += overlap_m;
          if (overlap_m > 0.)
          {
-            double seg_frac_of_reach = segment_len_m / pReach->m_length;
+            double seg_frac_of_reach = overlap_m / pReach->m_length;
             frac_of_reach += seg_frac_of_reach;
-            if (frac_of_reach >= 1.) seg_frac_of_reach -= frac_of_reach - 1.;
+            ASSERT(frac_of_reach < 1. || close_enough(frac_of_reach, 1., 1e-7));
 
             float seg_elev_m; pData->Get(1, row, seg_elev_m); elev_m += seg_frac_of_reach * seg_elev_m;
             float seg_width_m; pData->Get(2, row, seg_width_m); width_m += seg_frac_of_reach * seg_width_m;
@@ -5542,35 +5505,33 @@ x*/
             pData->Get(3, row, seg_topo_elev_deg); topo_E_deg += seg_frac_of_reach * seg_topo_elev_deg;
             pData->Get(4, row, seg_topo_elev_deg); topo_S_deg += seg_frac_of_reach * seg_topo_elev_deg;
             pData->Get(5, row, seg_topo_elev_deg); topo_W_deg += seg_frac_of_reach * seg_topo_elev_deg;
-            double seg_veg_ht_m = 0.;
+            double seg_veg_ht_accum_m = 0.;
 
             for (int direction = 0; direction < 7; direction++) // NE, E, SE, S, SW, W, NW
             {
-               float direction_veg_ht_m = 0.;
+               float direction_veg_ht_accum_m = 0.;
                double elv_accum_m = 0.;
                for (int j = 0; j < 9; j++)
                {
                   float ht_m;
                   pData->Get(7 + direction * 9 + j, row, ht_m);
-                  direction_veg_ht_m += ht_m;
+                  if (ht_m < pSAL->m_heightThreshold_m) ht_m = (float)pSAL->m_futureHeight_m;
+                  direction_veg_ht_accum_m += ht_m;
                   float seg_elv_m = 0.f; pData->Get(70 + direction * 9 + j, row, seg_elv_m);
                   elv_m[direction] += seg_frac_of_reach * seg_elv_m;
                } // end of loop on j, sample position relative to center of stream
-               direction_veg_ht_m /= 9.;
-               seg_veg_ht_m += direction_veg_ht_m;
+               seg_veg_ht_accum_m += direction_veg_ht_accum_m / 9.;
                elv_m[direction] = elv_accum_m / 9.;
             } // end of loop on direction
-            seg_veg_ht_m /= 7.;
-            reach_veg_ht_m += seg_frac_of_reach * seg_veg_ht_m;
+            reach_veg_ht_m += seg_frac_of_reach * (seg_veg_ht_accum_m / 7.);
 
-            frac_of_reach += overlap_m / pReach->m_length;
-         }
+         } // end of if (overlap_m > 0.), processing of data for one Shade-a-lator river segment for one reach
 
          if (segment_downstream_end_km >= reach_downstream_end_km) // (frac_of_reach < 1.)
          { // The downstream end of this segment is within the reach
             ASSERT(below_the_bottom_m == 0.);
             row++;
-            ASSERT(row <= data_rows);
+            ASSERT(row <= dataRows);
             segment_upstream_end_km = segment_downstream_end_km;
             if (row < dataRows) pData->Get(0, row, segment_downstream_end_km);
             else segment_downstream_end_km = segment_upstream_end_km;
@@ -5578,7 +5539,7 @@ x*/
          else break; // go on to the next reach without advancing to the next segment.
       } // end of while (segment_upstream_end_km > reach_downstream_end_km && row < data_rows)
 
-      // Now we have reach values for topographic elevations, width, and vegetation heights.
+      // Now we have reach values for topographic elevations, width, and vegetation height.
       m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
       pReach->m_topo.m_topoElevE_deg = topo_E_deg;
       pReach->m_topo.m_topoElevS_deg = topo_S_deg;
@@ -5590,7 +5551,7 @@ x*/
       m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEG_HT_L, reach_veg_ht_m);
 
       ASSERT(close_enough(frac_of_reach, 1., 1e-7));
-      ASSERT(row <= data_rows);
+      ASSERT(row <= dataRows);
 
       if (pReach->m_reachID == pSAL->m_comid_downstream) pReach = NULL;
       else pReach = GetReachFromNode(pReach->m_pDown);
@@ -5599,73 +5560,9 @@ x*/
          reach_upstream_end_km = reach_downstream_end_km;
          reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
       }
-   } // end of while (pReach != NULL && row < data_rows)
+   } // end of reach loop: while (pReach != NULL && row < data_rows)
 
       return(true);
-/*x
-         // For each reach, average the Shade-a-lator data over all the segments which overlap it.
-      while (pReach != NULL)
-      {
-         double topo_E_deg = 0., topo_S_deg = 0., topo_W_deg = 0.;
-         double reach_veg_ht_m = 0;
-         double elv_m[7]; for (int direction = 0; direction < 7; direction++) elv_m[direction] = 0.;
-         double emergent_veg_ht_m = 0;
-         double width_m = 0.;
-         double elev_m = 0.;
-
-         double frac_of_reach = 0.;
-         while (frac_of_reach < 1.)
-         {
-            float segment_downstream_end_km; pData->Get(0, s, segment_downstream_end_km);
-            double segment_len_m = (segment_upstream_end_km - segment_downstream_end_km) * 1000.;
-            double seg_frac_of_reach = segment_len_m / pReach->m_length;
-            frac_of_reach += seg_frac_of_reach;
-            if (frac_of_reach >= 1.) seg_frac_of_reach -= frac_of_reach - 1.;
-
-            float seg_elev_m; pData->Get(1, s, seg_elev_m); elev_m += seg_frac_of_reach * seg_elev_m;
-            float seg_width_m; pData->Get(2, s, seg_width_m); width_m += seg_frac_of_reach * seg_width_m;
-            float seg_topo_elev_deg;
-            pData->Get(3, s, seg_topo_elev_deg); topo_E_deg += seg_frac_of_reach * seg_topo_elev_deg;
-            pData->Get(4, s, seg_topo_elev_deg); topo_S_deg += seg_frac_of_reach * seg_topo_elev_deg;
-            pData->Get(5, s, seg_topo_elev_deg); topo_W_deg += seg_frac_of_reach * seg_topo_elev_deg;
-            double seg_veg_ht_m = 0.;
-
-            for (int direction = 0; direction < 7; direction++) // NE, E, SE, S, SW, W, NW
-            {
-               float direction_veg_ht_m;
-               double elv_accum_m = 0.;
-               for (int j = 0; j < 9; j++)
-               {
-                  float ht_m;
-                  pData->Get(7 + direction * 9 + j, s, ht_m);
-                  direction_veg_ht_m += ht_m;
-                  float seg_elv_m = 0.f; pData->Get(70 + direction * 9 + j, s, seg_elv_m);
-                  elv_m[direction] += seg_frac_of_reach * seg_elv_m;
-               } // end of loop on j, sample position relative to center of stream
-               direction_veg_ht_m /= 9.;
-               seg_veg_ht_m += direction_veg_ht_m;
-               elv_m[direction] = elv_accum_m / 9.;
-            } // end of loop on direction
-            seg_veg_ht_m /= 7.;
-            reach_veg_ht_m += seg_frac_of_reach * seg_veg_ht_m;
-            s++;
-         } // end of while (frac_of_reach < 1.)
-
-         // Now we have reach values for topographic elevations, width, and vegetation heights.
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
-         pReach->m_topo.m_topoElevE_deg = topo_E_deg;
-         pReach->m_topo.m_topoElevS_deg = topo_S_deg;
-         pReach->m_topo.m_topoElevW_deg = topo_W_deg;
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_E, topo_E_deg);
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_S, topo_S_deg);
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachTOPOELEV_W, topo_W_deg);
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEG_HT_R, reach_veg_ht_m);
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachVEG_HT_L, reach_veg_ht_m);
-
-         if (pReach->m_reachID == pSAL->m_comid_downstream) pReach = NULL;
-         else pReach = GetReachFromNode(pReach->m_pDown);
-      } // end of while (pReach != NULL)
-x*/
 
 } // end of ReadShade_a_latorInputFile()
 

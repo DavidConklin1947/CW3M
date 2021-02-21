@@ -103,16 +103,13 @@
              obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
     </output_group>
     
-    <output_group name="FLOW Shade-a-lator KCAL comparison" interval="daily" >
-      <output name="23772757 KCAL_REACH (kcal)" query="COMID=23772757" value="KCAL_REACH" type="sum" domain="reach" />
-      <output name="23772757 KCAL_GIVEN (kcal)" query="COMID=23772757" value="KCAL_GIVEN" type="sum" domain="reach" />
-      <output name="23772853 KCAL_REACH (kcal)" query="COMID=23772853" value="KCAL_REACH" type="sum" domain="reach" />
-      <output name="23772853 KCAL_GIVEN (kcal)" query="COMID=23772853" value="KCAL_GIVEN" type="sum" domain="reach" />
-      <output name="23772701 KCAL_REACH (kcal)" query="COMID=23772701" value="KCAL_REACH" type="sum" domain="reach" />
-      <output name="23772701 KCAL_GIVEN (kcal)" query="COMID=23772701" value="KCAL_GIVEN" type="sum" domain="reach" />
+    <output_group name="FLOW Shade-a-lator study area comparison" interval="daily" >
+      <output name="KCAL_REACH (kcal)" query="SAL_REACH=1" value="KCAL_REACH" type="sum" domain="reach" />
+      <output name="LENGTH (km)" query="SAL_REACH=1" value="LENGTH/1000" type="sum" domain="reach" />
+      <output name="Number of reaches" query="SAL_REACH=1" value="1" type="sum" domain="reach" />
     </output_group>
 
-    <output_group name="FLOW Shade-a-lator comparison" interval="daily" >
+    <output_group name="FLOW Shade-a-lator reach comparison" interval="daily" >
       <output name="23772805 DIRECTION (deg)" query="COMID=23772805" value="DIRECTION" type="sum" domain="reach" />
       <output name="23772805 SHADECOEFF" query="COMID=23772805" value="SHADECOEFF" type="sum" domain="reach" />
       <output name="23772805 SHADE_TOPO" query="COMID=23772805" value="SHADE_TOPO" type="sum" domain="reach" />
