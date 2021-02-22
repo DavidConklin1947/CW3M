@@ -107,6 +107,8 @@
       <output name="KCAL_REACH (kcal)" query="SAL_REACH=1" value="KCAL_REACH" type="sum" domain="reach" />
       <output name="LENGTH (km)" query="SAL_REACH=1" value="LENGTH/1000" type="sum" domain="reach" />
       <output name="Number of reaches" query="SAL_REACH=1" value="1" type="sum" domain="reach" />
+      <output name="WIDTH x LENGTH (m2)" query="SAL_REACH=1" value="WIDTH*LENGTH" type="sum" domain="reach" />
+      <output name="VEGHTREACH x LENGTH (m2)" query="SAL_REACH=1" value="VEGHTREACH*LENGTH" type="sum" domain="reach" />
     </output_group>
 
     <output_group name="FLOW Shade-a-lator reach comparison" interval="daily" >

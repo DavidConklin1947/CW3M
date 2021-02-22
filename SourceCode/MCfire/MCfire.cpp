@@ -1417,7 +1417,7 @@ int MCfire::MCvtypeOfForestVEGCLASS(int vegclass)
    {
       CString msg;
       msg.Format("MCvtypeOfForestVEGCLASS() vegclass = %d, mc_vtype = %d", vegclass, mc_vtype);
-      Report::ErrorMsg(msg);
+      Report::LogMsg(msg);
    }
 
    return(mc_vtype);
