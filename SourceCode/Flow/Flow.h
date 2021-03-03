@@ -878,10 +878,12 @@ public:
    ~TopoSetting() {};
 
    double ShadeFrac(int jday0, double* pRadSWestimate_W_m2);
+   double VegShade_pct(double elev_deg, double azimuth_deg, double direction_deg, double reachWidth_m, double vegHt_m);
    bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
    bool IsVegShaded(double solarElev_deg, double solarAzimuth_deg);
-   double SolarDeclination_deg(int jday0);
+   static double SolarDeclination_deg(int jday0);
    double SolarElev_deg(int jday0, double time_hr);
+   static double SolarElev_deg(double lat_deg, int jday0, double time_hr);
    double SolarAzimuth_deg(int jday0, double time_hr);
    double OpticalAirMassThickness(double solarElev_deg);
    double DiffuseFrac(double C_I, int jday0);

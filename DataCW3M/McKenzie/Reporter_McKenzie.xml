@@ -12,6 +12,18 @@
   <const name="inches_per_mm" value="0.039370" />
   <const name="ft_per_m" value="3.28084" />
 
+  <output_group name="REP Forest Disturbance Report"  >
+    <output name="Forest area (ha)" query="LULC_A=4" value="AREA/10000" type="sum"  />
+    <output name="Forest area above 1000 m (ha)" query="LULC_A=4 and ELEV_MEAN>1000" value="AREA/10000" type="sum"  />
+    <output name="Forest harvest area (ha)" query="LULC_A=4 and DISTURB=1" value="AREA/10000" type="sum"  />
+    <output name="Forest harvest area above 1000 m (ha)" query="LULC_A=4 and DISTURB=1 and ELEV_MEAN>1000" value="AREA/10000" type="sum"  />
+    <output name="Forest stand-replacing fire area (ha)" query="LULC_A=4 and DISTURB=23" value="AREA/10000" type="sum" />
+    <output name="LAI" query="LULC_A=4" value="LAI" type="areaWtMean"  />
+    <output name="LAI above 1000 m" query="LULC_A=4 and ELEV_MEAN>1000" value="LAI" type="areaWtMean"  />
+    <output name="Yearly ET (mmH2O)" query="LULC_A=4" value="ET_DAY*365" type="areaWtMean"  />
+    <output name="Yearly ET above 1000 m (mmH2O)" query="LULC_A=4 and ELEV_MEAN > 1000" value="ET_DAY*365" type="areaWtMean"  />
+  </output_group>
+
   <output_group name="REP Mohawk25 water budget" >
     <output name="ET_yr (mm H2O) Mohawk25" query="HBVCALIB=25" value="GET_yr" type="areaWtMean" />
     <output name="GWMUNALL_Y (cms) Mohawk25" query="HBVCALIB=25" value="GWMUNALL_Y" type="sum" />

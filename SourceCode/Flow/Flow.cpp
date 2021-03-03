@@ -1032,28 +1032,80 @@ double TopoSetting::VegElevEW_deg(double direction_deg, double reach_width_m, do
 
 
 double TopoSetting::VegElevNS_deg(double direction_deg, double reach_width_m, double veg_ht_m)
+// Returns the angle between horizontal and the top of the vegetation, looking to the south,
+// as a function of the direction of the stream and the height of the streamside vegetation.
+// Here we assume the vegetation has the same height on both sides of the stream.
+// Picture two triangles, one horizontal and one vertical.
+// The horizontal triangle is formed by points S, B, and C, where 
+// S  is a point in the center of the stream 
+// B is the point on the bank of the stream looking directly to the south
+// C is the point in the center of the stream closest to B
+// The horizontal angle B-S-C (aka theta) is the angle formed between the direction of the stream and the south
+// The vertical triangle is formed by points S, B, and T, where
+// T is the point at the top of the vegetation directly above B.
+// The vertical angle T-S-B is what we want to calculate and return.
+// The distance BC is half the width of the stream.
+// The distance BT is the height of the vegetation.
+// tan(T-S-B) is BT/BS
+// sin(B-S-C) * BS = BC
+// We know the angle B-S-C and the distance BC, so we use them to calculate BS.
+// We know BT and we use it together with the calculated BS to calculate tan(T-S-B).
 {
    double veg_elev_deg = 0.;
    double eff_dir_deg = direction_deg;
    if (eff_dir_deg >= 270.) eff_dir_deg -= 180.;
    else if (eff_dir_deg < 90.) eff_dir_deg += 180.;
 
-   double hw_m = reach_width_m / 2.;
+   double hw_m = reach_width_m / 2.; // This is distance BC.
 
-   double theta_deg = abs(180. - eff_dir_deg);
+   double theta_deg = abs(180. - eff_dir_deg); // This is angle B-S-C.
    double sin_theta = sin(theta_deg * PI / 180.);
    ASSERT(sin_theta > 0.); if (sin_theta <= 0.) sin_theta = 0.;
    if (sin_theta == 0.) veg_elev_deg = 0.; // center line of stream runs N-S
    else
    { // center line of stream runs NE-SW or SE-NW, including E-W (eff_dir_deg = 90) but not including N-S (sin(theta) = 0, eff_dir_deg = 180)
-      double shadow_m = hw_m / sin_theta;
-      double tan_elev = veg_ht_m / shadow_m;
+      double shadow_m = hw_m / sin_theta; // This is distance BS.
+      double tan_elev = veg_ht_m / shadow_m; // This is tan(B-S-T).
       veg_elev_deg = atan(tan_elev) * 180. / PI;
    }
-
+   ASSERT(veg_elev_deg >= 0. && veg_elev_deg <= 90.);
    return(veg_elev_deg);
 } // end of VegElevNS_deg()
 
+
+double TopoSetting::VegShade_pct(double elev_deg, double azimuth_deg, double direction_deg, double reachWidth_m, double vegHt_m)
+// Returns the percentage of the stream width shaded from direct beam sunshine by the vegetation;
+// does not account for canopy density < 1.
+// Picture two triangles, one horizontal and one vertical.
+// T is the top of streamside vegetation on the bank of the stream nearest the sun.
+// R is the point on the bank directly below T (R for Root).
+// S is the point on the stream or on the ground on the other side shaded by T.
+// The vertical triangle is T-R-S.
+// B is the point on the same bank as R directly opposite S.
+// The horizontal triangle is B-R-S.
+// The quantity to be calculated is related to the ratio of the distance BS to the width of the stream.
+// When BS > the stream width, the shadow goes clear across the stream, and Shade_pct is 100%.
+// When BS is <= the stream width, then Shade_pct is 100 * BS/stream width.
+// There is a special case when azimuth_deg = direction_deg.  In that case the shadows fall
+// parallel to the stream and Shade_pct is 0.
+{
+   double shade_pct = 0.;
+   if (azimuth_deg != direction_deg)
+   {
+      double BRS_deg = abs(direction_deg - azimuth_deg);
+      double BRS_rad = 2 * PI * BRS_deg / 360.;
+      double RST_rad = 2 * PI * elev_deg / 360.;
+
+      double RT_m = vegHt_m;
+      double ST_m = RT_m / sin(RST_rad);
+      double RS_m = ST_m * cos(RST_rad);
+
+      double BS_m = RS_m * sin(BRS_rad);
+      shade_pct = (BS_m > reachWidth_m) ? 100. : 100. * BS_m / reachWidth_m;
+   }
+
+   return(shade_pct);
+} // end of VegShade_pct()
 
 
 double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
@@ -1088,6 +1140,7 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
    double solar_elev_deg = SolarElev_deg(jday0, time_hr);
    bool topo_shaded_already = false;
    bool veg_shaded_already = false;
+   double veg_shade_pct = 0;
    while (solar_elev_deg > 0)
    {
       double M_A = OpticalAirMassThickness(solar_elev_deg);
@@ -1108,12 +1161,20 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
          direct_lost_to_shade_kJ_m2 += direct_kJ_m2;
          topo_shaded_already = true;
       }
+
       else if (veg_shaded_already || IsVegShaded(solar_elev_deg, azimuth_deg))
       {
          direct_lost_to_shade_kJ_m2 += m_vegDensity * direct_kJ_m2;
          veg_shaded_already = true;
       }
-
+/*
+      else
+      {
+         double prev_veg_shade_pct = veg_shade_pct;
+         veg_shade_pct = VegShade_pct(solar_elev_deg, azimuth_deg, double direction_deg, double reachWidth_m, double vegHt_m);
+         direct_lost_to_shade_kJ_m2 += (veg_shade_pct / 100.) * (m_vegDensity * direct_kJ_m2);
+      }
+*/
       time_hr -= delta_t_hr;
       solar_elev_deg = SolarElev_deg(jday0, time_hr);
    } // end of loop from noon back to dawn
@@ -1157,8 +1218,11 @@ double TopoSetting::ShadeFrac(int jday0, double* pRadSWestimate_W_m2)
    double net_diffuse_kJ_m2 = diffuse_unshaded_kJ_m2;
 
    double shade_frac = 1. - (net_direct_kJ_m2 + net_diffuse_kJ_m2) / (direct_unshaded_kJ_m2 + diffuse_unshaded_kJ_m2);
-
    *pRadSWestimate_W_m2 = SW_est_J_m2 / SEC_PER_DAY;
+
+   ASSERT(0. < *pRadSWestimate_W_m2 && *pRadSWestimate_W_m2 <= phi_SRG_W_m2);
+   ASSERT(0. <= shade_frac && shade_frac <= 1.);
+
    return(shade_frac);
 } // end of ShadeFrac()
 
@@ -1192,7 +1256,7 @@ double TopoSetting::SolarDeclination_deg(int jday0)
 } // end of SolarDeclination_deg()
 
 
-double TopoSetting::SolarElev_deg(int jday0, double time_hr)
+double TopoSetting::SolarElev_deg(double lat_deg, int jday0, double time_hr)
 // from itacanet.org/the-sun-as-a-source-of-energy/part-3-calculating-solar-angles
 // alpha = altitude angle
 // delta = declination
@@ -1203,7 +1267,7 @@ double TopoSetting::SolarElev_deg(int jday0, double time_hr)
    double declination_deg = SolarDeclination_deg(jday0);
    double delta = declination_deg * PI / 180.;
 
-   double phi = m_lat_deg * PI / 180.;
+   double phi = lat_deg * PI / 180.;
 
    double hour_angle_deg = ((time_hr - 12.) / 24.) * 360.;
    double omega = hour_angle_deg * PI / 180.;
@@ -1211,6 +1275,19 @@ double TopoSetting::SolarElev_deg(int jday0, double time_hr)
    double alpha = sin(delta) * sin(phi) + cos(delta) * cos(omega) * cos(phi);
 
    double solar_elev_in_northern_hemisphere_deg = alpha * 180. / PI;
+   return(solar_elev_in_northern_hemisphere_deg);
+} // end of SolarElev_deg()
+
+
+double TopoSetting::SolarElev_deg(int jday0, double time_hr)
+// from itacanet.org/the-sun-as-a-source-of-energy/part-3-calculating-solar-angles
+// alpha = altitude angle
+// delta = declination
+// omega = hour angle (noon = 0)
+// phi = latitude
+// alpha = sin(delta) * sin(phi) + cos(delta) * cos(omega) * cos (phi)
+{
+   double solar_elev_in_northern_hemisphere_deg = SolarElev_deg(m_lat_deg, jday0, time_hr);
    return(solar_elev_in_northern_hemisphere_deg);
 } // end of SolarElev_deg()
 
@@ -3611,19 +3688,23 @@ bool FlowModel::DumpReachInsolationData(Shade_a_latorData* pSAL)
       double veg_ht_reach_m = 0; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachVEGHTREACH, veg_ht_reach_m);
       double width_given_m = 0; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_given_m);
       double rad_sw_given_W_m2 = 0; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRADSWGIVEN, rad_sw_given_W_m2);
+      double kcal_given = 0.; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachKCAL_GIVEN, kcal_given);
+      double kcal_calculated = (rad_sw_given_W_m2 * width_given_m * pReach->m_length * SEC_PER_DAY / J_PER_CAL) / 1000.;
+      double kcal_diff_pct = (kcal_given != 0.) ? (kcal_calculated - kcal_given) / kcal_given : 0.;
+      double rad_sw_est_W_m2 = 0.; m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRAD_SW_EST, rad_sw_est_W_m2);
 
       if (insolation_ofile != NULL) fprintf(insolation_ofile, "%d, %d, %d, "
          "%f, %d, %f, %f, %f, %f, %f, %f, %f, "
          "%d, %d, %d, %f, "
          "%d, %d, %d, %f, "
          "%d, %f, %f, %f, "
-         "%f, %f\n",
+         "%f, %f, %f, %f, %f, %f\n",
          current_date.year, current_date.month, current_date.day,
          river_km, comid, pReach->m_length, unshaded_rad_sw_W_m2, rad_sw_in_W_m2, rad_lw_out_W_m2, avg_width_m, direction, shadecoeff,
          bank_l_idu_id, vegclass_l, ageclass_l, tree_ht_l_m,
          bank_r_idu_id, vegclass_r, ageclass_r, tree_ht_r_m,
          num_subreaches, veg_ht_l_m, veg_ht_r_m, veg_ht_reach_m,
-         width_given_m, rad_sw_given_W_m2);
+         width_given_m, rad_sw_given_W_m2, kcal_given, kcal_calculated, kcal_diff_pct, rad_sw_est_W_m2);
 
       river_km -= pReach->m_length / 1000.;
       if (comid == pSAL->m_comid_downstream) done = true;
@@ -3904,7 +3985,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
          "BANK_L_IDU, VEGCLASS_L, AGE_CLASS_L, TREE_HT_L, "
          "BANK_R_IDU, VEGCLASS_R, AGE_CLASS_R, TREE_HT_R, "
          "NUM_SUBREACHES, VEG_HT_L, VEG_HT_R, VEGHTREACH, "
-         "WIDTHGIVEN, RADSWGIVEN\n");
+         "WIDTHGIVEN, RADSWGIVEN, KCAL_GIVEN, KCAL_CALCULATED, KCAL_DIFF_PCT, RAD_SW_EST\n");
 
       // If there are Shade-a-lator files, process them.
       m_pReachLayer->SetColDataU(m_colReachSAL_REACH, false);
@@ -5491,10 +5572,13 @@ bool FlowModel::ProcessShade_a_latorInputData(Shade_a_latorData* pSAL, FDataObj*
             (segment_upstream_end_km - reach_upstream_end_km) * 1000. : 0;
          below_the_bottom_m = (segment_downstream_end_km < reach_downstream_end_km) ?
             (reach_downstream_end_km - segment_downstream_end_km) * 1000. : 0;
+
          double overlap_m = segment_len_m - over_the_top_m - below_the_bottom_m;
-         total_length_m += overlap_m;
+         if (overlap_m < 0.) overlap_m = 0.;
+
          if (overlap_m > 0.)
          {
+            total_length_m += overlap_m;
             double seg_frac_of_reach = overlap_m / pReach->m_length;
             frac_of_reach += seg_frac_of_reach;
             ASSERT(frac_of_reach < 1. || close_enough(frac_of_reach, 1., 1e-7));
@@ -5832,10 +5916,13 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
                   (segment_upstream_end_km - reach_upstream_end_km) * 1000. : 0;
                below_the_bottom_m = (segment_downstream_end_km < reach_downstream_end_km) ?
                   (reach_downstream_end_km - segment_downstream_end_km) * 1000. : 0;
+
                double overlap_m = segment_len_m - over_the_top_m - below_the_bottom_m;
-               total_length_m += overlap_m;
+               if (overlap_m < 0.) overlap_m = 0.;
+
                if (overlap_m > 0.)
                {
+                  total_length_m += overlap_m;
                   pEnergyData->Get(energy_tgt_col, row, seg_kcal);
                   double seg_contrib_to_reach_kcal = (overlap_m / segment_len_m) * seg_kcal;
                   reach_kcal += seg_contrib_to_reach_kcal;

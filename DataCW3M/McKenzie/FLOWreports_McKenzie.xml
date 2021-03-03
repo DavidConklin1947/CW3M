@@ -43,24 +43,6 @@
   <output name="ADDED_CMS" query="HBVCALIB=25" value="ADDED_CMS" type="sum" domain="reach" />
   -->
     
-    <output_group name="FLOW Q at gage daily" interval="daily" >
-      <output in_use="1" name="Lookout49 adjusted Q (cfs)" query="COMID=23773411" value="Q*35.315*0.983" type="sum" domain="reach"
-      obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
-    <output in_use="1" name="Mohawk25 adjusted Q (cfs)" query="COMID=23773513" value="Q*35.315*0.989" type="sum" domain="reach"
-  obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
-      <output in_use="1" name="SFork48 adjusted Q (cfs)" query="COMID=23773037" value="Q*35.315*1.025" type="sum" domain="reach"
-      obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-    </output_group>
-
-    <output_group name="FLOW Q at gage monthly" interval="monthly" >
-      <output in_use="1" name="Lookout49 adjusted Q (cfs)" query="COMID=23773411" value="Q*35.315*0.983" type="sum" domain="reach"
-      obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
-    <output in_use="1" name="Mohawk25 adjusted Q (cfs)" query="COMID=23773513" value="Q*35.315*0.989" type="sum" domain="reach"
-  obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
-      <output in_use="1" name="SFork48 adjusted Q (cfs)" query="COMID=23773037" value="Q*35.315*1.025" type="sum" domain="reach"
-      obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-    </output_group>
-
     <output_group name="FLOW Yearly McKenzie flow skill assessment" interval ="yearly" >
       <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
               query="COMID=23773363" value="((Q-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
