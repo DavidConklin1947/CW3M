@@ -3692,10 +3692,10 @@ void EnvModel::RunAutonomousProcesses( bool isPostYear )
 
             if ( !ok )
                {
-               CString msg = "The ";
+               CString msg = "Fatal Error: The ";
                msg += pInfo->name;
                msg += " Autonomous Process returned FALSE indicating an error.";
-               Report::ErrorMsg(msg);
+               Report::FatalMsg(msg);
                throw new EnvRuntimeException( msg );
                }
             }

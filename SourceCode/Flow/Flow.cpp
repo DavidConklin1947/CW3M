@@ -5961,14 +5961,7 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
             ASSERT(row <= data_rows);
 
             m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachKCAL_GIVEN, reach_kcal);
-/*x
-            // Convert kcal to W/m2, using Reach attribute WIDTHGIVEN, which is derived from the Shade-a-lator input file.
-            double width_m; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
-            double reach_surface_area_m2 = width_m * pReach->m_length;
-            double kJ = 4.184 * reach_kcal;
-            double J_m2 = kJ * 1000. / reach_surface_area_m2;
-            double W_m2 = J_m2 / SEC_PER_DAY;
-x*/
+
             double reach_W_m2 = reach_W_m_accumulator / total_length_m;
             m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachRADSWGIVEN, reach_W_m2);
 
