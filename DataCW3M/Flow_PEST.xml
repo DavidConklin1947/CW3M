@@ -278,6 +278,13 @@ COMID="23773009"
 flow_cms="1.10"
      temp_C="4.9"
        />
+
+    <external name="MCfire"
+            method="fn=MCfire.dll:CW3Mfire_DailyProcess"
+            use="1"
+            timing="1+2+4+16"
+            initInfo="..\ForestStates.csv"
+              />
       </global_methods>
 
   <controlPoints>

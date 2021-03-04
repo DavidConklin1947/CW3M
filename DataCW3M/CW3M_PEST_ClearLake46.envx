@@ -339,7 +339,7 @@ initInfo     ='APs.xml'
 dependencies =''
 initRunOnStartup ='0'
    />
-<!--
+
 <autonomous_process
   name         ='LandUseTransitions'
   path         ='APs.dll'
@@ -353,7 +353,7 @@ initRunOnStartup ='0'
   dependencies =''
   initRunOnStartup ='0'
    />
-
+<!--
 <autonomous_process
   name         ='UGAexpansion'
   path         ='APs.dll'

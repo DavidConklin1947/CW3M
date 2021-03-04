@@ -1209,7 +1209,7 @@ x*/
          upstream_inflow_avg_cms = upstream_inflow_avg_cms * exp(-1 / tau) + upstream_inflow_today_cms * (1 - exp(-1 / tau));
       }
 
-      double additional_frac = 0.8351;
+      double additional_frac = 0.; // 0.8351;
       double additional_m3 = additional_frac * upstream_inflow_avg_cms * SEC_PER_DAY;
       WaterParcel additionalWP(additional_m3, m_temp_C);
 
