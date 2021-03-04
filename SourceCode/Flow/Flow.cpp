@@ -1051,6 +1051,9 @@ double TopoSetting::VegElevNS_deg(double direction_deg, double reach_width_m, do
 // We know the angle B-S-C and the distance BC, so we use them to calculate BS.
 // We know BT and we use it together with the calculated BS to calculate tan(T-S-B).
 {
+// ???   ASSERT(reach_width_m > 0. && veg_ht_m >= 0.);
+   if (reach_width_m <= 0. || veg_ht_m <= 0.) return(0);
+
    double veg_elev_deg = 0.;
    double eff_dir_deg = direction_deg;
    if (eff_dir_deg >= 270.) eff_dir_deg -= 180.;
@@ -1067,8 +1070,8 @@ double TopoSetting::VegElevNS_deg(double direction_deg, double reach_width_m, do
       double shadow_m = hw_m / sin_theta; // This is distance BS.
       double tan_elev = veg_ht_m / shadow_m; // This is tan(B-S-T).
       veg_elev_deg = atan(tan_elev) * 180. / PI;
+      ASSERT(veg_elev_deg >= 0. && veg_elev_deg <= 90.);
    }
-   ASSERT(veg_elev_deg >= 0. && veg_elev_deg <= 90.);
    return(veg_elev_deg);
 } // end of VegElevNS_deg()
 
@@ -3650,6 +3653,7 @@ bool FlowModel::DumpReachInsolationData(Shade_a_latorData* pSAL)
 
    double river_km = pSAL->m_riverKmAtUpperEnd;
    Reach* pReach = pSAL->m_pReach_upstream;
+   river_km -= pReach->m_length / 1000.; // Now river_km is the downstream end of the upstream reach
    int comid = pSAL->m_comid_upstream;
 
    bool done = pReach == NULL;
@@ -3707,6 +3711,7 @@ bool FlowModel::DumpReachInsolationData(Shade_a_latorData* pSAL)
          width_given_m, rad_sw_given_W_m2, kcal_given, kcal_calculated, kcal_diff_pct, rad_sw_est_W_m2);
 
       river_km -= pReach->m_length / 1000.;
+
       if (comid == pSAL->m_comid_downstream) done = true;
       else if (pReach->m_pDown != NULL)
       {
@@ -5967,13 +5972,14 @@ x*/
             double reach_W_m2 = reach_W_m_accumulator / total_length_m;
             m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachRADSWGIVEN, reach_W_m2);
 
-            if (pReach->m_reachID == pSAL->m_comid_downstream) pReach = NULL;
-            else pReach = GetReachFromNode(pReach->m_pDown);
-            if (pReach != NULL)
+            Reach * pReach_down = GetReachFromNode(pReach->m_pDown);
+            if (pReach->m_reachID == pSAL->m_comid_downstream) pReach_down = NULL;
+            if (pReach_down != NULL)
             {
                reach_upstream_end_km = reach_downstream_end_km;
-               reach_downstream_end_km = reach_upstream_end_km - pReach->m_length / 1000.;
+               reach_downstream_end_km = reach_upstream_end_km - pReach_down->m_length / 1000.;
             }
+            pReach = pReach_down;
          } // end of while (pReach != NULL && row < data_rows)
 
       } // end of block to get the SAL output data for the current date

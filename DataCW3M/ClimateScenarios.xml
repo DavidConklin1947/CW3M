@@ -177,7 +177,7 @@
                var_name="air_temperature" units="K" />
       <climate type="humidity"
                path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_huss_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
-               var_name="specific_humidity" units="kg/kg" />
+               var_name="specific_humidity" units="kg kg-1" />
       <climate type="rhmin"
                path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_rhsmin_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
                var_name="relative_humidity" units="%" />
@@ -189,10 +189,10 @@
                var_name="surface_downwelling_shortwave_flux_in_air" units="W m-2"  />
       <climate type="uas"
                path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_uas_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
-               var_name="eastward_wind" units="m/s" />
+               var_name="eastward_wind" units="m s-1" />
       <climate type="vas"
                path="\WeatherOnGrids\trunk\MIROC5\macav2metdata_MIROC5_r1i1p1_historical_1950_2005_willamette_daily\macav2metdata_vas_MIROC5_r1i1p1_historical_1950_2005_willamette_daily.nc"
-               var_name="northward_wind" units="m/s" />
+               var_name="northward_wind" units="m s-1" />
     </climate_scenario>
 
     <!-- MACAv2-METDATA MIROC5 RCP 8.5 2006-99 daily dataset -->
