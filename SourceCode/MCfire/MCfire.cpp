@@ -263,7 +263,7 @@ bool CW3Mfire::CW3Mfire_StartYear()
       {
          CString msg;
          msg.Format("CW3Mfire_StartYear() Turning off CW3Mfire for idu_ndx = %d due to FuelLoad() failure", idu_ndx);
-         Report::WarningMsg(msg);
+         Report::LogMsg(msg);
          msg.Format("pvt = %d, vegclass = %d, ageclass = %d, standStartYear = %d, stm_index = %d", pvt, vegclass, standStartYear, stm_index);
          Report::LogMsg(msg);
          retval = false;
@@ -336,7 +336,7 @@ bool CW3Mfire::CW3Mfire_Step()
       {
          CString msg;
          msg.Format("CW3Mfire_Step() Turning off CW3Mfire for idu_ndx = %d due to FireBehav() failure", idu_ndx);
-         Report::WarningMsg(msg);
+         Report::LogMsg(msg);
          msg.Format("vegclass = %d, slope_deg = %f", vegclass, slope_deg);
          Report::LogMsg(msg);
          m_Fm.m_fire.idu_ndx = -idu_ndx - TOKEN_FOR_FIREBEHAV_FAILED;
@@ -740,7 +740,7 @@ bool MCfire::FuelLoad(int pvt, int vegclass, int standage, int standStartYear, i
    {
       CString msg;
       msg.Format("FuelLoad() vegclass = %d, mc_vtype = %d", vegclass, mc_vtype);
-      Report::WarningMsg(msg);
+      Report::LogMsg(msg);
       return(false);
    }
 
@@ -849,7 +849,7 @@ bool MCfire::FireBehav(int vegclass, float slope_deg)
    {
       CString msg;
       msg.Format("FireBehav() vegclass = %d, mc_vtype = %d", vegclass, mc_vtype);
-      Report::WarningMsg(msg);
+      Report::LogMsg(msg);
       return(false);
    }
 
