@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CW3M_McKenzie"
-#define MyAppVersion "McKenzie_0.4.9"
+#define MyAppVersion "McKenzie_0.4.11"
 ;#define MyAppVersion "x.x.x"
 #define MyAppPublisher "Oregon Freshwater Simulations, Inc."
 #define MyAppURL "http:/www.freshwatersim.com"
@@ -113,6 +113,7 @@ Source: "{#InputPath}\DataCW3M\GriddedRecentWeather\*"; DestDir: "\CW3M_{#MyAppV
 
 Source: "{#InputPath}\DataCW3M\ScenarioData\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData"; 
 Source: "{#InputPath}\DataCW3M\ScenarioData\Demo_Baseline\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Demo_Baseline";
+Source: "{#InputPath}\DataCW3M\ScenarioData\Clearcut_above_1000m\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Clearcut_above_1000m";
 Source: "{#InputPath}\DataCW3M\ScenarioData\Baseline\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Baseline";
 Source: "{#InputPath}\DataCW3M\ScenarioData\Baseline_2000-09\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Baseline_2000-09";
 Source: "{#InputPath}\DataCW3M\ScenarioData\Baseline_2010-current\*"; DestDir: "\CW3M_{#MyAppVersion}\ScenarioData\Baseline_2010-current";
