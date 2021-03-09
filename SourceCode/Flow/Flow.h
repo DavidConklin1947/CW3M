@@ -1565,6 +1565,8 @@ protected:
    void  PopulateTreeID( ReachNode *pNode, int treeID ); // recursive
    float PopulateCatchmentCumulativeAreas( void );
    float PopulateCatchmentCumulativeAreas( ReachNode *pNode );
+//   Reach* FlowModel::SetRIVER_KM(Reach* pReach, double riverKM);
+//   void PopulateRIVER_KM();
 
    int  RemoveReaches( ReachNode *pStartNode );       // recursive
    bool RemoveReach( ReachNode *pNode );              // a single reach
@@ -1776,6 +1778,9 @@ public:
    int m_colCENTROIDX;
    int m_colCENTROIDY;
 
+   int m_colWETNESS;
+   int m_colWETL_CAP;
+
    int m_colHruTEMP;
    int m_colHruTMAX;
    int m_colHruTMIN;
@@ -1812,6 +1817,7 @@ public:
    int m_colStreamLOBJECTID;
    int m_colStreamROBJECTID;
    int m_colReachSTRM_ORDER;
+   int m_colReachRIVER_KM;
    int m_colReachWIDTH_MIN;
    int m_colReachDEPTH_MIN;
    int m_colReachZ_MAX;
@@ -1867,6 +1873,8 @@ public:
    int m_colHruDecadalSnow;
    int m_colReachQ;
    int m_colReachLOG_Q;
+   int m_colReachQ_CAP;
+   int m_colReachQSPILL_FRC;
    int m_colReachTEMP_H2O;
    int m_colReachArea;
    int m_colReachZ_MEAN;
