@@ -1565,8 +1565,7 @@ protected:
    void  PopulateTreeID( ReachNode *pNode, int treeID ); // recursive
    float PopulateCatchmentCumulativeAreas( void );
    float PopulateCatchmentCumulativeAreas( ReachNode *pNode );
-//   Reach* FlowModel::SetRIVER_KM(Reach* pReach, double riverKM);
-//   void PopulateRIVER_KM();
+   void PopulateRIVER_KM(ReachNode* pRoot);
 
    int  RemoveReaches( ReachNode *pStartNode );       // recursive
    bool RemoveReach( ReachNode *pNode );              // a single reach

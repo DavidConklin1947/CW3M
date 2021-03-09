@@ -7929,59 +7929,77 @@ bool FlowModel::InitReaches(void)
       pReach->m_topo = TopoSetting(elev_m2, topo_elev_E_deg, topo_elev_S_deg, topo_elev_W_deg);
    } // end of loop thru m_reachArray
 
-//   PopulateRIVER_KM();
+   if (m_flowContext.pEnvContext->coldStartFlag)
+   { // Populate the RIVER_KM attribute.
+      m_pStreamLayer->SetColDataU(m_colReachRIVER_KM, -1.);
+      for (int i = 0; i < roots; i++)
+      {
+         ReachNode* pRoot = m_reachTree.GetRootNode(i);
+         PopulateRIVER_KM(pRoot);
+      }
+   } // end of if (m_flowContext.pEnvContext->coldStartFlag)
 
    return true;
    } // end of InitReaches()
 
-/*
-   Reach* FlowModel::SetRIVER_KM(Reach* pReach, double riverKm)
-   {
-      ASSERT(pReach != NULL);
-      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachRIVER_KM, riverKm);
-      double river_km = riverKm +  pReach->m_length / 1000.;
-      Reach* orig_pReach = pReach;
-      pReach = GetReachFromNode(pReach->m_pLeft) != NULL ? GetReachFromNode(pReach->m_pLeft)
-         : ((GetReachFromNode(pReach->m_pRight) != NULL) ? GetReachFromNode(pReach->m_pRight) : orig_pReach);
-      bool done = false;
-      if (pReach != NULL && pReach != orig_pReach) SetRIVER_KM(pReach, river_km);
-      else while (!done)
+
+   void FlowModel::PopulateRIVER_KM(ReachNode * pRoot)
+   { // Assumes that RIVER_KM has been filled with negative place holders.
+      Reach* pReach = GetReachFromNode(pRoot);
+      double river_km = 0.; // the downstream end of pReach
+
+      // Walk the reach tree, filling in the RIVER_KM attribute.
+      while (pReach != NULL)
       {
-         pReach = GetReachFromNode(orig_pReach->m_pDown);
-         river_km = -1.;
-         if (pReach != NULL)
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachRIVER_KM, river_km);
+
+         // Go up the tree if possible
+         if (pReach->m_pLeft != NULL)
          {
-            m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRIVER_KM, river_km);
-
+            river_km += pReach->m_length / 1000.;
+            pReach = GetReachFromNode(pReach->m_pLeft);
+            continue;
          }
-         done = p
+         else if (pReach->m_pRight != NULL)
+         {
+            river_km += pReach->m_length / 1000.;
+            pReach = GetReachFromNode(pReach->m_pRight);
+            continue;
+         }
 
-      }
-   } // end of SetRIVER_KM()
-
-
-   void FlowModel::PopulateRIVER_KM()
-   {
-      m_pStreamLayer->SetColDataU(m_colReachRIVER_KM, -1.);
-      int roots = m_reachTree.GetRootCount();
-      for (int i = 0; i < roots; i++)
-      {
-         ReachNode* pRoot = m_reachTree.GetRootNode(i);
-         Reach* pReach = GetReachFromNode(pRoot);
-         double river_km = 0.;
+         // Couldn't go up. Back down, looking for places where RIVER_KM hasn't been filled in yet.
+         Reach* orig_pReach = pReach;
+         pReach = GetReachFromNode(pReach->m_pDown);
          while (pReach != NULL)
          {
-            m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachRIVER_KM, river_km);
-            river_km += pReach->m_length / 1000.;
-            if (pReach->m_pLeft != NULL)
-            {
+            double check_river_km = river_km - pReach->m_length / 1000.;
 
+            m_pStreamLayer->GetData(pReach->m_polyIndex, m_colReachRIVER_KM, river_km);
+            ASSERT(close_enough(check_river_km, river_km, 1e-7, 1e-7));
+
+            Reach * new_pReach = GetReachFromNode(pReach->m_pLeft);
+            if (new_pReach == NULL || new_pReach == orig_pReach) new_pReach = GetReachFromNode(pReach->m_pRight);
+
+            if (new_pReach != NULL && new_pReach != orig_pReach)
+            { // new_pReach might be a branch where RIVER_KM hasn't been filled in yet.
+               double new_river_km = 0.; m_pStreamLayer->GetData(new_pReach->m_polyIndex, m_colReachRIVER_KM, new_river_km);
+               if (new_river_km < 0.)
+               { // RIVER_KM hasn't been filled in yet.
+                  river_km += pReach->m_length / 1000.;
+                  pReach = new_pReach;
+                  break; // exit from inner while loop to outer while loop
+               }
             }
+            
+            orig_pReach = pReach;
+            pReach = GetReachFromNode(pReach->m_pDown); // back down one more level
+         } // end of while (pReach != NULL) backing down the tree
 
-         }
-      }
+      } // end of while (pReach != NULL) walking the tree
+
+      ASSERT(river_km == 0.);
    } // end of PopulateRIVER_KM()
-*/
+
 
 void FlowModel::PopulateTreeID( ReachNode *pNode, int treeID )
    {
