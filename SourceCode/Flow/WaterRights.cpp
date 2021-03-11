@@ -1152,10 +1152,10 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
    
    // Initialize m_availableDischarge for use by CalcTotH2OinReaches()
    for (int i = 0; i < reachCount; i++)
-      {
+   {
       Reach *pReach = pFlowContext->pFlowModel->GetReach(i); 
-      pReach->m_availableDischarge = pReach->GetDischarge();
-      }
+      pReach->m_availableDischarge = (pReach->GetReachDischargeWP()).m_volume_m3 / SEC_PER_DAY;
+   }
 
    msg.Format("*** AltWaterMaster::Init() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f",
       pFlowContext->pFlowModel->CalcTotH2OinReaches(), pFlowContext->pFlowModel->CalcTotH2OinReservoirs(), pFlowContext->pFlowModel->CalcTotH2OinHRUs(), pFlowContext->pFlowModel->CalcTotH2O());
@@ -1571,7 +1571,7 @@ bool AltWaterMaster::Step(FlowContext *pFlowContext)
 	for (int i = 0; i < reachCount; i++)
 		{
 		Reach *pReach = pFlowContext->pFlowModel->GetReach(i); // Note: these are guaranteed to be non-phantom
-		pReach->m_availableDischarge = pReach->GetDischarge();
+		pReach->m_availableDischarge = (pReach->GetReachDischargeWP()).m_volume_m3 / SEC_PER_DAY;
 		pReach->m_instreamWaterRightUse = 0.;
 		pFlowContext->pFlowModel->m_pStreamLayer->m_readOnly = false;
 		pFlowContext->pFlowModel->m_pStreamLayer->SetData(i, m_colWRConflictDy, 0);
@@ -1870,7 +1870,7 @@ bool AltWaterMaster::Step(FlowContext *pFlowContext)
                }
             //*/
             double wrq = pReach->m_instreamWaterRightUse + current_rate_for_this_reach_cms;
-            double q_div_wrq = wrq > 0.f ? (pReach->GetDischarge() / wrq) : 100.f;
+            double q_div_wrq = wrq > 0.f ? (((pReach->GetReachDischargeWP()).m_volume_m3 / SEC_PER_DAY) / wrq) : 100.f;
             pReach->m_instreamWaterRightUse += allocation_m3_per_s;
             /*
             if (jday_1 == 1)
@@ -4069,7 +4069,7 @@ double AltWaterMaster::GetAvailableSourceFlow(Reach *pReach)
 	{
 	// this method calculates the amount of demand that can be extracted from this stream reach
 
-	double flow = (pReach->GetDischarge()); // m3/day
+	double flow = (pReach->GetReachDischargeWP()).m_volume_m3 / SEC_PER_DAY; // m3/day
 
 	float instreamWRUse = (float)pReach->m_instreamWaterRightUse;
 

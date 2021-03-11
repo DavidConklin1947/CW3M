@@ -735,8 +735,20 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachDEPTH, reach_depth_m);
       double reach_manning_depth_m = manning_depth_x_length_accum / pReach->m_length;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachDEPTHMANNG, reach_manning_depth_m);
-      double turnover = (pReach->GetDischarge() * SEC_PER_DAY) / volume_accum_m3;
+      double turnover = (pReach->GetReachDischargeWP()).m_volume_m3 / volume_accum_m3;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachTURNOVER, turnover);
+
+      // Wetlands stuff
+      // Has the flow gone over the stream banks?
+      double q_cap_cms = pReach->Att(Q_CAP);
+      double q_cms = (pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY);
+      if (q_cap_cms > 0 && q_cms > q_cap_cms)
+      { // Flow has gone over the banks.
+         double qspill_frc = 0.; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachQSPILL_FRC, qspill_frc);
+         double q2wetl_cms = q_cms * qspill_frc;
+         gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachQ2WETL, q2wetl_cms);
+      }
+
 
    } // end of loop through reaches
 
@@ -914,9 +926,6 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
    // Use yesterday's outflow rate to determine the geometry of this subreach.
    double old_Q_cms = pSubnode->m_dischargeWP.m_volume_m3 / SEC_PER_DAY; ASSERT(old_Q_cms > 0); // old_Q_cms is yesterday's outflow rate from this subreach.
 
-   double Qin_m3 = GetReachInflow(pReach, subnode) * SEC_PER_DAY;
-   ASSERT(close_enough(original_upstream_inflow_volume_m3, Qin_m3, 0.1, 100.));
-
    // Make sure there is enough water available to handle any withdrawals from the reach for irrigation or municipal use.
    double net_lateral_inflow_m3 = pSubnode->m_runoffWP.m_volume_m3 - pSubnode->m_withdrawalWP.m_volume_m3;
    if (net_lateral_inflow_m3 < 0)
@@ -999,56 +1008,17 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
 } // end of ApplyReachOutflowWP()
 
 
-double ReachRouting::GetReachInflow( Reach *pReach, int subNode )
-   {
-   double Q = 0;
-
-   ///////
-   if ( subNode == 0 )  // look upstream?
-      {
-      Reservoir *pRes = pReach->m_pReservoir;
-
-      if ( pRes == NULL )
-         {
-         Q = GetReachOutflow( pReach->m_pLeft );
-         Q += GetReachOutflow( pReach->m_pRight );
-         }
-      else
-         //Q = pRes->GetResOutflow( pRes, m_flowContext.dayOfYear );
-       Q = pRes->m_outflow/SEC_PER_DAY;  //m3/day to m3/s
-      }
-   else
-      {
-      ReachSubnode *pNode = (ReachSubnode*) pReach->m_subnodeArray[ subNode-1 ];  ///->GetReachSubnode( subNode-1 );
-      ASSERT( pNode != NULL );
-      Q = pNode->m_discharge;
-      }
-
-   return Q;
-   } // end of GetReachInflow()
-
-
 WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
 {
    WaterParcel inflowWP(0,0);
    if (subNode == 0)  // look upstream?
    {
       Reservoir* pRes = pReach->m_pReservoir;
-      if (pRes != NULL)
-      {
-         inflowWP = pRes->m_outflowWP;
-//         ASSERT(pReach->m_pRight == NULL); This isn't true for Big Cliff.
-
-         double reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
-         ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.1, 100.));
-      }
+      if (pRes != NULL) inflowWP = pRes->m_outflowWP;
       else
       {
-         inflowWP = GetReachOutflowWP(pReach->m_pLeft);
-         inflowWP.MixIn(GetReachOutflowWP(pReach->m_pRight));
-
-         double reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
-         ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.1, 100.));
+         if (pReach->m_pLeft != NULL) inflowWP = (gpModel->GetReachFromNode(pReach->m_pLeft))->GetReachDischargeWP();
+         if (pReach->m_pRight != NULL) inflowWP.MixIn((gpModel->GetReachFromNode(pReach->m_pRight))->GetReachDischargeWP());
       }
    }
    else
@@ -1058,51 +1028,8 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
       inflowWP = pNode->m_dischargeWP;
    }
 
-   double reach_inflow_m3 = SEC_PER_DAY * GetReachInflow(pReach, subNode);
-   ASSERT(close_enough(inflowWP.m_volume_m3, reach_inflow_m3, 0.1, 100.));
-
    return(inflowWP);
 } // end of GetReachInflowWP()
-
-double ReachRouting::GetReachOutflow( ReachNode *pReachNode )   // recursive!!! for pahntom nodes
-   {
-   if ( pReachNode == NULL )
-      return 0;
-
-   if ( pReachNode->IsPhantomNode() )
-      {
-      double q = GetReachOutflow( pReachNode->m_pLeft );
-      q += GetReachOutflow( pReachNode->m_pRight );
-
-      return q;
-      }
-   else
-      {
-      Reach *pReach = gpModel->GetReachFromNode( pReachNode );
-
-      if ( pReach != NULL )
-         return pReach->GetDischarge();
-      else
-         {
-         ASSERT( 0 );
-         return 0;
-         }
-      }
-   }
-
-
-WaterParcel ReachRouting::GetReachOutflowWP(ReachNode* pReachNode)
-{
-   WaterParcel outflowWP(0, 0);
-   if (pReachNode == NULL) return(outflowWP);
-
-   ASSERT(!pReachNode->IsPhantomNode());
-
-   Reach* pReach = gpModel->GetReachFromNode(pReachNode);
-   ASSERT(pReach != NULL);
-   outflowWP = pReach->GetDischargeWP();
-   return(outflowWP);
-} // end of GetReachOutflowWP()
 
 
 double ReachRouting::GetLateralSVInflow( Reach *pReach, int sv )

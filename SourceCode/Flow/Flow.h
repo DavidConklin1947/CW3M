@@ -78,6 +78,9 @@ using namespace std;
 
 #define BEERS_LAW_K 0.5
 
+#define Q2WETL gpModel->m_colReachQ2WETL
+#define Q_CAP gpModel->m_colReachQ_CAP
+
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *
  * \section intro_sec Introduction
@@ -911,8 +914,8 @@ public:
 
    Reservoir *GetReservoir( void ) { return (Reservoir*) m_pReservoir; }
    float GetManningDepthFromQ( double Q, float wdRatio );  // ASSUMES A SPECIFIC CHANNEL GEOMETRY
-   double GetDischarge( int subnode=-1 );  // -1 means last (lowest) subnode - m3/sec
-   WaterParcel GetDischargeWP(int subnode = -1); // -1 means last (lowest, most downstream) subnode 
+   WaterParcel GetSubreachDischargeWP(int subnode);
+   WaterParcel GetReachDischargeWP(); // Calculates and returns Q_DISCHARG
    double Evap_m_s(int subreachNdx, double rad_sw_net_W_m2, double net_lw_out_W_m2, double temp_air_degC, double ws_m_sec, double sphumidity);
    double GetUpstreamInflow();
    bool GetUpstreamInflow(double &QLeft, double &QRight);
@@ -977,6 +980,7 @@ public:
 
 public:
    // reach-level parameters
+   double Att(int col); 
    TopoSetting m_topo;
    double m_reach_volume_m3;
    float m_wdRatio;
@@ -1022,7 +1026,9 @@ public:
    static MTDOUBLE m_mvQ_DIV_WRQ;  // Flow divided by regulatory demand
    static MTDOUBLE m_mvINSTRM_REQ;  // regulatory required flow, cms
    static MTDOUBLE m_mvRESVR_H2O; // volume of water in reservoir on this reach, m3 H2O
-   };
+
+   static MapLayer* pLayer;
+  };
 
 
 class FLOWAPI LinkMV // Link model variables
@@ -1597,8 +1603,6 @@ protected:
    bool AssignIDUsToStreamBanks();
    //void UpdateCatchmentFluxes( float time, float timeStep, FlowContext *pFlowContext );
 
-   //float GetReachOutflow( ReachNode *pReachNode );
-
    bool InitFluxes( void );
    bool InitRunFluxes( void );
    bool InitIntegrationBlocks( void );
@@ -1779,6 +1783,7 @@ public:
 
    int m_colWETNESS;
    int m_colWETL_CAP;
+   int m_colWETL2Q;
 
    int m_colHruTEMP;
    int m_colHruTMAX;
@@ -1871,9 +1876,11 @@ public:
    //int m_colHruAnnualSnow;
    int m_colHruDecadalSnow;
    int m_colReachQ;
+   int m_colReachQ_DISCHARG;
    int m_colReachLOG_Q;
    int m_colReachQ_CAP;
    int m_colReachQSPILL_FRC;
+   int m_colReachQ2WETL;
    int m_colReachTEMP_H2O;
    int m_colReachArea;
    int m_colReachZ_MEAN;

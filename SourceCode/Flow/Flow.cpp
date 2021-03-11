@@ -76,6 +76,8 @@ MTDOUBLE Reach::m_mvINSTRM_REQ = 0;
 MTDOUBLE Reach::m_mvRESVR_H2O = 0;
 MTDOUBLE Reach::m_mvCurrentTracer = 0;
 
+MapLayer* Reach::pLayer = NULL;
+
 MTDOUBLE HRU::m_mvCumET = 0;
 MTDOUBLE HRU::m_mvCumRunoff = 0;
 MTDOUBLE HRU::m_mvCumMaxET = 0;
@@ -878,23 +880,6 @@ double Reach::NominalMinWidth_m()
 } // end of SetNominalSubreachGeometry()
 
 
-double Reach::GetDischarge( int subnode /*=-1*/ )
-   {
-   if ( subnode < 0 )
-      subnode = this->GetSubnodeCount()-1;
-
-   ReachSubnode *pNode = (ReachSubnode*) this->m_subnodeArray[ subnode ];
-   ASSERT( pNode != NULL );
-
-   double q = pNode->m_discharge;
-
-   if (q < 0.0f || q != q) // q != q detects NaNs
-      q = 0.0f;
-
-   return q;
-   } // end of GetDischarge()
-
-
 double Reach::SubreachNetRad_kJ(int subreachNdx)
 // Totals up the incoming shortwave and outgoing longwave from the stream segment parts corresponding to this subreach.
 {
@@ -1430,7 +1415,7 @@ double Reach::GetSubreachArea_m2(int subreachNdx)
 } // end of GetSegmentArea_m2()
 
 
-WaterParcel Reach::GetDischargeWP(int subnode)
+WaterParcel Reach::GetSubreachDischargeWP(int subnode)
 {
    if (subnode < 0) subnode = this->GetSubnodeCount() - 1;
 
@@ -1439,6 +1424,19 @@ WaterParcel Reach::GetDischargeWP(int subnode)
    ASSERT(!isnan(pNode->m_dischargeWP.m_volume_m3));
    return(pNode->m_dischargeWP);
 } // end of GetDischargeWP()
+
+
+WaterParcel Reach::GetReachDischargeWP() // Calculates and returns Q_DISCHARG
+{
+   int subnode = GetSubnodeCount() - 1;
+   ReachSubnode* pNode = (ReachSubnode*)m_subnodeArray[subnode];
+   WaterParcel downstream_outflowWP = pNode->m_dischargeWP;
+
+   double q2wetl_cms = Att(Q2WETL);
+   downstream_outflowWP.Discharge(q2wetl_cms * SEC_PER_DAY);
+
+   return(downstream_outflowWP);
+} // end of GetReachDownstreamOutflowWP()
 
 
 double Reach::GetUpstreamInflow( )
@@ -3230,6 +3228,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    m_pIDUlayer->CheckCol(m_colWETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
    m_pIDUlayer->CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
+   m_pIDUlayer->CheckCol(m_colWETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruTEMP, "TEMP", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruTMAX, "TMAX", TYPE_FLOAT, CC_AUTOADD);
@@ -3376,10 +3375,12 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    m_pReachLayer->CheckCol(m_colReachVEG_HT_L, "VEG_HT_L", TYPE_DOUBLE, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_DISCHARG, _T("Q_DISCHARG"), TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
 
    m_pReachLayer->CheckCol(m_colReachQ_CAP, "Q_CAP", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachQSPILL_FRC, "QSPILL_FRC", TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachQ2WETL, "Q2WETL", TYPE_DOUBLE, CC_AUTOADD);
 
    EnvExtension::CheckCol( m_pStreamLayer,    m_colStreamCumArea,       _T("CUM_AREA"), TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colCatchmentCumArea,    _T("CUM_AREA"), TYPE_FLOAT, CC_AUTOADD );
@@ -3699,6 +3700,17 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    } // end of if (input_path_ok)
 
 */      /////////////////////////////////////////
+
+   if (m_flowContext.pEnvContext->coldStartFlag)
+   { // Initialize the WETNESS attribute.
+      m_pIDUlayer->SetColDataU(m_colWETNESS, -1000.);
+      for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu != m_pIDUlayer->End(); idu++)
+      {
+         int lulc_a = 0; m_pIDUlayer->GetData(idu, m_colLulcA, lulc_a);
+         if (lulc_a != LULCA_WETLAND) continue;
+         m_pIDUlayer->SetDataU(idu, m_colWETNESS, 0.); // Initialize as saturated soil without standing water.
+      } // end of loop through IDUs
+   } // end of if (m_flowContext.pEnvContext->coldStartFlag)
 
    return(true);
 } // end of FlowModel::Init()
@@ -4031,7 +4043,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
    Scenario* pSimulationScenario = m_flowContext.pEnvContext->pEnvModel->GetScenario();
    Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
-   if (pSAL->m_valid)
+   if (!pSAL->m_valid) m_flowContext.m_SALmode = false;
+   else
    { 
       // Initialize DumpReachInsolationData()
       // Get the path to the current user's Documents folder.
@@ -5894,7 +5907,7 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
    {
       ReachNode *pRootNode = this->m_reachTree.GetRootNode( i );
       Reach *pReach = GetReachFromNode( pRootNode );
-      double discharge = pReach->GetDischarge();   // m3/sec
+      double discharge = pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY;   // m3/sec
 
       // convert to acreft/day
       discharge *= ACREFT_PER_M3 * SEC_PER_DAY;  // convert to acreft-day
@@ -6782,7 +6795,7 @@ bool FlowModel::UpdateReservoirControlPoints( int doy )
          xvalue = 110;   //workaround 11_15.  Need to point to Fern Ridge pool elev.  only one control point used this xvalue
       else if (_stricmp(xlabel, "Outflow_lagged_24h" ) == 0)
          {
-         xvalue = (float)pReach->GetDischarge();
+         xvalue = (float)(pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY);
         }
       else if (_stricmp(xlabel,"Inflow_cms" ) == 0)     
          {}//Code here for lagged and inflow based constraints
@@ -6802,7 +6815,7 @@ bool FlowModel::UpdateReservoirControlPoints( int doy )
       // if the reach doesn't exist, ignore this
       if ( pReach != NULL )
          {       
-         double currentdischarge = pReach->GetDischarge();    // Get current flow at reach
+         double currentdischarge = (pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY);    // Get current flow at reach
          /*/////////////////////////////////////////////////////////
        ///Change flows with ResSim values.  Use only for testing in conjunction with low or zero precipitation
        int flowcol = 0;
@@ -6868,7 +6881,7 @@ bool FlowModel::UpdateReservoirControlPoints( int doy )
                   
                   if (pControl->m_influencedReservoirsArray[0]->m_reservoirType == ResType_CtrlPointControl)
                   {
-                     double resDischarge = pControl->m_influencedReservoirsArray[0]->m_pReach->GetDischarge();
+                     double resDischarge = pControl->m_influencedReservoirsArray[0]->m_pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY;
                      addedConstraint = (float)(resDischarge + constraintValue);
                      int releaseFreq = 1;
 
@@ -6986,14 +6999,14 @@ bool FlowModel::SetGlobalReservoirFluxesResSimLite( void )
       //   To be re-implemented with remainder of FLOW hydrology - ignored currently to test ResSIMlite
       if (pLeft != NULL)
       {
-         inflow_cms = pLeft->GetDischarge();
-         inflowWP = pLeft->GetDischargeWP();
+         inflowWP = pLeft->GetReachDischargeWP();
+         inflow_cms = inflowWP.m_volume_m3 / SEC_PER_DAY;
       }
       if (pRight != NULL)
       {
-         inflow_cms += pRight->GetDischarge();
-		WaterParcel rightWP = pRight->GetDischargeWP();
+		   WaterParcel rightWP = pRight->GetReachDischargeWP();
          inflowWP.MixIn(rightWP);
+         inflow_cms = inflowWP.m_volume_m3 / SEC_PER_DAY;
       }
      
 
@@ -7358,11 +7371,12 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
       ASSERT( pReach != NULL );
       if ( pReach->m_subnodeArray.GetSize() > 0 && pReach->m_polyIndex >= 0 )
       {
-         double discharge = pReach->GetDischarge(); ASSERT(discharge > 0.);
-         WaterParcel dischargeWP = pReach->GetDischargeWP(); ASSERT(close_enough(discharge, dischargeWP.m_volume_m3 / SEC_PER_DAY, .01, max(10, discharge / 10)));
+         WaterParcel dischargeWP = pReach->GetReachDischargeWP(); 
+         double discharge_cms = dischargeWP.m_volume_m3 / SEC_PER_DAY;
+         ASSERT(discharge_cms > 0.);
 
-         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachQ, discharge);  // m3/sec        
-         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachLOG_Q, log10(discharge));  // log10(m3/sec)
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachQ_DISCHARG, discharge_cms);  // m3/sec        
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachLOG_Q, log10(discharge_cms));  // log10(m3/sec)
          m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachTEMP_H2O, dischargeWP.WaterTemperature());  // degC       
 
          Reservoir* pReservoir = pReach->m_pReservoir;
@@ -7509,10 +7523,19 @@ bool FlowModel::ResetCumulativeWaterYearValues()
    }
 
 
+double Reach::Att(int col)
+{
+   double attribute;
+   pLayer->GetData(this->m_polyIndex, col, attribute);
+   return(attribute);
+} // end of Reach::Att()
+
+
 // create, initialize reaches based on the stream layer
 bool FlowModel::InitReaches(void)
    {
    ASSERT(m_pStreamLayer != NULL);
+   Reach::pLayer = m_pStreamLayer; 
 
    m_colStreamFrom = m_pStreamLayer->GetFieldCol(_T("FNODE_"));
    m_colStreamTo = m_pStreamLayer->GetFieldCol(_T("TNODE_"));
@@ -15196,7 +15219,7 @@ bool FlowModel::CollectModelOutput(void)
          m_pME_Reach->SetCurrentRecord(pReach->m_polyIndex);
 
          // update static HRU variables
-         Reach::m_mvCurrentStreamFlow = pReach->GetDischarge();
+         Reach::m_mvCurrentStreamFlow = (pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY);
          Reach::m_mvInstreamWaterRightUse = pReach->m_instreamWaterRightUse;
 
          MapLayer* pStreamLayer = this->m_pStreamLayer;

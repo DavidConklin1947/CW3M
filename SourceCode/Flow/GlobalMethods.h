@@ -20,6 +20,7 @@ using namespace std;
 
 #define LULCA_AG 2 /* LULC_A {Agriculture} */
 #define LULCA_FOREST 4 /* LULC_A {Forest} */
+#define LULCA_WETLAND 62 /* Palustrine non-isolated wetland */ 
 
 class WaterMaster;
 class AltWaterMaster;
@@ -213,8 +214,7 @@ protected:
 
    double GetReachInflow( Reach *pReach, int subNode );
    WaterParcel GetReachInflowWP(Reach * pReach, int subnode);
-   double GetReachOutflow(ReachNode* pReachNode);
-   WaterParcel GetReachOutflowWP(ReachNode* pReachNode);
+   WaterParcel GetReachQdischargeWP(ReachNode* pReachNode);
 
    WaterParcel ApplyReachOutflowWP(Reach* pReach, int subnode, double timeStep);
    static double KinematicWave(double oldQ_cms, double upstreamInflow_cms, double lateralInflow_cms, double manningDepth_m, double wdRatio, double manningN, double slope, double length_m);
