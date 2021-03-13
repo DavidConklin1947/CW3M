@@ -49,6 +49,7 @@ using namespace std;
 #define BOX_SNOWPACK 0
 #define BOX_SNOW 0
 #define BOX_MELT 1
+#define BOX_STANDING_H2O 1
 #define BOX_NAT_SOIL 2
 #define BOX_IRRIG_SOIL 3
 #define BOX_FAST_GW 4
@@ -619,6 +620,10 @@ public:
 
    int m_id;            // unique identifier for this HRU
    int m_hruNdx; // index of this HRU in the HRUarray[], also row number in the HRU.shp file
+
+   bool m_standingH2Oflag; // true => "MELT_BOX" actually represents the volume of standing water in wetland IDUs in this HRU
+   double m_wetlandArea_m2; // Update each year in FlowModel::StartYear()
+   double m_infiltrationFromStandingH2O_m3; // Calculate in HBV daily process. Use to reduce WETNESS in Wetland daily process.
 
    float m_HRUtotArea_m2;  // total area of the HRU
    double m_frc_naturl; // FRC_NATURL attribute in HRU layer

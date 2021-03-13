@@ -6492,6 +6492,28 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
          pHRU->m_frc_naturl = 1.;
          pHRU->m_HRUeffArea_m2 = pHRU->m_HRUtotArea_m2;
 
+         pHRU->m_standingH2Oflag = false;
+         for (int idu = 0; !pHRU->m_standingH2Oflag && idu < pHRU->m_polyIndexArray.GetSize(); idu++)
+         {
+            int lulc_a = 0;
+            m_flowContext.pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[idu], m_colLulcA, lulc_a);
+            if (lulc_a != LULCA_WETLAND) continue;
+
+            double wetness_mm = 0.;
+            m_flowContext.pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[idu], m_colWETNESS, wetness_mm);
+            pHRU->m_standingH2Oflag = wetness_mm > 0;
+         } // end of loop thru IDUs looking for standing water
+
+         HRULayer* pHRULayer0 = pHRU->GetLayer(BOX_SNOWPACK);
+         float snow_in_snowpack_m3SWE = (float)pHRULayer0->m_volumeWater;
+         if (pHRU->m_standingH2Oflag && snow_in_snowpack_m3SWE > 0.)
+         {
+            CString msg;
+            msg.Format("HBV_IrrigatedSoil() Snow and standing water at the same time in HRU %d", pHRU->m_id);
+            Report::ErrorMsg(msg);
+         }
+
+
          // Set FRC_NATURL, CATCH_NDX, NDX_IN_C, AREA_M2, and AREA_AC attributes in the HRU layer.
          m_pHRUlayer->SetData(hru_row, col_hruFRC_NATURL, pHRU->m_frc_naturl);
          m_pHRUlayer->SetData(hru_row, col_hruCATCH_NDX, i);
@@ -7261,8 +7283,10 @@ void FlowModel::GetMaxSnowPack(EnvContext *pEnvContext)
       Catchment *pCatchment = m_catchmentArray[i];
       for (int j = 0; j < pCatchment->GetHRUCount(); j++)
          {
-         HRU *pHRU = pCatchment->GetHRU(j);    
-         totalSnow+=((float)pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater + (float)pHRU->GetLayer(BOX_MELT)->m_volumeWater) ; //get the current year snowpack
+         HRU *pHRU = pCatchment->GetHRU(j);   
+         if (pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater > 0.)
+            // There is snow on the ground in this HRU.
+            totalSnow += ((float)pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater + (float)pHRU->GetLayer(BOX_MELT)->m_volumeWater); //get the current year snowpack
          }
       }
    // then compare the total volume to the previously defined maximum volume
@@ -7328,7 +7352,7 @@ void FlowModel::UpdateAprilDeltas(EnvContext *pEnvContext )
                float apr1SWEMovAvg = pHRU->m_apr1SWE_10yr.GetValue();
                gpFlow->UpdateIDU( pEnvContext, idu, m_colHruApr1SWE10Yr, apr1SWEMovAvg, true );
 
-               pHRU->m_precipCumApr1 = pHRU->m_precip_yr;      // mm of cum precip Jan 1 - Apr 1)
+               pHRU->m_precipCumApr1 = pHRU->m_precip_yr;      // mm of cumulative precip Jan 1 - Apr 1)
                }
             }
          }
