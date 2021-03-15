@@ -12,7 +12,8 @@
 #include <omp.h>
 
 extern FlowProcess *gpFlow;
-extern FlowModel *gpModel;
+extern FlowModel* gpModel;
+extern FlowModel* gpFlowModel;
 
 bool ReachRouting::Init(FlowContext* pFlowContext)
 {
@@ -506,6 +507,7 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
    // aerodynamic evaporation is a function of the windspeed.
    double evap_m_s = Reach::Evap_m_s(rtnWP.WaterTemperature(), rad_sw_net_W_m2, net_lw_out_W_m2, airTemp_degC, windspeed_m_sec, spHumidity);
    double evap_m3 = evap_m_s * H2Oarea_m2 * SEC_PER_DAY;
+   if (evap_m3 > origWP.m_volume_m3) evap_m3 = origWP.m_volume_m3;
    double evap_kJ = evap_m3 * DENSITY_H2O * Reach::LatentHeatOfVaporization_MJ_kg(H2Otemp_degC) * 1000.;
 
    double sw_kJ = rad_sw_net_W_m2 * H2Oarea_m2 * SEC_PER_DAY / 1000;

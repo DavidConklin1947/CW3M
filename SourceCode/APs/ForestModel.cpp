@@ -114,15 +114,15 @@ bool WW2100AP::RunDGVMvegtypeData( EnvContext *pContext )
 float WW2100AP::LeafAreaIndex(CString vegclassAbbrev)
    {
       int iRec = find(&m_LAIandC_table, m_records_LAIandC, m_colLAIandC_Abbrev, vegclassAbbrev);
-      float LAI = 0.f;
-      if (iRec>=0) LAI = m_LAIandC_table.GetAsFloat(m_colLAIandC_LAI, iRec);
+      float lai = 0.f;
+      if (iRec>=0) lai = m_LAIandC_table.GetAsFloat(m_colLAIandC_LAI, iRec);
       else
          {
          CString msg;
          msg.Format("LeafAreaIndex: can't find %s in LAIandC file", (LPCTSTR) vegclassAbbrev);
          Report::LogMsg(msg);
          }
-      return(LAI);
+      return(lai);
    }
 
 

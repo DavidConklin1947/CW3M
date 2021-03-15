@@ -175,7 +175,7 @@
      percentage out of the layer with the highest percentage of the total amount in all 3 layers-->
 
     <evap_trans name="ForestET" method="PM" use="1"
-     query="LULC_A!=2"
+     query="LULC_A!=2 {Ag} and LULC_A!=(62 {Wetlands})"
      lulc_col="LULC_B"
      soil_col="HBVCALIB"
      soil_table="HBV.csv"
@@ -199,6 +199,19 @@
           longitude="123">
       <layers>
         <layer layer_distributions="(3,1)" query="IRRIGATION=1" />
+        <layer layer_distributions="(2,1)" />
+      </layers>
+    </evap_trans>
+
+ <evap_trans name="WetlandET" method="wetlandET" use="1"
+ query="LULC_A=(62 {Wetlands})"
+ lulc_col="LULC_B"
+ soil_col="HBVCALIB"
+ soil_table="HBV.csv"
+ bulkStomatalResistance="150"
+ latitude="45"
+ longitude="123">
+      <layers>
         <layer layer_distributions="(2,1)" />
       </layers>
     </evap_trans>

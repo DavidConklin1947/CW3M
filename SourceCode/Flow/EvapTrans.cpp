@@ -953,7 +953,7 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
    //   2) Once the maxET is determined, estimate actual ET based on crop coefficients.
    //
    // This method relies on two tables:
-   //   1) A soils table "SOILS" which provided information on the wilting point and lower wate extraction limit for
+   //   1) A soils table "SOILS" which provided information on the wilting point and lower water extraction limit for
    //      the soil type present in the HRU.  This table should be named "Soil.csv" and be present
    //      on the Envision path.  Further, it must contain columns "SoilType", "WP" and "fieldCapacity" with the information
    //      described above
@@ -1535,8 +1535,14 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
 
          case 'h':
          case 'H':
-            pEvapTrans->SetMethod( GM_HARGREAVES );
-            pEvapTrans->m_ETEq.SetMode( ETEquation::HARGREAVES );
+            pEvapTrans->SetMethod(GM_HARGREAVES);
+            pEvapTrans->m_ETEq.SetMode(ETEquation::HARGREAVES);
+            break;
+
+         case 'w':
+         case 'W':
+            pEvapTrans->SetMethod(GM_WETLAND_ET);
+            pEvapTrans->m_ETEq.SetMode(ETEquation::WETLAND_ET);
             break;
 
          case 'k':

@@ -15,6 +15,7 @@
 #define KMPERDAY_PER_MPERSEC 86.4         // m/sec -> km/day
 #define KMD_PER_MMHR 0.000024;            // mm/h -> km/day
 
+extern FlowModel * gpFlowModel;
 
 double ETEquation::NOVAL;
 
@@ -84,6 +85,10 @@ float ETEquation::Run( unsigned short mode, HRU *pHRU )
 
    case HARGREAVES:
       result = Hargreaves();
+      break;
+
+   case WETLAND_ET:
+      result = WetlandET(pHRU);
       break;
 
    default:
@@ -627,400 +632,452 @@ float ETEquation::Fao56()
       }
 
 
-   float ETEquation::PennMont( HRU *pHRU )
+   float ETEquation::PennMont(HRU* pHRU)
    {
-   float result = -1.0;
-   
-   //run integ_check here
-   if( m_dailyMeanTemperature != NOVAL &&
-       m_dailyMinTemperature != NOVAL &&
-       m_dailyMaxTemperature != NOVAL &&
-       m_specificHumidity != NOVAL &&
-       m_windSpeed != NOVAL && 
-       m_solarRadiation != NOVAL &&
-       m_stationElevation != NOVAL &&
-       m_stationLatitude != NOVAL &&
-       m_stationLongitude != NOVAL &&
-  //     m_timeZoneLongitude != NOVAL &&
-       m_doy != NOVAL )
-   //    m_month != NOVAL )
-   //    m_day != NOVAL &&
-   //    m_year != NOVAL &&
-  //     m_hoursInDay != NOVAL)
+      float result = -1.0;
+
+      //run integ_check here
+      if (m_dailyMeanTemperature != NOVAL &&
+         m_dailyMinTemperature != NOVAL &&
+         m_dailyMaxTemperature != NOVAL &&
+         m_specificHumidity != NOVAL &&
+         m_windSpeed != NOVAL &&
+         m_solarRadiation != NOVAL &&
+         m_stationElevation != NOVAL &&
+         m_stationLatitude != NOVAL &&
+         m_stationLongitude != NOVAL &&
+    //     m_timeZoneLongitude != NOVAL &&
+         m_doy != NOVAL)
+     //    m_month != NOVAL )
+     //    m_day != NOVAL &&
+     //    m_year != NOVAL &&
+    //     m_hoursInDay != NOVAL)
       {
-     
-      const static double sigma = 4.901E-9;                                               // Stefan_Boltzmann : MJ K^-4 m^-2 d^-1     
-  //    const static double lambda = 2.45;                                                  // Latent Heat of Vaporization : MJ/kg     
-      const static double Gsc = 4.92;                                                     // Solar Constant : MJ/(h m^2)   
-      const static double albedo = 0.15;                                                  // Albedo (canopy reflection coefficient) : dimensionless
-      //const static double albedo = 0.23;
 
-     /* const static double Cn_daytime_shortReference = 37;
-      const static double Cn_nighttime_shortReference = 37;
-      const static double Cn_daytime_tallReference = 66;
-      const static double Cn_nighttime_tallReference = 66;
-      const static double Cd_daytime_shortReference = 0.24;
-      const static double Cd_nighttime_shortReference = 0.96;
-      const static double Cd_daytime_tallReference = 0.25;
-      const static double Cd_nighttime_tallReference = 1.7;*/
-     
-      
-      double P = 101.3 * pow( ( ( 293.0 - 0.0065 * m_stationElevation) / 293.0 ), 5.26 ); // Atmospheric Pressure : kPa
+         const static double sigma = 4.901E-9;                                               // Stefan_Boltzmann : MJ K^-4 m^-2 d^-1     
+     //    const static double lambda = 2.45;                                                  // Latent Heat of Vaporization : MJ/kg     
+         const static double Gsc = 4.92;                                                     // Solar Constant : MJ/(h m^2)   
+         const static double albedo = 0.15;                                                  // Albedo (canopy reflection coefficient) : dimensionless
+         //const static double albedo = 0.23;
 
-      double gamma = 0.000665 * P;                                                        // Psychrometic Constant : kPa/deg C
-     
-	
-
- //     double cp = 1.0131E-3;                                                            // specific heat of moist air : MJ/kg C
-	  double cp = 1.006E-3;                                                              // specific heat of dry air : MJ/kg C
+        /* const static double Cn_daytime_shortReference = 37;
+         const static double Cn_nighttime_shortReference = 37;
+         const static double Cn_daytime_tallReference = 66;
+         const static double Cn_nighttime_tallReference = 66;
+         const static double Cd_daytime_shortReference = 0.24;
+         const static double Cd_nighttime_shortReference = 0.96;
+         const static double Cd_daytime_tallReference = 0.25;
+         const static double Cd_nighttime_tallReference = 1.7;*/
 
 
-  //    double rho = (float) 3.486*P/(275.0 + m_airTemperature ) ;                        // density of air  C (kg/m3) Shuttleworth 4.2.4. 
-    
-      // rho = pressure/R*T   R = 287.058 J/kgK
+         double P = 101.3 * pow(((293.0 - 0.0065 * m_stationElevation) / 293.0), 5.26); // Atmospheric Pressure : kPa
 
-      //  double cp = 1.0131; // specific heat of moist air ( kJ/kg degree C)
-
-      // Latent Heat of Vaporization; MJ/kg
-      double lambda = 2.501 - 2.361E-3 * m_dailyMeanTemperature;
-      // lambda needed in kJ/kg instead of MJ/kg
-   //   double gamma = cp*P/(0.622*lambda)/1000.; // kPa/C
+         double gamma = 0.000665 * P;                                                        // Psychrometic Constant : kPa/deg C
 
 
-      // Slope of Saturation VaporPressure-Temperature Curve: kPa/deg C
-      // m_airTemperature = daily mean temperature
-      double slopeDelta = 4098.0 * ( 0.6108 * exp( ( 17.27 * m_dailyMeanTemperature ) / (m_dailyMeanTemperature + 237.3) ) ) / pow( m_dailyMeanTemperature + 237.3, 2.0 );    
 
-      // Saturation Vapor Pressure : kPa
-   //   double esTmin = .6108 +  exp( ( 17.27 * (double)m_dailyMinTemperature ) / ( 237.3 + (double)m_dailyMinTemperature ) );
-   //   double esTmax = .6108 +  exp( ( 17.27 * (double)m_dailyMaxTemperature ) / ( 237.3 + (double)m_dailyMaxTemperature ) );
-   //   double es = ( esTmax + esTmin ) / 2.0;
-       
-      // Actual Water Vapor Pressure : kPa
-      double ea = 0.0;
-	  double vpd = 0.0;
-	  CalculateRelHumidity((float)m_specificHumidity, (float)m_dailyMeanTemperature, (float)m_dailyMaxTemperature, (float)m_stationElevation, ea, vpd);
-
-	  double virtualT = (273.0 + m_dailyMeanTemperature) / (1.0 - 0.378 * ea / P);
-		    double rho = (float)1000.0 * P / (287.058 * (273.0 + m_dailyMeanTemperature));      // density of air : C (kg/m3) Shuttleworth 4.2.4. 
-	//  double rho = (float) (1000.0 * P) / (287.058  * virtualT);      // density of air : C (kg/m3) Shuttleworth 4.2.4. 
-
-      
-      double solarRadiation = (double)(m_solarRadiation * MJPERD_PER_W);			// incoming radiation MJ/(m^2 d)	
-	  // Net Short-Wave Radiation : MJ/(m^2 d)
-      double netShortWaveRad = ( 1.0 - albedo ) * solarRadiation ;
-  
-      // latitude : radians
-      double phi = (PI / 180.0 ) * (double)m_stationLatitude;
-
-      double J = m_doy + 1;
-
-      // seasonal correction for Solar Time (Sc)
-  //    double b = 2.0 * PI * ( J - 1.39 ) / 365.0;
-  //    double Sc = 0.1645 * sin( 2.0 * b ) - 0.1255 * cos( b ) - 0.025 * sin( b );
-   
-      // Solar Declination : radians
-      double radDelta = 0.409 * sin(  ( 2.0 * PI  * J) / 365.0 - 1.39 );
-	  double declination = 180 / PI * radDelta;
- 
-      //solar time angle at midpoint of time period
-      //p40, eq55
-   //   double omega = (PI/12.0) * ( (m_hoursInDay * 0.06667*(m_stationLongitude - m_timeZoneLongitude) + Sc) - 12.0);
-   
-      //solar time angles at beginning and end of time period
-      //p40, eqs 53, 54
-      //length of calculation period is assumed = 1 hour
-  //    double omega1 = omega - PI / 24.0;
-   //   double omega2 = omega + PI / 24.0;
+    //     double cp = 1.0131E-3;                                                            // specific heat of moist air : MJ/kg C
+         double cp = 1.006E-3;                                                              // specific heat of dry air : MJ/kg C
 
 
-      // Sunset Hour angle
-      double omegas = acos( -1.0 * tan( phi ) * tan( radDelta ) );
+      //    double rho = (float) 3.486*P/(275.0 + m_airTemperature ) ;                        // density of air  C (kg/m3) Shuttleworth 4.2.4. 
 
-      //apply limits to hour angles
-      //p41, eq56
-     /* if(omega1 < -omegas)
-         omega1 = -omegas;
-      else if(omega1 > omegas)
-         omega1 = omegas;
-   
-      if (omega2 < -omegas)
-         omega2 = -omegas;
-      else if (omega2 > omegas)
-         omega2 = omegas;
+          // rho = pressure/R*T   R = 287.058 J/kgK
 
-      if (omega1 > omega2)
-         omega1 = omega2;*/
+          //  double cp = 1.0131; // specific heat of moist air ( kJ/kg degree C)
 
-      //angle of the sun above the horizon at midpoint of calculation period; radians
-      //p43, eq62
-  //    double beta = asin(sin(phi) * sin(delta) + cos(phi) * cos(delta) * cos(omega));
+          // Latent Heat of Vaporization; MJ/kg
+         double lambda = 2.501 - 2.361E-3 * m_dailyMeanTemperature;
+         // lambda needed in kJ/kg instead of MJ/kg
+      //   double gamma = cp*P/(0.622*lambda)/1000.; // kPa/C
 
-      
-      // inverse relative distance factor for earth-sun : dimensionless
-      double dr = 1.0 + 0.033 * cos( J * ( 2.0 * PI ) / 365.0 );
 
-      // Extraterrestrial radiation : MJ(d m^2)
-      //p39, eq48
-  //    double Ra = (12.0 / PI) * Gsc * dr * ((omega2 - omega1) * sin(phi) * sin(delta) + cos(phi) * cos(delta) * (sin(omega2) - sin(omega1)));
-      double Ra = ( 24.0 / PI ) * Gsc * dr * ( omegas * sin( phi ) * sin( radDelta ) + cos( phi ) * cos( radDelta ) * sin( omegas ) );
+         // Slope of Saturation VaporPressure-Temperature Curve: kPa/deg C
+         // m_airTemperature = daily mean temperature
+         double slopeDelta = 4098.0 * (0.6108 * exp((17.27 * m_dailyMeanTemperature) / (m_dailyMeanTemperature + 237.3))) / pow(m_dailyMeanTemperature + 237.3, 2.0);
 
-      //compute relative solar radiation based on angle of sun relative to horizon
-      //see p35
-      //double relativeSolarRad;
+         // Saturation Vapor Pressure : kPa
+      //   double esTmin = .6108 +  exp( ( 17.27 * (double)m_dailyMinTemperature ) / ( 237.3 + (double)m_dailyMinTemperature ) );
+      //   double esTmax = .6108 +  exp( ( 17.27 * (double)m_dailyMaxTemperature ) / ( 237.3 + (double)m_dailyMaxTemperature ) );
+      //   double es = ( esTmax + esTmin ) / 2.0;
 
-      //if (abs(beta) < 0.3)
-      //   {
-      //   relativeSolarRad = m_twilightSolarRadiation / ((0.75 + 2e-5 * m_stationElevation) * Ra);
-      //   }
-      //else
-      //   {
-      //   //using modified version of Clear-sky solar radiation; MJ/(h m^2)
-      //   //p37, eq47
-         double relativeSolarRad = solarRadiation / ( ( 0.75 + 2.0E-5 * m_stationElevation ) * Ra );
+         // Actual Water Vapor Pressure : kPa
+         double ea = 0.0;
+         double vpd = 0.0;
+         CalculateRelHumidity((float)m_specificHumidity, (float)m_dailyMeanTemperature, (float)m_dailyMaxTemperature, (float)m_stationElevation, ea, vpd);
+
+         double virtualT = (273.0 + m_dailyMeanTemperature) / (1.0 - 0.378 * ea / P);
+         double rho = (float)1000.0 * P / (287.058 * (273.0 + m_dailyMeanTemperature));      // density of air : C (kg/m3) Shuttleworth 4.2.4. 
+  //  double rho = (float) (1000.0 * P) / (287.058  * virtualT);      // density of air : C (kg/m3) Shuttleworth 4.2.4. 
+
+
+         double solarRadiation = (double)(m_solarRadiation * MJPERD_PER_W);			// incoming radiation MJ/(m^2 d)	
+        // Net Short-Wave Radiation : MJ/(m^2 d)
+         double netShortWaveRad = (1.0 - albedo) * solarRadiation;
+
+         // latitude : radians
+         double phi = (PI / 180.0) * (double)m_stationLatitude;
+
+         double J = m_doy + 1;
+
+         // seasonal correction for Solar Time (Sc)
+     //    double b = 2.0 * PI * ( J - 1.39 ) / 365.0;
+     //    double Sc = 0.1645 * sin( 2.0 * b ) - 0.1255 * cos( b ) - 0.025 * sin( b );
+
+         // Solar Declination : radians
+         double radDelta = 0.409 * sin((2.0 * PI * J) / 365.0 - 1.39);
+         double declination = 180 / PI * radDelta;
+
+          //solar time angle at midpoint of time period
+          //p40, eq55
+       //   double omega = (PI/12.0) * ( (m_hoursInDay * 0.06667*(m_stationLongitude - m_timeZoneLongitude) + Sc) - 12.0);
+
+          //solar time angles at beginning and end of time period
+          //p40, eqs 53, 54
+          //length of calculation period is assumed = 1 hour
+      //    double omega1 = omega - PI / 24.0;
+       //   double omega2 = omega + PI / 24.0;
+
+
+          // Sunset Hour angle
+         double omegas = acos(-1.0 * tan(phi) * tan(radDelta));
+
+         //apply limits to hour angles
+         //p41, eq56
+        /* if(omega1 < -omegas)
+            omega1 = -omegas;
+         else if(omega1 > omegas)
+            omega1 = omegas;
+
+         if (omega2 < -omegas)
+            omega2 = -omegas;
+         else if (omega2 > omegas)
+            omega2 = omegas;
+
+         if (omega1 > omega2)
+            omega1 = omega2;*/
+
+         //angle of the sun above the horizon at midpoint of calculation period; radians
+         //p43, eq62
+     //    double beta = asin(sin(phi) * sin(delta) + cos(phi) * cos(delta) * cos(omega));
+
+
+         // inverse relative distance factor for earth-sun : dimensionless
+         double dr = 1.0 + 0.033 * cos(J * (2.0 * PI) / 365.0);
+
+         // Extraterrestrial radiation : MJ(d m^2)
+         //p39, eq48
+     //    double Ra = (12.0 / PI) * Gsc * dr * ((omega2 - omega1) * sin(phi) * sin(delta) + cos(phi) * cos(delta) * (sin(omega2) - sin(omega1)));
+         double Ra = (24.0 / PI) * Gsc * dr * (omegas * sin(phi) * sin(radDelta) + cos(phi) * cos(radDelta) * sin(omegas));
+
+         //compute relative solar radiation based on angle of sun relative to horizon
+         //see p35
+         //double relativeSolarRad;
+
+         //if (abs(beta) < 0.3)
+         //   {
+         //   relativeSolarRad = m_twilightSolarRadiation / ((0.75 + 2e-5 * m_stationElevation) * Ra);
+         //   }
+         //else
+         //   {
+         //   //using modified version of Clear-sky solar radiation; MJ/(h m^2)
+         //   //p37, eq47
+         double relativeSolarRad = solarRadiation / ((0.75 + 2.0E-5 * m_stationElevation) * Ra);
     //     }
 
       //enforce limits on ration of Rs/Rso
       //p35
-      if ( relativeSolarRad < 0.3 )
-         relativeSolarRad = 0.3;
-      else if ( relativeSolarRad > 1.0 )
-         relativeSolarRad = 1.0;
-      else if( isNan<double>( relativeSolarRad ) )
-         relativeSolarRad = 1.0;
+         if (relativeSolarRad < 0.3)
+            relativeSolarRad = 0.3;
+         else if (relativeSolarRad > 1.0)
+            relativeSolarRad = 1.0;
+         else if (isNan<double>(relativeSolarRad))
+            relativeSolarRad = 1.0;
 
-      //cloudiness function
-      //p34, eq45
-      //this must be adjusted
-      double fcd = 1.35 * relativeSolarRad - 0.35;
-
-
- 
-      //Net Long-Wave Radiation; MJ/(m^2 d)
-      //p34, eq44
-
-      ////double fcd=1.f;
-      //double Rnl = sigma * fcd * (0.34 - 0.14 * sqrt(ea)) * pow(m_airTemperature, 4);
-    
-
-      ////Net Radiation; MJ/(m^2 d)
-      ////p32, eq42
-      //double Rn = Rns - Rnl;
-
-       //Net Long-Wave Radiation, Eq. 1.11 : MJ/(m^2 d)
-
-      double tMinKelvin = m_dailyMinTemperature + 273;
-      double tMaxKelvin = m_dailyMaxTemperature + 273;
-
-      double netLongWaveRad = sigma * fcd * ( 0.34 - 0.14 * sqrt( ea ) ) * ( ( pow( tMinKelvin, 4.0 ) + pow( tMaxKelvin, 4.0 ) ) / 2.0 );
-
-      //Net Radiation; MJ/(m^2 d)
-      // Eq 1.9
-
-      double netRadiation = netShortWaveRad - netLongWaveRad;
+         //cloudiness function
+         //p34, eq45
+         //this must be adjusted
+         double fcd = 1.35 * relativeSolarRad - 0.35;
 
 
-      //Soil Heat Flux Density : MJ/(d m^2)
-      //p44, eqs65-66
-      double G = 0.0;
 
-      //if (Rn < 0.0) //nighttime
-      //   {
-      //   G = Rn * ((m_useTallRefCrop) ? 0.2 : 0.5);
-      //   }
-      //else //daytime
-      //   {
-      //   G = Rn * ((m_useTallRefCrop) ? 0.04 : 0.1);
-      //   }
+         //Net Long-Wave Radiation; MJ/(m^2 d)
+         //p34, eq44
 
-      int count = (int)pHRU->m_polyIndexArray.GetSize();
+         ////double fcd=1.f;
+         //double Rnl = sigma * fcd * (0.34 - 0.14 * sqrt(ea)) * pow(m_airTemperature, 4);
 
-      for ( int i = 0; i < count; i++ )
+
+         ////Net Radiation; MJ/(m^2 d)
+         ////p32, eq42
+         //double Rn = Rns - Rnl;
+
+          //Net Long-Wave Radiation, Eq. 1.11 : MJ/(m^2 d)
+
+         double tMinKelvin = m_dailyMinTemperature + 273;
+         double tMaxKelvin = m_dailyMaxTemperature + 273;
+
+         double netLongWaveRad = sigma * fcd * (0.34 - 0.14 * sqrt(ea)) * ((pow(tMinKelvin, 4.0) + pow(tMaxKelvin, 4.0)) / 2.0);
+
+         //Net Radiation; MJ/(m^2 d)
+         // Eq 1.9
+
+         double netRadiation = netShortWaveRad - netLongWaveRad;
+
+
+         //Soil Heat Flux Density : MJ/(d m^2)
+         //p44, eqs65-66
+         double G = 0.0;
+
+         //if (Rn < 0.0) //nighttime
+         //   {
+         //   G = Rn * ((m_useTallRefCrop) ? 0.2 : 0.5);
+         //   }
+         //else //daytime
+         //   {
+         //   G = Rn * ((m_useTallRefCrop) ? 0.04 : 0.1);
+         //   }
+
+         int count = (int)pHRU->m_polyIndexArray.GetSize();
+
+         for (int i = 0; i < count; i++)
          {
-         int idu = pHRU->m_polyIndexArray[ i ];
+            int idu = pHRU->m_polyIndexArray[i];
 
-         bool processIDU = true;
-         if ( m_pEvapTrans->m_pQuery != NULL )
+            bool processIDU = true;
+            if (m_pEvapTrans->m_pQuery != NULL)
             {
-            m_pEvapTrans->m_pQuery->Run( idu, processIDU );
-            if ( processIDU )
+               m_pEvapTrans->m_pQuery->Run(idu, processIDU);
+               if (processIDU)
                {
-               int lulc_a = 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLULC_A, lulc_a);
+                  int lulc_a = 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLULC_A, lulc_a);
 
-               float lai = 1.0f; m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLAI, lai);
-               float height = 10.f;
-               if (lulc_a == 4)
+                  float lai = 1.0f; m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLAI, lai);
+                  float height = 10.f;
+                  if (lulc_a == 4)
                   { // LULC_A == {forest}
-                  int pvt = 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colPVT, pvt);
-                  if (pvt > 0)
+                     int pvt = 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colPVT, pvt);
+                     if (pvt > 0)
                      {
-                     float age = 1.0f; m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colAgeClass, age);
-                     height = (float)(46.6 * (1.0 - exp(-0.0144 * age)));
+                        float age = 1.0f; m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colAgeClass, age);
+                        height = (float)(46.6 * (1.0 - exp(-0.0144 * age)));
                      }
-                  else height = 10.f;
+                     else height = 10.f;
                   }
 
                // Surface Resistance rs
-               lai /= 2;     // Active leaf area
-               if (lai < 0.1f) lai = 0.1f;
-               float rs = m_pEvapTrans->m_effBulkStomatalResistance / lai;  // : s/m.  This is a standard leaf resistance for forest canopies (Shuttleworth and Wallace, 1985).
+                  lai /= 2;     // Active leaf area
+                  if (lai < 0.1f) lai = 0.1f;
+                  float rs = m_pEvapTrans->m_effBulkStomatalResistance / lai;  // : s/m.  This is a standard leaf resistance for forest canopies (Shuttleworth and Wallace, 1985).
 
-               //Aerodynamic Resistance
-               if ( alglib::fp_eq( height, 0.0 ) )
-                  height = 0.1f;
+                  //Aerodynamic Resistance
+                  if (alglib::fp_eq(height, 0.0))
+                     height = 0.1f;
 
-               float d = 2.0f / 3.0f * height;                    // 0 plane displacement height
-               float zom = 0.123f * height;                       // roughness length governing momentum transfer
-               float zoh = 0.0123f * height;                      // roughness length governing transfer of head and vapor
-               float zm = height + 2;                             // height of wind measurement
-               float zh = height + 2;                             // height of humidity measurement
-               float ra = 1.0f;
+                  float d = 2.0f / 3.0f * height;                    // 0 plane displacement height
+                  float zom = 0.123f * height;                       // roughness length governing momentum transfer
+                  float zoh = 0.0123f * height;                      // roughness length governing transfer of head and vapor
+                  float zm = height + 2;                             // height of wind measurement
+                  float zh = height + 2;                             // height of humidity measurement
+                  float ra = 1.0f;
 
-               if ( m_windSpeed > 0 && zm > d )
-                  ra = (float)( log( ( zm - d ) / zom ) * log( ( zh-d ) / zoh ) / 0.41 * 0.41 * m_windSpeed );
-               else
-                  ra = 1.0f;
-   
-               //P-M Evapotranspiration; mm/day
-               double numerator = slopeDelta * ( netRadiation - G ) + ( rho * cp * vpd / ra ) * SEC_PER_DAY;
-               double denominator = 2453.0 * ( slopeDelta + gamma * ( 1.0 + rs / ra ) );
-               double ETsz =  ( numerator / denominator ) * MM_PER_M;
-			//   double denominator = lambda * (slopeDelta + gamma * (1.0 + rs / ra));
-			//   double ETsz = (numerator / denominator);
+                  if (m_windSpeed > 0 && zm > d)
+                     ra = (float)(log((zm - d) / zom) * log((zh - d) / zoh) / 0.41 * 0.41 * m_windSpeed);
+                  else
+                     ra = 1.0f;
 
-               result = (float)ETsz;
-               
-               if (result < 0.0f) 
-				   result = 0.0f;
+                  //P-M Evapotranspiration; mm/day
+                  double numerator = slopeDelta * (netRadiation - G) + (rho * cp * vpd / ra) * SEC_PER_DAY;
+                  double denominator = 2453.0 * (slopeDelta + gamma * (1.0 + rs / ra));
+                  double ETsz = (numerator / denominator) * MM_PER_M;
+            //   double denominator = lambda * (slopeDelta + gamma * (1.0 + rs / ra));
+            //   double ETsz = (numerator / denominator);
 
-               GlobalMethod::m_iduIrrRequestArray[ pHRU->m_polyIndexArray[ i ] ] = result;
-               GlobalMethod::m_iduVPDarray[ pHRU->m_polyIndexArray[ i ] ] = (float)vpd;
+                  result = (float)ETsz;
 
-  //             ASSERT(result>=0.0f);
+                  if (result < 0.0f)
+                     result = 0.0f;
+
+                  GlobalMethod::m_iduIrrRequestArray[pHRU->m_polyIndexArray[i]] = result;
+                  GlobalMethod::m_iduVPDarray[pHRU->m_polyIndexArray[i]] = (float)vpd;
+
+     //             ASSERT(result>=0.0f);
                }
             }
          }
       }
 
-   return result;
+      return result;
    }
 
-float ETEquation::KimbPenn()
+
+   float ETEquation::WetlandET(HRU* pHRU)
+   {
+      ASSERT(m_pEvapTrans->m_pQuery != NULL);
+      if (m_pEvapTrans->m_pQuery == NULL) return(0);
+
+      int count = (int)pHRU->m_polyIndexArray.GetSize();
+      double evap_x_area_accum = 0., area_accum = 0.;
+      for (int i = 0; i < count; i++)
+      {
+         int idu = pHRU->m_polyIndexArray[i];
+         bool processIDU = true;
+         m_pEvapTrans->m_pQuery->Run(idu, processIDU);
+         if (!processIDU) continue;
+
+         float lai = gpFlowModel->AttFloat(idu, LAI);
+         double evap_mm = 0, vpd = 0.;
+
+         // Is there standing water?
+         double wetness_mm = gpFlowModel->Att(idu, WETNESS);
+         if (wetness_mm > 0)
+         { // Calculate evaporation from standing water.
+            double idu_area_m2 = gpFlowModel->Att(idu, AREA);
+            area_accum += idu_area_m2;
+            double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
+            WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
+            float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
+            double ea = 0.;
+            double rh_pct = 100 * CalculateRelHumidity(m_specificHumidity, m_dailyMeanTemperature, m_dailyMaxTemperature, elev_mean_m, ea, vpd);
+            double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gpFlowModel->m_flowContext.dayOfYear);
+            double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
+            double evap_m3 = 0., evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
+            WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,
+               m_dailyMeanTemperature, m_dailyMeanTemperature, 1., cloudiness_frac, m_windSpeed, m_specificHumidity, rh_pct,
+               evap_m3, evap_kJ, SW_kJ, LW_kJ);
+            evap_mm = (evap_m3 / idu_area_m2) * 1000;
+            evap_x_area_accum += evap_mm * idu_area_m2;
+         }
+         else {} // soil evaporation
+
+         // Is there vegetation?
+
+         GlobalMethod::m_iduIrrRequestArray[idu] = evap_mm;
+         GlobalMethod::m_iduVPDarray[idu] = (float)vpd;
+
+      } // end of loop through IDUs in this HRU
+
+      double hru_evap_mm = evap_x_area_accum / area_accum;
+      return(hru_evap_mm);
+   } // end of WetlandET()
+
+
+   float ETEquation::KimbPenn()
    {
    // Source: http://www.usbr.gov/pn/agrimet/aginfo/AgriMet%20Kimberly%20Penman%20Equation.pdf
 
-   float result = -1.0;
+      float result = -1.0;
 
-   //number of coefficients expected from an agriment station (for calculating clear-day shortwave radiation)
-   const unsigned int STATION_COEFF_COUNT = 5;
-   bool allCoeffs = true;
-  /* for(unsigned int i=0; i<STATION_COEFF_COUNT && allCoeffs;i++)
-      allCoeffs=m_agrimetStationCoeffs[i]==NOVAL;*/
+      //number of coefficients expected from an agriment station (for calculating clear-day shortwave radiation)
+      const unsigned int STATION_COEFF_COUNT = 5;
+      bool allCoeffs = true;
+     /* for(unsigned int i=0; i<STATION_COEFF_COUNT && allCoeffs;i++)
+         allCoeffs=m_agrimetStationCoeffs[i]==NOVAL;*/
 
-   if(!m_agrimetStationCoeffs.empty() &&
-      m_stationElevation!=NOVAL &&
-      m_solarRadiation!=NOVAL &&
-      m_dailyMaxTemperature!=NOVAL &&
-      m_dailyMinTemperature!=NOVAL &&
-      m_recentMeanTemperature!=NOVAL &&
-      m_specificHumidity != NOVAL &&
-      m_relativeHumidity!=NOVAL &&
-      m_dailyMeanTemperature != NOVAL &&
-      m_windSpeed!=NOVAL)
+      if (!m_agrimetStationCoeffs.empty() &&
+         m_stationElevation != NOVAL &&
+         m_solarRadiation != NOVAL &&
+         m_dailyMaxTemperature != NOVAL &&
+         m_dailyMinTemperature != NOVAL &&
+         m_recentMeanTemperature != NOVAL &&
+         m_specificHumidity != NOVAL &&
+         m_relativeHumidity != NOVAL &&
+         m_dailyMeanTemperature != NOVAL &&
+         m_windSpeed != NOVAL)
       {
       //Stefan_Boltzmann constant
-      const static double sigma = 4.901E-9; 
+         const static double sigma = 4.901E-9;
 
-      //specific heat of air at constant pressure
-      const double C_P = 0.001005;
+         //specific heat of air at constant pressure
+         const double C_P = 0.001005;
 
-      //mean air temperature (C)
-  //    double meanTemperature=(m_dailyMaxTemperature+m_dailyMinTemperature)/2.0;
+         //mean air temperature (C)
+     //    double meanTemperature=(m_dailyMaxTemperature+m_dailyMinTemperature)/2.0;
 
-      //slope of saturation vapor pressure - temperature curve
-  //    double delta=0.200*pow(0.00738*meanTemperature+0.8072,7.0)-0.000116;;
-      double slopeDelta = 0.200 * pow( 0.00738 * (double)m_dailyMeanTemperature + 0.8072, 7.0 ) - 0.000116;
+         //slope of saturation vapor pressure - temperature curve
+     //    double delta=0.200*pow(0.00738*meanTemperature+0.8072,7.0)-0.000116;;
+         double slopeDelta = 0.200 * pow(0.00738 * (double)m_dailyMeanTemperature + 0.8072, 7.0) - 0.000116;
 
-      //Psychochromatic constant (gamma)
-      // -- Latent head of vaporization of water
-      double lambda = 2.501 - 0.002361 * m_dailyMeanTemperature;
-      // -- Estimated mean atmospheric pressure
-      double P = 101.3 * pow( ( ( 288.0 - 0.0065 * (double)m_stationElevation ) / 288.0 ), 5.257 );
+         //Psychochromatic constant (gamma)
+         // -- Latent head of vaporization of water
+         double lambda = 2.501 - 0.002361 * m_dailyMeanTemperature;
+         // -- Estimated mean atmospheric pressure
+         double P = 101.3 * pow(((288.0 - 0.0065 * (double)m_stationElevation) / 288.0), 5.257);
 
-      double gamma = ( C_P * P ) / ( 0.622 * lambda );
+         double gamma = (C_P * P) / (0.622 * lambda);
 
-      double factor1 = slopeDelta / ( slopeDelta + gamma );
-      double factor2 = 1.0 - factor1;
+         double factor1 = slopeDelta / (slopeDelta + gamma);
+         double factor2 = 1.0 - factor1;
 
-      //Net radiation energy (Rn)
-      // -- albedo
-      double alpha = 0.29 + 0.06 * sin( m_doy + 97.92 );
+         //Net radiation energy (Rn)
+         // -- albedo
+         double alpha = 0.29 + 0.06 * sin(m_doy + 97.92);
 
-      // -- clear day shortwave radiation
-      double Rs0 = 0.0;
-      int stationCount = (int)m_agrimetStationCoeffs.size();
-      for ( int i = 0; i < stationCount; i++ )
-         Rs0 += m_agrimetStationCoeffs.at( i ) * pow( (double)m_doy, (double)i );
-      // -- Rs/Rso
+         // -- clear day shortwave radiation
+         double Rs0 = 0.0;
+         int stationCount = (int)m_agrimetStationCoeffs.size();
+         for (int i = 0; i < stationCount; i++)
+            Rs0 += m_agrimetStationCoeffs.at(i) * pow((double)m_doy, (double)i);
+         // -- Rs/Rso
 
-      Rs0 = Rs0 * 0.041868; // convert to MJ/m^2d
+         Rs0 = Rs0 * 0.041868; // convert to MJ/m^2d
 
-      double solarRadiation = ( m_solarRadiation*MJPERD_PER_W );
-      double radRatio=solarRadiation / Rs0;
-      // -- imperical constants (a,b,a1,b1)
-      double a = 1.0;
-      double b = -.01;
+         double solarRadiation = (m_solarRadiation * MJPERD_PER_W);
+         double radRatio = solarRadiation / Rs0;
+         // -- imperical constants (a,b,a1,b1)
+         double a = 1.0;
+         double b = -.01;
 
-      if( radRatio > 0.70 )
+         if (radRatio > 0.70)
          {
-         a = 1.126;
-         b = -0.07;
+            a = 1.126;
+            b = -0.07;
          }
-      else if ( radRatio <= 0.70 )
+         else if (radRatio <= 0.70)
          {
-         a = 1.017;
-         b = -0.06;
+            a = 1.017;
+            b = -0.06;
          }
 
-      double a1 = 0.26 + 0.1 * exp( -1.0 * pow( 0.0154 * (double)( m_doy-177 ), 2.0 ) );
-      const double b1 = -0.139;
+         double a1 = 0.26 + 0.1 * exp(-1.0 * pow(0.0154 * (double)(m_doy - 177), 2.0));
+         const double b1 = -0.139;
 
-	//	double dewTemperature=CalcDewTemp(m_relativeHumidity, m_dailyMeanTemperature);
-      double ea = 0.0;
-      CalcRelHumidityKP( (float)m_specificHumidity, (float)m_dailyMinTemperature, (float)m_dailyMaxTemperature, (float)m_stationElevation, ea );
-      // -- saturation vapor pressure at mean daily dewpoint temperature
-    //  double ea=3.38639*(pow(0.00738*dewTemperature+0.8072,8)-0.000019*(1.8*dewTemperature+48.0)+0.001316);
-      
-      // -- Theoretical outgoing longwave radiation
-      double Rb0 = ( a1 + b1 * sqrt( ABS( ea ) ) ) * sigma * ( ( pow( m_dailyMaxTemperature + 273.15, 4.0 ) + pow( m_dailyMinTemperature + 273.15, 4.0 ) ) / 2.0 );
-      // -- outgoing longwave radiation
-      double Rb = Rb0 * ( a * radRatio + b );
-      // netRadiation
-      double Rn = ( 1.0 - alpha ) * solarRadiation - Rb;
+      //	double dewTemperature=CalcDewTemp(m_relativeHumidity, m_dailyMeanTemperature);
+         double ea = 0.0;
+         CalcRelHumidityKP((float)m_specificHumidity, (float)m_dailyMinTemperature, (float)m_dailyMaxTemperature, (float)m_stationElevation, ea);
+         // -- saturation vapor pressure at mean daily dewpoint temperature
+       //  double ea=3.38639*(pow(0.00738*dewTemperature+0.8072,8)-0.000019*(1.8*dewTemperature+48.0)+0.001316);
 
-      //Soil Heat flux (G)
-      double G = 0.377 * ( (double)m_dailyMeanTemperature - (double)m_recentMeanTemperature );
-   //   G=0.0;
+         // -- Theoretical outgoing longwave radiation
+         double Rb0 = (a1 + b1 * sqrt(ABS(ea))) * sigma * ((pow(m_dailyMaxTemperature + 273.15, 4.0) + pow(m_dailyMinTemperature + 273.15, 4.0)) / 2.0);
+         // -- outgoing longwave radiation
+         double Rb = Rb0 * (a * radRatio + b);
+         // netRadiation
+         double Rn = (1.0 - alpha) * solarRadiation - Rb;
 
-      //Advective Energy Transfer (Wf)
-      // -- empirical constants (aw,bw)
-      double aw = 0.4 + 1.4 * exp( -1.0 * pow( ( m_doy-173 ) / 58.0, 2.0 ) );
-      double bw = 0.007 + 0.004 * exp( -1.0 * pow( ( m_doy - 243 ) / 80.0, 2.0 ) );
-      double Wf = aw + bw * (double)m_windSpeed * KMPERDAY_PER_MPERSEC; // windspeed needs to be converted from m/sec to km/d for Kimberly-Pennman 
+         //Soil Heat flux (G)
+         double G = 0.377 * ((double)m_dailyMeanTemperature - (double)m_recentMeanTemperature);
+      //   G=0.0;
 
-      //Vapor Pressure Deficit (es)
-      // -- saturation vapor pressure at max temperature
-      double eTmax = 3.38639 * ( pow( 0.00738 * m_dailyMaxTemperature + 0.8072, 8.0 ) - 0.000019 * ABS( 1.8 * m_dailyMaxTemperature + 48.0 ) + 0.001316 );
-      // -- saturation vapor pressure at min temperature
-      double eTmin = 3.38639 * ( pow( 0.00738 * m_dailyMinTemperature + 0.8072, 8.0 ) - 0.000019 * ABS( 1.8 * m_dailyMinTemperature + 48.0 ) + 0.001316 );
-      double es = ( eTmax + eTmin ) / 2.0;
+         //Advective Energy Transfer (Wf)
+         // -- empirical constants (aw,bw)
+         double aw = 0.4 + 1.4 * exp(-1.0 * pow((m_doy - 173) / 58.0, 2.0));
+         double bw = 0.007 + 0.004 * exp(-1.0 * pow((m_doy - 243) / 80.0, 2.0));
+         double Wf = aw + bw * (double)m_windSpeed * KMPERDAY_PER_MPERSEC; // windspeed needs to be converted from m/sec to km/d for Kimberly-Pennman 
 
-		if (ea > es) es = ea;
+         //Vapor Pressure Deficit (es)
+         // -- saturation vapor pressure at max temperature
+         double eTmax = 3.38639 * (pow(0.00738 * m_dailyMaxTemperature + 0.8072, 8.0) - 0.000019 * ABS(1.8 * m_dailyMaxTemperature + 48.0) + 0.001316);
+         // -- saturation vapor pressure at min temperature
+         double eTmin = 3.38639 * (pow(0.00738 * m_dailyMinTemperature + 0.8072, 8.0) - 0.000019 * ABS(1.8 * m_dailyMinTemperature + 48.0) + 0.001316);
+         double es = (eTmax + eTmin) / 2.0;
 
-      //ET equation
-      result = (float) ( ( factor1 * ( Rn-G ) + factor2 * 6.43 * Wf * ( es-ea ) ) / lambda); //mm/d    
+         if (ea > es) es = ea;
+
+         //ET equation
+         result = (float)((factor1 * (Rn - G) + factor2 * 6.43 * Wf * (es - ea)) / lambda); //mm/d    
       }
-   return result;
+      return result;
    }
 
    float ETEquation::Asce()

@@ -36,6 +36,7 @@
 extern FlowProcess *gpFlow;
 
 FlowModel *gpModel = NULL; // ??? shouldn't gpModel be an EnvModel instead of a FlowModel?
+FlowModel* gpFlowModel = NULL;
 
 FILE* insolation_ofile;
 
@@ -963,7 +964,7 @@ double Reach::LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC) // returns MJ
 } // end of LatentHeadOfEvaporation()
 
 
-double VegDensity(double lai)
+double FlowModel::VegDensity(double lai)
 {
    double veg_density = 1. - exp(-BEERS_LAW_K * lai);
    return(veg_density);
@@ -2801,6 +2802,7 @@ FlowModel::FlowModel()
    , m_parameter2(0.f)
    {
    gpModel = this;
+   gpFlowModel = this;
    gpFlow->AddInputVar( "Climate Scenario", m_currentFlowScenarioIndex, "0=MIROC, 1=GFDL, 2=HadGEM, 3=Stationary using MIROC, "
       "4=MACA actual weather 1979-2011, 5=BaselineGrid, 6=BaselinePoly, 7=GriddedRecentWeatherForDemos, 8=BaselineGridMultiyearFiles" );    
    gpFlow->AddInputVar( "Use Parameter Estimation", m_estimateParameters, "true if the model will be used to estimate parameters" );    
@@ -3196,6 +3198,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    EnvExtension::CheckCol(m_pIDUlayer, m_colIDU_ID, "IDU_ID", TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colAREA, "AREA", TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pIDUlayer, m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruAREA, "AREA_M2", TYPE_FLOAT, CC_AUTOADD);
 
    m_pIDUlayer->CheckCol(m_colGRID_INDEX, "GRID_INDEX", TYPE_INT, CC_AUTOADD);
@@ -5369,7 +5372,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
       double lai_l = -1; gpModel->m_pIDUlayer->GetData(bank_l_idu_ndx, gpModel->m_colLAI, lai_l);
       double lai_r = -1; gpModel->m_pIDUlayer->GetData(bank_r_idu_ndx, gpModel->m_colLAI, lai_r);
       lai_reach = (lai_l + lai_r) / 2.;
-      m_topo.m_vegDensity = VegDensity(lai_reach);
+      m_topo.m_vegDensity = FlowModel::VegDensity(lai_reach);
 
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachWIDTH, width_reach_m);
    }
@@ -7553,6 +7556,22 @@ double Reach::Att(int col)
    pLayer->GetData(this->m_polyIndex, col, attribute);
    return(attribute);
 } // end of Reach::Att()
+
+
+double FlowModel::Att(int IDUindex, int col)
+{
+   double attribute;
+   m_pIDUlayer->GetData(IDUindex, col, attribute);
+   return(attribute);
+} // end of FlowModel:Att()
+
+
+float FlowModel::AttFloat(int IDUindex, int col)
+{
+   float attribute;
+   m_pIDUlayer->GetData(IDUindex, col, attribute);
+   return(attribute);
+} // end of FlowModel::AttFloat()
 
 
 // create, initialize reaches based on the stream layer

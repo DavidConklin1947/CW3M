@@ -45,7 +45,7 @@ enum GM_METHOD
    GM_LINEAR_RESERVOIR,                                  // LateralExchange
    GM_BROOKS_COREY,                                      // HruVerticalExchange
    GM_MODFLOW,                                           // GroundWater
-   GM_ASCE, GM_FAO56, GM_PENMAN_MONTIETH, GM_HARGREAVES, // GM_KIMBERLY_PENNMAN,        // EvapTrans
+   GM_ASCE, GM_FAO56, GM_PENMAN_MONTIETH, GM_HARGREAVES, GM_WETLAND_ET, // GM_KIMBERLY_PENNMAN,        // EvapTrans
 	GM_URBAN_DEMAND_DY,							   			   // Daily Urban demand
    GM_WATER_RIGHTS, GM_EXPR_ALLOCATOR, GM_ALTWM,         // WaterAllocation
    GM_FLUX_EXPR,                                         // FluxExpr

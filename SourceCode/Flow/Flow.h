@@ -79,8 +79,12 @@ using namespace std;
 
 #define BEERS_LAW_K 0.5
 
-#define Q2WETL gpModel->m_colReachQ2WETL
-#define Q_CAP gpModel->m_colReachQ_CAP
+#define AREA gpFlowModel->m_colAREA
+#define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
+#define LAI gpFlowModel->m_colLAI
+#define Q_CAP gpFlowModel->m_colReachQ_CAP
+#define Q2WETL gpFlowModel->m_colReachQ2WETL
+#define WETNESS gpFlowModel->m_colWETNESS
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *
@@ -1469,6 +1473,9 @@ public:
    // manage global methods
    //void RunGlobalMethods( void );          
 
+   double Att(int IDUindex, int col); // value of IDU attribute
+   float AttFloat(int IDUindex, int col); // value of IDU attribute
+   static double VegDensity(double lai);
    Reach* GetReachFromCOMID(int comid);
    Reach *GetReachFromStreamIndex( int index ) { return (Reach*) m_reachTree.GetReachNodeFromPolyIndex( index ); }
    Reach *GetReachFromNode( ReachNode *pNode );
@@ -1756,6 +1763,7 @@ public:
 
    int m_colIDU_ID;
    int m_colAREA;
+   int m_colELEV_MEAN;
    int m_colHruAREA;
 
    int m_colGRID_INDEX;
