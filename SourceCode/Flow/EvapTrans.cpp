@@ -1179,6 +1179,13 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
                      maxET = m_iduIrrRequestArray[idu] * et_multiplier;
                   m_iduIrrRequestArray[idu] = 0.0f;
                   break;
+
+               case GM_WETLAND_ET:
+                  if (m_iduIrrRequestArray[idu] >= 0.0f)
+                     maxET = m_iduIrrRequestArray[idu];
+                  m_iduIrrRequestArray[idu] = 0.0f;
+                  break;
+
                default: ASSERT(0); break;
             } // end of switch (Getmethod())
 
@@ -1558,7 +1565,7 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
          }
       }
 
-   if ( pEvapTrans->m_method != GM_PENMAN_MONTIETH ) //Assuming penman montieth is not a reference crop method (we don't need crop coefficients)
+   if ( pEvapTrans->m_method != GM_PENMAN_MONTIETH && pEvapTrans->m_method != GM_WETLAND_ET) 
       {
       CString tmpPath1;
 

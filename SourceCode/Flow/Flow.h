@@ -84,6 +84,7 @@ using namespace std;
 #define LAI gpFlowModel->m_colLAI
 #define Q_CAP gpFlowModel->m_colReachQ_CAP
 #define Q2WETL gpFlowModel->m_colReachQ2WETL
+#define WETL_CAP gpFlowModel->m_colWETL_CAP
 #define WETNESS gpFlowModel->m_colWETNESS
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision

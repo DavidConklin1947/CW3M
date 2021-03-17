@@ -15,10 +15,13 @@
 #define new DEBUG_NEW
 #endif
 
-
+EnvModel* gpEnvModel = NULL; 
+FlowModel* gpFlowModel = NULL;
 
 float HBV::InitHBV_Global(FlowContext *pFlowContext, LPCTSTR inti)
    {
+   gpFlowModel = pFlowContext->pFlowModel;
+   gpEnvModel = pFlowContext->pEnvContext->pEnvModel;
    m_pIDUlayer = pFlowContext->pFlowModel->m_pIDUlayer;
    m_pReachLayer = pFlowContext->pFlowModel->m_pStreamLayer;
    m_pHRUlayer = pFlowContext->pFlowModel->m_pHRUlayer;
@@ -583,7 +586,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
             if (lulc_a == LULCA_WETLAND) hru_wetland_area_m2 += area;
          }
       }
-      double hru_non_irrigated_area_m2 = (double)(pHRU->m_HRUtotArea_m2 - hruIrrigatedArea);
+      double hru_non_irrigated_area_m2 = (double)pHRU->m_HRUtotArea_m2 - (double)hruIrrigatedArea;
 
       hruIrrigatedArea = (float)(hruIrrigatedArea * pHRU->m_frc_naturl);
       hru_non_irrigated_area_m2 *= pHRU->m_frc_naturl;
@@ -603,23 +606,63 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
 
       //Calculate rates
       double infiltration_from_standing_H2O_m3 = 0.;
+      double hru_wetl2q_m3 = 0.;
       if (pHRU->m_standingH2Oflag)
       {
-         // How much standing water is there, expressed as a depth over the wetland area??
-         double standing_H2O_m3 = pHRU->GetLayer(BOX_STANDING_H2O)->m_volumeWater;
-         double wetland_water_depth_mm = (standing_H2O_m3 / hru_wetland_area_m2) * 1000.;
+         double hru_standing_H2O_m3 = pHRU->GetLayer(BOX_STANDING_H2O)->m_volumeWater;
+         int idus_in_hru = pHRU->m_polyIndexArray.GetSize();
+         double wetness_check_m3 = 0.;
+
          // How much room is there in the topsoil for more water to infiltrate from standing water?
-         double room_mm = fc - nonIrrigatedSoilWater_mm; ASSERT(room_mm > 0.);
-         double room_m3 = (room_mm / 1000.) * hru_wetland_area_m2;
-         infiltration_from_standing_H2O_m3 = min(room_m3, standing_H2O_m3);
-      }
+         double room_mm = (double)fc - (double)nonIrrigatedSoilWater_mm; ASSERT(room_mm > 0.);
+
+         for (int i = 0; i < idus_in_hru; i++)
+         {
+            int idu_ndx = pHRU->m_polyIndexArray[i];
+            double wetness_mm = gpFlowModel->Att(idu_ndx, WETNESS);
+            if (wetness_mm <= 0.) continue;
+
+            float idu_area_m2 = gpFlowModel->AttFloat(idu_ndx, AREA);
+            double idu_standing_H2O_m3 = (wetness_mm / 1000.) * idu_area_m2;
+            wetness_check_m3 += idu_standing_H2O_m3;
+
+            double wetl2q_m3 = 0.;
+
+            if (room_mm > wetness_mm)
+            { // Drain all the standing water out of this IDU into the soil.
+               infiltration_from_standing_H2O_m3 += idu_standing_H2O_m3;
+               wetness_mm = 0.;
+            } // end of if (room_mm > wetness_mm)
+            else
+            { // Drain enough standing water out of this IDU to saturate the soil.
+               double idu_room_m3 = (room_mm / 1000.) * idu_area_m2;
+               infiltration_from_standing_H2O_m3 += idu_room_m3;
+               double wetness_m3 = (wetness_mm / 1000.) * idu_area_m2;
+               wetness_m3 -= idu_room_m3;
+               wetness_mm = (wetness_m3 / idu_area_m2) * 1000.;
+            } // end of if (room_mm > wetness_mm) ... else
+
+            // Is there enough standing water in the IDU to overflow back into the reach?
+            double wetl_cap_mm = gpFlowModel->Att(idu_ndx, WETL_CAP);
+            if (wetness_mm > wetl_cap_mm)
+            { // Yes.
+               double wetl2q_mm = wetness_mm - wetl_cap_mm;
+               wetl2q_m3 = (wetl2q_mm / 1000.) * idu_area_m2;
+               wetness_mm -= wetl2q_mm;
+            } // end of if (wetness_mm > wetl_cap_mm)
+
+            hru_wetl2q_m3 += wetl2q_m3;
+            pIDULayer->SetDataU(idu_ndx, WETNESS, wetness_mm);
+         } // end of loop through IDUs
+
+         ASSERT(close_enough(wetness_check_m3, hru_standing_H2O_m3, 1e-5));
+      } // end of if (pHRU->m_standingH2Oflag)
 
       // gwIrrigated is the proportion of rain/snowmelt that bypasses the irrigated soil bucket, and is added directly to GW
       float gwIrrigated = GroundWaterRechargeFraction(precip, irrigatedSoilWater_mm, fc, Beta); 
 
       // gwNonIrrigated is the proportion of rain/snowmelt/infiltration_from_standing_H2O that bypasses the non-irrigated soil bucket, and is added directly to GW
-      double infiltration_from_standing_H2O_mm = 0.;
-      infiltration_from_standing_H2O_mm = hru_non_irrigated_area_m2 > 0 ?
+      double infiltration_from_standing_H2O_mm = hru_non_irrigated_area_m2 > 0 ?
          ((infiltration_from_standing_H2O_m3 / hru_non_irrigated_area_m2) * 1000.) : 0;
       float gwNonIrrigated = GroundWaterRechargeFraction(precip + infiltration_from_standing_H2O_mm, nonIrrigatedSoilWater_mm, fc, Beta);
       if (h == hru_of_interest) 
@@ -829,6 +872,8 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
                if (pHRU->m_standingH2Oflag)
                { // This compartment represents wetland standing water.
                   pHRULayer->AddFluxFromGlobalHandler(infiltration_from_standing_H2O_m3, FL_BOTTOM_SINK);     //m3/d
+                  if (hru_wetl2q_m3 > 0.)
+                     pHRULayer->AddFluxFromGlobalHandler(hru_wetl2q_m3, FL_STREAM_SINK);
                }
                else
                { // This compartment represents water in the snowpack.
