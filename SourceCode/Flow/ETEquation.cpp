@@ -87,8 +87,8 @@ float ETEquation::Run( unsigned short mode, HRU *pHRU )
       result = Hargreaves();
       break;
 
-   case WETLAND_ET:
-      result = WetlandET(pHRU);
+   case STANDING_H2O_EVAP:
+      result = StandingWaterEvaporation(pHRU);
       break;
 
    default:
@@ -902,7 +902,7 @@ float ETEquation::Fao56()
                   GlobalMethod::m_iduVPDarray[pHRU->m_polyIndexArray[i]] = (float)vpd;
 
      //             ASSERT(result>=0.0f);
-               }
+               } // end of if (processIDU)
             }
          }
       }
@@ -911,7 +911,7 @@ float ETEquation::Fao56()
    }
 
 
-   float ETEquation::WetlandET(HRU* pHRU)
+   float ETEquation::StandingWaterEvaporation(HRU* pHRU)
    {
       ASSERT(m_pEvapTrans->m_pQuery != NULL);
       if (m_pEvapTrans->m_pQuery == NULL) return(0);
@@ -925,41 +925,38 @@ float ETEquation::Fao56()
          m_pEvapTrans->m_pQuery->Run(idu, processIDU);
          if (!processIDU) continue;
 
+         double idu_area_m2 = gpFlowModel->Att(idu, AREA);
+         area_accum += idu_area_m2;
          float lai = gpFlowModel->AttFloat(idu, LAI);
          double evap_mm = 0, vpd = 0.;
 
          // Is there standing water?
          double wetness_mm = gpFlowModel->Att(idu, WETNESS);
-         if (wetness_mm > 0)
-         { // Calculate evaporation from standing water.
-            double idu_area_m2 = gpFlowModel->Att(idu, AREA);
-            area_accum += idu_area_m2;
-            double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
-            WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
-            float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
-            double ea = 0.;
-            double rh_pct = 100 * CalculateRelHumidity(m_specificHumidity, m_dailyMeanTemperature, m_dailyMaxTemperature, elev_mean_m, ea, vpd);
-            double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gpFlowModel->m_flowContext.dayOfYear);
-            double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
-            double evap_m3 = 0., evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
-            WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,
-               m_dailyMeanTemperature, m_dailyMeanTemperature, 1., cloudiness_frac, m_windSpeed, m_specificHumidity, rh_pct,
-               evap_m3, evap_kJ, SW_kJ, LW_kJ);
-            evap_mm = (evap_m3 / idu_area_m2) * 1000;
-            evap_x_area_accum += evap_mm * idu_area_m2;
-         }
-         else {} // soil evaporation
+         ASSERT(wetness_mm > 0);
+         
+         // Calculate evaporation from standing water.
+         double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
+         WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
+         float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
+         double ea = 0.;
+         double rh_pct = 100 * CalculateRelHumidity((float)m_specificHumidity, (float)m_dailyMeanTemperature, (float)m_dailyMaxTemperature, elev_mean_m, ea, vpd);
+         double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gpFlowModel->m_flowContext.dayOfYear);
+         double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
+         double evap_m3 = 0., evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
+         WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,
+            m_dailyMeanTemperature, m_dailyMeanTemperature, 1., cloudiness_frac, m_windSpeed, m_specificHumidity, rh_pct,
+            evap_m3, evap_kJ, SW_kJ, LW_kJ);
+         evap_mm = (evap_m3 / idu_area_m2) * 1000;
+         evap_x_area_accum += evap_mm * idu_area_m2;
 
-         // Is there vegetation?
-
-         GlobalMethod::m_iduIrrRequestArray[idu] = evap_mm;
+         GlobalMethod::m_iduIrrRequestArray[idu] += evap_mm;
          GlobalMethod::m_iduVPDarray[idu] = (float)vpd;
 
       } // end of loop through IDUs in this HRU
 
       double hru_evap_mm = evap_x_area_accum / area_accum;
       return(hru_evap_mm);
-   } // end of WetlandET()
+   } // end of StandingWaterEvaporation()
 
 
    float ETEquation::KimbPenn()

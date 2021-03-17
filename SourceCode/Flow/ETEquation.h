@@ -46,7 +46,7 @@ class ETEquation
                                  //  Prepared by Doug Dockter U.S.Bureau of Reclamation Pacific Northwest Region Water Conservation Center Revised January, 2008 Peter L.Palmer AgriMet Program)
                                  //
          HARGREAVES,             //  Hargreaves ET Equation
-         WETLAND_ET,
+         STANDING_H2O_EVAP,
          MODE_COUNT              //  Total Number of Mode Variables
          };
 
@@ -201,9 +201,9 @@ class ETEquation
 
       // reference ET equation methods
      float PennMont(HRU *pHRU);                       // Pennman-Monteith equation with explicit resistances and previously supplied data, if possible; return ET demand in mm/day, or -1 if prequisite values were not provided
-	  float Asce();                                    // Standardized Penman-Monteith equation with previously supplied data, if possible; return ET demand in mm/day
+     float Asce();                                    // Standardized Penman-Monteith equation with previously supplied data, if possible; return ET demand in mm/day
 	  float Fao56();                                   // FAO56 Penman-Monteith equation with previously supplied data, if possible; return ET demand in mm/day
 	  float Hargreaves();                              // Hargreaves equation with previously supplied data, if possible; return ET demand in mm/day
 	  float KimbPenn();                                // Kimberly-Pennman equation with previously supplied data, if possible; return ET demand in mm/day or -1 if prequisite values were not provided
-     float WetlandET(HRU* pHRU);
+     float StandingWaterEvaporation(HRU* pHRU);
    };

@@ -984,7 +984,7 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
    CalculateTodaysReferenceET( pFlowContext, pHRU, etMethod, referenceET, sw_coeff, lw_coeff);
 
    // get reference ET from ET method
-   referenceET = m_ETEq.Run( etMethod, pHRU );    // reference mm/hr is returned by method
+   referenceET = m_ETEq.Run( etMethod, pHRU );    // reference mm/day (or possibly mm/hr) is returned by method
 
    if ( referenceET < 0.0f ) { referenceET = 0.0f; }
 
@@ -1180,7 +1180,7 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
                   m_iduIrrRequestArray[idu] = 0.0f;
                   break;
 
-               case GM_WETLAND_ET:
+               case GM_STANDING_H2O_EVAP:
                   if (m_iduIrrRequestArray[idu] >= 0.0f)
                      maxET = m_iduIrrRequestArray[idu];
                   m_iduIrrRequestArray[idu] = 0.0f;
@@ -1546,10 +1546,10 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
             pEvapTrans->m_ETEq.SetMode(ETEquation::HARGREAVES);
             break;
 
-         case 'w':
-         case 'W':
-            pEvapTrans->SetMethod(GM_WETLAND_ET);
-            pEvapTrans->m_ETEq.SetMode(ETEquation::WETLAND_ET);
+         case 's':
+         case 'S':
+            pEvapTrans->SetMethod(GM_STANDING_H2O_EVAP);
+            pEvapTrans->m_ETEq.SetMode(ETEquation::STANDING_H2O_EVAP);
             break;
 
          case 'k':
@@ -1565,7 +1565,7 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
          }
       }
 
-   if ( pEvapTrans->m_method != GM_PENMAN_MONTIETH && pEvapTrans->m_method != GM_WETLAND_ET) 
+   if ( pEvapTrans->m_method != GM_PENMAN_MONTIETH && pEvapTrans->m_method != GM_STANDING_H2O_EVAP) 
       {
       CString tmpPath1;
 
