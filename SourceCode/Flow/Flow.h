@@ -84,6 +84,8 @@ using namespace std;
 #define LAI gpFlowModel->m_colLAI
 #define Q_CAP gpFlowModel->m_colReachQ_CAP
 #define Q2WETL gpFlowModel->m_colReachQ2WETL
+#define REACH_H2O gpFlowModel->m_colReachREACH_H2O
+#define TEMP_H2O gpFlowModel->m_colReachTEMP_H2O
 #define WETL_CAP gpFlowModel->m_colWETL_CAP
 #define WETNESS gpFlowModel->m_colWETNESS
 
@@ -991,6 +993,7 @@ public:
 public:
    // reach-level parameters
    double Att(int col); 
+   int m_wetlNdx; // index into gpFlowModel->m_wetlArray[]; not the same as WETL_ID; -1 if the reach isn't associated with a wetland
    TopoSetting m_topo;
    double m_reach_volume_m3;
    float m_wdRatio;
@@ -1440,6 +1443,26 @@ public:
 };
 
 
+class Wetland
+{
+   friend class FlowModel;
+
+   Wetland() {};
+   ~Wetland() {};
+   bool QtoWetland(WaterParcel q2wetlWP);
+
+   int m_wetlID;
+   int m_wetlNdx;
+   double m_wetlArea_m2;
+
+   // m_wetlIDUndxArray is an ordered list of the IDU polygon indices of the IDUs in the wetland.
+   // Note these are IDU index values, not IDU_ID values.
+   // The IDUs are in the order in which they would fill when water overflows the banks of the associated reaches,
+   // i.e. from lowest elevation to highest elevation.
+   CArray <int, int> m_wetlIDUndxArray; 
+}; // end of class Wetland
+
+
 class FLOWAPI FlowModel
 {
 friend class FlowProcess;
@@ -1474,8 +1497,10 @@ public:
    // manage global methods
    //void RunGlobalMethods( void );          
 
+   bool ApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
    double Att(int IDUindex, int col); // value of IDU attribute
    float AttFloat(int IDUindex, int col); // value of IDU attribute
+   void PutAtt(int IDUindex, int col, double attValue);
    static double VegDensity(double lai);
    Reach* GetReachFromCOMID(int comid);
    Reach *GetReachFromStreamIndex( int index ) { return (Reach*) m_reachTree.GetReachNodeFromPolyIndex( index ); }
@@ -1652,7 +1677,7 @@ protected:
 protected:
    // various collections
    PtrArray< Catchment > m_catchmentArray;         // list of catchments included in this model
-   PtrArray< HRU >       m_hruArray;               // list of HRUs included in this model
+   PtrArray< HRU >       m_hruArray;               // list of HRUs included in this model, ordered as in the HRU shapefile
    IDataObj              *m_pHruGrid;               // a gridded form of the HRU array (useful for gridded models only)
    PtrArray< Reservoir > m_reservoirArray;         // list of reservoirs included in this model
    PtrArray< ControlPoint > m_controlPointArray;   // list of control points included in this model
@@ -1660,6 +1685,7 @@ protected:
 public:
    CArray< Reach*, Reach* > m_reachArray;       // N.B. the index to m_ReachArray is not necessarily the same as the index to the corresponding reach in the Reach shapefile
 												// pReach->m_polyIndex is the index to the Reach shapefile
+   CArray< Wetland*, Wetland*> m_wetlArray; // The index to m_wetlArray is not the same as WETL_ID.
    CString m_path;
 
    // flux information
@@ -1845,6 +1871,8 @@ public:
    int m_colStreamCOMID_DOWN;
    int m_colStreamCOMID_LEFT;
    int m_colStreamCOMID_RT;
+   int m_colReachREACH_NDX;
+   int m_colReachREACH_H2O;
    int m_colReachHRU_ID;
    int m_colReachHRU_FRAC;
    int m_colStreamRES_ID;

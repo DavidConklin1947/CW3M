@@ -3301,6 +3301,8 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamCOMID_DOWN, _T("COMID_DOWN"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamCOMID_LEFT, _T("COMID_LEFT"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamCOMID_RT, _T("COMID_RT"), TYPE_INT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachREACH_NDX, _T("REACH_NDX"), TYPE_INT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachREACH_H2O, _T("REACH_H2O"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colStreamRES_ID, _T("RES_ID"), TYPE_INT, CC_MUST_EXIST);
 
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachRESAREA_HA, _T("RESAREA_HA"), TYPE_DOUBLE, CC_AUTOADD);
@@ -5200,6 +5202,8 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       GlobalMethodManager::SetTimeStep(stepSize );
       GlobalMethodManager::Step( &m_flowContext );
 
+      ApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
+
       finish = clock();
       duration = (float)(finish - start) / CLOCKS_PER_SEC;   
       m_reachIntegrationRunTime += (float) duration;   
@@ -5318,6 +5322,117 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
    return TRUE;
    }
+
+
+   bool FlowModel::ApplyQ2WETL()
+   { // Move water from stream reaches to the standing water soil compartment.
+      // Do it HRU by HRU.
+      int num_hrus = GetHRUCount();
+      for (int hru_ndx = 0; hru_ndx < num_hrus; hru_ndx++)
+      {
+         HRU* pHRU = GetHRU(hru_ndx);
+         HRULayer* pSnowLayer = pHRU->GetLayer(BOX_SNOW);
+         bool snow_flag = pSnowLayer->m_depth > 0.;
+
+         double hru_q2wetl_cms = 0.; // hru_q2wetl_m3 = 0.;
+         int num_reaches_in_hru = (int)pHRU->m_reachNdxArray.GetCount();
+         for (int reachpoly_ndx = 0; reachpoly_ndx < num_reaches_in_hru; reachpoly_ndx++)
+         {
+            int reach_array_ndx = -1; m_pReachLayer->GetData(reachpoly_ndx, m_colReachREACH_NDX, reach_array_ndx);
+            Reach* pReach = GetReachFromStreamIndex(reach_array_ndx);
+            double reach_q2wetl_cms = pReach->Att(Q2WETL);
+            if (reach_q2wetl_cms <= 0.) continue;
+
+            hru_q2wetl_cms += reach_q2wetl_cms;
+            double reach_q2wetl_m3 = reach_q2wetl_cms * SEC_PER_DAY;
+
+            // Remove the water from the reach.
+            // Remove it from each subreach in proportion as that subreach's volume is to the total volume of the reach.
+            double reach_h2o_m3 = pReach->Att(REACH_H2O);
+            int num_subreaches = (int)pReach->m_subnodeArray.GetSize();
+            for (int subreach_ndx = 0; subreach_ndx < num_subreaches; subreach_ndx++)
+            {
+               ReachSubnode* pSubreach = pReach->GetReachSubnode(subreach_ndx);
+               double vol_frac = pSubreach->m_waterParcel.m_volume_m3 / reach_h2o_m3;
+               pSubreach->m_waterParcel.Discharge(vol_frac * reach_q2wetl_m3);                
+            } // end of loop through the subreaches of this reach
+
+            // Add the water to the wetland IDUs associated with the reach.
+            int wetl_ndx = pReach->m_wetlNdx;
+            Wetland* pWetl = m_wetlArray[wetl_ndx];
+            WaterParcel reach_q2wetlWP(reach_q2wetl_m3, pReach->Att(TEMP_H2O));
+            pWetl->QtoWetland(reach_q2wetlWP);
+         } // end of loop through reaches
+         if (hru_q2wetl_cms <= 0.) continue;
+
+         if (snow_flag)
+         {
+            CString msg; msg.Format("ApplyQ2WETL() Snow and standing water at the same time. hru_id = %d", pHRU->m_id);
+            Report::ErrorMsg(msg);
+         }
+
+         HRULayer* pStandingH2Olayer = pHRU->GetLayer(BOX_STANDING_H2O);
+         if (!pHRU->m_standingH2Oflag)
+         {
+            ASSERT(pStandingH2Olayer->m_depth == 0 && pStandingH2Olayer->m_volumeWater == 0);
+            pHRU->m_standingH2Oflag = true;
+         }
+         double hru_q2wetl_m3 = hru_q2wetl_cms * SEC_PER_DAY;
+         double hru_q2wetl_mm = (hru_q2wetl_m3 / pHRU->m_HRUtotArea_m2) * 1000.;
+         pStandingH2Olayer->m_depth += (float)hru_q2wetl_mm;
+         pStandingH2Olayer->m_volumeWater += hru_q2wetl_m3;         
+      } // end of loop through HRUs
+
+      return(true);
+   } // end of ApplyQ2WETL()
+
+
+bool Wetland::QtoWetland(WaterParcel toWetlWP)
+{
+   double wetl_room_m3 = 0;
+   int num_wetl_idus = (int)m_wetlIDUndxArray.GetSize();
+   for (int i = 0; i < num_wetl_idus; i++)
+   {
+      int idu_ndx = m_wetlIDUndxArray[i];
+      double wetl_cap_mm = gpFlowModel->Att(idu_ndx, WETL_CAP);
+      double wetness_mm = gpFlowModel->Att(idu_ndx, WETNESS);
+      if (wetness_mm >= wetl_cap_mm) continue;
+
+      double idu_area_m2 = gpFlowModel->Att(idu_ndx, AREA);
+      double idu_room_m3 = ((wetl_cap_mm - wetness_mm) / 1000.) * idu_area_m2;
+      wetl_room_m3 += idu_room_m3;
+
+   } // end of loop through IDUs in this wetland
+   if (toWetlWP.m_volume_m3 > wetl_room_m3)
+   { // Both the reach and the wetland are overflowing. A flood condition exists.
+      CString msg;
+      msg.Format("QtoWetland() A flood condition exists. wetl_room_m3 = %f, toWetlWP.m_volume_m3 = %f",
+         wetl_room_m3, toWetlWP.m_volume_m3);
+      Report::LogMsg(msg);
+   }
+
+   // Now update WETNESS for each affected IDU
+   double remaining_m3 = toWetlWP.m_volume_m3;
+   for (int i = 0; remaining_m3 > 0. && i < num_wetl_idus; i++)
+   {
+      int idu_ndx = m_wetlIDUndxArray[i];
+      double wetl_cap_mm = gpFlowModel->Att(idu_ndx, WETL_CAP);
+      double wetness_mm = gpFlowModel->Att(idu_ndx, WETNESS);
+      if (wetness_mm >= wetl_cap_mm) continue;
+
+      double idu_area_m2 = gpFlowModel->Att(idu_ndx, AREA);
+      double idu_room_m3 = ((wetl_cap_mm - wetness_mm) / 1000.) * idu_area_m2;
+      wetl_room_m3 += idu_room_m3;
+
+      double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
+      remaining_m3 -= to_this_idu_m3;
+      double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
+      wetness_mm += to_this_idu_mm;
+      gpFlowModel->PutAtt(idu_ndx, WETNESS, wetness_mm);
+
+   } // end of loop through IDUs in this wetland
+
+} // end of QtoWetland()
 
 
 bool Reach::CalcReachVegParamsIfNecessary()
@@ -7558,6 +7673,12 @@ double Reach::Att(int col)
 } // end of Reach::Att()
 
 
+void FlowModel::PutAtt(int IDUindex, int col, double attValue)
+{
+   m_pIDUlayer->SetDataU(IDUindex, col, attValue);
+} // end of PutAtt()
+
+
 double FlowModel::Att(int IDUindex, int col)
 {
    double attribute;
@@ -7672,6 +7793,8 @@ bool FlowModel::InitReaches(void)
    for (int i = 0; i < reachCount; i++)
       {
       Reach *pReach = m_reachArray[i];
+      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachREACH_NDX, i);
+
       int num_subreaches = pReach->GetSubnodeCount();
 
       double reach_min_width_m = 0.;
@@ -16344,5 +16467,5 @@ Reach * FlowModel::GetReachFromCOMID(int comid)
    if (reach_array_ndx >= reach_count) pReach = NULL;
 
    return(pReach);
-} // end of GetReachPfromCOMID()
+} // end of GetReachFromCOMID()
 
