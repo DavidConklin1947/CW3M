@@ -2803,6 +2803,9 @@ FlowModel::FlowModel()
    {
    gpModel = this;
    gpFlowModel = this;
+
+   m_scenarioArray.RemoveAll();
+
    gpFlow->AddInputVar( "Climate Scenario", m_currentFlowScenarioIndex, "0=MIROC, 1=GFDL, 2=HadGEM, 3=Stationary using MIROC, "
       "4=MACA actual weather 1979-2011, 5=BaselineGrid, 6=BaselinePoly, 7=GriddedRecentWeatherForDemos, 8=BaselineGridMultiyearFiles" );    
    gpFlow->AddInputVar( "Use Parameter Estimation", m_estimateParameters, "true if the model will be used to estimate parameters" );    
@@ -2811,7 +2814,7 @@ FlowModel::FlowModel()
 
    gpFlow->AddOutputVar("Date of Max Snow", m_dateMaxSWE, "DOY of Max Snow");
    gpFlow->AddOutputVar("Volume Max Snow (cubic meters)", m_volumeMaxSWE, "Volume Max Snow (m3)");
-   }
+   } // end of constructor for FlowModel
  
 
 FlowModel::~FlowModel()
@@ -2864,6 +2867,7 @@ FlowModel::~FlowModel()
 
    // these are PtrArrays
    m_catchmentArray.RemoveAll();
+   m_wetlArray.RemoveAll();
    m_reservoirArray.RemoveAll();
    m_fluxInfoArray.RemoveAll();
    m_stateVarArray.RemoveAll();
@@ -3232,6 +3236,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    m_pIDUlayer->CheckCol(m_colWETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
    m_pIDUlayer->CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
    m_pIDUlayer->CheckCol(m_colWETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
+   m_pIDUlayer->CheckCol(m_colWETL_ID, "WETL_ID", TYPE_INT, CC_MUST_EXIST);
 
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruTEMP, "TEMP", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruTMAX, "TMAX", TYPE_FLOAT, CC_AUTOADD);
@@ -3455,6 +3460,8 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    // iterate through catchments/hrus/hrulayers, setting up the fluxes
    InitFluxes();
+
+   InitWetlands();
 
    // allocate integrators, state variable ptr arrays
    InitIntegrationBlocks();
@@ -5387,31 +5394,9 @@ bool FlowModel::Run( EnvContext *pEnvContext )
    } // end of ApplyQ2WETL()
 
 
-bool Wetland::QtoWetland(WaterParcel toWetlWP)
+bool Wetland::QtoWetland(WaterParcel toWetlWP) // Returns true if wetland absorbs all the water.
 {
-   double wetl_room_m3 = 0;
    int num_wetl_idus = (int)m_wetlIDUndxArray.GetSize();
-   for (int i = 0; i < num_wetl_idus; i++)
-   {
-      int idu_ndx = m_wetlIDUndxArray[i];
-      double wetl_cap_mm = gpFlowModel->Att(idu_ndx, WETL_CAP);
-      double wetness_mm = gpFlowModel->Att(idu_ndx, WETNESS);
-      if (wetness_mm >= wetl_cap_mm) continue;
-
-      double idu_area_m2 = gpFlowModel->Att(idu_ndx, AREA);
-      double idu_room_m3 = ((wetl_cap_mm - wetness_mm) / 1000.) * idu_area_m2;
-      wetl_room_m3 += idu_room_m3;
-
-   } // end of loop through IDUs in this wetland
-   if (toWetlWP.m_volume_m3 > wetl_room_m3)
-   { // Both the reach and the wetland are overflowing. A flood condition exists.
-      CString msg;
-      msg.Format("QtoWetland() A flood condition exists. wetl_room_m3 = %f, toWetlWP.m_volume_m3 = %f",
-         wetl_room_m3, toWetlWP.m_volume_m3);
-      Report::LogMsg(msg);
-   }
-
-   // Now update WETNESS for each affected IDU
    double remaining_m3 = toWetlWP.m_volume_m3;
    for (int i = 0; remaining_m3 > 0. && i < num_wetl_idus; i++)
    {
@@ -5422,16 +5407,25 @@ bool Wetland::QtoWetland(WaterParcel toWetlWP)
 
       double idu_area_m2 = gpFlowModel->Att(idu_ndx, AREA);
       double idu_room_m3 = ((wetl_cap_mm - wetness_mm) / 1000.) * idu_area_m2;
-      wetl_room_m3 += idu_room_m3;
 
       double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
-      remaining_m3 -= to_this_idu_m3;
       double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
       wetness_mm += to_this_idu_mm;
       gpFlowModel->PutAtt(idu_ndx, WETNESS, wetness_mm);
 
+      remaining_m3 -= to_this_idu_m3;
    } // end of loop through IDUs in this wetland
 
+   bool Q_absorbed_by_wetland = remaining_m3 <= 0.;
+   if (!Q_absorbed_by_wetland)
+   { // Both the reach and the wetland are overflowing. A flood condition exists.
+      CString msg;
+      msg.Format("QtoWetland() A flood condition exists. m_wetlID = %d, toWetlWP.m_volume_m3 = %f, remaining_m3 = %f",
+         m_wetlID, toWetlWP.m_volume_m3, remaining_m3);
+      Report::LogMsg(msg);
+   }
+
+   return(Q_absorbed_by_wetland);
 } // end of QtoWetland()
 
 
@@ -7687,12 +7681,102 @@ double FlowModel::Att(int IDUindex, int col)
 } // end of FlowModel:Att()
 
 
+int FlowModel::AttInt(int IDUindex, int col)
+{
+   int attribute;
+   m_pIDUlayer->GetData(IDUindex, col, attribute);
+   return(attribute);
+} // end of FlowModel:AttInt()
+
+
 float FlowModel::AttFloat(int IDUindex, int col)
 {
    float attribute;
    m_pIDUlayer->GetData(IDUindex, col, attribute);
    return(attribute);
 } // end of FlowModel::AttFloat()
+
+
+Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.) 
+{ 
+   m_wetlID = wetlID; 
+   m_wetlIDUndxArray.RemoveAll();
+} // end of Wetland constructor
+
+
+int FlowModel::InitWetlands() // Returns the number of wetlands.
+{
+   m_wetlArray.RemoveAll();
+   int num_wetlands = 0;
+   for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu != m_pIDUlayer->End(); idu++)
+   {
+      int wetl_id = AttInt(idu, WETL_ID);
+      if (wetl_id <= 0) continue;
+      Wetland* pWetl = NULL;
+      double idu_area_m2 = Att(idu, AREA);
+      int wetl_ndx = 0; while (wetl_ndx < num_wetlands && m_wetlArray[wetl_ndx]->m_wetlID != wetl_id) wetl_ndx++;
+
+      if (wetl_ndx >= num_wetlands)
+      { // Add a wetland
+         pWetl = new Wetland(wetl_id);
+         m_wetlArray.Add(pWetl);
+         pWetl->m_wetlNdx = wetl_ndx;
+         num_wetlands++;
+      }
+      else pWetl = m_wetlArray[wetl_ndx];
+
+      pWetl->m_wetlArea_m2 += idu_area_m2;
+      pWetl->m_wetlIDUndxArray.Add(idu);
+
+   } // end of loop through IDUs
+
+   // Now, for each wetland, rearrange the entries in m_wetlIDUndxArray into an order 
+   // representing the order in which the wetland IDUs will be inundated,
+   // i.e. from the IDU at the lowest elevation to the one at the highest elevation.
+   for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
+   {
+      Wetland* pWetl = m_wetlArray[wetl_ndx];
+      int num_idus = (int)pWetl->m_wetlIDUndxArray.GetSize();
+      CArray <int, int> idus; idus.SetSize(num_idus);
+      CArray <float, float> elevations; elevations.SetSize(num_idus);
+      for (int i = 0; i < num_idus; i++)
+      {
+         int idu_ndx = pWetl->m_wetlIDUndxArray[i];
+         idus[i] = idu_ndx;
+         elevations[i] = AttFloat(idu_ndx, ELEV_MEAN);
+      }
+
+      // Unsorted IDU indices are in idus[] and their elevations are in elevations[].
+      // Now sort them from lowest to highest elevation into m_wetlIDUndxArray.
+      int num_remaining_idus = num_idus;
+      while (num_remaining_idus > 0)
+      {
+         float min_elev_m = 10000.;
+         int j_min_elev = -1;
+         for (int j = 0; j < num_remaining_idus; j++)
+         {
+            if (elevations[j] < min_elev_m)
+            {
+               min_elev_m = elevations[j];
+               j_min_elev = j;
+            }
+         }
+         int idu_ndx = idus[j_min_elev];
+         int i = num_idus - num_remaining_idus;
+         pWetl->m_wetlIDUndxArray[i] = idu_ndx;
+
+         idus.RemoveAt(j_min_elev);
+         elevations.RemoveAt(j_min_elev);
+         num_remaining_idus--;
+      } // end of while (num_remaining_idus > 0)
+   }
+
+   CString msg;
+   msg.Format("InitWetlands() initialized %d Wetland objects.", num_wetlands);
+   Report::LogMsg(msg);
+
+   return(num_wetlands);
+} // end of InitWetlands()
 
 
 // create, initialize reaches based on the stream layer

@@ -87,6 +87,7 @@ using namespace std;
 #define REACH_H2O gpFlowModel->m_colReachREACH_H2O
 #define TEMP_H2O gpFlowModel->m_colReachTEMP_H2O
 #define WETL_CAP gpFlowModel->m_colWETL_CAP
+#define WETL_ID gpFlowModel->m_colWETL_ID
 #define WETNESS gpFlowModel->m_colWETNESS
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
@@ -1447,10 +1448,12 @@ class Wetland
 {
    friend class FlowModel;
 
-   Wetland() {};
-   ~Wetland() {};
+public:
+   Wetland(int wetlID);
+   ~Wetland() {  };
    bool QtoWetland(WaterParcel q2wetlWP);
 
+public:
    int m_wetlID;
    int m_wetlNdx;
    double m_wetlArea_m2;
@@ -1499,6 +1502,7 @@ public:
 
    bool ApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
    double Att(int IDUindex, int col); // value of IDU attribute
+   int AttInt(int IDUindex, int col); // value of IDU attribute
    float AttFloat(int IDUindex, int col); // value of IDU attribute
    void PutAtt(int IDUindex, int col, double attValue);
    static double VegDensity(double lai);
@@ -1569,6 +1573,7 @@ public:
 protected:
    bool InitClimateMeanValues(EnvContext *pContext);
    bool InitReaches( void  );
+   int InitWetlands(void); // Returns the number of wetlands.
    bool InitCatchments( void );
    bool InitHRULayers(EnvContext*);
    bool InitReservoirs( void );
@@ -1685,7 +1690,7 @@ protected:
 public:
    CArray< Reach*, Reach* > m_reachArray;       // N.B. the index to m_ReachArray is not necessarily the same as the index to the corresponding reach in the Reach shapefile
 												// pReach->m_polyIndex is the index to the Reach shapefile
-   CArray< Wetland*, Wetland*> m_wetlArray; // The index to m_wetlArray is not the same as WETL_ID.
+   CArray< Wetland *, Wetland *> m_wetlArray; // The index to m_wetlArray is not the same as WETL_ID.
    CString m_path;
 
    // flux information
@@ -1824,6 +1829,7 @@ public:
    int m_colWETNESS;
    int m_colWETL_CAP;
    int m_colWETL2Q;
+   int m_colWETL_ID;
 
    int m_colHruTEMP;
    int m_colHruTMAX;
