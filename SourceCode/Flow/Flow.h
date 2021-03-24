@@ -1923,7 +1923,7 @@ public:
 
    //int m_colHruAnnualSnow;
    int m_colHruDecadalSnow;
-   int m_colReachQ;
+//x   int m_colReachQ;
    int m_colReachQ_DISCHARG;
    int m_colReachLOG_Q;
    int m_colReachQ_CAP;

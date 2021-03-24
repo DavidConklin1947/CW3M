@@ -2657,7 +2657,6 @@ FlowModel::FlowModel()
  , m_colIRRIGATION(-1)
  , m_colSM_DAY(-1)
  , m_colARIDITYNDX(-1)
- , m_colReachQ( -1 )
  , m_colReachLOG_Q(-1)
  , m_colResID( -1 )
  , m_colReachHRU_ID(-1)
@@ -3384,7 +3383,6 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    m_pReachLayer->CheckCol(m_colReachVEG_HT_R, "VEG_HT_R", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachVEG_HT_L, "VEG_HT_L", TYPE_DOUBLE, CC_AUTOADD);
 
-   EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ, _T("Q"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_DISCHARG, _T("Q_DISCHARG"), TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachLOG_Q, "LOG_Q", TYPE_FLOAT, CC_AUTOADD);
 
@@ -7706,6 +7704,8 @@ Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.)
 
 int FlowModel::InitWetlands() // Returns the number of wetlands.
 {
+   if (WETL_ID < 0) return(0);
+
    m_wetlArray.RemoveAll();
    int num_wetlands = 0;
    for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu != m_pIDUlayer->End(); idu++)
