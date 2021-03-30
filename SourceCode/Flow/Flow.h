@@ -80,15 +80,21 @@ using namespace std;
 #define BEERS_LAW_K 0.5
 
 #define AREA gpFlowModel->m_colAREA
+#define DIRECTION gpFlowModel->m_colReachDIRECTION
 #define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
 #define LAI gpFlowModel->m_colLAI
 #define Q_CAP gpFlowModel->m_colReachQ_CAP
 #define Q2WETL gpFlowModel->m_colReachQ2WETL
 #define REACH_H2O gpFlowModel->m_colReachREACH_H2O
 #define TEMP_H2O gpFlowModel->m_colReachTEMP_H2O
+#define VEGHTREACH gpFlowModel->m_colReachVEGHTREACH
 #define WETL_CAP gpFlowModel->m_colWETL_CAP
 #define WETL_ID gpFlowModel->m_colWETL_ID
 #define WETNESS gpFlowModel->m_colWETNESS
+#define WIDTH_CALC gpFlowModel->m_colReachWIDTH_CALC
+#define WIDTH_MIN gpFlowModel->m_colReachWIDTH_MIN
+#define WIDTHGIVEN gpFlowModel->m_colReachWIDTHGIVEN
+#define WIDTHREACH gpFlowModel->m_colReachWIDTHREACH
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *
@@ -893,7 +899,7 @@ public:
    TopoSetting(double elev_m, double topoElev_E_deg, double topoElev_S_deg, double topoElev_W_deg, double lat_deg, double long_deg);
    ~TopoSetting() {};
 
-   double ShadeFrac(int jday0, double* pRadSWestimate_W_m2);
+   double ShadeFrac(int jday0, double* pRadSWestimate_W_m2, double direction_deg, double reachWidth_m, double vegHt_m);
    double VegShade_pct(double elev_deg, double azimuth_deg, double direction_deg, double reachWidth_m, double vegHt_m);
    bool IsTopoShaded(double solarElev_deg, double solarAzimuth_deg);
    bool IsVegShaded(double solarElev_deg, double solarAzimuth_deg);
@@ -1935,7 +1941,7 @@ public:
    int m_colReachRAD_LW_OUT; // W/m2
    int m_colReachRAD_SW_IN; // W/m2
    int m_colReachAREA_H2O;
-   int m_colReachWIDTH;
+   int m_colReachWIDTH_CALC;
    int m_colReachDEPTH;
    int m_colReachDEPTHMANNG;
    int m_colReachTURNOVER;
@@ -1955,7 +1961,9 @@ public:
    int m_colReachBANK_R_IDU; // IDU index of IDU representative of the right bank of the reach
    int m_colReachRAD_SW_EST;
    int m_colReachSHADE_TOPO;
-   int m_colReachVEG_DENS;
+   int m_colReachVGDNS_CALC;
+   int m_colReachVGDNSGIVEN;
+   int m_colReachVGDNSREACH;
    int m_colReachSHADE_VEG;
    int m_colReachLAI_REACH;
    int m_colReachVEGHTREACH;

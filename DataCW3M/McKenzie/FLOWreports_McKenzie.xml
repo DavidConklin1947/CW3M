@@ -89,7 +89,7 @@
       <output name="KCAL_REACH (kcal)" query="SAL_REACH=1" value="KCAL_REACH" type="sum" domain="reach" />
       <output name="LENGTH (km)" query="SAL_REACH=1" value="LENGTH/1000" type="sum" domain="reach" />
       <output name="Number of reaches" query="SAL_REACH=1" value="1" type="sum" domain="reach" />
-      <output name="WIDTH x LENGTH (m2)" query="SAL_REACH=1" value="WIDTH*LENGTH" type="sum" domain="reach" />
+      <output name="WIDTHREACH x LENGTH (m2)" query="SAL_REACH=1" value="WIDTHREACH*LENGTH" type="sum" domain="reach" />
       <output name="VEGHTREACH x LENGTH (m2)" query="SAL_REACH=1" value="VEGHTREACH*LENGTH" type="sum" domain="reach" />
     </output_group>
 
@@ -108,12 +108,13 @@
       <output name="23772805 KCAL_REACH (kcal)" query="COMID=23772805" value="KCAL_REACH" type="sum" domain="reach" />
       <output name="23772805 net KCAL" query="COMID=23772805" value="(RAD_SW_IN-RAD_LW_OUT)*AREA_H2O*86.4/4.184" type="sum" domain="reach" />
       <output name="23772805 KCAL_GIVEN (kcal)" query="COMID=23772805" value="KCAL_GIVEN" type="sum" domain="reach" />
-      <output name="23772805 WIDTH (m)" query="COMID=23772805" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772805 WIDTH_CALC (m)" query="COMID=23772805" value="WIDTH_CALC" type="sum" domain="reach" />
       <output name="23772805 WIDTHGIVEN (m)" query="COMID=23772805" value="WIDTHGIVEN" type="sum" domain="reach" />
+      <output name="23772805 WIDTHREACH (m)" query="COMID=23772805" value="WIDTHREACH" type="sum" domain="reach" />
       <output name="23772805 LENGTH (m)" query="COMID=23772805" value="LENGTH" type="sum" domain="reach" />
       <output name="23772805 DEPTH (m)" query="COMID=23772805" value="DEPTH" type="sum" domain="reach" />
       <output name="23772805 LAI_REACH" query="COMID=23772805" value="LAI_REACH" type="sum" domain="reach" />
-      <output name="23772805 VEG_DENS" query="COMID=23772805" value="VEG_DENS" type="sum" domain="reach" />
+      <output name="23772805 VGDNSREACH" query="COMID=23772805" value="VGDNSREACH" type="sum" domain="reach" />
       <output name="23772805 VEG_HT_L (m)" query="COMID=23772805" value="VEG_HT_L" type="sum" domain="reach" />
       <output name="23772805 VEG_HT_R (m)" query="COMID=23772805" value="VEG_HT_R" type="sum" domain="reach" />
       <output name="23772805 VEGHTREACH (m)" query="COMID=23772805" value="VEGHTREACH" type="sum" domain="reach" />
@@ -131,12 +132,13 @@
       <output name="23772703 KCAL_REACH (kcal)" query="COMID=23772703" value="KCAL_REACH" type="sum" domain="reach" />
       <output name="23772703 net KCAL" query="COMID=23772703" value="(RAD_SW_IN-RAD_LW_OUT)*AREA_H2O*86.4/4.184" type="sum" domain="reach" />
       <output name="23772703 KCAL_GIVEN (kcal)" query="COMID=23772703" value="KCAL_GIVEN" type="sum" domain="reach" />
-      <output name="23772703 WIDTH (m)" query="COMID=23772703" value="WIDTH" type="sum" domain="reach" />
+      <output name="23772703 WIDTH_CALC (m)" query="COMID=23772703" value="WIDTH_CALC" type="sum" domain="reach" />
       <output name="23772703 WIDTHGIVEN (m)" query="COMID=23772703" value="WIDTHGIVEN" type="sum" domain="reach" />
+      <output name="23772703 WIDTHREACH (m)" query="COMID=23772703" value="WIDTHREACH" type="sum" domain="reach" />
       <output name="23772703 LENGTH (m)" query="COMID=23772703" value="LENGTH" type="sum" domain="reach" />
       <output name="23772703 DEPTH (m)" query="COMID=23772703" value="DEPTH" type="sum" domain="reach" />
       <output name="23772703 LAI_REACH" query="COMID=23772703" value="LAI_REACH" type="sum" domain="reach" />
-      <output name="23772703 VEG_DENS" query="COMID=23772703" value="VEG_DENS" type="sum" domain="reach" />
+      <output name="23772703 VGDNSREACH" query="COMID=23772703" value="VGDNSREACH" type="sum" domain="reach" />
       <output name="23772703 VEG_HT_L (m)" query="COMID=23772703" value="VEG_HT_L" type="sum" domain="reach" />
       <output name="23772703 VEG_HT_R (m)" query="COMID=23772703" value="VEG_HT_R" type="sum" domain="reach" />
       <output name="23772703 VEGHTREACH (m)" query="COMID=23772703" value="VEGHTREACH" type="sum" domain="reach" />
@@ -366,7 +368,7 @@
       <output in_use="1" name="RAD_SW_IN W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN" type="sum" domain="reach" />
       <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23773373 McKenzie R" query="COMID=23773373" value="AREA_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="WIDTH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTHREACH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTHREACH" type="sum" domain="reach" />
       <output in_use="1" name="DEPTHMANNG m 23773373 McKenzie R" query="COMID=23773373" value="DEPTHMANNG" type="sum" domain="reach" />
       <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
@@ -389,7 +391,7 @@
       <output in_use="1" name="RAD_SW_IN W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN" type="sum" domain="reach" />
       <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23773373 McKenzie R" query="COMID=23773373" value="AREA_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="WIDTH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTHREACH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTHREACH" type="sum" domain="reach" />
       <output in_use="1" name="DEPTHMANNG m 23773373 McKenzie R" query="COMID=23773373" value="DEPTHMANNG" type="sum" domain="reach" />
       <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
@@ -410,7 +412,7 @@
       <output in_use="1" name="RAD_SW_IN W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN" type="sum" domain="reach" />
       <output in_use="1" name="Net radiation in W per m2 23773373 McKenzie R" query="COMID=23773373" value="RAD_SW_IN - RAD_LW_OUT" type="sum" domain="reach" />
       <output in_use="1" name="AREA_H2O m2 23773373 McKenzie R" query="COMID=23773373" value="AREA_H2O" type="sum" domain="reach" />
-      <output in_use="1" name="WIDTH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTH" type="sum" domain="reach" />
+      <output in_use="1" name="WIDTHREACH m 23773373 McKenzie R" query="COMID=23773373" value="WIDTHREACH" type="sum" domain="reach" />
       <output in_use="1" name="DEPTHMANNG m 23773373 McKenzie R" query="COMID=23773373" value="DEPTHMANNG" type="sum" domain="reach" />
       <output in_use="1" name="LENGTH m 23773373 McKenzie R" query="COMID=23773373" value="LENGTH" type="sum" domain="reach" />
       <output in_use="1" name="REACH_H2O m3 23773373 McKenzie R" query="COMID=23773373" value="REACH_H2O" type="sum" domain="reach" />
