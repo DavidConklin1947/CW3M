@@ -856,6 +856,7 @@ Reach::Reach(  )
 , m_IDUndxForReach(-1)
 , m_reachAddedVolumeWP(0.,0.)
 , m_addedDischarge_cms(0.)
+, m_topo(0,0,0,0,44.21228,-122.25528)
    { }
 
 
@@ -1112,6 +1113,7 @@ double TopoSetting::VegShade_pct(double elev_deg, double azimuth_deg, double flo
       double sin_BRS = sin(BRS_rad);
       double BS_m = RS_m * sin_BRS;
       shade_pct = (BS_m > reachWidth_m) ? 100. : 100. * BS_m / reachWidth_m;
+      ASSERT(!isnan(shade_pct));
    }
 
    return(shade_pct);
@@ -1324,10 +1326,10 @@ bool TopoSetting::IsTopoShaded(double solarElev_deg, double solarAzimuth_deg)
    ASSERT(0. <= solarAzimuth_deg && solarAzimuth_deg < 360.);
    double topo_elev_N_deg = (m_topoElevW_deg + m_topoElevE_deg) / 2.;
    double topo_elev_deg;
-   if (solarAzimuth_deg < 90.) topo_elev_deg = topo_elev_N_deg + (solarAzimuth_deg / 90.) * (m_topoElevE_deg - topo_elev_N_deg);
+   if (solarAzimuth_deg < 90.) topo_elev_deg = m_topoElevE_deg;
    else if (solarAzimuth_deg < 180.) topo_elev_deg = m_topoElevE_deg + ((solarAzimuth_deg - 90.) / 90.) * (m_topoElevS_deg - m_topoElevE_deg);
    else if (solarAzimuth_deg < 270.) topo_elev_deg = m_topoElevS_deg + ((solarAzimuth_deg - 180.) / 90.) * (m_topoElevW_deg - m_topoElevS_deg);
-   else topo_elev_deg = m_topoElevW_deg + ((solarAzimuth_deg - 270.) / 90.) * (topo_elev_N_deg - m_topoElevW_deg);
+   else topo_elev_deg = m_topoElevW_deg;
 
    bool return_val = topo_elev_deg >= solarElev_deg;
    return(return_val);
@@ -1369,8 +1371,10 @@ double FlowModel::GetReachShade_a_lator_W_m2(Reach* pReach, double SW_unshaded_W
 {
    double direction_deg = pReach->Att(DIRECTION);
    double width_m = pReach->Att(WIDTHREACH);
+   ASSERT(width_m > 0.);
    double veg_ht_m = pReach->Att(VEGHTREACH);
    double rad_sw_est_W_m2 = 0.;
+   ASSERT(pReach->m_topo.m_vegDensity >= 0.);
    double shade_frac = pReach->m_topo.ShadeFrac(m_flowContext.dayOfYear, &rad_sw_est_W_m2, direction_deg, width_m, veg_ht_m);
    m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachRAD_SW_EST, rad_sw_est_W_m2);
    double shade_coeff = 1. - shade_frac;
@@ -5396,7 +5400,7 @@ bool Wetland::QtoWetland(WaterParcel toWetlWP) // Returns true if wetland absorb
       double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
       double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
       wetness_mm += to_this_idu_mm;
-      gpFlowModel->PutAtt(idu_ndx, WETNESS, wetness_mm);
+      gpFlowModel->SetAtt(idu_ndx, WETNESS, wetness_mm);
 
       remaining_m3 -= to_this_idu_m3;
    } // end of loop through IDUs in this wetland
@@ -5416,9 +5420,6 @@ bool Wetland::QtoWetland(WaterParcel toWetlWP) // Returns true if wetland absorb
 
 bool Reach::CalcReachVegParamsIfNecessary()
 {
-   SYSDATE today = gpModel->m_flowContext.pEnvContext->m_simDate;
-   if (!today.month == 1 && today.day == 1) return(false);
-
    Scenario* pSimulationScenario = gpModel->m_flowContext.pEnvContext->pEnvModel->GetScenario();
    Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
 
@@ -5453,6 +5454,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
       double lai_r = -1; gpModel->m_pIDUlayer->GetData(bank_r_idu_ndx, gpModel->m_colLAI, lai_r);
       lai_reach = (lai_l + lai_r) / 2.;
       m_topo.m_vegDensity = FlowModel::VegDensity(lai_reach);
+      ASSERT(m_topo.m_vegDensity >= 0.);
       gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVGDNS_CALC, m_topo.m_vegDensity);
 
       double width_calc_m = Att(WIDTH_CALC);
@@ -5467,7 +5469,8 @@ bool Reach::CalcReachVegParamsIfNecessary()
    gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVGDNSREACH, m_topo.m_vegDensity);
 
    gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachWIDTHREACH, width_reach_m);
-   
+   ASSERT(width_reach_m > 0.);
+
    double direction_deg = 0.; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachDIRECTION, direction_deg);
    m_topo.m_vegElevEW_deg = m_topo.VegElevEW_deg(direction_deg, width_reach_m, veg_ht_m);
    m_topo.m_vegElevNS_deg = m_topo.VegElevNS_deg(direction_deg, width_reach_m, veg_ht_m);
@@ -5623,6 +5626,8 @@ bool FlowModel::ProcessShade_a_latorInputData(Shade_a_latorData* pSAL, FDataObj*
       ASSERT(width_m >= width_min_m);
       if (width_m < width_min_m) width_m = width_min_m;
       m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTHREACH, width_m);
+      ASSERT(width_m > 0.);
+
       pReach->m_topo.m_topoElevE_deg = topo_E_deg;
       pReach->m_topo.m_topoElevS_deg = topo_S_deg;
       pReach->m_topo.m_topoElevW_deg = topo_W_deg;
@@ -5820,7 +5825,9 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
 
    GlobalMethodManager::StartStep( &m_flowContext );  // Calls any global methods with ( m_timing & GMT_START_STEP ) == true
 
-   for (int reach_ndx = 0; reach_ndx < m_reachArray.GetSize(); reach_ndx++)
+   SYSDATE today = gpModel->m_flowContext.pEnvContext->m_simDate;
+   if (today.month == 1 && today.day == 1) 
+      for (int reach_ndx = 0; reach_ndx < m_reachArray.GetSize(); reach_ndx++)
    {
       Reach* pReach = m_reachArray[reach_ndx];
       pReach->CalcReachVegParamsIfNecessary();
@@ -7646,10 +7653,16 @@ double Reach::Att(int col)
 } // end of Reach::Att()
 
 
-void FlowModel::PutAtt(int IDUindex, int col, double attValue)
+void Reach::SetAtt(int col, double attValue)
+{
+   pLayer->SetDataU(this->m_polyIndex, col, attValue);
+} // end of Reach::SetAtt()
+
+
+void FlowModel::SetAtt(int IDUindex, int col, double attValue)
 {
    m_pIDUlayer->SetDataU(IDUindex, col, attValue);
-} // end of PutAtt()
+} // end of SetAtt()
 
 
 double FlowModel::Att(int IDUindex, int col)
@@ -7941,6 +7954,10 @@ bool FlowModel::InitReaches(void)
 
       double width_calc_m = width_x_length_accum_m2 / pReach->m_length;
       m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTH_CALC, width_calc_m);
+      double width_given_m = pReach->Att(WIDTHGIVEN);
+      double width_reach_m = (width_given_m > 0. ) ? width_given_m : width_calc_m;
+      pReach->SetAtt(WIDTHREACH, width_reach_m);
+      ASSERT(width_reach_m > 0.);
 
       } // end of loop through reaches
 
@@ -8198,6 +8215,8 @@ bool FlowModel::InitReaches(void)
          PopulateRIVER_KM(pRoot);
       }
    } // end of if (m_flowContext.pEnvContext->coldStartFlag)
+
+   m_pReachLayer->SetColDataU(m_colReachSAL_REACH, false);
 
    return true;
    } // end of InitReaches()

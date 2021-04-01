@@ -1000,6 +1000,7 @@ public:
 public:
    // reach-level parameters
    double Att(int col); 
+   void SetAtt(int col, double attValue);
    int m_wetlNdx; // index into gpFlowModel->m_wetlArray[]; not the same as WETL_ID; -1 if the reach isn't associated with a wetland
    TopoSetting m_topo;
    double m_reach_volume_m3;
@@ -1510,7 +1511,7 @@ public:
    double Att(int IDUindex, int col); // value of IDU attribute
    int AttInt(int IDUindex, int col); // value of IDU attribute
    float AttFloat(int IDUindex, int col); // value of IDU attribute
-   void PutAtt(int IDUindex, int col, double attValue);
+   void SetAtt(int IDUindex, int col, double attValue);
    static double VegDensity(double lai);
    Reach* GetReachFromCOMID(int comid);
    Reach *GetReachFromStreamIndex( int index ) { return (Reach*) m_reachTree.GetReachNodeFromPolyIndex( index ); }
