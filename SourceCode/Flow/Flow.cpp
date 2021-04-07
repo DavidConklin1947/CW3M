@@ -40,6 +40,8 @@ FlowModel* gpFlowModel = NULL;
 
 FILE* insolation_ofile;
 
+SYSDATE EvapTrans::m_dateEvapTransLastExecuted = SYSDATE(0, 0, 0);
+
 MTDOUBLE HRU::m_mvDepthMelt = 0;  // volume of water in snow
 MTDOUBLE HRU::m_mvDepthSWE_mm = 0;   // volume of ice in snow
 MTDOUBLE HRU::m_mvTopSoilH2O_mm = 0;

@@ -15,6 +15,7 @@
 #include <IDATAOBJ.H>
 #include <MapExprEngine.h>
 #include <map>
+#include <DATE.HPP>
 
 using namespace std;
 
@@ -453,6 +454,8 @@ protected:
    void CalculateTodaysReferenceET(FlowContext *pFlowContext, HRU *pHRU, unsigned short etMethod, float &referenceET, float sw_coef = 1.f, float lw_coef = 1.f);
 	void GetHruET(FlowContext *pFlowContext, HRU *pHRU, int hruIndex);
    //float CalcRelHumidity(float specHumid, float tMean, float elevation);
+
+   static SYSDATE m_dateEvapTransLastExecuted;
 };
 
 class DailyUrbanWaterDemand : public GlobalMethod

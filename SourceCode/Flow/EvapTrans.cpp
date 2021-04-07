@@ -159,96 +159,150 @@ EvapTrans::~EvapTrans()
 
 
 bool EvapTrans::Init( FlowContext *pFlowContext )
-   {
-   m_pIDUlayer = (MapLayer *)pFlowContext->pEnvContext->pMapLayer;
-   m_pHRUlayer = (MapLayer *)pFlowContext->pEnvContext->pHRUlayer;
+{
+   GlobalMethod::Init(pFlowContext); // compile query
 
-   // compile query
-   GlobalMethod::Init( pFlowContext );  
 
-   if ( m_method != GM_PENMAN_MONTIETH && m_method != GM_STANDING_H2O_EVAP )
-      {
-      gpFlow->CheckCol( pFlowContext->pEnvContext->pMapLayer, this->m_colPLANTDATE, "PLANTDATE", TYPE_INT, CC_AUTOADD );
-      gpFlow->CheckCol( pFlowContext->pEnvContext->pMapLayer, this->m_colEndGrowSeason, "HARVDATE", TYPE_INT, CC_AUTOADD );
+   if (m_dateEvapTransLastExecuted.year != 9999)
+   { // EvapTrans::Init() will be executed once for each <evap_trans> block in Flow.xml.
+      // Put stuff here which only needs to be executed the first time that EvapTrans::Init() is called.
 
-      int hruCount = pFlowContext->pFlowModel->GetHRUCount();
+      m_dateEvapTransLastExecuted = SYSDATE(1, 1, 9999);
+   } // end of if (m_dateEvapTransLastExecuted.year != 9999)
 
-      // Create and initialize the planting and harvest doy and cumulative gorwing degree days since planting lookup tables
-      m_phruCropStartGrowingSeasonArray = new IDataObj( hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
-      m_phruCropEndGrowingSeasonArray = new IDataObj( hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
-      m_phruCurrCGDDArray = new FDataObj( hruCount, max(0, m_cropCount), 0.0f );
+   { // We wouldn't have to do this more than once if we made all these m_... members static.
+      m_pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+      m_pHRUlayer = (MapLayer*)pFlowContext->pEnvContext->pHRUlayer;
+      m_flowContext = pFlowContext;
 
-      } // end of if ( m_method != GM_PENMAN_MONTIETH && m_method != GM_STANDING_H2O_EVAP )
-
-   // Evapotranspiration and Soil Moisture IDU attributes calculated 
-   gpFlow->CheckCol( pFlowContext->pEnvContext->pMapLayer, m_colDailyET, "ET_DAY", TYPE_FLOAT, CC_AUTOADD );
-   gpFlow->CheckCol( pFlowContext->pEnvContext->pMapLayer, m_colDailyMaxET, "MAX_ET_DAY", TYPE_FLOAT, CC_AUTOADD );
-   gpFlow->CheckCol( pFlowContext->pEnvContext->pMapLayer, m_colAnnAvgMaxET, "MAX_ET_YR", TYPE_FLOAT, CC_AUTOADD );
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colSM_DAY, "SM_DAY", TYPE_FLOAT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailySOILH2OEST, "SOILH2OEST", TYPE_FLOAT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyIRR_STATE, "IRR_STATE", TYPE_INT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyIRRRQST_D, "IRRRQST_D", TYPE_FLOAT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyIRRACRQ_D, "IRRACRQ_D", TYPE_FLOAT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyPRECIP, "PRECIP", TYPE_FLOAT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colIDUIndex, "IDU_ID", TYPE_INT, CC_MUST_EXIST);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colIrrigation, "IRRIGATION", TYPE_INT, CC_MUST_EXIST);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colF_THETA, "F_THETA", TYPE_FLOAT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colVPD, "VPD", TYPE_FLOAT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colVPD_SCALAR, "VPD_SCALAR", TYPE_FLOAT, CC_AUTOADD);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colLULC_A, "LULC_A", TYPE_INT, CC_MUST_EXIST);
-   gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colRAD_SW, "RAD_SW", TYPE_FLOAT, CC_AUTOADD);
-
-   m_pIDUlayer->CheckCol(m_colTMIN, "TMIN", TYPE_FLOAT, CC_AUTOADD);
-   m_pIDUlayer->CheckCol(m_colTMIN_GROW, "TMIN_GROW", TYPE_FLOAT, CC_AUTOADD);
-   m_pIDUlayer->CheckCol(m_colTMINGROAVG, "TMINGROAVG", TYPE_FLOAT, CC_AUTOADD);
-   m_pIDUlayer->CheckCol(m_colPRCP_GROW, "PRCP_GROW", TYPE_FLOAT, CC_AUTOADD);
-   m_pIDUlayer->CheckCol(m_colPRCPSPRING, "PRCPSPRING", TYPE_FLOAT, CC_AUTOADD);
-   m_pIDUlayer->CheckCol(m_colPRCPWINTER, "PRCPWINTER", TYPE_FLOAT, CC_AUTOADD);
-   m_pIDUlayer->CheckCol(m_colPRCP_JUN, "PRCP_JUN", TYPE_FLOAT, CC_AUTOADD);
-   m_pIDUlayer->CheckCol(m_colPRCP_JUL, "PRCP_JUL", TYPE_FLOAT, CC_AUTOADD);
-   m_pIDUlayer->CheckCol(m_colPRCP_AUG, "PRCP_AUG", TYPE_FLOAT, CC_AUTOADD);
-
-   m_pHRUlayer->CheckCol(m_colHruPV_HERE, "PV_HERE", TYPE_INT, CC_AUTOADD);
-
-   // IDU attributes needed for Penman-Monteith reference ET calculation
-   if ( m_method == GM_PENMAN_MONTIETH || m_method == GM_STANDING_H2O_EVAP)
-      {
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyET, "ET_DAY", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyMaxET, "MAX_ET_DAY", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colAnnAvgMaxET, "MAX_ET_YR", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colSM_DAY, "SM_DAY", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailySOILH2OEST, "SOILH2OEST", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyIRR_STATE, "IRR_STATE", TYPE_INT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyIRRRQST_D, "IRRRQST_D", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyIRRACRQ_D, "IRRACRQ_D", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colDailyPRECIP, "PRECIP", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colIDUIndex, "IDU_ID", TYPE_INT, CC_MUST_EXIST);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colIrrigation, "IRRIGATION", TYPE_INT, CC_MUST_EXIST);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colF_THETA, "F_THETA", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colVPD, "VPD", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colVPD_SCALAR, "VPD_SCALAR", TYPE_FLOAT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colLULC_A, "LULC_A", TYPE_INT, CC_MUST_EXIST);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colRAD_SW, "RAD_SW", TYPE_FLOAT, CC_AUTOADD);
       gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colLAI, "LAI", TYPE_FLOAT, CC_MUST_EXIST);
       gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colPVT, "PVT", TYPE_INT, CC_MUST_EXIST);
       gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colAgeClass, "AGECLASS", TYPE_INT, CC_MUST_EXIST);
-      }
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, this->m_colPLANTDATE, "PLANTDATE", TYPE_INT, CC_AUTOADD);
+      gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, this->m_colEndGrowSeason, "HARVDATE", TYPE_INT, CC_AUTOADD);
 
-   m_CO2effectMetrics.SetName("EVTR CO2 Effect");
-   m_CO2effectMetrics.SetSize(5, 0);
-   m_CO2effectMetrics.SetLabel(0, "Year");
-   m_CO2effectMetrics.SetLabel(1, "weatherYear");
-   m_CO2effectMetrics.SetLabel(2, "atm CO2 conc (ppm)");
-   m_CO2effectMetrics.SetLabel(3, "CO2_factor");
-   m_CO2effectMetrics.SetLabel(4, "effective bulk stomatal resistance (s per m)");
-   gpFlow->AddOutputVar("EVTR CO2 effect", &m_CO2effectMetrics, "EVTR CO2 effect");
+      m_pIDUlayer->CheckCol(m_colTMIN, "TMIN", TYPE_FLOAT, CC_AUTOADD);
+      m_pIDUlayer->CheckCol(m_colTMIN_GROW, "TMIN_GROW", TYPE_FLOAT, CC_AUTOADD);
+      m_pIDUlayer->CheckCol(m_colTMINGROAVG, "TMINGROAVG", TYPE_FLOAT, CC_AUTOADD);
+      m_pIDUlayer->CheckCol(m_colPRCP_GROW, "PRCP_GROW", TYPE_FLOAT, CC_AUTOADD);
+      m_pIDUlayer->CheckCol(m_colPRCPSPRING, "PRCPSPRING", TYPE_FLOAT, CC_AUTOADD);
+      m_pIDUlayer->CheckCol(m_colPRCPWINTER, "PRCPWINTER", TYPE_FLOAT, CC_AUTOADD);
+      m_pIDUlayer->CheckCol(m_colPRCP_JUN, "PRCP_JUN", TYPE_FLOAT, CC_AUTOADD);
+      m_pIDUlayer->CheckCol(m_colPRCP_JUL, "PRCP_JUL", TYPE_FLOAT, CC_AUTOADD);
+      m_pIDUlayer->CheckCol(m_colPRCP_AUG, "PRCP_AUG", TYPE_FLOAT, CC_AUTOADD);
+
+      m_pHRUlayer->CheckCol(m_colHruPV_HERE, "PV_HERE", TYPE_INT, CC_AUTOADD);
+   }
+
+   switch (m_method)
+   {
+      case GM_PENMAN_MONTIETH:
+      {
+         m_CO2effectMetrics.SetName("EVTR CO2 Effect");
+         m_CO2effectMetrics.SetSize(5, 0);
+         m_CO2effectMetrics.SetLabel(0, "Year");
+         m_CO2effectMetrics.SetLabel(1, "weatherYear");
+         m_CO2effectMetrics.SetLabel(2, "atm CO2 conc (ppm)");
+         m_CO2effectMetrics.SetLabel(3, "CO2_factor");
+         m_CO2effectMetrics.SetLabel(4, "effective bulk stomatal resistance (s per m)");
+         gpFlow->AddOutputVar("EVTR CO2 effect", &m_CO2effectMetrics, "EVTR CO2 effect");
+      }
+      break; // end of case GM_PENMAN_MONTIETH
+
+      case GM_FAO56:
+      {
+         // Create and initialize the planting and harvest doy and cumulative gorwing degree days since planting lookup tables
+         int hruCount = pFlowContext->pFlowModel->GetHRUCount();
+         m_phruCropStartGrowingSeasonArray = new IDataObj(hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
+         m_phruCropEndGrowingSeasonArray = new IDataObj(hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
+         m_phruCurrCGDDArray = new FDataObj(hruCount, max(0, m_cropCount), 0.0f);
+      }
+      break; // end of case GM_FAO56
+
+      case GM_STANDING_H2O_EVAP:
+         break; // end of case GM_STANDING_H2O_EVAP
+
+      default: ASSERT(0); 
+         break;
+   }
 
    return true;
-   }
+} // end of EvapTrans::Init()
 
 
 bool EvapTrans::InitRun( FlowContext *pFlowContext )
-   {
+{
    GlobalMethod::InitRun( pFlowContext );
 
+   // Note: At InitRun time, pEnvContext->currentYear is set to the calendar year before the first calendar year of the simulation.
+   if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
+   { // In each simulation run, EvapTrans::InitRun() will be executed once for each <evap_trans> block in Flow.xml.
+      // Put stuff here which only needs to be executed the first time that EvapTrans::InitRun() is called in a simulation run.
+
+      m_dateEvapTransLastExecuted = SYSDATE(1, 1, pFlowContext->pEnvContext->currentYear);
+   } // end of if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
+
+   switch (m_method)
+   {
+      case GM_PENMAN_MONTIETH:
+      {
+         m_CO2effectMetrics.ClearRows();
+      }
+      break; // end of case GM_PENMAN_MONTIETH
+
+      case GM_FAO56:
+      {
+         int hruCount = pFlowContext->pFlowModel->GetHRUCount();
+
+         // Create and initialize the planting and harvest doy and cumulative gorwing degree days since planting lookup tables
+         m_phruCropStartGrowingSeasonArray = new IDataObj(hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
+         m_phruCropEndGrowingSeasonArray = new IDataObj(hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
+         m_phruCurrCGDDArray = new FDataObj(hruCount, max(0, m_cropCount), 0.0f);
+      }
+      break; // end of case GM_FAO56
+
+      case GM_STANDING_H2O_EVAP:
+         break; // end of case GM_STANDING_H2O_EVAP
+
+      default: ASSERT(0);
+         break;
+   }
+
    // m_pDailyReferenceET->ClearRows();
-   m_CO2effectMetrics.ClearRows();
 
    //run dependent setup
    m_currMonth = -1;
-   m_flowContext = pFlowContext;
 
-   return true;
-   }
+   return(true);
+} // end of EvapTrans::InitRun()
 
 
 bool EvapTrans::StartYear( FlowContext *pFlowContext )
    {
-   GlobalMethod::StartYear( pFlowContext );  // this inits the m_hruQueryStatusArray to 0;
+   GlobalMethod::StartYear( pFlowContext );  
+
+   if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
+   { // In each simulation year, EvapTrans::StartYear() will be executed once for each <evap_trans> block in Flow.xml.
+      // Put stuff here which only needs to be executed the first time that EvapTrans::StartYear() is called in a simulation year.
+
+      m_dateEvapTransLastExecuted = SYSDATE(1, 1, pFlowContext->pEnvContext->currentYear);
+   } // end of if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
 
    FlowModel *pModel = pFlowContext->pFlowModel;
    MapLayer  *pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
@@ -261,17 +315,17 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
    {
       case GM_PENMAN_MONTIETH:
       {
-   for (int i = 0; i < iduCount; i++)
-   {
-      m_iduIrrRequestArray[i] = 0.0f;
-      m_iduAnnAvgMaxETArray[i] = 0.0f;
-      m_iduSeasonalAvgETArray[i] = 0.0f;
-      m_iduSeasonalAvgMaxETArray[i] = 0.0f;
-      if ( !pModel->m_estimateParameters )
-      {
-         gpFlow->UpdateIDU( pFlowContext->pEnvContext, i, m_colAnnAvgMaxET, m_iduAnnAvgMaxETArray[ i ], true );   // mm/year
-      }
-   } // end of loop thru IDUs
+         for (int i = 0; i < iduCount; i++)
+         {
+            m_iduIrrRequestArray[i] = 0.0f;
+            m_iduAnnAvgMaxETArray[i] = 0.0f;
+            m_iduSeasonalAvgETArray[i] = 0.0f;
+            m_iduSeasonalAvgMaxETArray[i] = 0.0f;
+            if ( !pModel->m_estimateParameters )
+            {
+               gpFlow->UpdateIDU( pFlowContext->pEnvContext, i, m_colAnnAvgMaxET, m_iduAnnAvgMaxETArray[ i ], true );   // mm/year
+            }
+         } // end of loop thru IDUs
       }
       { // For the Penman-Monteith method, calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
          float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
@@ -292,61 +346,58 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
 
       case GM_FAO56:
       {
-   FillLookupTables(pFlowContext);
-
-   // write planting dates to map
-   if ( m_pCropTable )
-      {
-      for ( int h = 0; h < pModel->GetHRUCount(); h++ )
+         ASSERT(m_pCropTable != NULL);
+         FillLookupTables(pFlowContext);
+    
+         // write planting dates to map
+         for ( int h = 0; h < pModel->GetHRUCount(); h++ )
          {
-         HRU *pHRU = pModel->GetHRU(h);
+            HRU *pHRU = pModel->GetHRU(h);
 
-         for ( int i = 0; i < (int)pHRU->m_polyIndexArray.GetSize(); i++ )
+            for ( int i = 0; i < (int)pHRU->m_polyIndexArray.GetSize(); i++ )
             {
-            int idu = pHRU->m_polyIndexArray[ i ];
+               int idu = pHRU->m_polyIndexArray[ i ];
 
-            int lulc = -1;
-            if ( pIDUlayer->GetData( idu, m_colLulc, lulc ) )
+               int lulc = -1;
+               if ( pIDUlayer->GetData( idu, m_colLulc, lulc ) )
                {
-               // have lulc for this IDU, find the corresponding row in the cc table
-               int row = m_pCropTable->Find( m_colCropTableLulc, VData( lulc ), 0 );
+                  // have lulc for this IDU, find the corresponding row in the cc table
+                  int row = m_pCropTable->Find( m_colCropTableLulc, VData( lulc ), 0 );
 
-               int startDate = GROWING_SEASON_HASNT_STARTED;
-               int harvestDate = GROWING_SEASON_HASNT_ENDED;
-               if ( row >= 0 )
+                  int startDate = GROWING_SEASON_HASNT_STARTED;
+                  int harvestDate = GROWING_SEASON_HASNT_ENDED;
+                  if ( row >= 0 )
                   {
-                  startDate = this->m_phruCropStartGrowingSeasonArray->Get( h, row );
-                  harvestDate = this->m_phruCropEndGrowingSeasonArray->Get( h, row );
+                     startDate = this->m_phruCropStartGrowingSeasonArray->Get( h, row );
+                     harvestDate = this->m_phruCropEndGrowingSeasonArray->Get( h, row );
                   }
 
-               if ( !pModel->m_estimateParameters )
+                  if ( !pModel->m_estimateParameters )
                   {
-                   gpFlow->UpdateIDU( pFlowContext->pEnvContext, idu, m_colPLANTDATE, startDate, true );
-                   gpFlow->UpdateIDU( pFlowContext->pEnvContext, idu, m_colEndGrowSeason, harvestDate, true );
+                      gpFlow->UpdateIDU( pFlowContext->pEnvContext, idu, m_colPLANTDATE, startDate, true );
+                      gpFlow->UpdateIDU( pFlowContext->pEnvContext, idu, m_colEndGrowSeason, harvestDate, true );
                   }
                }
-            }
-         }
-      }
-
+            } // end of loop thru IDUs in one HRU
+         } // end of loop thru HRUs
       }
       break; // end of case GM_FAO56
 
       case GM_STANDING_H2O_EVAP:
       { // For the Penman-Monteith method, calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
-      float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
-      float CO2min = 400.f; // parts per million
-      float CO2max = 800.f; // parts per million
-      m_atmCO2conc = CO2byYear(pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName());
-      m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
-      if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
-      else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
-         m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
+         float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
+         float CO2min = 400.f; // parts per million
+         float CO2max = 800.f; // parts per million
+         m_atmCO2conc = CO2byYear(pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName());
+         m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
+         if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
+         else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
+            m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
 
-      CString msg;
-      msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, m_effBulkStomatalResistance = %f",
-            pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
-      Report::LogMsg(msg);
+         CString msg;
+         msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, m_effBulkStomatalResistance = %f",
+               pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
+         Report::LogMsg(msg);
       }
       break; // end of case GM_STANDING_H2O_EVAP
 
@@ -354,62 +405,69 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
          break;
    } // end of switch (m_method)
 
-   return true;
-   } // end of StartYear()
+   return(true);
+} // end of EvapTrans::StartYear()
 
 
 bool EvapTrans::StartStep(FlowContext *pFlowContext)
 {
+   if (m_dateEvapTransLastExecuted.month != pFlowContext->pEnvContext->m_simDate.month || m_dateEvapTransLastExecuted.day != pFlowContext->pEnvContext->m_simDate.day)
+   { // In each simulation day, EvapTrans::StartStep() will be executed once for each <evap_trans> block in Flow.xml.
+      // Put stuff here which only needs to be executed the first time that EvapTrans::StartStep() is called in a simulation day.
+
+      // Zero out the ET_DAY IDU attribute.
+      int iduCount = (int)pFlowContext->pEnvContext->pMapLayer->GetRecordCount();
+      for (int i = 0; i < iduCount; i++) gpFlow->UpdateIDU(pFlowContext->pEnvContext, i, m_colDailyET, 0, false);
+
+      m_dateEvapTransLastExecuted.month = pFlowContext->pEnvContext->m_simDate.month;
+      m_dateEvapTransLastExecuted.day = pFlowContext->pEnvContext->m_simDate.day;
+   } // end of if (m_dateEvapTransLastExecuted.month != pFlowContext->pEnvContext->m_simDate.month || m_dateEvapTransLastExecuted.day != pFlowContext->pEnvContext->m_simDate.day)
+
    switch (m_method)
    {
       case GM_PENMAN_MONTIETH:
-      {
-   // Zero out the ET_DAY IDU attribute.
-   int iduCount = (int)pFlowContext->pEnvContext->pMapLayer->GetRecordCount();
-   for (int i = 0; i < iduCount; i++) gpFlow->UpdateIDU(pFlowContext->pEnvContext, i, m_colDailyET, 0, false);
-      }
       break; // end of case GM_PENMAN_MONTIETH
 
       case GM_FAO56:
-   {
+      {
          ASSERT(m_pCropTable != NULL);
          // populate the Crop Table with begining of step values:
-      int hruCount = pFlowContext->pFlowModel->GetHRUCount();
-      int doy = pFlowContext->dayOfYear;
+         int hruCount = pFlowContext->pFlowModel->GetHRUCount();
+         int doy = pFlowContext->dayOfYear;
 
-      // iterate through HRUs, setting values for each hru X crop for the cummulative degree
-      // days since planted (m_phruCurrCGDDArray)
-      for ( int hruIndex = 0; hruIndex < hruCount; hruIndex++ )
-      {
-         HRU *pHRU = pFlowContext->pFlowModel->GetHRU(hruIndex);
-
-         // iterate through crops, filling cGDD array with the cumulative growing degree days since planted
-         for ( int row = 0; row < m_cropCount; row++ )
+         // iterate through HRUs, setting values for each hru X crop for the cummulative degree
+         // days since planted (m_phruCurrCGDDArray)
+         for ( int hruIndex = 0; hruIndex < hruCount; hruIndex++ )
          {
-            float baseTemp = m_pCropTable->GetAsFloat( this->m_gddBaseTempCol, row );
-            int gddEquationType = m_pCropTable->GetAsInt( this->m_gddEquationTypeCol, row );
-            int useGDD = m_pCropTable->GetAsInt( this->m_useGDDCol, row );
+            HRU *pHRU = pFlowContext->pFlowModel->GetHRU(hruIndex);
 
-            bool isCorn = ( gddEquationType == 1 ) ? false : true;
-            bool isGDD = ( useGDD == 1 ) ? true : false;
-
-            // if doy is within growing season
-            int plantingDoy = m_phruCropStartGrowingSeasonArray->Get( hruIndex, row );
-            int harvestDoy = m_phruCropEndGrowingSeasonArray->Get( hruIndex, row );
-
-            if ( doy >= plantingDoy && doy <= harvestDoy )
+            // iterate through crops, filling cGDD array with the cumulative growing degree days since planted
+            for ( int row = 0; row < m_cropCount; row++ )
             {
-               if (isGDD)
+               float baseTemp = m_pCropTable->GetAsFloat( this->m_gddBaseTempCol, row );
+               int gddEquationType = m_pCropTable->GetAsInt( this->m_gddEquationTypeCol, row );
+               int useGDD = m_pCropTable->GetAsInt( this->m_useGDDCol, row );
+
+               bool isCorn = ( gddEquationType == 1 ) ? false : true;
+               bool isGDD = ( useGDD == 1 ) ? true : false;
+
+               // if doy is within growing season
+               int plantingDoy = m_phruCropStartGrowingSeasonArray->Get( hruIndex, row );
+               int harvestDoy = m_phruCropEndGrowingSeasonArray->Get( hruIndex, row );
+
+               if ( doy >= plantingDoy && doy <= harvestDoy )
                {
-                  float cGDD = m_phruCurrCGDDArray->Get( hruIndex, row );
-                  CalculateCGDD( pFlowContext, pHRU, baseTemp, doy, isCorn, cGDD );
-                  m_phruCurrCGDDArray->Set( hruIndex, row, cGDD );
-               }
-               else m_phruCurrCGDDArray->Set( hruIndex, row, -1 );
-            }  // end doy in growing season
-         }  // end row 
-      } // end hru 
-   } // end m_pCropTable
+                  if (isGDD)
+                  {
+                     float cGDD = m_phruCurrCGDDArray->Get( hruIndex, row );
+                     CalculateCGDD( pFlowContext, pHRU, baseTemp, doy, isCorn, cGDD );
+                     m_phruCurrCGDDArray->Set( hruIndex, row, cGDD );
+                  }
+                  else m_phruCurrCGDDArray->Set( hruIndex, row, -1 );
+               }  // end doy in growing season
+            }  // end row 
+         } // end hru 
+      } 
       break; // end of case GM_FAO56
 
       case GM_STANDING_H2O_EVAP:
@@ -424,12 +482,16 @@ bool EvapTrans::StartStep(FlowContext *pFlowContext)
 
 
 bool EvapTrans::Step( FlowContext *pFlowContext )
-   {
+{
    if ( GlobalMethod::Step( pFlowContext ) == true )
       return true;
 
    if ( pFlowContext == NULL )
       return false;
+
+   // In each simulation day, EvapTrans::Step() will be executed once for each <evap_trans> block in Flow.xml.
+   // If there were stuff which should only be executed the first time Step() is called in a simulation day,
+   // we would have to add a flag to keep track of whether or not Step() had been called in the given simulation day.
 
    int hruCount = pFlowContext->pFlowModel->GetHRUCount();
 
@@ -438,17 +500,11 @@ bool EvapTrans::Step( FlowContext *pFlowContext )
    //  int idusProcessed = 0;
    for ( int h = 0; h < hruCount; h++ )
       {
-      //		float aet = 0.0f;
-      //		float maxET = 0.0f;
-      float cgdd0 = 0.0f;
-
       HRU *pHRU = pFlowContext->pFlowModel->GetHRU( h );
       int doy = pFlowContext->dayOfYear;
 
       if ( DoesHRUPassQuery( h ) )
          {
-         // TODO: move this to Flow -- only works for one instance of EvapTrans
-         CalculateCGDD( pFlowContext, pHRU, 0, doy, 0, cgdd0 );
          GetHruET( pFlowContext, pHRU, h );                                      
          }
       }
@@ -459,7 +515,7 @@ bool EvapTrans::Step( FlowContext *pFlowContext )
    //msg.Format( "EvapTrans:Run() '%s' processed %i IDUs", this->m_name, idusProcessed );
    //Report::LogMsg( msg );
    return TRUE;
-   }
+} // end of EvapTrans::Step()
 
 
 bool EvapTrans::EndStep( FlowContext *pFlowContext )
