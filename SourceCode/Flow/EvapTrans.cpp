@@ -166,7 +166,7 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
    // compile query
    GlobalMethod::Init( pFlowContext );  
 
-   if ( m_method != GM_PENMAN_MONTIETH )
+   if ( m_method != GM_PENMAN_MONTIETH && m_method != GM_STANDING_H2O_EVAP )
       {
       gpFlow->CheckCol( pFlowContext->pEnvContext->pMapLayer, this->m_colPLANTDATE, "PLANTDATE", TYPE_INT, CC_AUTOADD );
       gpFlow->CheckCol( pFlowContext->pEnvContext->pMapLayer, this->m_colEndGrowSeason, "HARVDATE", TYPE_INT, CC_AUTOADD );
@@ -178,7 +178,7 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
       m_phruCropEndGrowingSeasonArray = new IDataObj( hruCount, max(0, m_cropCount), CROP_NOT_IN_HRU);
       m_phruCurrCGDDArray = new FDataObj( hruCount, max(0, m_cropCount), 0.0f );
 
-      } // end of if ( m_method != GM_PENMAN_MONTIETH )
+      } // end of if ( m_method != GM_PENMAN_MONTIETH && m_method != GM_STANDING_H2O_EVAP )
 
    // Evapotranspiration and Soil Moisture IDU attributes calculated 
    gpFlow->CheckCol( pFlowContext->pEnvContext->pMapLayer, m_colDailyET, "ET_DAY", TYPE_FLOAT, CC_AUTOADD );
@@ -211,7 +211,7 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
    m_pHRUlayer->CheckCol(m_colHruPV_HERE, "PV_HERE", TYPE_INT, CC_AUTOADD);
 
    // IDU attributes needed for Penman-Monteith reference ET calculation
-   if ( m_method == GM_PENMAN_MONTIETH )
+   if ( m_method == GM_PENMAN_MONTIETH || m_method == GM_STANDING_H2O_EVAP)
       {
       gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colLAI, "LAI", TYPE_FLOAT, CC_MUST_EXIST);
       gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, m_colPVT, "PVT", TYPE_INT, CC_MUST_EXIST);
@@ -254,7 +254,13 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
    MapLayer  *pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
 
    int iduCount = (int)pFlowContext->pEnvContext->pMapLayer->GetRecordCount();
+   m_flowContext = pFlowContext;
+   m_runCount = 0;
 
+   switch (m_method)
+   {
+      case GM_PENMAN_MONTIETH:
+      {
    for (int i = 0; i < iduCount; i++)
    {
       m_iduIrrRequestArray[i] = 0.0f;
@@ -266,13 +272,26 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
          gpFlow->UpdateIDU( pFlowContext->pEnvContext, i, m_colAnnAvgMaxET, m_iduAnnAvgMaxETArray[ i ], true );   // mm/year
       }
    } // end of loop thru IDUs
+      }
+      { // For the Penman-Monteith method, calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
+         float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
+         float CO2min = 400.f; // parts per million
+         float CO2max = 800.f; // parts per million
+         m_atmCO2conc = CO2byYear(pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName());
+         m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
+         if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
+         else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
+         m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
 
-   //run dependent setup
+         CString msg;
+         msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, m_effBulkStomatalResistance = %f",
+            pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
+         Report::LogMsg(msg);
+      }
+      break; // end of case GM_PENMAN_MONTIETH
 
-   m_flowContext = pFlowContext;
-
-   m_runCount = 0;
-
+      case GM_FAO56:
+      {
    FillLookupTables(pFlowContext);
 
    // write planting dates to map
@@ -310,7 +329,10 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
          }
       }
 
-   if (this->GetMethod() == GM_PENMAN_MONTIETH)
+      }
+      break; // end of case GM_FAO56
+
+      case GM_STANDING_H2O_EVAP:
       { // For the Penman-Monteith method, calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
       float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
       float CO2min = 400.f; // parts per million
@@ -319,13 +341,18 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
       m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
       if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
       else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
-      m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1. + m_CO2_scalar * CO2_factor));
+         m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
 
       CString msg;
       msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, m_effBulkStomatalResistance = %f",
-         pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
+            pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
       Report::LogMsg(msg);
       }
+      break; // end of case GM_STANDING_H2O_EVAP
+
+      default: ASSERT(0);
+         break;
+   } // end of switch (m_method)
 
    return true;
    } // end of StartYear()
@@ -333,13 +360,20 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
 
 bool EvapTrans::StartStep(FlowContext *pFlowContext)
 {
+   switch (m_method)
+   {
+      case GM_PENMAN_MONTIETH:
+      {
    // Zero out the ET_DAY IDU attribute.
    int iduCount = (int)pFlowContext->pEnvContext->pMapLayer->GetRecordCount();
    for (int i = 0; i < iduCount; i++) gpFlow->UpdateIDU(pFlowContext->pEnvContext, i, m_colDailyET, 0, false);
+      }
+      break; // end of case GM_PENMAN_MONTIETH
 
-   // populate the Crop Table with begining of step values:
-   if ( m_pCropTable )
+      case GM_FAO56:
    {
+         ASSERT(m_pCropTable != NULL);
+         // populate the Crop Table with begining of step values:
       int hruCount = pFlowContext->pFlowModel->GetHRUCount();
       int doy = pFlowContext->dayOfYear;
 
@@ -376,6 +410,14 @@ bool EvapTrans::StartStep(FlowContext *pFlowContext)
          }  // end row 
       } // end hru 
    } // end m_pCropTable
+      break; // end of case GM_FAO56
+
+      case GM_STANDING_H2O_EVAP:
+         break;
+
+      default: ASSERT(0);
+         break;
+   } // end of switch(m_method)
 
    return true;
 } // end of EvapTrans::StartStep(FlowContext *pFlowContext)
@@ -496,7 +538,7 @@ bool EvapTrans::SetMethod( GM_METHOD method )
       case GM_FAO56:               m_ETEq.SetMode( ETEquation::FAO56 );       break;
       case GM_HARGREAVES:          m_ETEq.SetMode( ETEquation::HARGREAVES );  break;
       case GM_PENMAN_MONTIETH:     m_ETEq.SetMode( ETEquation::PENN_MONT );   break;
-
+      case GM_STANDING_H2O_EVAP:          m_ETEq.SetMode(ETEquation::STANDING_H2O_EVAP); break;
       default:
          return false;
       }
