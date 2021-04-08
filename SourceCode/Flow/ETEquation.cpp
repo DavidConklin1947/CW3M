@@ -9,6 +9,7 @@
 #include <UNITCONV.h>
 #include "Flow.h"
 #include "AlgLib\AlgLib.h"
+#include <ScienceFcns.h>
 
 #define MJPERHR_PER_W 0.0036              // Watts -> MegaJoules per hour
 #define MJPERD_PER_W  0.0864              // Watts/m^2 -> MegaJoules/m^2*day
@@ -916,8 +917,12 @@ float ETEquation::Fao56()
       ASSERT(m_pEvapTrans->m_pQuery != NULL);
       if (m_pEvapTrans->m_pQuery == NULL) return(0);
 
+      // Slope of Saturation VaporPressure-Temperature Curve: kPa/deg C
+      double slopeDelta = 4098.0 * (0.6108 * exp((17.27 * m_dailyMeanTemperature) / (m_dailyMeanTemperature + 237.3))) / pow(m_dailyMeanTemperature + 237.3, 2.0);
+
       int count = (int)pHRU->m_polyIndexArray.GetSize();
       double evap_x_area_accum = 0., area_accum = 0.;
+
       for (int i = 0; i < count; i++)
       {
          int idu = pHRU->m_polyIndexArray[i];
@@ -928,35 +933,127 @@ float ETEquation::Fao56()
          double idu_area_m2 = gpFlowModel->Att(idu, AREA);
          area_accum += idu_area_m2;
          float lai = gpFlowModel->AttFloat(idu, LAI);
-         double evap_mm = 0, vpd = 0.;
+         double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
+//         double netRadiation = net_SW_W_m2 - netLongWaveRad;
+         double evap_m3 = 0., evap_mm = 0, vpd = 0.;
+         double ea = 0.;
+         float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
+         double rh_pct = 100 * CalculateRelHumidity((float)m_specificHumidity, (float)m_dailyMeanTemperature, (float)m_dailyMaxTemperature, elev_mean_m, ea, vpd);
 
          // Is there standing water?
          double wetness_mm = gpFlowModel->Att(idu, WETNESS);
-         ASSERT(wetness_mm > 0);
-         
-         // Calculate evaporation from standing water.
-         double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
-         WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
-         float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
-         double ea = 0.;
-         double rh_pct = 100 * CalculateRelHumidity((float)m_specificHumidity, (float)m_dailyMeanTemperature, (float)m_dailyMaxTemperature, elev_mean_m, ea, vpd);
-         double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gpFlowModel->m_flowContext.dayOfYear);
-         double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
-         double evap_m3 = 0., evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
-         WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,
-            m_dailyMeanTemperature, m_dailyMeanTemperature, 1., cloudiness_frac, m_windSpeed, m_specificHumidity, rh_pct,
-            evap_m3, evap_kJ, SW_kJ, LW_kJ);
-         evap_mm = (evap_m3 / idu_area_m2) * 1000;
+         if (wetness_mm > 0)
+         { // Calculate evaporation from standing water.
+            double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
+            WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
+            double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gpFlowModel->m_flowContext.dayOfYear);
+            double evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
+            WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,
+               m_dailyMeanTemperature, m_dailyMeanTemperature, 1., cloudiness_frac, m_windSpeed, m_specificHumidity, rh_pct,
+               evap_m3, evap_kJ, SW_kJ, LW_kJ);
+            evap_mm = (evap_m3 / idu_area_m2) * 1000;
+         } // end of if (wetness_mm > 0) standing water
+         else
+         { // No standing water --> calculate ET using Penman-Monteith equation
+            evap_mm = PenmanMonteith(idu, rh_pct, lai);
+         } // end of if (wetness_mm > 0) else ... no standing water
+
          evap_x_area_accum += evap_mm * idu_area_m2;
 
          GlobalMethod::m_iduIrrRequestArray[idu] += evap_mm;
          GlobalMethod::m_iduVPDarray[idu] = (float)vpd;
-
       } // end of loop through IDUs in this HRU
 
       double hru_evap_mm = evap_x_area_accum / area_accum;
       return(hru_evap_mm);
    } // end of WetlandET()
+
+
+double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
+{
+   const static double sigma = 4.901E-9;                                               // Stefan_Boltzmann : MJ K^-4 m^-2 d^-1     
+   const static double Gsc = 4.92;                                                     // Solar Constant : MJ/(h m^2)   
+   const static double albedo = 0.15;                                                  // Albedo (canopy reflection coefficient) : dimensionless
+
+   double elev_mean_m = gpFlowModel->Att(iduNdx, ELEV_MEAN);
+   double P = 101.3 * pow(((293.0 - 0.0065 * elev_mean_m) / 293.0), 5.26); // Atmospheric Pressure : kPa
+   double gamma = 0.000665 * P;                                                        // Psychrometic Constant : kPa/deg C
+   double cp = 1.006E-3;                                                              // specific heat of dry air : MJ/kg C
+   double temp_C = gpFlowModel->Att(iduNdx, TEMP);            
+   double lambda = 2.501 - 2.361E-3 * temp_C; // Latent Heat of Vaporization; MJ/kg
+   double slopeDelta = 4098.0 * (0.6108 * exp((17.27 * temp_C) / (temp_C + 237.3))) / pow(temp_C + 237.3, 2.0); // Slope of Saturation VaporPressure-Temperature Curve: kPa/deg C
+
+   // Actual Water Vapor Pressure : kPa
+   double ea = 0.0, vpd = 0.0;
+   double sphumidity_kg_kg = gpFlowModel->Att(iduNdx, SPHUMIDITY);
+   double tmax_C = gpFlowModel->Att(iduNdx, TMAX);
+   CalculateRelHumidity(sphumidity_kg_kg, temp_C, tmax_C, elev_mean_m, ea, vpd);
+
+//x   double virtualT = (273.0 + m_dailyMeanTemperature) / (1.0 - 0.378 * ea / P);
+   double rho = (float)1000.0 * P / (287.058 * (273.0 + temp_C));      // density of air : C (kg/m3) Shuttleworth 4.2.4. 
+
+   double rad_sw_W_m2 = gpFlowModel->Att(iduNdx, RAD_SW);
+   double solarRadiation = (double)(rad_sw_W_m2 * MJPERD_PER_W);			// incoming radiation MJ/(m^2 d)	           
+   double netShortWaveRad = (1.0 - albedo) * solarRadiation; // Net Short-Wave Radiation : MJ/(m^2 d)
+ 
+   double phi = (PI / 180.0) * (double)m_stationLatitude; // latitude : radians
+   double J = m_doy + 1;
+
+   
+   double radDelta = 0.409 * sin((2.0 * PI * J) / 365.0 - 1.39);
+   double declination = 180 / PI * radDelta; // Solar Declination : radians          
+   double omegas = acos(-1.0 * tan(phi) * tan(radDelta)); // Sunset Hour angle         
+   double dr = 1.0 + 0.033 * cos(J * (2.0 * PI) / 365.0); // inverse relative distance factor for earth-sun : dimensionless
+   double Ra = (24.0 / PI) * Gsc * dr * (omegas * sin(phi) * sin(radDelta) + cos(phi) * cos(radDelta) * sin(omegas));
+   double relativeSolarRad = solarRadiation / ((0.75 + 2.0E-5 * m_stationElevation) * Ra);
+   if (relativeSolarRad < 0.3) relativeSolarRad = 0.3;
+   else if (relativeSolarRad > 1.0) relativeSolarRad = 1.0;
+   else if (isNan<double>(relativeSolarRad)) relativeSolarRad = 1.0;
+
+   double fcd = 1.35 * relativeSolarRad - 0.35; //cloudiness function
+
+   double tmin_C = gpFlowModel->Att(iduNdx, TMIN);
+   double tMinKelvin = ScienceFcns::degC_to_degK(tmin_C);
+   double tMaxKelvin = ScienceFcns::degC_to_degK(tmax_C);
+   double netLongWaveRad = sigma * fcd * (0.34 - 0.14 * sqrt(ea)) * ((pow(tMinKelvin, 4.0) + pow(tMaxKelvin, 4.0)) / 2.0);
+
+   double netRadiation = netShortWaveRad - netLongWaveRad; //Net Radiation; MJ/(m^2 d)
+
+   double G = 0.0; //Soil Heat Flux Density : MJ/(d m^2)
+
+   float height = 10.f;
+   int lulc_a = gpFlowModel->Att(iduNdx, LULC_A); // 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLULC_A, lulc_a);
+   if (lulc_a == LULCA_FOREST)
+   {
+      int pvt = gpFlowModel->Att(iduNdx, PVT);
+      if (pvt > 0) height = gpFlowModel->AttFloat(iduNdx, TREE_HT);
+   }
+
+   lai /= 2;     // Active leaf area ???
+   if (lai < 0.1f) lai = 0.1f;
+   float rs = m_pEvapTrans->m_effBulkStomatalResistance / lai;  // : s/m.  This is a standard leaf resistance for forest canopies (Shuttleworth and Wallace, 1985).
+
+   //Aerodynamic Resistance
+   if (alglib::fp_eq(height, 0.0)) height = 0.1f;
+   float d = 2.0f / 3.0f * height;                    // 0 plane displacement height
+   float zom = 0.123f * height;                       // roughness length governing momentum transfer
+   float zoh = 0.0123f * height;                      // roughness length governing transfer of head and vapor
+   float zm = height + 2;                             // height of wind measurement
+   float zh = height + 2;                             // height of humidity measurement
+   float ra = 1.0f;
+   double windspeed_m_s = gpFlowModel->Att(iduNdx, WINDSPEED);
+   if (windspeed_m_s > 0 && zm > d) ra = (float)(log((zm - d) / zom) * log((zh - d) / zoh) / 0.41 * 0.41 * windspeed_m_s);
+   else ra = 1.0f;
+
+   //P-M Evapotranspiration; mm/day
+   double numerator = slopeDelta * (netRadiation - G) + (rho * cp * vpd / ra) * SEC_PER_DAY;
+   double denominator = 2453.0 * (slopeDelta + gamma * (1.0 + rs / ra));
+   double ETsz = (numerator / denominator) * MM_PER_M;
+   double et_mm = (float)ETsz;
+   if (et_mm < 0.0f) et_mm = 0.0f;
+ 
+   return(et_mm);
+} // end of PenmanMonteith(idu, ...)
 
 
    float ETEquation::KimbPenn()

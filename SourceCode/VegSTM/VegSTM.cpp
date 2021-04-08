@@ -41,7 +41,7 @@ VEGTRANSFILE VegSTM::m_vegtransfile;
 
 INITIALIZER VegSTM::m_initializer;
 
-PVT VegSTM::m_dynamic_update;
+PVTstruct VegSTM::m_dynamic_update;
 
 RandUniform   VegSTM::m_rn;
 

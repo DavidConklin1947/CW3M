@@ -203,7 +203,7 @@
       </layers>
     </evap_trans>
 
- <evap_trans name="WetlandET" method="StandingWaterEvaporation" use="1"
+ <evap_trans name="WetlandET" method="WetlandET" use="1"
  query="LULC_A=62 {Wetlands}"
  lulc_col="LULC_B"
  soil_col="HBVCALIB"

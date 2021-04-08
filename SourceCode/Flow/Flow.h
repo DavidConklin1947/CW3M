@@ -83,10 +83,18 @@ using namespace std;
 #define DIRECTION gpFlowModel->m_colReachDIRECTION
 #define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
 #define LAI gpFlowModel->m_colLAI
+#define LULC_A gpFlowModel->m_colLulcA
 #define Q_CAP gpFlowModel->m_colReachQ_CAP
 #define Q2WETL gpFlowModel->m_colReachQ2WETL
+#define PVT gpFlowModel->m_colPVT
+#define RAD_SW gpFlowModel->m_colRAD_SW
 #define REACH_H2O gpFlowModel->m_colReachREACH_H2O
+#define SPHUMIDITY gpFlowModel->m_colSPHUMIDITY
+#define TEMP gpFlowModel->m_colTEMP
 #define TEMP_H2O gpFlowModel->m_colReachTEMP_H2O
+#define TMAX gpFlowModel->m_colTMAX
+#define TMIN gpFlowModel->m_colTMIN
+#define TREE_HT gpFlowModel->m_colTREE_HT
 #define VEGHTREACH gpFlowModel->m_colReachVEGHTREACH
 #define WETL_CAP gpFlowModel->m_colWETL_CAP
 #define WETL_ID gpFlowModel->m_colWETL_ID
@@ -95,6 +103,7 @@ using namespace std;
 #define WIDTH_MIN gpFlowModel->m_colReachWIDTH_MIN
 #define WIDTHGIVEN gpFlowModel->m_colReachWIDTHGIVEN
 #define WIDTHREACH gpFlowModel->m_colReachWIDTHREACH
+#define WINDSPEED gpFlowModel->m_colWINDSPEED
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *

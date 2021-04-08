@@ -431,7 +431,7 @@ struct INITIALIZER
    int initTSD;
    };
 
-struct PVT
+struct PVTstruct
 	{
 	int dynamic_update;
 	};
@@ -478,7 +478,7 @@ class VegSTM : public EnvAutoProcess
      static PtrArray< OUTPUT > m_outputArray;	 
 	  static VEGTRANSFILE m_vegtransfile;
      static INITIALIZER m_initializer;
-	  static PVT m_dynamic_update;      
+	  static PVTstruct m_dynamic_update;      
 	  static RandUniform   m_rn;
      static bool m_staticsInitialized;
 

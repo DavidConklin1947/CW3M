@@ -297,52 +297,50 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
    {
    GlobalMethod::StartYear( pFlowContext );  
 
-   if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
-   { // In each simulation year, EvapTrans::StartYear() will be executed once for each <evap_trans> block in Flow.xml.
-      // Put stuff here which only needs to be executed the first time that EvapTrans::StartYear() is called in a simulation year.
-
-      m_dateEvapTransLastExecuted = SYSDATE(1, 1, pFlowContext->pEnvContext->currentYear);
-   } // end of if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
-
-   FlowModel *pModel = pFlowContext->pFlowModel;
-   MapLayer  *pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+   FlowModel* pModel = pFlowContext->pFlowModel;
+   MapLayer* pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
 
    int iduCount = (int)pFlowContext->pEnvContext->pMapLayer->GetRecordCount();
    m_flowContext = pFlowContext;
    m_runCount = 0;
 
+   if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
+   { // In each simulation year, EvapTrans::StartYear() will be executed once for each <evap_trans> block in Flow.xml.
+      // Put stuff here which only needs to be executed the first time that EvapTrans::StartYear() is called in a simulation year.
+      for (int i = 0; i < iduCount; i++)
+      {
+         m_iduIrrRequestArray[i] = 0.0f;
+         m_iduAnnAvgMaxETArray[i] = 0.0f;
+         m_iduSeasonalAvgETArray[i] = 0.0f;
+         m_iduSeasonalAvgMaxETArray[i] = 0.0f;
+         if (!pModel->m_estimateParameters)
+         {
+            gpFlow->UpdateIDU(pFlowContext->pEnvContext, i, m_colAnnAvgMaxET, m_iduAnnAvgMaxETArray[i], true);   // mm/year
+         }
+      } // end of loop thru IDUs
+
+      // Calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
+      float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
+      float CO2min = 400.f; // parts per million
+      float CO2max = 800.f; // parts per million
+      m_atmCO2conc = CO2byYear(pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName());
+      m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
+      if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
+      else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
+      m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
+
+      CString msg;
+      msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, m_effBulkStomatalResistance = %f",
+         pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
+      Report::LogMsg(msg);
+
+      m_dateEvapTransLastExecuted = SYSDATE(1, 1, pFlowContext->pEnvContext->currentYear);
+   } // end of if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
+
    switch (m_method)
    {
       case GM_PENMAN_MONTEITH:
-      {
-         for (int i = 0; i < iduCount; i++)
-         {
-            m_iduIrrRequestArray[i] = 0.0f;
-            m_iduAnnAvgMaxETArray[i] = 0.0f;
-            m_iduSeasonalAvgETArray[i] = 0.0f;
-            m_iduSeasonalAvgMaxETArray[i] = 0.0f;
-            if ( !pModel->m_estimateParameters )
-            {
-               gpFlow->UpdateIDU( pFlowContext->pEnvContext, i, m_colAnnAvgMaxET, m_iduAnnAvgMaxETArray[ i ], true );   // mm/year
-            }
-         } // end of loop thru IDUs
-      }
-      { // For the Penman-Monteith method, calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
-         float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
-         float CO2min = 400.f; // parts per million
-         float CO2max = 800.f; // parts per million
-         m_atmCO2conc = CO2byYear(pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName());
-         m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
-         if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
-         else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
-         m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
-
-         CString msg;
-         msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, m_effBulkStomatalResistance = %f",
-            pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
-         Report::LogMsg(msg);
-      }
-      break; // end of case GM_PENMAN_MONTEITH
+         break; // end of case GM_PENMAN_MONTEITH
 
       case GM_FAO56:
       {
@@ -384,22 +382,7 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
       break; // end of case GM_FAO56
 
       case GM_WETLAND_ET:
-      { // For the Penman-Monteith method, calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
-         float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
-         float CO2min = 400.f; // parts per million
-         float CO2max = 800.f; // parts per million
-         m_atmCO2conc = CO2byYear(pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName());
-         m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
-         if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
-         else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
-            m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
-
-         CString msg;
-         msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, m_effBulkStomatalResistance = %f",
-               pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
-         Report::LogMsg(msg);
-      }
-      break; // end of case GM_WETLAND_ET
+         break; // end of case GM_WETLAND_ET
 
       default: ASSERT(0);
          break;
@@ -981,6 +964,7 @@ void EvapTrans::CalculateTodaysReferenceET( FlowContext *pFlowContext, HRU *pHRU
 
    switch (etMethod)
       {
+      case ETEquation::WETLAND_ET:
       case ETEquation::PENMAN_MONTEITH:
          {
          m_ETEq.SetDailyMinTemperature(tMin);                             //from IDU/HRU
@@ -1660,8 +1644,15 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
             }
 
          default:
-            pEvapTrans->SetMethod( GM_NONE );
-         }
+            {
+               pEvapTrans->SetMethod(GM_NONE);
+            
+               CString msg; msg.Format("EvapTrans::LoadXml() Unrecognized method %s in <evap_trans> %s block.",
+                  method, name);
+               Report::ErrorMsg(msg);
+               return(false);
+            }
+      }
       }
 
    if ( pEvapTrans->m_method != GM_PENMAN_MONTEITH && pEvapTrans->m_method != GM_WETLAND_ET) 

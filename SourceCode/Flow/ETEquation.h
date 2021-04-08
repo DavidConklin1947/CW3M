@@ -206,4 +206,5 @@ class ETEquation
 	  float Hargreaves();                              // Hargreaves equation with previously supplied data, if possible; return ET demand in mm/day
 	  float KimbPenn();                                // Kimberly-Pennman equation with previously supplied data, if possible; return ET demand in mm/day or -1 if prequisite values were not provided
      float WetlandET(HRU* pHRU);
+     double PenmanMonteith(int iduNdx, double rh_pct, float lai);
    };
