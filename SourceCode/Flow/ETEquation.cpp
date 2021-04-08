@@ -75,8 +75,8 @@ float ETEquation::Run( unsigned short mode, HRU *pHRU )
       result = Fao56();
       break;
    
-   case PENN_MONT:
-      result = PennMont( pHRU );
+   case PENMAN_MONTEITH:
+      result = PenmanMonteith( pHRU );
       break;
 
    case KIMB_PENN:
@@ -87,8 +87,8 @@ float ETEquation::Run( unsigned short mode, HRU *pHRU )
       result = Hargreaves();
       break;
 
-   case STANDING_H2O_EVAP:
-      result = StandingWaterEvaporation(pHRU);
+   case WETLAND_ET:
+      result = WetlandET(pHRU);
       break;
 
    default:
@@ -632,7 +632,7 @@ float ETEquation::Fao56()
       }
 
 
-   float ETEquation::PennMont(HRU* pHRU)
+   float ETEquation::PenmanMonteith(HRU* pHRU)
    {
       float result = -1.0;
 
@@ -911,7 +911,7 @@ float ETEquation::Fao56()
    }
 
 
-   float ETEquation::StandingWaterEvaporation(HRU* pHRU)
+   float ETEquation::WetlandET(HRU* pHRU)
    {
       ASSERT(m_pEvapTrans->m_pQuery != NULL);
       if (m_pEvapTrans->m_pQuery == NULL) return(0);
@@ -956,7 +956,7 @@ float ETEquation::Fao56()
 
       double hru_evap_mm = evap_x_area_accum / area_accum;
       return(hru_evap_mm);
-   } // end of StandingWaterEvaporation()
+   } // end of WetlandET()
 
 
    float ETEquation::KimbPenn()

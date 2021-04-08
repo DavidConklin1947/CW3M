@@ -46,7 +46,7 @@ enum GM_METHOD
    GM_LINEAR_RESERVOIR,                                  // LateralExchange
    GM_BROOKS_COREY,                                      // HruVerticalExchange
    GM_MODFLOW,                                           // GroundWater
-   GM_ASCE, GM_FAO56, GM_PENMAN_MONTIETH, GM_HARGREAVES, GM_STANDING_H2O_EVAP, // GM_KIMBERLY_PENNMAN,        // EvapTrans
+   GM_ASCE, GM_FAO56, GM_PENMAN_MONTEITH, GM_HARGREAVES, GM_WETLAND_ET, // GM_KIMBERLY_PENNMAN,        // EvapTrans
 	GM_URBAN_DEMAND_DY,							   			   // Daily Urban demand
    GM_WATER_RIGHTS, GM_EXPR_ALLOCATOR, GM_ALTWM,         // WaterAllocation
    GM_FLUX_EXPR,                                         // FluxExpr
@@ -72,7 +72,7 @@ enum FLUX_DOMAIN
 //  1) FAO56 - similar to kimberly, but not the same - requires crop coefficients that vary
 //             over the growing season. Crop coefficients are based on accumulating
 //             heat units to define start of growing season, length of growing season.
-//  2) PENMAN_MONTIETH - doesn't use crop coeffiecient, used in forested landscape
+//  2) PENMAN_MONTEITH - doesn't use crop coefficient, used in forested landscape
 //             (simulates resistences based on veg characteristics, not crop coeffiencts)
 //             (has coefficients related to aerodynamic resistance, surface resistance)
 //  3) HARGREAVES - 
@@ -282,7 +282,7 @@ protected:
 class EvapTrans : public GlobalMethod
 {
 public:
-   EvapTrans( LPCTSTR name ); // : GlobalMethod( name, GM_PENMAN_MONTIETH ) { }
+   EvapTrans( LPCTSTR name ); // : GlobalMethod( name, GM_PENMAN_MONTEITH ) { }
  //  m_pEvapTrans(NULL) { }
    ~EvapTrans( void );
 
@@ -461,7 +461,7 @@ protected:
 class DailyUrbanWaterDemand : public GlobalMethod
 {
 public:
-	DailyUrbanWaterDemand(LPCTSTR name); // : GlobalMethod( name, GM_PENMAN_MONTIETH ) { }
+	DailyUrbanWaterDemand(LPCTSTR name); // : GlobalMethod( name, GM_PENMAN_MONTEITH ) { }
 	~DailyUrbanWaterDemand(void);
 
 	// Run() sets MaxET, AET values in the IDUs

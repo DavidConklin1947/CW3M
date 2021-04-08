@@ -16,7 +16,7 @@ Reference ET calculations currently implemented :
 
 ASCE
 FAO56
-Penman-Monteith (PENN_MONT)
+Penman-Monteith (PENMAN_MONTEITH)
 Kimberly-Penman (KIMB_PENN)
 Hargreaves
 
@@ -39,14 +39,14 @@ class ETEquation
          FAO56,                  // FAO56 
                                  // ("Step by Step Calculation of the Penman-Monteith Evapotranspiration(FAO - 56 Method)" Zotarelli, Dukes, Romero, Migliaccio, and Morgan)
                                  //
-         PENN_MONT,              // ASCE-Pennman-Monteith ET Equation
+         PENMAN_MONTEITH,              // ASCE-Pennman-Monteith ET Equation
                                  // 
          KIMB_PENN,              //  1982 Kimberly Pennman ET Equation 
                                  // ("Computation of the 1982 Kimberly-Penman and the Jensen-Haise Evapotranspiration Equations as Applied in the U.S.Bureau of Reclamation's Pacific Northwest AgriMet Program" February 1994 
                                  //  Prepared by Doug Dockter U.S.Bureau of Reclamation Pacific Northwest Region Water Conservation Center Revised January, 2008 Peter L.Palmer AgriMet Program)
                                  //
          HARGREAVES,             //  Hargreaves ET Equation
-         STANDING_H2O_EVAP,
+         WETLAND_ET,
          MODE_COUNT              //  Total Number of Mode Variables
          };
 
@@ -200,10 +200,10 @@ class ETEquation
 		static double CalcDewTemp(const double & relHum, double temp);
 
       // reference ET equation methods
-     float PennMont(HRU *pHRU);                       // Pennman-Monteith equation with explicit resistances and previously supplied data, if possible; return ET demand in mm/day, or -1 if prequisite values were not provided
+     float PenmanMonteith(HRU *pHRU);                       // Penman-Monteith equation with explicit resistances and previously supplied data, if possible; return ET demand in mm/day, or -1 if prequisite values were not provided
      float Asce();                                    // Standardized Penman-Monteith equation with previously supplied data, if possible; return ET demand in mm/day
 	  float Fao56();                                   // FAO56 Penman-Monteith equation with previously supplied data, if possible; return ET demand in mm/day
 	  float Hargreaves();                              // Hargreaves equation with previously supplied data, if possible; return ET demand in mm/day
 	  float KimbPenn();                                // Kimberly-Pennman equation with previously supplied data, if possible; return ET demand in mm/day or -1 if prequisite values were not provided
-     float StandingWaterEvaporation(HRU* pHRU);
+     float WetlandET(HRU* pHRU);
    };

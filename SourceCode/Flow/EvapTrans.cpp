@@ -212,7 +212,7 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
 
    switch (m_method)
    {
-      case GM_PENMAN_MONTIETH:
+      case GM_PENMAN_MONTEITH:
       {
          m_CO2effectMetrics.SetName("EVTR CO2 Effect");
          m_CO2effectMetrics.SetSize(5, 0);
@@ -223,7 +223,7 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
          m_CO2effectMetrics.SetLabel(4, "effective bulk stomatal resistance (s per m)");
          gpFlow->AddOutputVar("EVTR CO2 effect", &m_CO2effectMetrics, "EVTR CO2 effect");
       }
-      break; // end of case GM_PENMAN_MONTIETH
+      break; // end of case GM_PENMAN_MONTEITH
 
       case GM_FAO56:
       {
@@ -235,8 +235,8 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
       }
       break; // end of case GM_FAO56
 
-      case GM_STANDING_H2O_EVAP:
-         break; // end of case GM_STANDING_H2O_EVAP
+      case GM_WETLAND_ET:
+         break; // end of case GM_WETLAND_ET
 
       default: ASSERT(0); 
          break;
@@ -260,11 +260,11 @@ bool EvapTrans::InitRun( FlowContext *pFlowContext )
 
    switch (m_method)
    {
-      case GM_PENMAN_MONTIETH:
+      case GM_PENMAN_MONTEITH:
       {
          m_CO2effectMetrics.ClearRows();
       }
-      break; // end of case GM_PENMAN_MONTIETH
+      break; // end of case GM_PENMAN_MONTEITH
 
       case GM_FAO56:
       {
@@ -277,8 +277,8 @@ bool EvapTrans::InitRun( FlowContext *pFlowContext )
       }
       break; // end of case GM_FAO56
 
-      case GM_STANDING_H2O_EVAP:
-         break; // end of case GM_STANDING_H2O_EVAP
+      case GM_WETLAND_ET:
+         break; // end of case GM_WETLAND_ET
 
       default: ASSERT(0);
          break;
@@ -313,7 +313,7 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
 
    switch (m_method)
    {
-      case GM_PENMAN_MONTIETH:
+      case GM_PENMAN_MONTEITH:
       {
          for (int i = 0; i < iduCount; i++)
          {
@@ -342,7 +342,7 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
             pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
          Report::LogMsg(msg);
       }
-      break; // end of case GM_PENMAN_MONTIETH
+      break; // end of case GM_PENMAN_MONTEITH
 
       case GM_FAO56:
       {
@@ -383,7 +383,7 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
       }
       break; // end of case GM_FAO56
 
-      case GM_STANDING_H2O_EVAP:
+      case GM_WETLAND_ET:
       { // For the Penman-Monteith method, calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
          float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
          float CO2min = 400.f; // parts per million
@@ -399,7 +399,7 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
                pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
          Report::LogMsg(msg);
       }
-      break; // end of case GM_STANDING_H2O_EVAP
+      break; // end of case GM_WETLAND_ET
 
       default: ASSERT(0);
          break;
@@ -425,8 +425,8 @@ bool EvapTrans::StartStep(FlowContext *pFlowContext)
 
    switch (m_method)
    {
-      case GM_PENMAN_MONTIETH:
-      break; // end of case GM_PENMAN_MONTIETH
+      case GM_PENMAN_MONTEITH:
+      break; // end of case GM_PENMAN_MONTEITH
 
       case GM_FAO56:
       {
@@ -470,7 +470,7 @@ bool EvapTrans::StartStep(FlowContext *pFlowContext)
       } 
       break; // end of case GM_FAO56
 
-      case GM_STANDING_H2O_EVAP:
+      case GM_WETLAND_ET:
          break;
 
       default: ASSERT(0);
@@ -576,9 +576,10 @@ bool EvapTrans::EndYear( FlowContext *pFlowContext )
    m_CO2effectMetrics.AppendRow(rowCO2effectMetrics);
 
    if (pFlowContext->pEnvContext->startYear + pFlowContext->pEnvContext->yearOfRun == pFlowContext->pEnvContext->endYear)
-      { // This is the end of the run.  Set the input variables back to their default values.
+   { // This is the end of the run.  Set the input variables back to their default values.
       m_TurnerScenario = 0; 
-      }
+      m_dateEvapTransLastExecuted = SYSDATE(1, 1, 9999);
+   }
 
    return true;
    } // end of EndYear()
@@ -593,8 +594,8 @@ bool EvapTrans::SetMethod( GM_METHOD method )
       case GM_ASCE:                m_ETEq.SetMode( ETEquation::ASCE );        break;
       case GM_FAO56:               m_ETEq.SetMode( ETEquation::FAO56 );       break;
       case GM_HARGREAVES:          m_ETEq.SetMode( ETEquation::HARGREAVES );  break;
-      case GM_PENMAN_MONTIETH:     m_ETEq.SetMode( ETEquation::PENN_MONT );   break;
-      case GM_STANDING_H2O_EVAP:          m_ETEq.SetMode(ETEquation::STANDING_H2O_EVAP); break;
+      case GM_PENMAN_MONTEITH:     m_ETEq.SetMode( ETEquation::PENMAN_MONTEITH );   break;
+      case GM_WETLAND_ET:          m_ETEq.SetMode(ETEquation::WETLAND_ET); break;
       default:
          return false;
       }
@@ -980,7 +981,7 @@ void EvapTrans::CalculateTodaysReferenceET( FlowContext *pFlowContext, HRU *pHRU
 
    switch (etMethod)
       {
-      case ETEquation::PENN_MONT:
+      case ETEquation::PENMAN_MONTEITH:
          {
          m_ETEq.SetDailyMinTemperature(tMin);                             //from IDU/HRU
          m_ETEq.SetDailyMaxTemperature( tMax );                           //from IDU/HRU
@@ -1046,7 +1047,7 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
    // This method calculates Potential ET and Actual ET for a given HRU
    //
    // Basic idea: 
-   //   1) Using a specified ET method (FAO56, HARGRAVES, PENMAN_MONTIETH ), calculate reference (potential)
+   //   1) Using a specified ET method (FAO56, HARGRAVES, PENMAN_MONTEITH ), calculate reference (potential)
    //      ET value for s.
    //   2) Once the maxET is determined, estimate actual ET based on crop coefficients.
    //
@@ -1272,13 +1273,13 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
                      depletionFraction = pFraction + 0.04f * (5.0f - maxET);    */
                   break;
 
-               case GM_PENMAN_MONTIETH:
+               case GM_PENMAN_MONTEITH:
                   if (m_iduIrrRequestArray[idu] >= 0.0f)
                      maxET = m_iduIrrRequestArray[idu] * et_multiplier;
                   m_iduIrrRequestArray[idu] = 0.0f;
                   break;
 
-               case GM_STANDING_H2O_EVAP:
+               case GM_WETLAND_ET:
                   if (m_iduIrrRequestArray[idu] >= 0.0f)
                      maxET = m_iduIrrRequestArray[idu];
                   m_iduIrrRequestArray[idu] = 0.0f;
@@ -1634,8 +1635,8 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
 
          case 'p':
          case 'P':
-            pEvapTrans->SetMethod( GM_PENMAN_MONTIETH );
-            pEvapTrans->m_ETEq.SetMode( ETEquation::PENN_MONT );
+            pEvapTrans->SetMethod( GM_PENMAN_MONTEITH );
+            pEvapTrans->m_ETEq.SetMode( ETEquation::PENMAN_MONTEITH );
             break;
 
          case 'h':
@@ -1644,10 +1645,10 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
             pEvapTrans->m_ETEq.SetMode(ETEquation::HARGREAVES);
             break;
 
-         case 's':
-         case 'S':
-            pEvapTrans->SetMethod(GM_STANDING_H2O_EVAP);
-            pEvapTrans->m_ETEq.SetMode(ETEquation::STANDING_H2O_EVAP);
+         case 'w': // WetlandET
+         case 'W':
+            pEvapTrans->SetMethod(GM_WETLAND_ET);
+            pEvapTrans->m_ETEq.SetMode(ETEquation::WETLAND_ET);
             break;
 
          case 'k':
@@ -1663,7 +1664,7 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
          }
       }
 
-   if ( pEvapTrans->m_method != GM_PENMAN_MONTIETH && pEvapTrans->m_method != GM_STANDING_H2O_EVAP) 
+   if ( pEvapTrans->m_method != GM_PENMAN_MONTEITH && pEvapTrans->m_method != GM_WETLAND_ET) 
       {
       CString tmpPath1;
 
