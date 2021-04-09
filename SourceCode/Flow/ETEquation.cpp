@@ -934,7 +934,6 @@ float ETEquation::Fao56()
          area_accum += idu_area_m2;
          float lai = gpFlowModel->AttFloat(idu, LAI);
          double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
-//         double netRadiation = net_SW_W_m2 - netLongWaveRad;
          double evap_m3 = 0., evap_mm = 0, vpd = 0.;
          double ea = 0.;
          float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
@@ -989,7 +988,6 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
    double tmax_C = gpFlowModel->Att(iduNdx, TMAX);
    CalculateRelHumidity(sphumidity_kg_kg, temp_C, tmax_C, elev_mean_m, ea, vpd);
 
-//x   double virtualT = (273.0 + m_dailyMeanTemperature) / (1.0 - 0.378 * ea / P);
    double rho = (float)1000.0 * P / (287.058 * (273.0 + temp_C));      // density of air : C (kg/m3) Shuttleworth 4.2.4. 
 
    double rad_sw_W_m2 = gpFlowModel->Att(iduNdx, RAD_SW);

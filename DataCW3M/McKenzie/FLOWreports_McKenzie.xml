@@ -24,6 +24,28 @@
     -->
 
   <outputs>
+    <output_group name="FLOW Wetland 17 analysis" interval="daily" >
+      <output name="idu 31325 LULC_A" query="IDU_ID=31325" value="LULC_A" type="areaWtMean" domain="idu" />
+      <output name="idu 31325 LULC_B" query="IDU_ID=31325" value="LULC_B" type="areaWtMean" domain="idu" />
+      <output name="idu 31325 VEGCLASS" query="IDU_ID=31325" value="VEGCLASS" type="areaWtMean" domain="idu" />
+      <output name="idu 31325 LAI" query="IDU_ID=31325" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="hru 1816 LAI" query="HRU_ID=1816" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="idu 31325 WETNESS" query="IDU_ID=31325" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="wetland 17 ET (mm per day)" query="WETL_ID=17" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output name="hru 1816 ET (mm per day)" query="HRU_ID=1816" value="ET_DAY" type="areaWtMean" domain="hru" />
+      <output name="reach 23774413 Q_DISCHARG (cms)" query="COMID=23774413" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23774413 Q2WETL (cms)" query="COMID=23774413" value="Q2WETL" type="sum" domain="reach" />
+    </output_group>
+    
+    <output_group name="FLOW Fire Indices Test" interval="daily" >
+      <output name="FIRE_BUI" query="LULC_A=4 and PVT &gt; 0" value="FIRE_BUI" type="areaWtMean" domain="idu" />
+      <output name="FIRE_ERC" query="LULC_A=4 and PVT &gt; 0" value="FIRE_ERC" type="areaWtMean" domain="idu" />
+      <output name="FIRE_FFMC" query="LULC_A=4 and PVT &gt; 0" value="FIRE_FFMC" type="areaWtMean" domain="idu" />
+      <output name="FIRE_FLI" query="LULC_A=4 and PVT &gt; 0" value="FIRE_FLI" type="areaWtMean" domain="idu" />
+      <output name="FIRE_ROS" query="LULC_A=4 and PVT &gt; 0" value="FIRE_ROS" type="areaWtMean" domain="idu" />
+      <output name="PRECIP (mm H2O)" query="LULC_A=4 and PVT &gt; 0" value="PRECIP" type="areaWtMean" domain="idu" />
+    </output_group>
+    
     <output_group name="FLOW Mohawk25 water budget" interval="yearly" >
       <output name="PRECIP (mm H2O)" query="HBVCALIB=25" value="PRECIP" type="areaWtMean" domain="idu" />
       <output name="SNOW_EVAP (mm SWE)" query="HBVCALIB=25" value="SNOW_EVAP" type="areaWtMean" domain="idu" />

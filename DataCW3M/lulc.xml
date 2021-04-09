@@ -8,6 +8,7 @@
 		<lulc id='4' name='Forest' />
 		<lulc id='5' name='Barren' />
 		<lulc id='6' name='Wetlands' />
+    <lulc id='62' name='Palustrine non-isolated wetland' />
 		<lulc id='7' name='Water/Snow/Ice' />
 	</classification>
 
@@ -46,7 +47,17 @@
     <lulc id='44' parentID='4' name='Savanna' />
     
     <lulc id='51' parentID='5' name='Barren' />
+    
     <lulc id='61' parentID='6' name='Wetlands' />
+    <lulc id='621' parentID='62' name='PUB Unconsolidated bottom wetland' />
+    <lulc id='622' parentID='62' name='PAB Aquatic bed wetland' />
+    <lulc id='623' parentID='62' name='PUS Unconsolidated shore wetland' />
+    <lulc id='624' parentID='62' name='PEM Emergent wetland' />
+    <lulc id='626' parentID='62' name='PSS6 Deciduous scrub-shrub wetland' />
+    <lulc id='627' parentID='62' name='PSS7 Evergreen scrub-shrub wetland' />
+    <lulc id='628' parentID='62' name='PFO6 Deciduous forested wetland' />
+    <lulc id='629' parentID='62' name='PFO7 Evergreen forested wetland' />
+
     <lulc id='71' parentID='7' name='Open Water' />
     <lulc id='72' parentID='7' name='Snow/Ice' />    
   </classification>
@@ -123,6 +134,72 @@
 		  <lulc id='246' parentID='29' name='Radishes' />
 		  <lulc id='247' parentID='29' name='Turnips' />
     <lulc id='299' parentID='20' name='crop not yet selected' />
+
+    <lulc id='6211' parentID='621' name='PUBH permanently flooded wetland' />
+    <lulc id='6212' parentID='621' name='PUBF semi-permanently flooded wetland' />
+    <lulc id='6213' parentID='621' name='PUBG intermittently exposed wetland' />
+    <lulc id='6214' parentID='621' name='PUBK artificially flooded wetland' />
+
+    <lulc id='6221' parentID='622' name='PABH permanently flooded wetland' />
+    <lulc id='6222' parentID='622' name='PABF semi-permanently flooded wetland' />
+    <lulc id='6223' parentID='622' name='PABG intermittently exposed wetland' />
+    <lulc id='6224' parentID='622' name='PABK artificially flooded wetland' />
+
+    <lulc id='6234' parentID='623' name='PUSK artificially flooded wetland' />
+    <lulc id='6235' parentID='623' name='PUSA temporarily flooded wetland' />
+    <lulc id='6236' parentID='623' name='PUSC seasonally flooded wetland' />
+    <lulc id='6237' parentID='623' name='PUSE seasonally flooded/saturated wetland' />
+
+    <lulc id='6241' parentID='624' name='PEMH permanently flooded wetland' />
+    <lulc id='6242' parentID='624' name='PEMF semi-permanently flooded wetland' />
+    <lulc id='6243' parentID='624' name='PEMG intermittently exposed wetland' />
+    <lulc id='6244' parentID='624' name='PEMK artificially flooded wetland' />
+    <lulc id='6245' parentID='624' name='PEMA temporarily flooded wetland' />
+    <lulc id='6246' parentID='624' name='PEMC seasonally flooded wetland' />
+    <lulc id='6247' parentID='624' name='PEME seasonally flooded/saturated wetland' />
+    <lulc id='6248' parentID='624' name='PEMD continuously saturated wetland' />
+    <lulc id='6249' parentID='624' name='PEMB seasonally saturated wetland' />
+
+    <lulc id='6261' parentID='626' name='PSS6H permanently flooded wetland' />
+    <lulc id='6262' parentID='626' name='PSS6F semi-permanently flooded wetland' />
+    <lulc id='6263' parentID='626' name='PSS6G intermittently exposed wetland' />
+    <lulc id='6264' parentID='626' name='PSS6K artificially flooded wetland' />
+    <lulc id='6265' parentID='626' name='PSS6A temporarily flooded wetland' />
+    <lulc id='6266' parentID='626' name='PSS6C seasonally flooded wetland' />
+    <lulc id='6267' parentID='626' name='PSS6E seasonally flooded/saturated wetland' />
+    <lulc id='6268' parentID='626' name='PSS6D continuously saturated wetland' />
+    <lulc id='6269' parentID='626' name='PSS6B seasonally saturated wetland' />
+
+    <lulc id='6271' parentID='627' name='PSS7H permanently flooded wetland' />
+    <lulc id='6272' parentID='627' name='PSS7F semi-permanently flooded wetland' />
+    <lulc id='6273' parentID='627' name='PSS7G intermittently exposed wetland' />
+    <lulc id='6274' parentID='627' name='PSS7K artificially flooded wetland' />
+    <lulc id='6275' parentID='627' name='PSS7A temporarily flooded wetland' />
+    <lulc id='6276' parentID='627' name='PSS7C seasonally flooded wetland' />
+    <lulc id='6277' parentID='627' name='PSS7E seasonally flooded/saturated wetland' />
+    <lulc id='6278' parentID='627' name='PSS7D continuously saturated wetland' />
+    <lulc id='6279' parentID='627' name='PSS7B seasonally saturated wetland' />
+
+    <lulc id='6281' parentID='628' name='PFO6H permanently flooded wetland' />
+    <lulc id='6282' parentID='628' name='PFO6F semi-permanently flooded wetland' />
+    <lulc id='6283' parentID='628' name='PFO6G intermittently exposed wetland' />
+    <lulc id='6284' parentID='628' name='PFO6K artificially flooded wetland' />
+    <lulc id='6285' parentID='628' name='PFO6A temporarily flooded wetland' />
+    <lulc id='6286' parentID='628' name='PFO6C seasonally flooded wetland' />
+    <lulc id='6287' parentID='628' name='PFO6E seasonally flooded/saturated wetland' />
+    <lulc id='6288' parentID='628' name='PFO6D continuously saturated wetland' />
+    <lulc id='6289' parentID='628' name='PFO6B seasonally saturated wetland' />
+
+    <lulc id='6291' parentID='629' name='PFO7H permanently flooded wetland' />
+    <lulc id='6292' parentID='629' name='PFO7F semi-permanently flooded wetland' />
+    <lulc id='6293' parentID='629' name='PFO7G intermittently exposed wetland' />
+    <lulc id='6294' parentID='629' name='PFO7K artificially flooded wetland' />
+    <lulc id='6295' parentID='629' name='PFO7A temporarily flooded wetland' />
+    <lulc id='6296' parentID='629' name='PFO7C seasonally flooded wetland' />
+    <lulc id='6297' parentID='629' name='PFO7E seasonally flooded/saturated wetland' />
+    <lulc id='6298' parentID='629' name='PFO7D continuously saturated wetland' />
+    <lulc id='6299' parentID='629' name='PFO7B seasonally saturated wetland' />
+
     <lulc id='3503300' parentID='43' name='(DFal:SHc) Douglas-fir/Red alder' />
       <lulc id='7702000' parentID='421' name='(JP:GF) Jeffrey pine' />
       <lulc id='7702100' parentID='421' name='(JP:GFp) Jeffrey pine' />
