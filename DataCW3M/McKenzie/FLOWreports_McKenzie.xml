@@ -30,7 +30,10 @@
       <output name="idu 31325 VEGCLASS" query="IDU_ID=31325" value="VEGCLASS" type="areaWtMean" domain="idu" />
       <output name="idu 31325 LAI" query="IDU_ID=31325" value="LAI" type="areaWtMean" domain="idu" />
       <output name="hru 1816 LAI" query="HRU_ID=1816" value="LAI" type="areaWtMean" domain="idu" />
-      <output name="idu 31325 WETNESS" query="IDU_ID=31325" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="idu 31325 WETNESS (mm)" query="IDU_ID=31325" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="hru 1816 MELT_BOX (mm)" query="HRU_ID=1816" value="MELT_BOX" type="areaWtMean" domain="hru" />
+      <output name="hru 1816 NAT_SOIL (mm)" query="HRU_ID=1816" value="NAT_SOIL" type="areaWtMean" domain="hru" />
+      <output name="hru 1816 IRRIG_SOIL (mm)" query="HRU_ID=1816" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
       <output name="wetland 17 ET (mm per day)" query="WETL_ID=17" value="ET_DAY" type="areaWtMean" domain="idu" />
       <output name="hru 1816 ET (mm per day)" query="HRU_ID=1816" value="ET_DAY" type="areaWtMean" domain="hru" />
       <output name="reach 23774413 Q_DISCHARG (cms)" query="COMID=23774413" value="Q_DISCHARG" type="sum" domain="reach" />

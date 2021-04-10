@@ -203,15 +203,16 @@
       </layers>
     </evap_trans>
 
- <evap_trans name="WetlandET" method="WetlandET" use="1"
- query="LULC_A=62 {Wetlands}"
- lulc_col="LULC_B"
- soil_col="HBVCALIB"
- soil_table="HBV.csv"
- latitude="45"
- longitude="123">
+    <evap_trans name="WetlandET" method="WetlandET" use="1"
+          query="LULC_A=62 {Wetlands}"
+          lulc_col="LULC_B"
+          soil_col="HBVCALIB"
+          soil_table="HBV.csv"
+          bulkStomatalResistance="150"
+          latitude="45"
+          longitude="123">
       <layers>
-        <layer layer_distributions="(1,1)" />
+        <layer layer_distributions="(2,1)" />
       </layers>
     </evap_trans>
 

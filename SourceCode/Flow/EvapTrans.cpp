@@ -24,6 +24,7 @@ typedef twoDarray::index twoDindex;
 using namespace std;
 
 extern FlowProcess *gpFlow;
+extern FlowModel* gpFlowModel;
 
 
 #ifdef _DEBUG
@@ -50,7 +51,6 @@ EvapTrans::EvapTrans( LPCTSTR name )
 , m_phruCurrCGDDArray( NULL )                                     // FDataObj holding the cummulative Growing Degree Days for the crop since planted
 , m_pLandCoverCoefficientLUT( NULL )                              // FDataObj holing the land cover coefficents representing percentile stages of growth 
 //  , m_pDailyReferenceET( NULL )                                 // DEBUGGING: Uncomment to output reference ET for a particular HRU
-, m_bulkStomatalResistance( 1000.0f )                             // Bulk Stomatal Resistance for Penman Monteith reference ET calculation 
 , m_latitude( 45.0f )                                             // latitude needed for reference ET calculation
 , m_longitude(123.0f)                                             // longitue needed for reference ET calculation
 , m_pLayerDists( NULL )                                           // pointer to the soil layer distribution
@@ -107,7 +107,6 @@ EvapTrans::EvapTrans( LPCTSTR name )
 , m_ETEq( this )                                                  // the type of ET equation to use for calculation of the reference ET (ASCE, FAO56, Penn_Mont, Kimb_Penn, Hargreaves)
 , m_CO2_scalar(0.f)
 , m_atmCO2conc(0.f)
-, m_effBulkStomatalResistance(1.e10)
 , m_TurnerScenario(0) 
 
 , m_colTMIN(-1)
@@ -327,11 +326,11 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
       m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
       if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
       else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
-      m_effBulkStomatalResistance = (float)(m_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
+      M_effBulkStomatalResistance = (float)(M_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
 
       CString msg;
-      msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, m_effBulkStomatalResistance = %f",
-         pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, m_effBulkStomatalResistance);
+      msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, M_effBulkStomatalResistance = %f",
+         pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, M_effBulkStomatalResistance);
       Report::LogMsg(msg);
 
       m_dateEvapTransLastExecuted = SYSDATE(1, 1, pFlowContext->pEnvContext->currentYear);
@@ -555,7 +554,7 @@ bool EvapTrans::EndYear( FlowContext *pFlowContext )
    rowCO2effectMetrics[1] = (float)pFlowContext->pEnvContext->weatherYear;
    rowCO2effectMetrics[2] = m_atmCO2conc;
    rowCO2effectMetrics[3] = m_CO2_scalar;
-   rowCO2effectMetrics[4] = m_effBulkStomatalResistance;
+   rowCO2effectMetrics[4] = M_effBulkStomatalResistance;
    m_CO2effectMetrics.AppendRow(rowCO2effectMetrics);
 
    if (pFlowContext->pEnvContext->startYear + pFlowContext->pEnvContext->yearOfRun == pFlowContext->pEnvContext->endYear)
@@ -1102,265 +1101,229 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
       int idu = pHRU->m_polyIndexArray[ i ];
    
       // if a query is defined, does this IDU pass the query?
-      if (DoesIDUPassQuery(idu))
-      {
-         float pFraction = 0.0f;  // crop specific depletion fraction in table
-         float fc = 0.0f;  // field capacity - maximum soil moisture storage (mm)
-         float wp = 0.0f;  // wilting point?
-         float et_multiplier = 1.f;
-
-         float maxET = 0.0f; // mm/day
-         float aet = 0.0f; // mm/day
-
-         int soilRow = -1;
-         if (m_pSoilTable)
-         {
-         // get soils id from HRU
-            int hbvcalib = -1;
-            if (pIDUlayer->GetData(idu, m_colIduSoilID, hbvcalib))
-            {
-
-               int colECOREGION;
-               pIDUlayer->CheckCol(colECOREGION, "ECOREGION", TYPE_INT, CC_MUST_EXIST);
-               int ecoregion; pIDUlayer->GetData(idu, colECOREGION, ecoregion);
-               ASSERT(!((hbvcalib == 16 || hbvcalib == 25) && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)));
-               if (hbvcalib != 46 && hbvcalib != 9 && hbvcalib != 8 && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)) hbvcalib = 28; // HBVCALIB==28 is ClackamasAboveRiverMill.
-
-                  // have soil ID for this HRU, find the corresponding row in the soils table
-               int row = m_pSoilTable->Find(m_colSoilTableSoilID, VData(hbvcalib), 0);
-               soilRow = row;
-
-               if (row >= 0)  // found?
-               {
-                  m_pSoilTable->Get(m_colFC, row, fc);
-                  m_pSoilTable->Get(m_colWP, row, wp);
-                  m_pSoilTable->Get(m_colHbvET_MULT, row, et_multiplier);
-               }
-            }
-         }
-
+      if (!DoesIDUPassQuery(idu)) continue;
       
-         if (soilRow < 0)
-         { // if no soil data found, assume no demand
-            aet = maxET = 0;
-            m_iduIrrRequestArray[idu] = 0.0f;
+      float pFraction = 0.0f;  // crop specific depletion fraction in table
+      float fc = 0.0f;  // field capacity - maximum soil moisture storage (mm)
+      float wp = 0.0f;  // wilting point?
+      float et_multiplier = 1.f;
 
-            CString msg;
-            msg.Format("GetHruET() soilRow = %d, hruIndex = %d, i = %d", soilRow, hruIndex, i);
-            Report::ErrorMsg(msg);
-			ASSERT(false);
-		    return;
-         }
+      float maxET = 0.0f; // mm/day
+      float aet = 0.0f; // mm/day
+
+      ASSERT(pSoilTable != NULL);
+      int hbvcalib = gpFlowModel->AttInt(idu, HBVCALIB);
+      int ecoregion = gpFlowModel->AttInt(idu, ECOREGION);
+      ASSERT(!((hbvcalib == 16 || hbvcalib == 25) && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)));
+      if (hbvcalib != 46 && hbvcalib != 9 && hbvcalib != 8 && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)) hbvcalib = 28; // HBVCALIB==28 is ClackamasAboveRiverMill.
+
+      // have soil ID for this HRU, find the corresponding row in the soils table
+      int soilRow = m_pSoilTable->Find(m_colSoilTableSoilID, VData(hbvcalib), 0);
+
+      if (soilRow >= 0)  // found?
+      {
+         m_pSoilTable->Get(m_colFC, soilRow, fc);
+         m_pSoilTable->Get(m_colWP, soilRow, wp);
+         m_pSoilTable->Get(m_colHbvET_MULT, soilRow, et_multiplier);
+      }
+      else
+      { // No soil data found, assume no demand
+         aet = maxET = 0;
+         m_iduIrrRequestArray[idu] = 0.0f;
+
+         CString msg;
+         msg.Format("GetHruET() soilRow = %d, hruIndex = %d, i = %d", soilRow, hruIndex, i);
+         Report::ErrorMsg(msg);
+		   ASSERT(false);
+		   return;
+      }
 
       // determine landCover coefficient
-            float iduArea = 0.0f; pIDUlayer->GetData(idu, m_colArea, iduArea);
-            if (iduArea > 0.0f && pHRU->m_HRUeffArea_m2 > 0.0f)
-            {
-               if (m_pCropTable)
-               {
-               // get lulc id from HRU
-                  int lulc = -1;
-                  int row = -1;
-                  landCover_coefficient = 0.0f;
+      float iduArea = 0.0f; pIDUlayer->GetData(idu, m_colArea, iduArea);
+      if (iduArea > 0.0f && pHRU->m_HRUeffArea_m2 > 0.0f)
+      {
+         if (m_pCropTable)
+         {
+         // get lulc id from HRU
+            int lulc = -1;
+            int row = -1;
+            landCover_coefficient = 0.0f;
 
-                  if (pIDUlayer->GetData(idu, m_colLulc, lulc))
-                  {
-                  // have lulc for this HRU, find the corresponding row in the cc table
-                     row = m_pCropTable->Find(m_colCropTableLulc, VData(lulc), 0);
+            if (pIDUlayer->GetData(idu, m_colLulc, lulc))
+            { // have lulc for this HRU, find the corresponding row in the cc table
+               row = m_pCropTable->Find(m_colCropTableLulc, VData(lulc), 0);
+               if (row >= 0)
+               { // the landCover specific values needed for looking up the cGDD percentile
+                  // and interpolating the landCover_coefficient               
+                  float denominator = -1;
+                  float binToEFC = m_pCropTable->GetAsFloat(this->m_binToEFCCol, row);
+                  float cGDDtoEFC = m_pCropTable->GetAsFloat(this->m_cGDDtoEFCCol, row);
+                  float binEFCtoTerm = m_pCropTable->GetAsFloat(this->m_binEFCtoTermCol, row);
+                  int binMethod = m_pCropTable->GetAsInt(this->m_binMethodCol, row);
 
-                     if (row >= 0)
+                  plantingDoy = 999;
+                  harvestDoy = pFlowContext->pEnvContext->daysInCurrentYear - 1;
+                  plantingDoy = m_phruCropStartGrowingSeasonArray->Get(hruIndex, row);
+                  harvestDoy = m_phruCropEndGrowingSeasonArray->Get(hruIndex, row);
+                  int useGDD = m_pCropTable->GetAsInt(this->m_useGDDCol, row);
+
+                  bool isGDD = (useGDD == 1) ? true : false;
+                  bool isFraction = false;
+
+                  if (doy_today >= plantingDoy && doy_today <= harvestDoy)
+                  { 
+                     //crop specific depletion fraction 
+                     pFraction = m_pCropTable->GetAsFloat(this->m_depletionFractionCol, row);
+
+                     // using Growing Degree Days (heat unit)
+                     float cGDD = m_phruCurrCGDDArray->Get(hruIndex, row);
+                     if (m_calcFracCGDD)
                      {
-                     // the landCover specific values needed for looking up the cGDD percentile
-                     // and interpolating the landCover_coefficient               
+                        float potentialHeatUnits = m_pCropTable->GetAsFloat(this->m_termCGDDCol, row);
+                        int colCGDD = -1;
+                        float cGDDFraction = 0.0f;
+                        if (potentialHeatUnits != 0.0f)
+                           cGDDFraction = cGDD / potentialHeatUnits;
 
-                        float denominator = -1;
-                        float binToEFC = m_pCropTable->GetAsFloat(this->m_binToEFCCol, row);
-                        float cGDDtoEFC = m_pCropTable->GetAsFloat(this->m_cGDDtoEFCCol, row);
-                        float binEFCtoTerm = m_pCropTable->GetAsFloat(this->m_binEFCtoTermCol, row);
-                        int binMethod = m_pCropTable->GetAsInt(this->m_binMethodCol, row);
-
-                        plantingDoy = 999;
-                        harvestDoy = pFlowContext->pEnvContext->daysInCurrentYear - 1;
-                        plantingDoy = m_phruCropStartGrowingSeasonArray->Get(hruIndex, row);
-                        harvestDoy = m_phruCropEndGrowingSeasonArray->Get(hruIndex, row);
-                        int useGDD = m_pCropTable->GetAsInt(this->m_useGDDCol, row);
-
-
-                        bool isGDD = (useGDD == 1) ? true : false;
-                        bool isFraction = false;
-
-                        if (doy_today >= plantingDoy && doy_today <= harvestDoy)
-                        {
-                        //crop specific depletion fraction 
-                           pFraction = m_pCropTable->GetAsFloat(this->m_depletionFractionCol, row);
-
-                           // using Growing Degree Days (heat unit)
-                           float cGDD = m_phruCurrCGDDArray->Get(hruIndex, row);
-                           if (m_calcFracCGDD)
-                           {
-                              float potentialHeatUnits = m_pCropTable->GetAsFloat(this->m_termCGDDCol, row);
-                              int colCGDD = -1;
-                              float cGDDFraction = 0.0f;
-                              if (potentialHeatUnits != 0.0f)
-                                 cGDDFraction = cGDD / potentialHeatUnits;
-
-                              gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, colCGDD, "FracCGDD_D", TYPE_FLOAT, CC_AUTOADD);
-                              pIDUlayer->SetData(idu, colCGDD, cGDDFraction); // degree C days
-                           }
-
-                           if (cGDD < cGDDtoEFC  && isGDD)
-                           {
-                              denominator = binToEFC;
-                              LookupLandCoverCoefficient(row, cGDD, denominator, landCover_coefficient);
-                           }
-                        // using Growing Days (number of days)
-                           else if (!isGDD)
-                           {
-                              int growingDays = doy_today - m_phruCropStartGrowingSeasonArray->Get(hruIndex, row);
-                              denominator = (float)m_phruCropEndGrowingSeasonArray->Get(hruIndex, row) - m_phruCropStartGrowingSeasonArray->Get(hruIndex, row);
-                              LookupLandCoverCoefficient(row, (float)growingDays, denominator, landCover_coefficient);
-                           }
-                        // using GDD after EFC, first lookup method
-                           else if (binMethod == 1)
-                           {
-                              denominator = binEFCtoTerm;
-                              LookupLandCoverCoefficient(row, cGDD, denominator, landCover_coefficient);
-                           }
-                        // using GDD after EFC, second lookup method
-                           else if (binMethod == 2)
-                           {
-                              landCover_coefficient = m_pCropTable->GetAsFloat(this->m_constCropCoeffEFCtoTCol, row);
-                           }
-                        }
-                        else
-                        {
-                        // outside of Growing Season landCover_coefficient is 0% percentile value
-                           denominator = 1;
-                   //        LookupLandCoverCoefficient( row, 0.0f, denominator, landCover_coefficient );
-                           landCover_coefficient = 0.10f; // bare soil ET
-                        }
-                     } // crop is found
-                  }  // get lulc
-               } // end m_pCropTable
-            } // end if has area
-
-         // get potential ET 
-            switch (GetMethod())
-            {
-               case GM_FAO56:
-               case GM_HARGREAVES:
-                  maxET = referenceET * landCover_coefficient * et_multiplier;
-                  ASSERT(maxET >= 0.0f && maxET <= 1.0E10f);
-                  /*if (pFraction < 0)
-                     depletionFraction = 1.0f;
-                     else
-                     depletionFraction = pFraction + 0.04f * (5.0f - maxET);    */
-                  break;
-
-               case GM_PENMAN_MONTEITH:
-                  if (m_iduIrrRequestArray[idu] >= 0.0f)
-                     maxET = m_iduIrrRequestArray[idu] * et_multiplier;
-                  m_iduIrrRequestArray[idu] = 0.0f;
-                  break;
-
-               case GM_WETLAND_ET:
-                  if (m_iduIrrRequestArray[idu] >= 0.0f)
-                     maxET = m_iduIrrRequestArray[idu];
-                  m_iduIrrRequestArray[idu] = 0.0f;
-                  break;
-
-               default: ASSERT(0); break;
-            } // end of switch (Getmethod())
-
-         // calculate actual ET based on soil condition. This is a fractional value based on the distributions
-            float totalVolWater = 0.0f;    // m3
-            float soilwater_mm = 0.0f;       // mm 
-
-            // choose the layer distribution that matches
-            int layerIndex = m_pLayerDists->GetLayerIndex(idu);
-            if (layerIndex != -1)
-            {
-               // isRatio = m_pLayerDists->m_layerArray[layerIndex]->isRatio;
-               int layerDistArraySize = (int)m_pLayerDists->m_layerArray[layerIndex]->layerDistArray.GetSize();
-
-               // determine total available water
-               /* for ( */ int j = 0; /* j < layerDistArraySize; j++) */
-               {
-                  LayerDist *pLD = m_pLayerDists->m_layerArray[layerIndex]->layerDistArray[j];
-                  HRULayer *pHRULayer = pHRU->GetLayer(pLD->layerIndex);
-                  totalVolWater += float(pHRULayer->m_volumeWater);   // m3  Results in the volume of water
-                  // soilwater = pHRULayer->m_wc * pLD->fraction;       // mm.  Results in the length of water   
-                  soilwater_mm = (float)(pHRULayer->m_volumeWater > 0. ?
-                     (pHRULayer->m_volumeWater / (pHRU->m_HRUeffArea_m2 * pHRULayer->m_HRUareaFraction)) * 1000.f
-                     : 0.f);
-               }
-   /*
-                  if ( isRatio )
-                  {
-                     // determine fraction in each layer to remove later
-                     // int layerDistArraySize = (int)m_pLayerDists->m_layerArray[layerIndex]->layerDistArray.GetSize();
-                     for (int j = 0; j < layerDistArraySize; j++)
-                     {
-                        LayerDist *pLD = m_pLayerDists->m_layerArray[layerIndex]->layerDistArray[j];
-                        HRULayer *pHRULayer = pHRU->GetLayer(pLD->layerIndex);
-                        if ( totalVolWater > 0.0f )
-                         pLD->fraction = float(pHRULayer->m_volumeWater) / totalVolWater;
+                        gpFlow->CheckCol(pFlowContext->pEnvContext->pMapLayer, colCGDD, "FracCGDD_D", TYPE_FLOAT, CC_AUTOADD);
+                        pIDUlayer->SetData(idu, colCGDD, cGDDFraction); // degree C days
                      }
 
-                     float areaToUse = hruArea - pHRU->m_areaIrrigated;    // m2
-                     if ( areaToUse > 0.0f) soilwater = totalVolWater / areaToUse * MM_PER_M;   // mm
+                     if (cGDD < cGDDtoEFC  && isGDD)
+                     {
+                        denominator = binToEFC;
+                        LookupLandCoverCoefficient(row, cGDD, denominator, landCover_coefficient);
+                     }
+                  // using Growing Days (number of days)
+                     else if (!isGDD)
+                     {
+                        int growingDays = doy_today - m_phruCropStartGrowingSeasonArray->Get(hruIndex, row);
+                        denominator = (float)m_phruCropEndGrowingSeasonArray->Get(hruIndex, row) - m_phruCropStartGrowingSeasonArray->Get(hruIndex, row);
+                        LookupLandCoverCoefficient(row, (float)growingDays, denominator, landCover_coefficient);
+                     }
+                  // using GDD after EFC, first lookup method
+                     else if (binMethod == 1)
+                     {
+                        denominator = binEFCtoTerm;
+                        LookupLandCoverCoefficient(row, cGDD, denominator, landCover_coefficient);
+                     }
+                  // using GDD after EFC, second lookup method
+                     else if (binMethod == 2)
+                     {
+                        landCover_coefficient = m_pCropTable->GetAsFloat(this->m_constCropCoeffEFCtoTCol, row);
+                     }
                   }
-   */
-            } // end layer choice
+                  else
+                  {
+                  // outside of Growing Season landCover_coefficient is 0% percentile value
+                     denominator = 1;
+               //        LookupLandCoverCoefficient( row, 0.0f, denominator, landCover_coefficient );
+                     landCover_coefficient = 0.10f; // bare soil ET
+                  }
+               } // crop is found
+            }  // get lulc
+         } // end m_pCropTable
+      } // end if has area
 
-            int irrigate = 0;
-            pIDUlayer->GetData(idu, m_colIrrigation, irrigate);
-            bool isIrrigated = (irrigate == 1);
-            float idu_soilwater_est_begin_mm = soilwater_mm;
-            if (isIrrigated && pFlowContext->dayOfYear > 0) pIDUlayer->GetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_begin_mm); // mm
-            if (idu_soilwater_est_begin_mm > soilwater_mm) idu_soilwater_est_begin_mm = soilwater_mm;
+      // get potential ET 
+      switch (GetMethod())
+      {
+         case GM_FAO56:
+         case GM_HARGREAVES:
+            maxET = referenceET * landCover_coefficient * et_multiplier;
+            ASSERT(maxET >= 0.0f && maxET <= 1.0E10f);
+            /*if (pFraction < 0)
+               depletionFraction = 1.0f;
+               else
+               depletionFraction = pFraction + 0.04f * (5.0f - maxET);    */
+            break;
 
-            // calculate actual ET based on soil condition and relative humidity     
-            float threshold = 0.5f * (fc - wp);
-            float vpd_scalar = 1.f;
-            float fTheta = 0.f;
-
-            int lulc_a = -1; pIDUlayer->GetData(idu, m_colLULC_A, lulc_a);
-            if (lulc_a == LULCA_FOREST)
-            {
-               float vpdMin = 0.610f; // 1.5f; // kPa
-               float vpdMax = 3.100f; // 4.0f; // kPa
-               vpd_scalar = (vpdMax - GlobalMethod::m_iduVPDarray[idu]) / (vpdMax - vpdMin);
-               if (vpd_scalar < 0.02) vpd_scalar = 0.02f; // clip to [0.02, 1.0]
-               else if (vpd_scalar > 1.f) vpd_scalar = 1.f;
-            }
-
-            if (idu_soilwater_est_begin_mm > threshold) fTheta = 1.0f; // wet conditions; ks = 1
-            else if (idu_soilwater_est_begin_mm <= wp) fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : 0.f; // dry conditions; ks = 0
-            else
-            { // intermediate conditions; ks is a linear function of soilwater
-               float slope = 1.0F / (threshold - wp);
-               fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : (slope * (idu_soilwater_est_begin_mm - wp));
-            }
-            if (m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) vpd_scalar = 1.f;
-            aet = maxET * (fTheta < vpd_scalar ? fTheta : vpd_scalar);
-            float phonyFlux = 0.f;
-            if ((m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) && (idu_soilwater_est_begin_mm - aet < wp)) phonyFlux = wp - (idu_soilwater_est_begin_mm - aet);
-
-            // reset iduCropDemandArray
+         case GM_PENMAN_MONTEITH:
+            if (m_iduIrrRequestArray[idu] >= 0.0f)
+               maxET = m_iduIrrRequestArray[idu] * et_multiplier;
             m_iduIrrRequestArray[idu] = 0.0f;
+            break;
 
-            // fill annual maximum ET array
-            m_iduAnnAvgMaxETArray[idu] += maxET;   // mm/day
+         case GM_WETLAND_ET:
+            if (m_iduIrrRequestArray[idu] >= 0.0f) maxET = m_iduIrrRequestArray[idu];
+            m_iduIrrRequestArray[idu] = 0.0f;
+            break;
 
-            // fill seasonal actual and maximum ET arrays
-            if (doy_today >= plantingDoy && doy_today <= harvestDoy)
-            {
-               m_iduSeasonalAvgETArray[idu] += aet;   // mm/day
-               m_iduSeasonalAvgMaxETArray[idu] += maxET;   // mm/day
-            } // end of if (doy_today >= plantingDoy && doy_today <= harvestDoy)
+         default: ASSERT(0); break;
+      } // end of switch (Getmethod())
 
-            float rainfall = pHRU->m_currentPrecip;         // mm
+      // calculate actual ET based on soil condition. This is a fractional value based on the distributions
+      float totalVolWater = 0.0f;    // m3
+      float soilwater_mm = 0.0f;       // mm 
+
+      // choose the layer distribution that matches
+      int layerIndex = m_pLayerDists->GetLayerIndex(idu);
+      if (layerIndex != -1)
+      {
+         // isRatio = m_pLayerDists->m_layerArray[layerIndex]->isRatio;
+         int layerDistArraySize = (int)m_pLayerDists->m_layerArray[layerIndex]->layerDistArray.GetSize();
+
+         // determine total available water
+         /* for ( */ int j = 0; /* j < layerDistArraySize; j++) */
+         {
+            LayerDist *pLD = m_pLayerDists->m_layerArray[layerIndex]->layerDistArray[j];
+            HRULayer *pHRULayer = pHRU->GetLayer(pLD->layerIndex);
+            totalVolWater += float(pHRULayer->m_volumeWater);   // m3  Results in the volume of water
+            // soilwater = pHRULayer->m_wc * pLD->fraction;       // mm.  Results in the length of water   
+            soilwater_mm = (float)(pHRULayer->m_volumeWater > 0. ?
+               (pHRULayer->m_volumeWater / (pHRU->m_HRUeffArea_m2 * pHRULayer->m_HRUareaFraction)) * 1000.f
+               : 0.f);
+         }
+      } // end layer choice
+
+         int irrigate = 0;
+         pIDUlayer->GetData(idu, m_colIrrigation, irrigate);
+         bool isIrrigated = (irrigate == 1);
+         float idu_soilwater_est_begin_mm = soilwater_mm;
+         if (isIrrigated && pFlowContext->dayOfYear > 0) pIDUlayer->GetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_begin_mm); // mm
+         if (idu_soilwater_est_begin_mm > soilwater_mm) idu_soilwater_est_begin_mm = soilwater_mm;
+
+         // calculate actual ET based on soil condition and relative humidity     
+         float threshold = 0.5f * (fc - wp);
+         float vpd_scalar = 1.f;
+         float fTheta = 0.f;
+
+         int lulc_a = -1; pIDUlayer->GetData(idu, m_colLULC_A, lulc_a);
+         if (lulc_a == LULCA_FOREST)
+         {
+            float vpdMin = 0.610f; // 1.5f; // kPa
+            float vpdMax = 3.100f; // 4.0f; // kPa
+            vpd_scalar = (vpdMax - GlobalMethod::m_iduVPDarray[idu]) / (vpdMax - vpdMin);
+            if (vpd_scalar < 0.02) vpd_scalar = 0.02f; // clip to [0.02, 1.0]
+            else if (vpd_scalar > 1.f) vpd_scalar = 1.f;
+         }
+
+         if (idu_soilwater_est_begin_mm > threshold) fTheta = 1.0f; // wet conditions; ks = 1
+         else if (idu_soilwater_est_begin_mm <= wp) fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : 0.f; // dry conditions; ks = 0
+         else
+         { // intermediate conditions; ks is a linear function of soilwater
+            float slope = 1.0F / (threshold - wp);
+            fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : (slope * (idu_soilwater_est_begin_mm - wp));
+         }
+         if (m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) vpd_scalar = 1.f;
+         aet = maxET * (fTheta < vpd_scalar ? fTheta : vpd_scalar);
+         float phonyFlux = 0.f;
+         if ((m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) && (idu_soilwater_est_begin_mm - aet < wp)) phonyFlux = wp - (idu_soilwater_est_begin_mm - aet);
+
+         // reset iduCropDemandArray
+         m_iduIrrRequestArray[idu] = 0.0f;
+
+         // fill annual maximum ET array
+         m_iduAnnAvgMaxETArray[idu] += maxET;   // mm/day
+
+         // fill seasonal actual and maximum ET arrays
+         if (doy_today >= plantingDoy && doy_today <= harvestDoy)
+         {
+            m_iduSeasonalAvgETArray[idu] += aet;   // mm/day
+            m_iduSeasonalAvgMaxETArray[idu] += maxET;   // mm/day
+         } // end of if (doy_today >= plantingDoy && doy_today <= harvestDoy)
+
+         float rainfall = pHRU->m_currentPrecip;         // mm
          IrrigationState irr_state; 
          float idu_soilwater_est_end_mm = -1.f;
          if (pFlowContext->dayOfYear <= 0) irr_state = IRR_NOT_STARTED_OR_OFF_SEASON;
@@ -1511,8 +1474,6 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
                   } // end of for ( int j = 0; j < layerDistArraySize; j++ )
                } // end of if ( layerIndex != -1 )
             } // end of if ( aet > 0.0 )
-
-         }  // end of: if (idu processed)
       }  // end of: for ( each IDU in the HRU )
 
    // all done
@@ -1553,7 +1514,7 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
       { "lulc_col", TYPE_STRING, &lulcCol, true, CC_MUST_EXIST },
       { "soil_col", TYPE_STRING, &soilCol, false, 0 },
       { "crop_table", TYPE_STRING, &cropTablePath, false, 0 },
-      { "soil_table", TYPE_STRING, &soilTablePath, false, 0 },
+      { "soil_table", TYPE_STRING, &soilTablePath, true, 0 },
       { "irrig_loss_factor", TYPE_FLOAT, &irrigLossFactor, false, 0 },
       { "latitude", TYPE_FLOAT, &latitude, true, 0 },
       { "longitude", TYPE_FLOAT, &longitude, true, 0 },
@@ -1851,7 +1812,7 @@ EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer,
    pEvapTrans->m_colFC = pEvapTrans->m_pSoilTable->GetCol("FC");
    pEvapTrans->m_colHbvET_MULT = pEvapTrans->m_pSoilTable->GetCol("ET_MULT");
 
-   pEvapTrans->m_bulkStomatalResistance = rSt;
+   pEvapTrans->M_bulkStomatalResistance = rSt;
    pEvapTrans->m_latitude = latitude;
    pEvapTrans->m_longitude = longitude;
 

@@ -869,7 +869,7 @@ float ETEquation::Fao56()
                // Surface Resistance rs
                   lai /= 2;     // Active leaf area
                   if (lai < 0.1f) lai = 0.1f;
-                  float rs = m_pEvapTrans->m_effBulkStomatalResistance / lai;  // : s/m.  This is a standard leaf resistance for forest canopies (Shuttleworth and Wallace, 1985).
+                  float rs = m_pEvapTrans->M_effBulkStomatalResistance / lai;  // : s/m.  This is a standard leaf resistance for forest canopies (Shuttleworth and Wallace, 1985).
 
                   //Aerodynamic Resistance
                   if (alglib::fp_eq(height, 0.0))
@@ -1029,7 +1029,7 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
 
    lai /= 2;     // Active leaf area ???
    if (lai < 0.1f) lai = 0.1f;
-   float rs = m_pEvapTrans->m_effBulkStomatalResistance / lai;  // : s/m.  This is a standard leaf resistance for forest canopies (Shuttleworth and Wallace, 1985).
+   float rs = m_pEvapTrans->M_effBulkStomatalResistance / lai;  // : s/m.  This is a standard leaf resistance for forest canopies (Shuttleworth and Wallace, 1985).
 
    //Aerodynamic Resistance
    if (alglib::fp_eq(height, 0.0)) height = 0.1f;

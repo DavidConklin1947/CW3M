@@ -303,7 +303,7 @@ public:
    CString m_soilTablePath;
 	CString m_stationTablePath;
 
-   float m_bulkStomatalResistance; // minimum stomatal resistance across all forest cover types.  s/m
+   static float M_bulkStomatalResistance; // minimum stomatal resistance across all forest cover types.  s/m
 
    float m_latitude;
    float m_longitude;
@@ -396,7 +396,7 @@ public:
    int m_colPVT;
 	int m_colAgrimetStationID;  // Agrimet Station ID
 
-   float m_effBulkStomatalResistance;
+   static float M_effBulkStomatalResistance;
 
 protected:
    // soil table columns
@@ -456,6 +456,7 @@ protected:
    //float CalcRelHumidity(float specHumid, float tMean, float elevation);
 
    static SYSDATE m_dateEvapTransLastExecuted;
+
 };
 
 class DailyUrbanWaterDemand : public GlobalMethod
