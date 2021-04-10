@@ -81,7 +81,9 @@ using namespace std;
 
 #define AREA gpFlowModel->m_colAREA
 #define DIRECTION gpFlowModel->m_colReachDIRECTION
+#define ECOREGION gpFlowModel->m_colECOREGION
 #define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
+#define HBVCALIB gpFlowModel->m_colHBVCALIB
 #define LAI gpFlowModel->m_colLAI
 #define LULC_A gpFlowModel->m_colLulcA
 #define Q_CAP gpFlowModel->m_colReachQ_CAP
@@ -1810,6 +1812,8 @@ public:
    int m_colP_MINUS_ET;
 
    int m_colIDU_ID;
+   int m_colHBVCALIB;
+   int m_colECOREGION;
    int m_colAREA;
    int m_colELEV_MEAN;
    int m_colHruAREA;

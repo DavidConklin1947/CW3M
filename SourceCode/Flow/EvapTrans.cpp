@@ -1276,205 +1276,185 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
          }
       } // end layer choice
 
-         int irrigate = 0;
-         pIDUlayer->GetData(idu, m_colIrrigation, irrigate);
-         bool isIrrigated = (irrigate == 1);
-         float idu_soilwater_est_begin_mm = soilwater_mm;
-         if (isIrrigated && pFlowContext->dayOfYear > 0) pIDUlayer->GetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_begin_mm); // mm
-         if (idu_soilwater_est_begin_mm > soilwater_mm) idu_soilwater_est_begin_mm = soilwater_mm;
+      int irrigate = 0;
+      pIDUlayer->GetData(idu, m_colIrrigation, irrigate);
+      bool isIrrigated = (irrigate == 1);
+      float idu_soilwater_est_begin_mm = soilwater_mm;
+      if (isIrrigated && pFlowContext->dayOfYear > 0) pIDUlayer->GetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_begin_mm); // mm
+      if (idu_soilwater_est_begin_mm > soilwater_mm) idu_soilwater_est_begin_mm = soilwater_mm;
 
-         // calculate actual ET based on soil condition and relative humidity     
-         float threshold = 0.5f * (fc - wp);
-         float vpd_scalar = 1.f;
-         float fTheta = 0.f;
+      // calculate actual ET based on soil condition and relative humidity     
+      float threshold = 0.5f * (fc - wp);
+      float vpd_scalar = 1.f;
+      float fTheta = 0.f;
 
-         int lulc_a = -1; pIDUlayer->GetData(idu, m_colLULC_A, lulc_a);
-         if (lulc_a == LULCA_FOREST)
+      int lulc_a = -1; pIDUlayer->GetData(idu, m_colLULC_A, lulc_a);
+      if (lulc_a == LULCA_FOREST)
+      {
+         float vpdMin = 0.610f; // 1.5f; // kPa
+         float vpdMax = 3.100f; // 4.0f; // kPa
+         vpd_scalar = (vpdMax - GlobalMethod::m_iduVPDarray[idu]) / (vpdMax - vpdMin);
+         if (vpd_scalar < 0.02) vpd_scalar = 0.02f; // clip to [0.02, 1.0]
+         else if (vpd_scalar > 1.f) vpd_scalar = 1.f;
+      }
+
+      if (idu_soilwater_est_begin_mm > threshold) fTheta = 1.0f; // wet conditions; ks = 1
+      else if (idu_soilwater_est_begin_mm <= wp) fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : 0.f; // dry conditions; ks = 0
+      else
+      { // intermediate conditions; ks is a linear function of soilwater
+         float slope = 1.0F / (threshold - wp);
+         fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : (slope * (idu_soilwater_est_begin_mm - wp));
+      }
+      if (m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) vpd_scalar = 1.f;
+      aet = maxET * (fTheta < vpd_scalar ? fTheta : vpd_scalar);
+      float phonyFlux = 0.f;
+      if ((m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) && (idu_soilwater_est_begin_mm - aet < wp)) phonyFlux = wp - (idu_soilwater_est_begin_mm - aet);
+
+      // reset iduCropDemandArray
+      m_iduIrrRequestArray[idu] = 0.0f;
+
+      // fill annual maximum ET array
+      m_iduAnnAvgMaxETArray[idu] += maxET;   // mm/day
+
+      // fill seasonal actual and maximum ET arrays
+      if (doy_today >= plantingDoy && doy_today <= harvestDoy)
+      {
+         m_iduSeasonalAvgETArray[idu] += aet;   // mm/day
+         m_iduSeasonalAvgMaxETArray[idu] += maxET;   // mm/day
+      } // end of if (doy_today >= plantingDoy && doy_today <= harvestDoy)
+
+      float rainfall = pHRU->m_currentPrecip;         // mm
+      IrrigationState irr_state; 
+      float idu_soilwater_est_end_mm = -1.f;
+      if (pFlowContext->dayOfYear <= 0) irr_state = IRR_NOT_STARTED_OR_OFF_SEASON;
+      else
+      {
+         pIDUlayer->GetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_begin_mm); // mm
+         int irr_state_int;  pIDUlayer->GetData(idu, m_colDailyIRR_STATE, irr_state_int); irr_state = (IrrigationState)irr_state_int; // mm
+      } // end of if (pFlowContext->dayOfYear <= 0) ... else
+      float avail_water_est_begin =  idu_soilwater_est_begin_mm - wp;
+      if (avail_water_est_begin > (fc - wp)) avail_water_est_begin = fc - wp;
+      if (avail_water_est_begin < 0.f) avail_water_est_begin = 0.f;
+
+      // calculate irrigation request, if any
+      float unsmoothed_irr_req = -1.f;
+      float smoothed_irr_req = -1.f;
+      float avail_water_est_end = -1.f;
+      int start_doy0 = isIrrigated ? max(plantingDoy, doy0_irr_season_start) : 366;
+      int end_doy0 = isIrrigated ? min(harvestDoy, doy0_irr_season_end) : -1;
+      if (isIrrigated && doy_today >= start_doy0 && doy_today <= end_doy0)
+      {
+         float max_irr_rate_mm = 7.56f; // 7.56 mm/day equivalent to 1/80 cfs per acre
+         float tgt_min_soil_moisture_mm = wp + 0.80f*(fc - wp);
+         float tgt_min_avail_mm = tgt_min_soil_moisture_mm - wp;
+         float wet_enough_mm = wp + 0.825f*(fc - wp);
+         m_iduIrrRequestArray[idu] = 0.f;
+         float moisture_deficit_mm = -1.f;
+         float prev_smoothed_irr_req;
+         if (doy_today == start_doy0)
+         { // Initialize avail_water_est at the beginning of the growing season.
+            idu_soilwater_est_begin_mm = soilwater_mm > fc ? fc : soilwater_mm;
+            avail_water_est_begin = idu_soilwater_est_begin_mm > wp ? (idu_soilwater_est_begin_mm - wp) : 0.f;
+            moisture_deficit_mm = avail_water_est_begin > tgt_min_avail_mm ? 0.f : (tgt_min_avail_mm - avail_water_est_begin);
+            smoothed_irr_req = rainfall > moisture_deficit_mm ? 0.f : (moisture_deficit_mm / (1.f - m_irrigLossFactor));
+            if (smoothed_irr_req > max_irr_rate_mm) smoothed_irr_req = max_irr_rate_mm;
+            prev_smoothed_irr_req = smoothed_irr_req;
+         }
+         else
          {
-            float vpdMin = 0.610f; // 1.5f; // kPa
-            float vpdMax = 3.100f; // 4.0f; // kPa
-            vpd_scalar = (vpdMax - GlobalMethod::m_iduVPDarray[idu]) / (vpdMax - vpdMin);
-            if (vpd_scalar < 0.02) vpd_scalar = 0.02f; // clip to [0.02, 1.0]
-            else if (vpd_scalar > 1.f) vpd_scalar = 1.f;
+            pIDUlayer->GetData(idu, m_colDailyIRRACRQ_D, prev_smoothed_irr_req); // mm/day
+            pIDUlayer->GetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_begin_mm);
+            avail_water_est_begin = idu_soilwater_est_begin_mm > wp ? (idu_soilwater_est_begin_mm - wp) : 0.f;
          }
 
-         if (idu_soilwater_est_begin_mm > threshold) fTheta = 1.0f; // wet conditions; ks = 1
-         else if (idu_soilwater_est_begin_mm <= wp) fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : 0.f; // dry conditions; ks = 0
-         else
-         { // intermediate conditions; ks is a linear function of soilwater
-            float slope = 1.0F / (threshold - wp);
-            fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : (slope * (idu_soilwater_est_begin_mm - wp));
-         }
-         if (m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) vpd_scalar = 1.f;
-         aet = maxET * (fTheta < vpd_scalar ? fTheta : vpd_scalar);
-         float phonyFlux = 0.f;
-         if ((m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) && (idu_soilwater_est_begin_mm - aet < wp)) phonyFlux = wp - (idu_soilwater_est_begin_mm - aet);
-
-         // reset iduCropDemandArray
-         m_iduIrrRequestArray[idu] = 0.0f;
-
-         // fill annual maximum ET array
-         m_iduAnnAvgMaxETArray[idu] += maxET;   // mm/day
-
-         // fill seasonal actual and maximum ET arrays
-         if (doy_today >= plantingDoy && doy_today <= harvestDoy)
+         // Irrigation states are  IRR_NOT_STARTED_OR_OFF_SEASON, IRR_FULL, IRR_PARTIAL, IRR_SUSPENDED, IRR_SHUT_OFF_BY_REG_ACTION
+         switch (irr_state)
          {
-            m_iduSeasonalAvgETArray[idu] += aet;   // mm/day
-            m_iduSeasonalAvgMaxETArray[idu] += maxET;   // mm/day
-         } // end of if (doy_today >= plantingDoy && doy_today <= harvestDoy)
-
-         float rainfall = pHRU->m_currentPrecip;         // mm
-         IrrigationState irr_state; 
-         float idu_soilwater_est_end_mm = -1.f;
-         if (pFlowContext->dayOfYear <= 0) irr_state = IRR_NOT_STARTED_OR_OFF_SEASON;
-         else
-            {
-            pIDUlayer->GetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_begin_mm); // mm
-            int irr_state_int;  pIDUlayer->GetData(idu, m_colDailyIRR_STATE, irr_state_int); irr_state = (IrrigationState)irr_state_int; // mm
-            } // end of if (pFlowContext->dayOfYear <= 0) ... else
-         float avail_water_est_begin =  idu_soilwater_est_begin_mm - wp;
-         if (avail_water_est_begin > (fc - wp)) avail_water_est_begin = fc - wp;
-         if (avail_water_est_begin < 0.f) avail_water_est_begin = 0.f;
-
-         // calculate irrigation request, if any
-         float unsmoothed_irr_req = -1.f;
-         float smoothed_irr_req = -1.f;
-         float avail_water_est_end = -1.f;
-         int start_doy0 = isIrrigated ? max(plantingDoy, doy0_irr_season_start) : 366;
-         int end_doy0 = isIrrigated ? min(harvestDoy, doy0_irr_season_end) : -1;
-         if (isIrrigated && doy_today >= start_doy0 && doy_today <= end_doy0)
-            {
-            float max_irr_rate_mm = 7.56f; // 7.56 mm/day equivalent to 1/80 cfs per acre
-//          float tgt_min_avail_mm = threshold; // begin irrigating when the stomata begin to close due to dry soil
-//          float tgt_min_avail_mm = wp + 0.75f*(fc - wp);
-            float tgt_min_soil_moisture_mm = wp + 0.80f*(fc - wp);
-            float tgt_min_avail_mm = tgt_min_soil_moisture_mm - wp;
-//          float fully_wetted_mm = wp + 0.90f*(fc - wp);
-//          float wet_enough_mm = wp + 0.80f*(fc - wp);
-            float wet_enough_mm = wp + 0.825f*(fc - wp);
-            m_iduIrrRequestArray[idu] = 0.f;
-            float moisture_deficit_mm = -1.f;
-            float prev_smoothed_irr_req;
-            if (doy_today == start_doy0)
-               { // Initialize avail_water_est at the beginning of the growing season.
-               idu_soilwater_est_begin_mm = soilwater_mm > fc ? fc : soilwater_mm;
-               avail_water_est_begin = idu_soilwater_est_begin_mm > wp ? (idu_soilwater_est_begin_mm - wp) : 0.f;
-               moisture_deficit_mm = avail_water_est_begin > tgt_min_avail_mm ? 0.f : (tgt_min_avail_mm - avail_water_est_begin);
-               smoothed_irr_req = rainfall > moisture_deficit_mm ? 0.f : (moisture_deficit_mm / (1.f - m_irrigLossFactor));
-               if (smoothed_irr_req > max_irr_rate_mm) smoothed_irr_req = max_irr_rate_mm;
-               prev_smoothed_irr_req = smoothed_irr_req;
+            case IRR_NOT_STARTED_OR_OFF_SEASON:
+            case IRR_SUSPENDED:
+               if (avail_water_est_begin < tgt_min_avail_mm && !(rainfall > 2 * maxET))
+               { // avail soil water is below the threshold for irrigation and it's not raining enough to matter
+                  irr_state = IRR_FULL;
+                  unsmoothed_irr_req = max_irr_rate_mm;
                }
-            else
+               else unsmoothed_irr_req = 0.f;
+               break;
+            case IRR_FULL:
+            case IRR_PARTIAL:
+               if (idu_soilwater_est_begin_mm >= wet_enough_mm || rainfall > 2 * maxET)
                {
-               pIDUlayer->GetData(idu, m_colDailyIRRACRQ_D, prev_smoothed_irr_req); // mm/day
-               pIDUlayer->GetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_begin_mm);
-               avail_water_est_begin = idu_soilwater_est_begin_mm > wp ? (idu_soilwater_est_begin_mm - wp) : 0.f;
-               }
-
-            // Irrigation states are  IRR_NOT_STARTED_OR_OFF_SEASON, IRR_FULL, IRR_PARTIAL, IRR_SUSPENDED, IRR_SHUT_OFF_BY_REG_ACTION
-            switch (irr_state)
-               {
-               case IRR_NOT_STARTED_OR_OFF_SEASON:
-               case IRR_SUSPENDED:
-                  if (avail_water_est_begin < tgt_min_avail_mm && !(rainfall > 2 * maxET))
-                     { // avail soil water is below the threshold for irrigation and it's not raining enough to matter
-                     irr_state = IRR_FULL;
-                     unsmoothed_irr_req = max_irr_rate_mm;
-                     }
-                  else unsmoothed_irr_req = 0.f;
-                  break;
-               case IRR_FULL:
-               case IRR_PARTIAL:
-                  if (idu_soilwater_est_begin_mm >= wet_enough_mm || rainfall > 2 * maxET)
-                     {
-                     irr_state = IRR_SUSPENDED;
-                     unsmoothed_irr_req = 0.f;
-                     }
-                  else unsmoothed_irr_req = max_irr_rate_mm;
-                  break;
-               default:
-               case IRR_SHUT_OFF_BY_REG_ACTION:
+                  irr_state = IRR_SUSPENDED;
                   unsmoothed_irr_req = 0.f;
-                  smoothed_irr_req = 0.f;
-                  break;
                }
+               else unsmoothed_irr_req = max_irr_rate_mm;
+               break;
+            default:
+            case IRR_SHUT_OFF_BY_REG_ACTION:
+               unsmoothed_irr_req = 0.f;
+               smoothed_irr_req = 0.f;
+               break;
+         } // end of switch(irr_state)
 
-            /* Unless this is the first day of the season, or the water right has been regulated off, update smoothed_irr_req.
-            if ((irr_state != IRR_SHUT_OFF_BY_REG_ACTION) && (doy_today > start_doy0))
-               {
-               float tau = 7.f; // smoothing time constant
-//             float tau_eff = (doy_today - start_doy0) < tau ? (doy_today - start_doy0) : tau;
-               float tau_eff = (doy_today - start_doy0) < tau ? (doy_today - start_doy0 + 1.f) : tau;
-//             smoothed_irr_req = prev_smoothed_irr_req*exp(-1.f / tau_eff) + unsmoothed_irr_req*(1.f - exp(-1.f / tau_eff));
-               smoothed_irr_req = prev_smoothed_irr_req*((tau_eff - 1.f) / tau_eff) + unsmoothed_irr_req*(1.f / tau_eff); // per Bill Jaeger 1/26/16
-               if (smoothed_irr_req < 1.f) smoothed_irr_req = 0.f; // per Bill Jaeger 1/26/16
-               } // end of if (doy_today > start_doy0)
-            */
-            m_iduIrrRequestArray[idu] = smoothed_irr_req = unsmoothed_irr_req;
+         m_iduIrrRequestArray[idu] = smoothed_irr_req = unsmoothed_irr_req;
 
-            // Update avail_water_est.
-            float soil_water_retention_fraction = 0.995f; // 1.0f; // 0.995f; // 0.99 0.98
-            //float rainfall_retention_fraction = 1.0f - HBV::GroundWaterRechargeFraction(0.f, avail_water_est_begin, fc, beta);
-            //float rainfall_lossFraction = pow((avail_water_est_begin + wp) / fc, beta); if (lossFraction > 1.0f) lossFraction = 1.0f;
-            //rainfall_retention_fraction = 1.0f - lossFraction;
-            avail_water_est_end = soil_water_retention_fraction*avail_water_est_begin + /* rainfall_retention_fraction * */rainfall +
-               m_iduIrrRequestArray[idu] * (1.f - m_irrigLossFactor) - aet;
-            if (avail_water_est_end > fc - wp) avail_water_est_end = fc - wp;
-            else if (avail_water_est_end < 0.f) avail_water_est_end = 0.f;
-            idu_soilwater_est_end_mm = avail_water_est_end + wp;
-            } // end of if (isIrrigated && doy_today >= plantingDoy && doy_today >= doy0_irr_season_start && doy_today <= harvestDoy && doy_today <= doy0_irr_season_end)
-         else
-            { // Outside of the growing and/or irrigation season
-            avail_water_est_end = unsmoothed_irr_req = m_iduIrrRequestArray[idu] = smoothed_irr_req = 0.f;
-            idu_soilwater_est_end_mm = soilwater_mm;
-            irr_state = IRR_NOT_STARTED_OR_OFF_SEASON;
-            }
+         // Update avail_water_est.
+         float soil_water_retention_fraction = 0.995f; // 1.0f; // 0.995f; // 0.99 0.98
+         avail_water_est_end = soil_water_retention_fraction*avail_water_est_begin + /* rainfall_retention_fraction * */rainfall +
+            m_iduIrrRequestArray[idu] * (1.f - m_irrigLossFactor) - aet;
+         if (avail_water_est_end > fc - wp) avail_water_est_end = fc - wp;
+         else if (avail_water_est_end < 0.f) avail_water_est_end = 0.f;
+         idu_soilwater_est_end_mm = avail_water_est_end + wp;
+      } // end of if (isIrrigated && doy_today >= plantingDoy && doy_today >= doy0_irr_season_start && doy_today <= harvestDoy && doy_today <= doy0_irr_season_end)
+      else
+      { // Outside of the growing and/or irrigation season
+         avail_water_est_end = unsmoothed_irr_req = m_iduIrrRequestArray[idu] = smoothed_irr_req = 0.f;
+         idu_soilwater_est_end_mm = soilwater_mm;
+         irr_state = IRR_NOT_STARTED_OR_OFF_SEASON;
+      } // end of if (might be irrigating) ... else ... 
 
-         // output daily values
-         pIDUlayer->m_readOnly = false;
+      // output daily values
+      pIDUlayer->m_readOnly = false;
 
-         float et_day_mm; pIDUlayer->GetData(idu, m_colDailyET, et_day_mm);
-         et_day_mm += aet;
-         pIDUlayer->SetData( idu, m_colDailyET, et_day_mm);  // mm/day
+      float et_day_mm; pIDUlayer->GetData(idu, m_colDailyET, et_day_mm);
+      et_day_mm += aet;
+      pIDUlayer->SetData( idu, m_colDailyET, et_day_mm);  // mm/day
 
-         pIDUlayer->SetData( idu, m_colDailyMaxET, maxET );  // mm/day
-         pIDUlayer->SetData( idu, m_colSM_DAY, soilwater_mm );  // mm/day
-         pIDUlayer->SetData(idu, m_colVPD, GlobalMethod::m_iduVPDarray[idu]);
-         pIDUlayer->SetData(idu, m_colF_THETA, fTheta);  // on the unit interval, dimensionless
-         pIDUlayer->SetData(idu, m_colVPD_SCALAR, vpd_scalar);  // on the unit interval, dimensionless
-         pIDUlayer->SetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_end_mm);  // mm
-         pIDUlayer->SetData(idu, m_colDailyIRR_STATE, irr_state);  // mm
-         pIDUlayer->SetData(idu, m_colDailyIRRRQST_D, unsmoothed_irr_req);  // mm
-         pIDUlayer->SetData(idu, m_colDailyIRRACRQ_D, smoothed_irr_req);  // mm
-         pIDUlayer->m_readOnly = true;
+      pIDUlayer->SetData( idu, m_colDailyMaxET, maxET );  // mm/day
+      pIDUlayer->SetData( idu, m_colSM_DAY, soilwater_mm );  // mm/day
+      pIDUlayer->SetData(idu, m_colVPD, GlobalMethod::m_iduVPDarray[idu]);
+      pIDUlayer->SetData(idu, m_colF_THETA, fTheta);  // on the unit interval, dimensionless
+      pIDUlayer->SetData(idu, m_colVPD_SCALAR, vpd_scalar);  // on the unit interval, dimensionless
+      pIDUlayer->SetData(idu, m_colDailySOILH2OEST, idu_soilwater_est_end_mm);  // mm
+      pIDUlayer->SetData(idu, m_colDailyIRR_STATE, irr_state);  // mm
+      pIDUlayer->SetData(idu, m_colDailyIRRRQST_D, unsmoothed_irr_req);  // mm
+      pIDUlayer->SetData(idu, m_colDailyIRRACRQ_D, smoothed_irr_req);  // mm
+      pIDUlayer->m_readOnly = true;
 
-         // store in shared data
-         float val = 1.0;
-         if (iduArea / pHRU->m_HRUtotArea_m2 < 1.0)
-            val = iduArea / pHRU->m_HRUtotArea_m2;
+      // store in shared data
+      float val = 1.0;
+      if (iduArea / pHRU->m_HRUtotArea_m2 < 1.0) val = iduArea / pHRU->m_HRUtotArea_m2;
+      hruAET += aet * val;
+      hruMaxET += maxET * val;
 
-         hruAET += aet * val;
-         hruMaxET += maxET * val;
-
-         int time = pFlowContext->dayOfYear;
-         // soil layer distribution
-         if ( aet > 0.0 )
+      int time = pFlowContext->dayOfYear;
+      // soil layer distribution
+      if ( aet > 0.0 )
+      {
+         // found layer that matches idu
+         if ( layerIndex != -1 )
+         {
+            // determine distributions
+            int layerDistArraySize = (int)m_pLayerDists->m_layerArray[ layerIndex ]->layerDistArray.GetSize();
+            for ( int j = 0; j < layerDistArraySize; j++ )
             {
-            // found layer that matches idu
-            if ( layerIndex != -1 )
-               {
-               // determine distributions
-               int layerDistArraySize = (int)m_pLayerDists->m_layerArray[ layerIndex ]->layerDistArray.GetSize();
-               for ( int j = 0; j < layerDistArraySize; j++ )
-                  {
-                  LayerDist *pLD = m_pLayerDists->m_layerArray[layerIndex]->layerDistArray[ j ];
-                  HRULayer *pHRULayer = pHRU->GetLayer( pLD->layerIndex );
-                  float flux = (float)((aet - phonyFlux) * pLD->fraction * iduArea * M_PER_MM);
-                  pHRULayer->CheckForNaNs("GetHRUET", pHRULayer->AddFluxFromGlobalHandler( flux, FL_TOP_SINK ));     // m3/d                  
-                  } // end of for ( int j = 0; j < layerDistArraySize; j++ )
-               } // end of if ( layerIndex != -1 )
-            } // end of if ( aet > 0.0 )
-      }  // end of: for ( each IDU in the HRU )
+               LayerDist *pLD = m_pLayerDists->m_layerArray[layerIndex]->layerDistArray[ j ];
+               HRULayer *pHRULayer = pHRU->GetLayer( pLD->layerIndex );
+               float flux = (float)((aet - phonyFlux) * pLD->fraction * iduArea * M_PER_MM);
+               pHRULayer->CheckForNaNs("GetHRUET", pHRULayer->AddFluxFromGlobalHandler( flux, FL_TOP_SINK ));     // m3/d                  
+            } // end of for ( int j = 0; j < layerDistArraySize; j++ )
+         } // end of if ( layerIndex != -1 )
+      } // end of if ( aet > 0.0 )
+   }  // end of: for ( each IDU in the HRU )
 
    // all done
 
@@ -1482,7 +1462,7 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
    pHRU->m_currentET += hruAET;     // mm/day
 
    return;
-   }
+} // end of GetHruET()
 
 
 EvapTrans *EvapTrans::LoadXml( TiXmlElement *pXmlEvapTrans, MapLayer *pIDUlayer, LPCTSTR filename )

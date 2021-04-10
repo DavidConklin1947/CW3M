@@ -3190,6 +3190,8 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pIDUlayer, m_colP_MINUS_ET, "P_MINUS_ET", TYPE_FLOAT, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pIDUlayer, m_colIDU_ID, "IDU_ID", TYPE_INT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pIDUlayer, m_colHBVCALIB, "HBVCALIB", TYPE_INT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pIDUlayer, m_colECOREGION, "ECOREGION", TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colAREA, "AREA", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruAREA, "AREA_M2", TYPE_FLOAT, CC_AUTOADD);
