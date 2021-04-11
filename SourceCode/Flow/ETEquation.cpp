@@ -89,7 +89,7 @@ float ETEquation::Run( unsigned short mode, HRU *pHRU )
       break;
 
    case WETLAND_ET:
-      result = WetlandET(pHRU);
+      result = -1.f; // PET and AET get calculated IDU by IDU, rather than all at once for the whole HRU.
       break;
 
    default:
@@ -602,8 +602,8 @@ float ETEquation::Fao56()
       float sd_degrees = solarDeclination * 57.2957795f ;
       float sunsetHourAngle = (float)acos( -1.0 * tan( latitude ) * tan( solarDeclination ) );
       float sHA_degress = sunsetHourAngle * 57.2957795f ;
-      float N = 24.0f / PI * sunsetHourAngle;
-      float dr = 1 + 0.033f * cos( 2 * PI / 365.f * m_doy );
+      float N = (float)(24.0f / PI * sunsetHourAngle);
+      float dr = (float)(1 + 0.033f * cos( 2 * PI / 365.f * m_doy ));
       float So_mm_d = 15.392f * dr *( sunsetHourAngle * sin( latitude ) * sin( solarDeclination ) + cos( latitude ) * cos( solarDeclination ) * sin( sunsetHourAngle ) ); 
    
       int *monthlyTempDiff = new int[ 12 ];
@@ -912,60 +912,73 @@ float ETEquation::Fao56()
    }
 
 
-   float ETEquation::WetlandET(HRU* pHRU)
-   {
-      ASSERT(m_pEvapTrans->m_pQuery != NULL);
-      if (m_pEvapTrans->m_pQuery == NULL) return(0);
+void ETEquation::WetlandET(int idu, float soilH2O_mm, float fc_mm, float wp_mm, double * pPET_mm, double * pAET_mm)
+{
+   double idu_area_m2 = gpFlowModel->Att(idu, AREA);
+   float lai = gpFlowModel->AttFloat(idu, LAI);
+   double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
+   double evap_m3 = 0., vpd = 0., ea = 0.;
+   float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
+   float sphumidity_kg_kg = gpFlowModel->AttFloat(idu, SPHUMIDITY);
+   float temp_C = gpFlowModel->AttFloat(idu, TEMP);
+   float tmax_C = gpFlowModel->AttFloat(idu, TMAX);
+   double rh_pct = 100 * CalculateRelHumidity((float)sphumidity_kg_kg, (float)temp_C, (float)tmax_C, elev_mean_m, ea, vpd);
+   double pet_mm = 0., aet_mm = 0.;
 
-      // Slope of Saturation VaporPressure-Temperature Curve: kPa/deg C
-      double slopeDelta = 4098.0 * (0.6108 * exp((17.27 * m_dailyMeanTemperature) / (m_dailyMeanTemperature + 237.3))) / pow(m_dailyMeanTemperature + 237.3, 2.0);
+   // Is there standing water?
+   double wetness_mm = gpFlowModel->Att(idu, WETNESS);
+   if (wetness_mm > 0)
+   { // Calculate evaporation from standing water.
+      double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
+      WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
+      double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gpFlowModel->m_flowContext.dayOfYear);
+      double evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
+      WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,
+         m_dailyMeanTemperature, m_dailyMeanTemperature, 1., cloudiness_frac, m_windSpeed, m_specificHumidity, rh_pct,
+         evap_m3, evap_kJ, SW_kJ, LW_kJ);
+      pet_mm = (evap_m3 / idu_area_m2) * 1000;
+      aet_mm = (wetness_mm > pet_mm) ? pet_mm : wetness_mm;
+   } // end of if (wetness_mm > 0) standing water
+   else
+   { // No standing water --> calculate ET using Penman-Monteith equation
+      pet_mm = PenmanMonteith(idu, rh_pct, lai);
+      aet_mm = ActualET(idu, pet_mm, soilH2O_mm, vpd, fc_mm, wp_mm);
+   } // end of if (wetness_mm > 0) else ... no standing water
 
-      int count = (int)pHRU->m_polyIndexArray.GetSize();
-      double evap_x_area_accum = 0., area_accum = 0.;
+   GlobalMethod::m_iduIrrRequestArray[idu] += (float)aet_mm;
+   GlobalMethod::m_iduVPDarray[idu] = (float)vpd;
 
-      for (int i = 0; i < count; i++)
-      {
-         int idu = pHRU->m_polyIndexArray[i];
-         bool processIDU = true;
-         m_pEvapTrans->m_pQuery->Run(idu, processIDU);
-         if (!processIDU) continue;
+   *pPET_mm = pet_mm;
+   *pAET_mm = aet_mm;
+} // end of WetlandET(iduNdx, ...)
 
-         double idu_area_m2 = gpFlowModel->Att(idu, AREA);
-         area_accum += idu_area_m2;
-         float lai = gpFlowModel->AttFloat(idu, LAI);
-         double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
-         double evap_m3 = 0., evap_mm = 0, vpd = 0.;
-         double ea = 0.;
-         float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
-         double rh_pct = 100 * CalculateRelHumidity((float)m_specificHumidity, (float)m_dailyMeanTemperature, (float)m_dailyMaxTemperature, elev_mean_m, ea, vpd);
 
-         // Is there standing water?
-         double wetness_mm = gpFlowModel->Att(idu, WETNESS);
-         if (wetness_mm > 0)
-         { // Calculate evaporation from standing water.
-            double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
-            WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
-            double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gpFlowModel->m_flowContext.dayOfYear);
-            double evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
-            WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,
-               m_dailyMeanTemperature, m_dailyMeanTemperature, 1., cloudiness_frac, m_windSpeed, m_specificHumidity, rh_pct,
-               evap_m3, evap_kJ, SW_kJ, LW_kJ);
-            evap_mm = (evap_m3 / idu_area_m2) * 1000;
-         } // end of if (wetness_mm > 0) standing water
-         else
-         { // No standing water --> calculate ET using Penman-Monteith equation
-            evap_mm = PenmanMonteith(idu, rh_pct, lai);
-         } // end of if (wetness_mm > 0) else ... no standing water
+double ETEquation::ActualET(int iduNdx, double pet_mm, double HRUnatSoilBox_mm, double vpd, float fc_mm, float wp_mm)
+{ // Calculate actual ET based on soil condition and relative humidity
+   float threshold_mm = 0.5f * (fc_mm - wp_mm) + wp_mm;
+   float vpd_scalar = 1.f; // on the unit interval, dimensionless
+   float fTheta = 0.f; // on the unit interval, dimensionless
 
-         evap_x_area_accum += evap_mm * idu_area_m2;
+   double vpdMin = 0.610; // 1.5f; // kPa
+   double vpdMax = 3.100; // 4.0f; // kPa
+   vpd_scalar = (float)((vpdMax - vpd) / (vpdMax - vpdMin));
+   if (vpd_scalar < 0.02) vpd_scalar = 0.02f; // clip to [0.02, 1.0]
+   else if (vpd_scalar > 1.f) vpd_scalar = 1.f;
 
-         GlobalMethod::m_iduIrrRequestArray[idu] += evap_mm;
-         GlobalMethod::m_iduVPDarray[idu] = (float)vpd;
-      } // end of loop through IDUs in this HRU
+   if (HRUnatSoilBox_mm > threshold_mm) fTheta = 1.0f; // wet conditions; ks = 1
+   else if (HRUnatSoilBox_mm <= wp_mm) fTheta = 0.f; // dry conditions; ks = 0
+   else
+   { // intermediate conditions; ks is a linear function of soilwater
+      float slope = 1.0F / (threshold_mm - wp_mm);
+      fTheta = (slope * ((float)HRUnatSoilBox_mm - wp_mm));
+   }
 
-      double hru_evap_mm = evap_x_area_accum / area_accum;
-      return(hru_evap_mm);
-   } // end of WetlandET()
+   gpFlowModel->SetAtt(iduNdx, F_THETA, fTheta);
+   gpFlowModel->SetAtt(iduNdx, VPD_SCALAR, vpd_scalar);
+
+   double aet_mm = pet_mm * (fTheta < vpd_scalar ? fTheta : vpd_scalar);
+   return(aet_mm);
+} // end of ActualET()
 
 
 double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
@@ -986,7 +999,7 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
    double ea = 0.0, vpd = 0.0;
    double sphumidity_kg_kg = gpFlowModel->Att(iduNdx, SPHUMIDITY);
    double tmax_C = gpFlowModel->Att(iduNdx, TMAX);
-   CalculateRelHumidity(sphumidity_kg_kg, temp_C, tmax_C, elev_mean_m, ea, vpd);
+   CalculateRelHumidity((float)sphumidity_kg_kg, (float)temp_C, (float)tmax_C, (float)elev_mean_m, ea, vpd);
 
    double rho = (float)1000.0 * P / (287.058 * (273.0 + temp_C));      // density of air : C (kg/m3) Shuttleworth 4.2.4. 
 
@@ -1011,8 +1024,8 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
    double fcd = 1.35 * relativeSolarRad - 0.35; //cloudiness function
 
    double tmin_C = gpFlowModel->Att(iduNdx, TMIN);
-   double tMinKelvin = ScienceFcns::degC_to_degK(tmin_C);
-   double tMaxKelvin = ScienceFcns::degC_to_degK(tmax_C);
+   double tMinKelvin = ScienceFcns::degC_to_degK((float)tmin_C);
+   double tMaxKelvin = ScienceFcns::degC_to_degK((float)tmax_C);
    double netLongWaveRad = sigma * fcd * (0.34 - 0.14 * sqrt(ea)) * ((pow(tMinKelvin, 4.0) + pow(tMaxKelvin, 4.0)) / 2.0);
 
    double netRadiation = netShortWaveRad - netLongWaveRad; //Net Radiation; MJ/(m^2 d)
@@ -1020,10 +1033,10 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
    double G = 0.0; //Soil Heat Flux Density : MJ/(d m^2)
 
    float height = 10.f;
-   int lulc_a = gpFlowModel->Att(iduNdx, LULC_A); // 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLULC_A, lulc_a);
+   int lulc_a = gpFlowModel->AttInt(iduNdx, LULC_A); // 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLULC_A, lulc_a);
    if (lulc_a == LULCA_FOREST)
    {
-      int pvt = gpFlowModel->Att(iduNdx, PVT);
+      int pvt = gpFlowModel->AttInt(iduNdx, PVT);
       if (pvt > 0) height = gpFlowModel->AttFloat(iduNdx, TREE_HT);
    }
 

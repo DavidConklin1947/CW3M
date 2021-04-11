@@ -1373,10 +1373,10 @@ TopoSetting::TopoSetting(double elev_m, double topoElevE_deg, double topoElevS_d
 
 double FlowModel::GetReachShade_a_lator_W_m2(Reach* pReach, double SW_unshaded_W_m2)
 {
-   double direction_deg = pReach->Att(DIRECTION);
-   double width_m = pReach->Att(WIDTHREACH);
+   double direction_deg = pReach->Att(ReachDIRECTION);
+   double width_m = pReach->Att(ReachWIDTHREACH);
    ASSERT(width_m > 0.);
-   double veg_ht_m = pReach->Att(VEGHTREACH);
+   double veg_ht_m = pReach->Att(ReachVEGHTREACH);
    double rad_sw_est_W_m2 = 0.;
    ASSERT(pReach->m_topo.m_vegDensity >= 0.);
    double shade_frac = pReach->m_topo.ShadeFrac(m_flowContext.dayOfYear, &rad_sw_est_W_m2, direction_deg, width_m, veg_ht_m);
@@ -1423,7 +1423,7 @@ WaterParcel Reach::GetReachDischargeWP() // Calculates and returns Q_DISCHARG
    ReachSubnode* pNode = (ReachSubnode*)m_subnodeArray[subnode];
    WaterParcel downstream_outflowWP = pNode->m_dischargeWP;
 
-   double q2wetl_cms = Att(Q2WETL);
+   double q2wetl_cms = Att(ReachQ2WETL);
    downstream_outflowWP.Discharge(q2wetl_cms * SEC_PER_DAY);
 
    return(downstream_outflowWP);
@@ -3191,6 +3191,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    EnvExtension::CheckCol(m_pIDUlayer, m_colIDU_ID, "IDU_ID", TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colHBVCALIB, "HBVCALIB", TYPE_INT, CC_AUTOADD);
+//x   m_pHRUlayer->CheckCol(m_colHruHBVCALIB, "HBVCALIB", TYPE_INT, CC_MUST_EXIST);
    EnvExtension::CheckCol(m_pIDUlayer, m_colECOREGION, "ECOREGION", TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colAREA, "AREA", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_AUTOADD);
@@ -3206,6 +3207,8 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pIDUlayer, m_colSPHUMIDITY, "SPHUMIDITY", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colRH, "RH", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colWINDSPEED, "WINDSPEED", TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pIDUlayer, m_colF_THETA, "F_THETA", TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pIDUlayer, m_colVPD_SCALAR, "VPD_SCALAR", TYPE_FLOAT, CC_AUTOADD);
 
    EnvExtension::CheckCol(m_pIDUlayer, m_colTMIN_GROW, "TMIN_GROW", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colPRCP_GROW, "PRCP_GROW", TYPE_FLOAT, CC_AUTOADD);
@@ -5342,7 +5345,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          {
             int reach_array_ndx = -1; m_pReachLayer->GetData(reachpoly_ndx, m_colReachREACH_NDX, reach_array_ndx);
             Reach* pReach = GetReachFromStreamIndex(reach_array_ndx);
-            double reach_q2wetl_cms = pReach->Att(Q2WETL);
+            double reach_q2wetl_cms = pReach->Att(ReachQ2WETL);
             if (reach_q2wetl_cms <= 0.) continue;
 
             hru_q2wetl_cms += reach_q2wetl_cms;
@@ -5350,7 +5353,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
             // Remove the water from the reach.
             // Remove it from each subreach in proportion as that subreach's volume is to the total volume of the reach.
-            double reach_h2o_m3 = pReach->Att(REACH_H2O);
+            double reach_h2o_m3 = pReach->Att(ReachREACH_H2O);
             int num_subreaches = (int)pReach->m_subnodeArray.GetSize();
             for (int subreach_ndx = 0; subreach_ndx < num_subreaches; subreach_ndx++)
             {
@@ -5362,7 +5365,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             // Add the water to the wetland IDUs associated with the reach.
             int wetl_ndx = pReach->m_wetlNdx;
             Wetland* pWetl = m_wetlArray[wetl_ndx];
-            WaterParcel reach_q2wetlWP(reach_q2wetl_m3, pReach->Att(TEMP_H2O));
+            WaterParcel reach_q2wetlWP(reach_q2wetl_m3, pReach->Att(ReachTEMP_H2O));
             pWetl->QtoWetland(reach_q2wetlWP);
          } // end of loop through reaches
          if (hru_q2wetl_cms <= 0.) continue;
@@ -5436,7 +5439,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
    double veg_ht_m = 0.;
    double lai_reach = 0.;
    double width_reach_m = 0.;
-   double width_given_m = Att(WIDTHGIVEN);
+   double width_given_m = Att(ReachWIDTHGIVEN);
    if (sal_reach)
    { // Shade-a-lator mode for this reach
       gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachVEG_HT_L, veg_ht_l_m);
@@ -5463,11 +5466,11 @@ bool Reach::CalcReachVegParamsIfNecessary()
       ASSERT(m_topo.m_vegDensity >= 0.);
       gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVGDNS_CALC, m_topo.m_vegDensity);
 
-      double width_calc_m = Att(WIDTH_CALC);
+      double width_calc_m = Att(ReachWIDTH_CALC);
       ASSERT(width_calc_m >= Att(WIDTH_MIN));
       width_reach_m = (width_given_m > 0.) ? width_given_m : width_calc_m;
    }
-   double orig_veg_ht_reach_m = Att(VEGHTREACH);
+   double orig_veg_ht_reach_m = Att(ReachVEGHTREACH);
    if (orig_veg_ht_reach_m == 0) // ??? temporary
       gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVEGHTREACH, veg_ht_m);
 
@@ -5628,7 +5631,7 @@ bool FlowModel::ProcessShade_a_latorInputData(Shade_a_latorData* pSAL, FDataObj*
 
       // Now we have reach values for topographic elevations, width, and vegetation height.
       m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTHGIVEN, width_m);
-      double width_min_m = pReach->Att(WIDTH_MIN);
+      double width_min_m = pReach->Att(ReachWIDTH_MIN);
       ASSERT(width_m >= width_min_m);
       if (width_m < width_min_m) width_m = width_min_m;
       m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTHREACH, width_m);
@@ -7651,7 +7654,31 @@ bool FlowModel::ResetCumulativeWaterYearValues()
    }
 
 
-double Reach::Att(int col)
+inline double HRU::Att(int hruCol)
+{
+   double attribute;
+   gpFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
+   return(attribute);
+} // end of HRU::Att()
+
+
+inline int HRU::AttInt(int hruCol)
+{
+   int attribute;
+   gpFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
+   return(attribute);
+} // end of HRU::AttInt()
+
+
+inline float HRU::AttFloat(int hruCol)
+{
+   float attribute;
+   gpFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
+   return(attribute);
+} // end of HRU::AttFloat()
+
+
+inline double Reach::Att(int col)
 {
    double attribute;
    pLayer->GetData(this->m_polyIndex, col, attribute);
@@ -7659,19 +7686,13 @@ double Reach::Att(int col)
 } // end of Reach::Att()
 
 
-void Reach::SetAtt(int col, double attValue)
+inline void Reach::SetAtt(int col, double attValue)
 {
    pLayer->SetDataU(this->m_polyIndex, col, attValue);
 } // end of Reach::SetAtt()
 
 
-void FlowModel::SetAtt(int IDUindex, int col, double attValue)
-{
-   m_pIDUlayer->SetDataU(IDUindex, col, attValue);
-} // end of SetAtt()
-
-
-double FlowModel::Att(int IDUindex, int col)
+inline double FlowModel::Att(int IDUindex, int col)
 {
    double attribute;
    m_pIDUlayer->GetData(IDUindex, col, attribute);
@@ -7679,7 +7700,7 @@ double FlowModel::Att(int IDUindex, int col)
 } // end of FlowModel:Att()
 
 
-int FlowModel::AttInt(int IDUindex, int col)
+inline int FlowModel::AttInt(int IDUindex, int col)
 {
    int attribute;
    m_pIDUlayer->GetData(IDUindex, col, attribute);
@@ -7687,7 +7708,7 @@ int FlowModel::AttInt(int IDUindex, int col)
 } // end of FlowModel:AttInt()
 
 
-float FlowModel::AttFloat(int IDUindex, int col)
+inline float FlowModel::AttFloat(int IDUindex, int col)
 {
    float attribute;
    m_pIDUlayer->GetData(IDUindex, col, attribute);
@@ -7695,7 +7716,19 @@ float FlowModel::AttFloat(int IDUindex, int col)
 } // end of FlowModel::AttFloat()
 
 
-Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.) 
+inline void FlowModel::SetAtt(int IDUindex, int col, double attValue)
+{
+   m_pIDUlayer->SetDataU(IDUindex, col, attValue);
+} // end of SetAtt()
+
+
+inline void FlowModel::SetAttFloat(int IDUindex, int col, float attValue)
+{
+   m_pIDUlayer->SetDataU(IDUindex, col, attValue);
+} // end of SetAttFloat()
+
+
+Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.)
 { 
    m_wetlID = wetlID; 
    m_wetlIDUndxArray.RemoveAll();
@@ -7960,9 +7993,9 @@ bool FlowModel::InitReaches(void)
 
       double width_calc_m = width_x_length_accum_m2 / pReach->m_length;
       m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachWIDTH_CALC, width_calc_m);
-      double width_given_m = pReach->Att(WIDTHGIVEN);
+      double width_given_m = pReach->Att(ReachWIDTHGIVEN);
       double width_reach_m = (width_given_m > 0. ) ? width_given_m : width_calc_m;
-      pReach->SetAtt(WIDTHREACH, width_reach_m);
+      pReach->SetAtt(ReachWIDTHREACH, width_reach_m);
       ASSERT(width_reach_m > 0.);
 
       } // end of loop through reaches

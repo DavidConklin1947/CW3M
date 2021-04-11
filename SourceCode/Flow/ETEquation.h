@@ -205,6 +205,9 @@ class ETEquation
 	  float Fao56();                                   // FAO56 Penman-Monteith equation with previously supplied data, if possible; return ET demand in mm/day
 	  float Hargreaves();                              // Hargreaves equation with previously supplied data, if possible; return ET demand in mm/day
 	  float KimbPenn();                                // Kimberly-Pennman equation with previously supplied data, if possible; return ET demand in mm/day or -1 if prequisite values were not provided
-     float WetlandET(HRU* pHRU);
      double PenmanMonteith(int iduNdx, double rh_pct, float lai);
+     double ActualET(int iduNdx, double pet_mm, double HRUnatSoilBox_mm, double vpd, float fc_mm, float wp_mm);
+   public:
+      void WetlandET(int idu, float soilH2O_mm, float fc_mm, float wp_mm, double * pPET_mm, double * pAET_mm);
+
    };

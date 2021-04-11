@@ -376,9 +376,7 @@ protected:
    int m_colIrrigation;				// IRRIGATION binary from Iffiragation decision
    int m_colIDUIndex;
 	int m_colYieldReduction;		// Yield Reduction Fraction
-   int m_colF_THETA;
    int m_colVPD;
-   int m_colVPD_SCALAR;
    int m_colRAD_SW;              // Shortwave radiation, W m-2
 
    int m_colHruPV_HERE;

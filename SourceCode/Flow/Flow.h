@@ -80,31 +80,35 @@ using namespace std;
 #define BEERS_LAW_K 0.5
 
 #define AREA gpFlowModel->m_colAREA
-#define DIRECTION gpFlowModel->m_colReachDIRECTION
+#define ReachDIRECTION gpFlowModel->m_colReachDIRECTION
 #define ECOREGION gpFlowModel->m_colECOREGION
 #define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
+#define F_THETA gpFlowModel->m_colF_THETA
 #define HBVCALIB gpFlowModel->m_colHBVCALIB
+//x #define HruHBVCALIB gpFlowModel->m_colHruHBVCALIB
 #define LAI gpFlowModel->m_colLAI
 #define LULC_A gpFlowModel->m_colLulcA
-#define Q_CAP gpFlowModel->m_colReachQ_CAP
-#define Q2WETL gpFlowModel->m_colReachQ2WETL
+#define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
+#define ReachQ_CAP gpFlowModel->m_colReachQ_CAP
+#define ReachQ2WETL gpFlowModel->m_colReachQ2WETL
 #define PVT gpFlowModel->m_colPVT
 #define RAD_SW gpFlowModel->m_colRAD_SW
-#define REACH_H2O gpFlowModel->m_colReachREACH_H2O
+#define ReachREACH_H2O gpFlowModel->m_colReachREACH_H2O
 #define SPHUMIDITY gpFlowModel->m_colSPHUMIDITY
 #define TEMP gpFlowModel->m_colTEMP
-#define TEMP_H2O gpFlowModel->m_colReachTEMP_H2O
+#define ReachTEMP_H2O gpFlowModel->m_colReachTEMP_H2O
 #define TMAX gpFlowModel->m_colTMAX
 #define TMIN gpFlowModel->m_colTMIN
 #define TREE_HT gpFlowModel->m_colTREE_HT
-#define VEGHTREACH gpFlowModel->m_colReachVEGHTREACH
+#define ReachVEGHTREACH gpFlowModel->m_colReachVEGHTREACH
+#define VPD_SCALAR gpFlowModel->m_colVPD_SCALAR
 #define WETL_CAP gpFlowModel->m_colWETL_CAP
 #define WETL_ID gpFlowModel->m_colWETL_ID
 #define WETNESS gpFlowModel->m_colWETNESS
-#define WIDTH_CALC gpFlowModel->m_colReachWIDTH_CALC
-#define WIDTH_MIN gpFlowModel->m_colReachWIDTH_MIN
-#define WIDTHGIVEN gpFlowModel->m_colReachWIDTHGIVEN
-#define WIDTHREACH gpFlowModel->m_colReachWIDTHREACH
+#define ReachWIDTH_CALC gpFlowModel->m_colReachWIDTH_CALC
+#define ReachWIDTH_MIN gpFlowModel->m_colReachWIDTH_MIN
+#define ReachWIDTHGIVEN gpFlowModel->m_colReachWIDTHGIVEN
+#define ReachWIDTHREACH gpFlowModel->m_colReachWIDTHREACH
 #define WINDSPEED gpFlowModel->m_colWINDSPEED
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
@@ -784,6 +788,9 @@ public:
    HRULayer *GetLayer( int i ) { return m_layerArray[ i ]; }
    int AddLayers( int soilLayerCount, int snowLayerCount, int vegLayerCount, float initWaterContent, float initTemperature, bool grid );
    bool DistributeToReaches(float amount);
+   double Att(int hruCol);
+   int AttInt(int hruCol);
+   float AttFloat(int hruCol);
    };
 
 
@@ -1523,6 +1530,7 @@ public:
    int AttInt(int IDUindex, int col); // value of IDU attribute
    float AttFloat(int IDUindex, int col); // value of IDU attribute
    void SetAtt(int IDUindex, int col, double attValue);
+   void SetAttFloat(int IDUindex, int col, float attValue);
    static double VegDensity(double lai);
    Reach* GetReachFromCOMID(int comid);
    Reach *GetReachFromStreamIndex( int index ) { return (Reach*) m_reachTree.GetReachNodeFromPolyIndex( index ); }
@@ -1828,6 +1836,8 @@ public:
    int m_colSPHUMIDITY;
    int m_colRH;
    int m_colWINDSPEED;
+   int m_colF_THETA;
+   int m_colVPD_SCALAR;
 
    int m_colTMIN_GROW;
    int m_colPRCP_GROW;

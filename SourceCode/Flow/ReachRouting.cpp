@@ -642,7 +642,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       double temp_h2o_air_slope = 0;
       double temp_h2o_air_intercept = 0;
       double rad_sw_net_W_m2 = pFlowContext->pFlowModel->GetReachShade_a_lator_W_m2(pReach, rad_sw_unshaded_W_m2);
-      double width_given_m = pReach->Att(WIDTHGIVEN);
+      double width_given_m = pReach->Att(ReachWIDTHGIVEN);
       for (int l = 0; l < pReach->GetSubnodeCount(); l++)
       {
          pFlowContext->pReach = pReach;
@@ -726,8 +726,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       double reach_width_calc_m = width_calc_x_length_accum / pReach->m_length;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachWIDTH_CALC, reach_width_calc_m);
 
-      if (pReach->Att(WIDTHGIVEN) > 0.) pReach->SetAtt(WIDTHREACH, width_given_m);
-      else pReach->SetAtt(WIDTHREACH, reach_width_calc_m);
+      if (pReach->Att(ReachWIDTHGIVEN) > 0.) pReach->SetAtt(ReachWIDTHREACH, width_given_m);
+      else pReach->SetAtt(ReachWIDTHREACH, reach_width_calc_m);
       ASSERT(reach_width_calc_m > 0.);
 
       double reach_depth_m = depth_x_length_accum / pReach->m_length;
@@ -739,7 +739,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
 
       // Wetlands stuff
       // Has the flow gone over the stream banks?
-      double q_cap_cms = pReach->Att(Q_CAP);
+      double q_cap_cms = pReach->Att(ReachQ_CAP);
       double q_cms = (pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY);
       if (q_cap_cms > 0 && q_cms > q_cap_cms)
       { // Flow has gone over the banks.
