@@ -4,6 +4,7 @@
 <Envision ver='5.0'>
 
   <settings
+    studyAreaName='WRB'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'
@@ -36,6 +37,8 @@
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
     coldStart                  ='0'
+
+    useWaterYears              ='0'
   />
   <!-- for debugging, to run for just 1 day in each year    maxDaysInYear ='1'
 -->
@@ -44,7 +47,7 @@
 
     <layer
       name         ='IDU'
-      path         ='IDU_CW3M.shp'
+      path         ='{studyAreaName}\IDU_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,0'
@@ -53,10 +56,9 @@
       overlayFields =''
       fieldInfoFile='idu.xml'
 	/>
-    
     <layer
   name         ='HRU'
-  path         ='HRU_CW3M.shp'
+  path         ='{studyAreaName}\HRU_{studyAreaName}.shp'
   type         ='0'
   includeData  ='1'
   color        ='0,0,155'
@@ -68,7 +70,7 @@
 
   <layer
       name         ='Reach'
-      path         ='Reach_CW3M.shp'
+      path         ='{studyAreaName}\Reach_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,155'

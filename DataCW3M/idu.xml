@@ -2707,6 +2707,11 @@ label:  readable field description
       <attr value="44" color="(0,0,0)" label="44 lower N. Santiam" />
       <attr value="45" color="(0,0,0)" label="45 lower Santiam" />
       <attr value="46" color="(0,0,0)" label="46 Clear Lake on McKenzie" />
+      <attr value="47" color="(0,0,0)" label="47 Smith R above Smith R Reservoir" />
+      <attr value="48" color="(0,0,0)" label="48 S Fork McKenzie above CGR" />
+      <attr value="49" color="(0,0,0)" label="49 Lookout Cr near Blue R" />
+      <attr value="50" color="(0,0,0)" label="50 Little N Santiam" />
+      <attr value="51" color="(0,0,0)" label="51 Blowout Cr on N Santiam" />
     </attributes>
   </field>
 

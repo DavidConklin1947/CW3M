@@ -287,7 +287,7 @@ delete[] m_myGeo;
 
 
 // {EASTING, NORTHING, COMID, HBVCALIB attribute value}, 
-#define NUM_HBV_CALIB_PTS 50
+#define NUM_HBV_CALIB_PTS 52
 double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
 { // These entries should be ordered so that upstream points in a drainage come before downstream points.
 // Coast Fork Willamette basin
@@ -328,7 +328,9 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
    { 514578, 4925728, 23785687, 36 }, // 36 S. Santiam near Waterloo WTLO
    { 0, 0, 23785607, 43}, // 43 lower S. Santiam
 // North Santiam basin
-   { 0, 0, 23780525, 12 }, //", 12, Detroit, ,
+   { 0, 0, 23780557, 51 }, // 51 Blowout Cr.
+   { 0, 0, 23780525, 12 }, // 12, Detroit, 
+   { 0, 0, 23780805, 52 }, // 52 Little N Santiam
    { 530169, 4959583, 23780481, 37 }, // 37 Mehama MEHO
    { 0, 0, 23780877, 44 }, // 44 lower N Santiam
 // Lower Santiam
