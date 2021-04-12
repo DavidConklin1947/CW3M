@@ -861,6 +861,8 @@ Reach::Reach(  )
 , m_reachAddedVolumeWP(0.,0.)
 , m_addedDischarge_cms(0.)
 , m_topo(0,0,0,0,44.21228,-122.25528)
+, m_wetlNdx(-1)
+, m_q2wetl_cms(0.)
    { }
 
 
@@ -1423,11 +1425,10 @@ WaterParcel Reach::GetReachDischargeWP() // Calculates and returns Q_DISCHARG
    ReachSubnode* pNode = (ReachSubnode*)m_subnodeArray[subnode];
    WaterParcel downstream_outflowWP = pNode->m_dischargeWP;
 
-   double q2wetl_cms = Att(ReachQ2WETL);
-   downstream_outflowWP.Discharge(q2wetl_cms * SEC_PER_DAY);
+   downstream_outflowWP.Discharge(m_q2wetl_cms * SEC_PER_DAY);
 
    return(downstream_outflowWP);
-} // end of GetReachDownstreamOutflowWP()
+} // end of GetReachDischargeWP()
 
 
 double Reach::GetUpstreamInflow( )
@@ -3227,6 +3228,8 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pIDUlayer, m_colCENTROIDX, "CENTROIDX", TYPE_LONG, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colCENTROIDY, "CENTROIDY", TYPE_LONG, CC_AUTOADD);
 
+   m_pHRUlayer->CheckCol(m_colHruHRU_ID, "HRU_ID", TYPE_INT, CC_MUST_EXIST);
+   m_pHRUlayer->CheckCol(m_colHruCOMID, "COMID", TYPE_INT, CC_MUST_EXIST);
    m_pIDUlayer->CheckCol(m_colWETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
    m_pIDUlayer->CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
    m_pIDUlayer->CheckCol(m_colWETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
@@ -5342,30 +5345,37 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          double hru_q2wetl_cms = 0.; // hru_q2wetl_m3 = 0.;
          int num_reaches_in_hru = (int)pHRU->m_reachNdxArray.GetCount();
          for (int reachpoly_ndx = 0; reachpoly_ndx < num_reaches_in_hru; reachpoly_ndx++)
-         {
+         { // Note that, although many of the deltas for reach attributes have been created already,
+            // the reach attributes in the Reach layer itself haven't been updated yet today.
             int reach_array_ndx = -1; m_pReachLayer->GetData(reachpoly_ndx, m_colReachREACH_NDX, reach_array_ndx);
             Reach* pReach = GetReachFromStreamIndex(reach_array_ndx);
-            double reach_q2wetl_cms = pReach->Att(ReachQ2WETL);
+            double reach_q2wetl_cms = pReach->m_q2wetl_cms;
             if (reach_q2wetl_cms <= 0.) continue;
 
             hru_q2wetl_cms += reach_q2wetl_cms;
             double reach_q2wetl_m3 = reach_q2wetl_cms * SEC_PER_DAY;
 
             // Remove the water from the reach.
+            WaterParcel reach_q2wetlWP(0, 0);
             // Remove it from each subreach in proportion as that subreach's volume is to the total volume of the reach.
-            double reach_h2o_m3 = pReach->Att(ReachREACH_H2O);
+            double reach_h2o_m3 = 0.;
             int num_subreaches = (int)pReach->m_subnodeArray.GetSize();
+            for (int subreach_ndx = 0; subreach_ndx < num_subreaches; subreach_ndx++) 
+               reach_h2o_m3 += pReach->GetReachSubnode(subreach_ndx)->m_waterParcel.m_volume_m3;
             for (int subreach_ndx = 0; subreach_ndx < num_subreaches; subreach_ndx++)
             {
                ReachSubnode* pSubreach = pReach->GetReachSubnode(subreach_ndx);
                double vol_frac = pSubreach->m_waterParcel.m_volume_m3 / reach_h2o_m3;
-               pSubreach->m_waterParcel.Discharge(vol_frac * reach_q2wetl_m3);                
+               double vol_m3 = vol_frac * reach_q2wetl_m3;
+               double h2o_temp_C = pSubreach->m_waterParcel.WaterTemperature();
+               WaterParcel subreach_q2wetlWP(vol_m3, h2o_temp_C);
+               pSubreach->m_waterParcel.Discharge(vol_m3);      
+               reach_q2wetlWP.MixIn(subreach_q2wetlWP);
             } // end of loop through the subreaches of this reach
 
             // Add the water to the wetland IDUs associated with the reach.
             int wetl_ndx = pReach->m_wetlNdx;
             Wetland* pWetl = m_wetlArray[wetl_ndx];
-            WaterParcel reach_q2wetlWP(reach_q2wetl_m3, pReach->Att(ReachTEMP_H2O));
             pWetl->QtoWetland(reach_q2wetlWP);
          } // end of loop through reaches
          if (hru_q2wetl_cms <= 0.) continue;
@@ -5385,7 +5395,8 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          double hru_q2wetl_m3 = hru_q2wetl_cms * SEC_PER_DAY;
          double hru_q2wetl_mm = (hru_q2wetl_m3 / pHRU->m_HRUtotArea_m2) * 1000.;
          pStandingH2Olayer->m_depth += (float)hru_q2wetl_mm;
-         pStandingH2Olayer->m_volumeWater += hru_q2wetl_m3;         
+         pStandingH2Olayer->m_volumeWater += hru_q2wetl_m3;        
+         pHRU->SetAtt(HruMELT_BOX, pStandingH2Olayer->m_volumeWater);
       } // end of loop through HRUs
 
       return(true);
@@ -5449,7 +5460,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
       gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVGDNSGIVEN, m_topo.m_vegDensity);
       lai_reach = pSAL->m_SALlai;
       width_reach_m = width_given_m;
-      ASSERT(width_reach_m >= Att(WIDTH_MIN));
+      ASSERT(width_reach_m >= Att(ReachWIDTH_MIN));
    }
    else 
    { // not Shade-a-lator mode for this reach
@@ -5467,7 +5478,7 @@ bool Reach::CalcReachVegParamsIfNecessary()
       gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVGDNS_CALC, m_topo.m_vegDensity);
 
       double width_calc_m = Att(ReachWIDTH_CALC);
-      ASSERT(width_calc_m >= Att(WIDTH_MIN));
+      ASSERT(width_calc_m >= Att(ReachWIDTH_MIN));
       width_reach_m = (width_given_m > 0.) ? width_given_m : width_calc_m;
    }
    double orig_veg_ht_reach_m = Att(ReachVEGHTREACH);
@@ -7678,6 +7689,12 @@ inline float HRU::AttFloat(int hruCol)
 } // end of HRU::AttFloat()
 
 
+inline void HRU::SetAtt(int col, double attValue)
+{
+   gpFlowModel->m_pHRUlayer->SetDataU(this->m_hruNdx, col, attValue);
+} // end of HRU::SetAtt()
+
+
 inline double Reach::Att(int col)
 {
    double attribute;
@@ -7728,7 +7745,7 @@ inline void FlowModel::SetAttFloat(int IDUindex, int col, float attValue)
 } // end of SetAttFloat()
 
 
-Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.)
+Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.), m_wetlHruID(-1)
 { 
    m_wetlID = wetlID; 
    m_wetlIDUndxArray.RemoveAll();
@@ -7754,6 +7771,7 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
          pWetl = new Wetland(wetl_id);
          m_wetlArray.Add(pWetl);
          pWetl->m_wetlNdx = wetl_ndx;
+         pWetl->m_wetlHruID = AttInt(idu, HRU_ID);
          num_wetlands++;
       }
       else pWetl = m_wetlArray[wetl_ndx];
@@ -7766,9 +7784,16 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
    // Now, for each wetland, rearrange the entries in m_wetlIDUndxArray into an order 
    // representing the order in which the wetland IDUs will be inundated,
    // i.e. from the IDU at the lowest elevation to the one at the highest elevation.
+   // Also, set pReach->m_wetlNdx for the reach that overflows into the wetland.
    for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
    {
       Wetland* pWetl = m_wetlArray[wetl_ndx];
+      int hru_ndx = m_pHRUlayer->FindIndex(HruHRU_ID, pWetl->m_wetlHruID);
+      HRU* pHRU = GetHRU(hru_ndx);
+      int comid = pHRU->AttInt(HruCOMID);
+      Reach* pReach = GetReachFromCOMID(comid);
+      pReach->m_wetlNdx = wetl_ndx;
+
       int num_idus = (int)pWetl->m_wetlIDUndxArray.GetSize();
       CArray <int, int> idus; idus.SetSize(num_idus);
       CArray <float, float> elevations; elevations.SetSize(num_idus);

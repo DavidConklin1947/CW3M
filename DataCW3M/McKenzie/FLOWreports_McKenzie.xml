@@ -38,6 +38,9 @@
       <output name="hru 1816 ET (mm per day)" query="HRU_ID=1816" value="ET_DAY" type="areaWtMean" domain="hru" />
       <output name="reach 23774413 Q_DISCHARG (cms)" query="COMID=23774413" value="Q_DISCHARG" type="sum" domain="reach" />
       <output name="reach 23774413 Q2WETL (cms)" query="COMID=23774413" value="Q2WETL" type="sum" domain="reach" />
+      <output name="reach 23774413 Q_CAP (cms)" query="COMID=23774413" value="Q_CAP" type="sum" domain="reach" />
+      <output name="idu 31325 WETL_CAP (mm)" query="IDU_ID=31325" value="WETL_CAP" type="areaWtMean" domain="idu" />
+      <output name="idu 31325 WETL2Q (cms)" query="IDU_ID=31325" value="WETL2Q" type="areaWtMean" domain="idu" />
     </output_group>
     
     <output_group name="FLOW Fire Indices Test" interval="daily" >

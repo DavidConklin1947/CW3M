@@ -737,18 +737,23 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       double turnover = (pReach->GetReachDischargeWP()).m_volume_m3 / volume_accum_m3;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachTURNOVER, turnover);
 
-      // Wetlands stuff
-      // Has the flow gone over the stream banks?
-      double q_cap_cms = pReach->Att(ReachQ_CAP);
-      double q_cms = (pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY);
-      if (q_cap_cms > 0 && q_cms > q_cap_cms)
-      { // Flow has gone over the banks.
-         double qspill_frc = 0.; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachQSPILL_FRC, qspill_frc);
-         double q2wetl_cms = q_cms * qspill_frc;
-         gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachQ2WETL, q2wetl_cms);
-      }
-
-
+      if (pReach->m_wetlNdx >= 0)
+      { // Wetlands stuff
+         pReach->m_q2wetl_cms = 0.; // Assume the flow remains within the stream banks.
+         double q_cap_cms = pReach->Att(ReachQ_CAP);
+         double q_cms = (pReach->GetReachDischargeWP().m_volume_m3 / SEC_PER_DAY);
+         // Has the flow actually remained within the stream banks?
+         if (q_cap_cms > 0)
+         {
+            if (q_cms > q_cap_cms)
+            { // Flow has gone over the banks.
+               double qspill_frc = pReach->Att(ReachQSPILL_FRC);
+               pReach->m_q2wetl_cms = (q_cms - q_cap_cms) * qspill_frc;
+            }
+            pReach->SetAtt(ReachQ2WETL, pReach->m_q2wetl_cms);
+         } // end of if (q_cap_cms > 0)
+      } // end of if (pReach->m_wetlNdx >= 0)
+      
    } // end of loop through reaches
 
    clock_t finish = clock();

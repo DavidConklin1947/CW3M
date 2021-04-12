@@ -1100,7 +1100,7 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
       float maxET = 0.0f; // mm/day
       float aet = 0.0f; // mm/day
 
-      ASSERT(pSoilTable != NULL);
+      ASSERT(m_pSoilTable != NULL);
       int hbvcalib = gpFlowModel->AttInt(idu, HBVCALIB);
       int ecoregion = gpFlowModel->AttInt(idu, ECOREGION);
       ASSERT(!((hbvcalib == 16 || hbvcalib == 25) && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)));

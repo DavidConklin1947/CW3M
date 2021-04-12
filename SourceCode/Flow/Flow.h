@@ -80,36 +80,43 @@ using namespace std;
 #define BEERS_LAW_K 0.5
 
 #define AREA gpFlowModel->m_colAREA
-#define ReachDIRECTION gpFlowModel->m_colReachDIRECTION
 #define ECOREGION gpFlowModel->m_colECOREGION
 #define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
 #define F_THETA gpFlowModel->m_colF_THETA
 #define HBVCALIB gpFlowModel->m_colHBVCALIB
-//x #define HruHBVCALIB gpFlowModel->m_colHruHBVCALIB
+#define HRU_ID gpFlowModel->m_colHRU_ID
 #define LAI gpFlowModel->m_colLAI
 #define LULC_A gpFlowModel->m_colLulcA
-#define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
-#define ReachQ_CAP gpFlowModel->m_colReachQ_CAP
-#define ReachQ2WETL gpFlowModel->m_colReachQ2WETL
 #define PVT gpFlowModel->m_colPVT
 #define RAD_SW gpFlowModel->m_colRAD_SW
-#define ReachREACH_H2O gpFlowModel->m_colReachREACH_H2O
 #define SPHUMIDITY gpFlowModel->m_colSPHUMIDITY
 #define TEMP gpFlowModel->m_colTEMP
-#define ReachTEMP_H2O gpFlowModel->m_colReachTEMP_H2O
 #define TMAX gpFlowModel->m_colTMAX
 #define TMIN gpFlowModel->m_colTMIN
 #define TREE_HT gpFlowModel->m_colTREE_HT
-#define ReachVEGHTREACH gpFlowModel->m_colReachVEGHTREACH
 #define VPD_SCALAR gpFlowModel->m_colVPD_SCALAR
 #define WETL_CAP gpFlowModel->m_colWETL_CAP
 #define WETL_ID gpFlowModel->m_colWETL_ID
 #define WETNESS gpFlowModel->m_colWETNESS
+#define WINDSPEED gpFlowModel->m_colWINDSPEED
+
+#define HruCOMID gpFlowModel->m_colHruCOMID
+#define HruHRU_ID gpFlowModel->m_colHruHRU_ID
+#define HruMELT_BOX gpFlowModel->m_colHruMELT_BOX
+#define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
+
+#define ReachDIRECTION gpFlowModel->m_colReachDIRECTION
+#define ReachQ_CAP gpFlowModel->m_colReachQ_CAP
+#define ReachQSPILL_FRC gpFlowModel->m_colReachQSPILL_FRC
+#define ReachQ2WETL gpFlowModel->m_colReachQ2WETL
+#define ReachREACH_H2O gpFlowModel->m_colReachREACH_H2O
+#define ReachTEMP_H2O gpFlowModel->m_colReachTEMP_H2O
+#define ReachVEGHTREACH gpFlowModel->m_colReachVEGHTREACH
 #define ReachWIDTH_CALC gpFlowModel->m_colReachWIDTH_CALC
 #define ReachWIDTH_MIN gpFlowModel->m_colReachWIDTH_MIN
 #define ReachWIDTHGIVEN gpFlowModel->m_colReachWIDTHGIVEN
 #define ReachWIDTHREACH gpFlowModel->m_colReachWIDTHREACH
-#define WINDSPEED gpFlowModel->m_colWINDSPEED
+
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *
@@ -791,6 +798,7 @@ public:
    double Att(int hruCol);
    int AttInt(int hruCol);
    float AttFloat(int hruCol);
+   void SetAtt(int col, double attValue);
    };
 
 
@@ -1019,7 +1027,10 @@ public:
    // reach-level parameters
    double Att(int col); 
    void SetAtt(int col, double attValue);
+
    int m_wetlNdx; // index into gpFlowModel->m_wetlArray[]; not the same as WETL_ID; -1 if the reach isn't associated with a wetland
+   double m_q2wetl_cms;
+
    TopoSetting m_topo;
    double m_reach_volume_m3;
    float m_wdRatio;
@@ -1481,6 +1492,7 @@ public:
 public:
    int m_wetlID;
    int m_wetlNdx;
+   int m_wetlHruID;
    double m_wetlArea_m2;
 
    // m_wetlIDUndxArray is an ordered list of the IDU polygon indices of the IDUs in the wetland.
@@ -1861,6 +1873,8 @@ public:
    int m_colWETL2Q;
    int m_colWETL_ID;
 
+   int m_colHruHRU_ID;
+   int m_colHruCOMID;
    int m_colHruTEMP;
    int m_colHruTMAX;
    int m_colHruTMIN;
