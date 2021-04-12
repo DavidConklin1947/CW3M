@@ -330,7 +330,7 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
 // North Santiam basin
    { 0, 0, 23780557, 51 }, // 51 Blowout Cr.
    { 0, 0, 23780525, 12 }, // 12, Detroit, 
-   { 0, 0, 23780805, 52 }, // 52 Little N Santiam
+   { 0, 0, 23780805, 50 }, // 50 Little N Santiam
    { 530169, 4959583, 23780481, 37 }, // 37 Mehama MEHO
    { 0, 0, 23780877, 44 }, // 44 lower N Santiam
 // Lower Santiam

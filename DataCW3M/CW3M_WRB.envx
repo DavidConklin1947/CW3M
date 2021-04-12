@@ -36,9 +36,8 @@
     exportDeltas               ='0'
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
-    coldStart                  ='0'
-
     useWaterYears              ='0'
+    coldStart                  ='0'
   />
   <!-- for debugging, to run for just 1 day in each year    maxDaysInYear ='1'
 -->
