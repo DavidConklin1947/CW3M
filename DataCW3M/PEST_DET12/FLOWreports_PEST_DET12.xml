@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<outputs>
+  
+  <output_group name="FLOW Q_DISCHARG at gage daily" interval="daily" >
+    <output in_use="1" name="adjusted Q_DISCHARG (cfs)" query="COMID=23780511" value="Q_DISCHARG*35.315*0.996" type="sum" domain="reach"
+    obs="..\Observations\NSantiam\USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511.csv" format="E0" />
+  </output_group>
+
+  <output_group name="FLOW Q_DISCHARG at gage monthly" interval="monthly" >
+    <output in_use="1" name="adjusted Q_DISCHARG (cfs)" query="COMID=23780511" value="Q_DISCHARG*35.315*0.996" type="sum" domain="reach"
+    obs="..\Observations\NSantiam\USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511.csv" format="E0" />
+  </output_group>
+
+  <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
+    <output in_use="1" name="ET from DET12 avg mm/day" query="HBVCALIB=12" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="ET from DET12 avg m3/day" query="HBVCALIB=12" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    <output in_use="1" name="ET from DET12 avg cfs" query="HBVCALIB=12" value="(ET_DAY*Area/1000)/86400" type="sum" domain="idu" />
+  </output_group>
+
+  <output_group name="FLOW DET12 water budget" interval="yearly" >
+    <output name="PRECIP (mm H2O)" query="HBVCALIB=12" value="PRECIP" type="areaWtMean" domain="idu" />
+    <output name="SNOW_EVAP (mm SWE)" query="HBVCALIB=12" value="SNOW_EVAP" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="ET from DET12 mm" query="HBVCALIB=12" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output name="SPRING_CMS" query="HBVCALIB=12" value="SPRING_CMS" type="sum" domain="reach" />
+    <output name="ADDED_VOL (m3)" query="HBVCALIB=12" value="ADDED_VOL" type="sum" domain="reach" />
+    <output in_use="1" name="adjusted Q_DISCHARG (cfs)" query="COMID=23780511" value="Q_DISCHARG*35.315*0.996" type="sum" domain="reach"
+    obs="..\Observations\NSantiam\USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511.csv" format="E0" />
+  </output_group>
+
+</outputs>

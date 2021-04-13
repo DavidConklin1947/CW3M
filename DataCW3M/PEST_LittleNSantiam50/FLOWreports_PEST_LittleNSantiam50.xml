@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<outputs>
+  <output_group name="FLOW Q_DISCHARG at gage daily" interval="daily" >
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780805" value="Q_DISCHARG*35.315*0.993" type="sum" domain="reach"
+    obs="..\Observations\NSantiam\USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
+  </output_group>
+
+  <output_group name="FLOW Q_DISCHARG at gage monthly" interval="monthly" >
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780805" value="Q_DISCHARG*35.315*0.993" type="sum" domain="reach"
+    obs="..\Observations\NSantiam\USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
+  </output_group>
+  
+  <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
+    <output in_use="1" name="ET from LittleNSantiam50 avg mm/day" query="HBVCALIB=50" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="ET from LittleNSantiam50 avg m3/day" query="HBVCALIB=50" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    <output in_use="1" name="ET from LittleNSantiam50 avg cfs" query="HBVCALIB=50" value="(ET_DAY*Area/1000)/86400" type="sum" domain="idu" />
+  </output_group>
+
+  <output_group name="FLOW LittleNSantiam50 water budget" interval="yearly" >
+    <output name="PRECIP (mm H2O)" query="HBVCALIB=50" value="PRECIP" type="areaWtMean" domain="idu" />
+    <output name="SNOW_EVAP (mm SWE)" query="HBVCALIB=50" value="SNOW_EVAP" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="ET from LittleNSantiam50 mm" query="HBVCALIB=50" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output name="SPRING_CMS" query="HBVCALIB=50" value="SPRING_CMS" type="sum" domain="reach" />
+    <output name="ADDED_VOL (m3)" query="HBVCALIB=50" value="ADDED_VOL" type="sum" domain="reach" />
+    <output in_use="1" name="adjusted Q_DISCHARG (cfs)" query="COMID=23780805" value="Q_DISCHARG*35.315*0.989" type="sum" domain="reach"
+    obs="..\Observations\NSantiam\USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
+  </output_group>
+<!--
+  <output name="SNOWPACK (mm SWE)" query="HBVCALIB=25" value="SNOWPACK" type="areaWtMean" domain="hru" />
+  <output name="MELTBOX (mm H2O)" query="HBVCALIB=25" value="MELT_BOX" type="areaWtMean" domain="hru" />
+  <output name="NAT_SOIL (mm H2O)" query="HBVCALIB=25" value="NAT_SOIL" type="areaWtMean" domain="hru" />
+  <output name="IRRIG_SOIL (mm H2O)" query="HBVCALIB=25" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
+  <output name="GW_FASTBOX (mm H2O)" query="HBVCALIB=25" value="GW_FASTBOX" type="areaWtMean" domain="hru" />
+  <output name="GW_SLOWBOX (mm H2O)" query="HBVCALIB=25" value="GW_SLOWBOX" type="areaWtMean" domain="hru" />
+  <output name="ADDED_CMS" query="HBVCALIB=25" value="ADDED_CMS" type="sum" domain="reach" />
+-->
+</outputs>
