@@ -5425,6 +5425,11 @@ bool Wetland::QtoWetland(WaterParcel toWetlWP) // Returns true if wetland absorb
       remaining_m3 -= to_this_idu_m3;
    } // end of loop through IDUs in this wetland
 
+   WaterParcel h2o_to_wetlandWP = toWetlWP; h2o_to_wetlandWP.Discharge(remaining_m3);
+   HRU* pHRU = gpFlowModel->GetHRU(m_wetlHruNdx);
+   HRULayer* pHruLayer = pHRU->GetLayer(BOX_STANDING_H2O); // Layer 1 is used for both standing water and meltwater in the snowpack.
+   pHruLayer->AddFluxFromGlobalHandler(h2o_to_wetlandWP.m_volume_m3, FL_SINK);
+
    bool Q_absorbed_by_wetland = remaining_m3 <= 0.;
    if (!Q_absorbed_by_wetland)
    { // Both the reach and the wetland are overflowing. A flood condition exists.
@@ -7788,8 +7793,8 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
    for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
    {
       Wetland* pWetl = m_wetlArray[wetl_ndx];
-      int hru_ndx = m_pHRUlayer->FindIndex(HruHRU_ID, pWetl->m_wetlHruID);
-      HRU* pHRU = GetHRU(hru_ndx);
+      pWetl->m_wetlHruNdx = m_pHRUlayer->FindIndex(HruHRU_ID, pWetl->m_wetlHruID);
+      HRU* pHRU = GetHRU(pWetl->m_wetlHruNdx);
       int comid = pHRU->AttInt(HruCOMID);
       Reach* pReach = GetReachFromCOMID(comid);
       pReach->m_wetlNdx = wetl_ndx;

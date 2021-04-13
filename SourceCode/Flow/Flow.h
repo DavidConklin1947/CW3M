@@ -1493,6 +1493,7 @@ public:
    int m_wetlID;
    int m_wetlNdx;
    int m_wetlHruID;
+   int m_wetlHruNdx; // Same index is used for the HRU shapefile and the internal HRU array.
    double m_wetlArea_m2;
 
    // m_wetlIDUndxArray is an ordered list of the IDU polygon indices of the IDUs in the wetland.
