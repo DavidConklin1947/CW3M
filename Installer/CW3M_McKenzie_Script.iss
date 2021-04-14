@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CW3M_McKenzie"
-#define MyAppVersion "McKenzie_0.4.11"
+#define MyAppVersion "McKenzie_0.4.12"
 ;#define MyAppVersion "x.x.x"
 #define MyAppPublisher "Oregon Freshwater Simulations, Inc."
 #define MyAppURL "http:/www.freshwatersim.com"
@@ -281,8 +281,43 @@ Source: "{#InputPath}\DataCW3M\NSantiam\IDU_NSantiam.shx"; DestDir: "\CW3M_{#MyA
 Source: "{#InputPath}\DataCW3M\NSantiam\Reach_NSantiam*"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
 Source: "{#InputPath}\DataCW3M\NSantiam\Reporter_NSantiam.xml"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
 
+Source: "{#InputPath}\DataCW3M\CW3M_PEST_Blowout51.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\PEST_Blowout51\FLOWreports_PEST_Blowout51.xml"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Blowout51"; 
+Source: "{#InputPath}\DataCW3M\PEST_Blowout51\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Blowout51"; 
+Source: "{#InputPath}\DataCW3M\PEST_Blowout51\HRU_PEST_Blowout51*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Blowout51"; 
+Source: "{#InputPath}\DataCW3M\PEST_Blowout51\IDU_PEST_Blowout51*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Blowout51"; 
+Source: "{#InputPath}\DataCW3M\PEST_Blowout51\Reach_PEST_Blowout51*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Blowout51"; 
+
+Source: "{#InputPath}\DataCW3M\CW3M_PEST_DET12.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\PEST_DET12\FLOWreports_PEST_DET12.xml"; DestDir: "\CW3M_{#MyAppVersion}\PEST_DET12"; 
+Source: "{#InputPath}\DataCW3M\PEST_DET12\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\PEST_DET12"; 
+Source: "{#InputPath}\DataCW3M\PEST_DET12\HRU_PEST_DET12*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_DET12"; 
+Source: "{#InputPath}\DataCW3M\PEST_DET12\IDU_PEST_DET12*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_DET12"; 
+Source: "{#InputPath}\DataCW3M\PEST_DET12\Reach_PEST_DET12*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_DET12"; 
+
+Source: "{#InputPath}\DataCW3M\CW3M_PEST_LittleNSantiam50.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\PEST_LittleNSantiam50\FLOWreports_PEST_LittleNSantiam50.xml"; DestDir: "\CW3M_{#MyAppVersion}\PEST_LittleNSantiam50"; 
+Source: "{#InputPath}\DataCW3M\PEST_LittleNSantiam50\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\PEST_LittleNSantiam50"; 
+Source: "{#InputPath}\DataCW3M\PEST_LittleNSantiam50\HRU_PEST_LittleNSantiam50*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_LittleNSantiam50"; 
+Source: "{#InputPath}\DataCW3M\PEST_LittleNSantiam50\IDU_PEST_LittleNSantiam50*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_LittleNSantiam50"; 
+Source: "{#InputPath}\DataCW3M\PEST_LittleNSantiam50\Reach_PEST_LittleNSantiam50*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_LittleNSantiam50"; 
+
+Source: "{#InputPath}\DataCW3M\CW3M_PEST_Mehama37.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\PEST_Mehama37\FLOWreports_PEST_Mehama37.xml"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Mehama37"; 
+Source: "{#InputPath}\DataCW3M\PEST_Mehama37\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Mehama37"; 
+Source: "{#InputPath}\DataCW3M\PEST_Mehama37\HRU_PEST_Mehama37*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Mehama37"; 
+Source: "{#InputPath}\DataCW3M\PEST_Mehama37\IDU_PEST_Mehama37*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Mehama37"; 
+Source: "{#InputPath}\DataCW3M\PEST_Mehama37\Reach_PEST_Mehama37*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_Mehama37"; 
+
+Source: "{#InputPath}\DataCW3M\CW3M_PEST_GreensBr44.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\PEST_GreensBr44\FLOWreports_PEST_GreensBr44.xml"; DestDir: "\CW3M_{#MyAppVersion}\PEST_GreensBr44"; 
+Source: "{#InputPath}\DataCW3M\PEST_GreensBr44\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\PEST_GreensBr44"; 
+Source: "{#InputPath}\DataCW3M\PEST_GreensBr44\HRU_PEST_GreensBr44*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_GreensBr44"; 
+Source: "{#InputPath}\DataCW3M\PEST_GreensBr44\IDU_PEST_GreensBr44*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_GreensBr44"; 
+Source: "{#InputPath}\DataCW3M\PEST_GreensBr44\Reach_PEST_GreensBr44*"; DestDir: "\CW3M_{#MyAppVersion}\PEST_GreensBr44"; 
+
 Source: "{#InputPath}\DataCW3M\CW3M_Marys.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
-Source: "{#InputPath}\DataCW3M\Marys\FLOWreports_Marys.xml"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
+;Source: "{#InputPath}\DataCW3M\Marys\FLOWreports_Marys.xml"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
 Source: "{#InputPath}\DataCW3M\Marys\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
 Source: "{#InputPath}\DataCW3M\Marys\HRU_Marys*"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
 Source: "{#InputPath}\DataCW3M\Marys\IDU_Marys.cpg"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 

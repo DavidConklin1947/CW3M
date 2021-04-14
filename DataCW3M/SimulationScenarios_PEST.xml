@@ -31,7 +31,7 @@
       <var vtype='1' inUse='0' name='Decision Elements' value='7.000000' />
     </vars>
   </scenario>
-<!--
+
   <scenario name='PEST_Spinup'
    originator='Dave Conklin, Oregon Freshwater Simulations'
    isEditable='1'
@@ -61,5 +61,5 @@
       <var vtype='1' inUse='0' name='Decision Elements' value='7.000000' />
     </vars>
   </scenario>
--->
+
 </scenarios>
