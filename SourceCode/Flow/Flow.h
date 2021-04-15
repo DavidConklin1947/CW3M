@@ -50,6 +50,7 @@ using namespace std;
 #define BOX_SNOW 0
 #define BOX_MELT 1
 #define BOX_STANDING_H2O 1
+#define BOX_SURFACE_H2O 1
 #define BOX_NAT_SOIL 2
 #define BOX_IRRIG_SOIL 3
 #define BOX_FAST_GW 4
@@ -85,10 +86,13 @@ using namespace std;
 #define F_THETA gpFlowModel->m_colF_THETA
 #define HBVCALIB gpFlowModel->m_colHBVCALIB
 #define HRU_ID gpFlowModel->m_colHRU_ID
+#define H2O_MELT gpFlowModel->m_colH2O_MELT
 #define LAI gpFlowModel->m_colLAI
 #define LULC_A gpFlowModel->m_colLulcA
 #define PVT gpFlowModel->m_colPVT
 #define RAD_SW gpFlowModel->m_colRAD_SW
+#define SM_DAY gpFlowModel->m_colSM_DAY
+#define SNOWPACK gpFlowModel->m_colSNOWPACK
 #define SPHUMIDITY gpFlowModel->m_colSPHUMIDITY
 #define TEMP gpFlowModel->m_colTEMP
 #define TMAX gpFlowModel->m_colTMAX
@@ -657,7 +661,8 @@ public:
    int m_id;            // unique identifier for this HRU
    int m_hruNdx; // index of this HRU in the HRUarray[], also row number in the HRU.shp file
 
-   bool m_standingH2Oflag; // true => "MELT_BOX" actually represents the volume of standing water in wetland IDUs in this HRU
+   bool m_standingH2Oflag; // true => there exists an IDU in this HRU which has standing water (can only happen for wetland IDUs)
+   bool m_snowpackFlag; // true => there exists an IDU in this HRU which has snow on the ground
    double m_wetlandArea_m2; // Update each year in FlowModel::StartYear()
    double m_infiltrationFromStandingH2O_m3; // Calculate in HBV daily process. Use to reduce WETNESS in Wetland daily process.
 
@@ -1615,6 +1620,7 @@ protected:
    int InitWetlands(void); // Returns the number of wetlands.
    bool InitCatchments( void );
    bool InitHRULayers(EnvContext*);
+   bool CheckHRUwaterBalance(HRU* pHRU);
    bool InitReservoirs( void );
    bool InitReservoirControlPoints( void );
    bool InitRunReservoirs( EnvContext* );
@@ -1829,6 +1835,7 @@ public:
    int m_colSM2ATM;
    int m_colSM2ATM_YR;
    int m_colSNOWPACK;
+   int m_colH2O_MELT;
    int m_colSNOWCANOPY;
    int m_colP_MINUS_ET;
 
