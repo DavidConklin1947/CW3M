@@ -175,7 +175,7 @@
      percentage out of the layer with the highest percentage of the total amount in all 3 layers-->
 
     <evap_trans name="ForestET" method="PM" use="1"
-     query="LULC_A!=2"
+     query="LULC_A!=2 {Ag} and LULC_A!=62 {Wetlands}"
      lulc_col="LULC_B"
      soil_col="HBVCALIB"
      soil_table="HBV_PEST.csv"
@@ -199,6 +199,19 @@
           longitude="123">
       <layers>
         <layer layer_distributions="(3,1)" query="IRRIGATION=1" />
+        <layer layer_distributions="(2,1)" />
+      </layers>
+    </evap_trans>
+
+    <evap_trans name="WetlandET" method="WetlandET" use="1"
+          query="LULC_A=62 {Wetlands}"
+          lulc_col="LULC_B"
+          soil_col="HBVCALIB"
+          soil_table="HBV.csv"
+          bulkStomatalResistance="150"
+          latitude="45"
+          longitude="123">
+      <layers>
         <layer layer_distributions="(2,1)" />
       </layers>
     </evap_trans>
@@ -278,6 +291,14 @@ COMID="23773009"
 flow_cms="1.10"
      temp_C="4.9"
        />
+    <Spring name="Marion Cr." COMID="23780673" flow_cfs="41" temp_C="4.9" />
+    <Spring name="Pamelia Cr." COMID="23780957" flow_cfs="23" temp_C="4.9" />
+    <Spring name="Whitewater Cr." COMID="23781597" flow_cfs="15" temp_C="4.9" />
+    <Spring name="Horn Cr." COMID="23781739" flow_cfs="31" temp_C="4.9" />
+    <Spring name="Boulder Cr." COMID="23780901" flow_cfs="60" temp_C="4.9" />
+    <Spring name="Blowout Cr." COMID="23780557" flow_cfs="9" temp_C="4.9" />
+    <Spring name="Breitenbush" COMID="23780701" flow_cfs="159" temp_C="4.9" />
+    <Spring name="French Cr." COMID="23780793" flow_cfs="155" temp_C="4.9" />
 
     <external name="MCfire"
             method="fn=MCfire.dll:CW3Mfire_DailyProcess"

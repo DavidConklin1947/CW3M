@@ -382,10 +382,6 @@ protected:
    int m_colHruPV_HERE;
 
    bool m_calcFracCGDD;          // Daily fraction of CGDD / Potential CGDD
-   float m_CO2_scalar;           // dimensionless, on the unit interval
-   int m_TurnerScenario; 
-   float m_atmCO2conc;           // [CO2] ppm in the atmosphere
-   FDataObj m_CO2effectMetrics;  // an output var for CO2, CO2_scalar, and effective bulk stomatal resistance
 
 public:
    int m_colLAI;
@@ -395,6 +391,10 @@ public:
 	int m_colAgrimetStationID;  // Agrimet Station ID
 
    static float M_effBulkStomatalResistance;
+   static float M_CO2_scalar;           // dimensionless, on the unit interval
+   static int M_TurnerScenario;
+   static float M_atmCO2conc;           // [CO2] ppm in the atmosphere
+   static FDataObj M_CO2effectMetrics;  // an output var for CO2, CO2_scalar, and effective bulk stomatal resistance
 
 protected:
    // soil table columns

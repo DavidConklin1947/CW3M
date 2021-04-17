@@ -647,7 +647,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
             if (wetness_mm > wetl_cap_mm)
             { // Yes.
                double wetl2q_mm = wetness_mm - wetl_cap_mm;
-               wetl2q_m3 = (wetl2q_mm / 1000.) * idu_area_m2; // ??? what happens when WETL2Q drives Q_DISCHARG above Q_CAP?
+               wetl2q_m3 = (wetl2q_mm / 1000.) * idu_area_m2;
                wetness_mm -= wetl2q_mm;
             } // end of if (wetness_mm > wetl_cap_mm)
 

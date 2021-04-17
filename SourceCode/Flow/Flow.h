@@ -84,6 +84,7 @@ using namespace std;
 #define ECOREGION gpFlowModel->m_colECOREGION
 #define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
 #define F_THETA gpFlowModel->m_colF_THETA
+#define FIELD_CAP gpFlowModel->m_colFIELD_CAP
 #define HBVCALIB gpFlowModel->m_colHBVCALIB
 #define HRU_ID gpFlowModel->m_colHRU_ID
 #define H2O_MELT gpFlowModel->m_colH2O_MELT
@@ -1621,6 +1622,7 @@ protected:
    bool InitCatchments( void );
    bool InitHRULayers(EnvContext*);
    bool CheckHRUwaterBalance(HRU* pHRU);
+   bool FixHRUwaterBalance(HRU* pHRU);
    bool InitReservoirs( void );
    bool InitReservoirControlPoints( void );
    bool InitRunReservoirs( EnvContext* );
@@ -1836,6 +1838,7 @@ public:
    int m_colSM2ATM_YR;
    int m_colSNOWPACK;
    int m_colH2O_MELT;
+   int m_colFIELD_CAP;
    int m_colSNOWCANOPY;
    int m_colP_MINUS_ET;
 

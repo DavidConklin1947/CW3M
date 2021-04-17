@@ -27,7 +27,10 @@ CArray< HRU*,  HRU*  > GlobalMethod::m_iduHruPtrArray;
 PtrArray< GlobalMethod > GlobalMethodManager::m_gmArray;
 
 int GlobalMethod::m_nextID = 1;
-
+float EvapTrans::M_CO2_scalar = 0.f;
+float EvapTrans::M_atmCO2conc = 0.f;
+int EvapTrans::M_TurnerScenario = 0;
+FDataObj EvapTrans::M_CO2effectMetrics;
 
 //CArray< bool, bool > GlobalMethod::m_hruIsT30FilledArray;
 //CArray< int, int > GlobalMethod::m_hruT30OldestIndexArray;

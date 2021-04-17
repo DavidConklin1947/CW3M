@@ -103,9 +103,6 @@ EvapTrans::EvapTrans( LPCTSTR name )
 , m_colEndGrowSeason( -1 )                                        // doy (=day of year) for end of growing season in idu layer column ("HARVDATE")
 , m_runCount( 0 )                                                 // run count for integration
 , m_ETEq( this )                                                  // the type of ET equation to use for calculation of the reference ET (ASCE, FAO56, Penn_Mont, Kimb_Penn, Hargreaves)
-, m_CO2_scalar(0.f)
-, m_atmCO2conc(0.f)
-, m_TurnerScenario(0) 
 
 , m_colTMIN(-1)
 , m_colTMIN_GROW(-1)
@@ -119,7 +116,7 @@ EvapTrans::EvapTrans( LPCTSTR name )
    {
    this->m_timing = GMT_CATCHMENT | GMT_START_STEP;               // Called during GetCatchmentDerivatives()
    this->m_ETEq.SetMode( ETEquation::HARGREAVES );                // default reference ET is Hargreaves
-   gpFlow->AddInputVar("Turner scenario", m_TurnerScenario, "0 = Isolate soil H2O effect on ET (default), 1 = Isolate climate effect on PET, 2 = Isolate CO2 effect on bulk resistance"
+   gpFlow->AddInputVar("Turner scenario", M_TurnerScenario, "0 = Isolate soil H2O effect on ET (default), 1 = Isolate climate effect on PET, 2 = Isolate CO2 effect on bulk resistance"
       ", 3 = Isolate evaporative demand effect on AET using MIROC climate, 4 = Isolate evaporative demand effect on AET using GFDL climate, 3 = Isolate evaporative demand effect on AET using HadGEM climate");
    }
 
@@ -163,6 +160,14 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
    if (m_dateEvapTransLastExecuted.year != 9999)
    { // EvapTrans::Init() will be executed once for each <evap_trans> block in Flow.xml.
       // Put stuff here which only needs to be executed the first time that EvapTrans::Init() is called.
+      M_CO2effectMetrics.SetName("EVTR CO2 Effect");
+      M_CO2effectMetrics.SetSize(5, 0);
+      M_CO2effectMetrics.SetLabel(0, "Year");
+      M_CO2effectMetrics.SetLabel(1, "weatherYear");
+      M_CO2effectMetrics.SetLabel(2, "atm CO2 conc (ppm)");
+      M_CO2effectMetrics.SetLabel(3, "CO2_factor");
+      M_CO2effectMetrics.SetLabel(4, "effective bulk stomatal resistance (s per m)");
+      gpFlow->AddOutputVar("EVTR CO2 effect", &M_CO2effectMetrics, "EVTR CO2 effect");
 
       m_dateEvapTransLastExecuted = SYSDATE(1, 1, 9999);
    } // end of if (m_dateEvapTransLastExecuted.year != 9999)
@@ -208,17 +213,8 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
    switch (m_method)
    {
       case GM_PENMAN_MONTEITH:
-      {
-         m_CO2effectMetrics.SetName("EVTR CO2 Effect");
-         m_CO2effectMetrics.SetSize(5, 0);
-         m_CO2effectMetrics.SetLabel(0, "Year");
-         m_CO2effectMetrics.SetLabel(1, "weatherYear");
-         m_CO2effectMetrics.SetLabel(2, "atm CO2 conc (ppm)");
-         m_CO2effectMetrics.SetLabel(3, "CO2_factor");
-         m_CO2effectMetrics.SetLabel(4, "effective bulk stomatal resistance (s per m)");
-         gpFlow->AddOutputVar("EVTR CO2 effect", &m_CO2effectMetrics, "EVTR CO2 effect");
-      }
-      break; // end of case GM_PENMAN_MONTEITH
+      case GM_WETLAND_ET:
+         break;
 
       case GM_FAO56:
       {
@@ -229,9 +225,6 @@ bool EvapTrans::Init( FlowContext *pFlowContext )
          m_phruCurrCGDDArray = new FDataObj(hruCount, max(0, m_cropCount), 0.0f);
       }
       break; // end of case GM_FAO56
-
-      case GM_WETLAND_ET:
-         break; // end of case GM_WETLAND_ET
 
       default: ASSERT(0); 
          break;
@@ -249,6 +242,7 @@ bool EvapTrans::InitRun( FlowContext *pFlowContext )
    if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
    { // In each simulation run, EvapTrans::InitRun() will be executed once for each <evap_trans> block in Flow.xml.
       // Put stuff here which only needs to be executed the first time that EvapTrans::InitRun() is called in a simulation run.
+      M_CO2effectMetrics.ClearRows();
 
       m_dateEvapTransLastExecuted = SYSDATE(1, 1, pFlowContext->pEnvContext->currentYear);
    } // end of if (m_dateEvapTransLastExecuted.year != pFlowContext->pEnvContext->currentYear)
@@ -256,10 +250,8 @@ bool EvapTrans::InitRun( FlowContext *pFlowContext )
    switch (m_method)
    {
       case GM_PENMAN_MONTEITH:
-      {
-         m_CO2effectMetrics.ClearRows();
-      }
-      break; // end of case GM_PENMAN_MONTEITH
+      case GM_WETLAND_ET:
+          break; 
 
       case GM_FAO56:
       {
@@ -271,9 +263,6 @@ bool EvapTrans::InitRun( FlowContext *pFlowContext )
          m_phruCurrCGDDArray = new FDataObj(hruCount, max(0, m_cropCount), 0.0f);
       }
       break; // end of case GM_FAO56
-
-      case GM_WETLAND_ET:
-         break; // end of case GM_WETLAND_ET
 
       default: ASSERT(0);
          break;
@@ -315,18 +304,18 @@ bool EvapTrans::StartYear( FlowContext *pFlowContext )
       } // end of loop thru IDUs
 
       // Calculate effective bulk stomatal resistance as a function of atmospheric CO2 concentration.
-      float CO2_factor = m_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
+      float CO2_factor = M_TurnerScenario == 2 ? 1.f : 0.f; // Proportional increase in the base resistance over the range of CO2 influence.
       float CO2min = 400.f; // parts per million
       float CO2max = 800.f; // parts per million
-      m_atmCO2conc = CO2byYear(pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName());
-      m_CO2_scalar = (m_atmCO2conc - CO2min) / (CO2max - CO2min);
-      if (m_CO2_scalar < 0.f) m_CO2_scalar = 0.f;
-      else if (m_CO2_scalar > 1.f) m_CO2_scalar = 1.f;
-      M_effBulkStomatalResistance = (float)(M_bulkStomatalResistance * (1.f + m_CO2_scalar * CO2_factor));
+      M_atmCO2conc = CO2byYear(pFlowContext->pEnvContext->weatherYear, pFlowContext->pFlowModel->GetScenarioName());
+      M_CO2_scalar = (M_atmCO2conc - CO2min) / (CO2max - CO2min);
+      if (M_CO2_scalar < 0.f) M_CO2_scalar = 0.f;
+      else if (M_CO2_scalar > 1.f) M_CO2_scalar = 1.f;
+      M_effBulkStomatalResistance = (float)(M_bulkStomatalResistance * (1.f + M_CO2_scalar * CO2_factor));
 
       CString msg;
-      msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, m_TurnerScenario = %d, m_atmCO2conc = %f, CO2_factor = %f, m_CO2_scalar = %f, M_effBulkStomatalResistance = %f",
-         pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), m_TurnerScenario, m_atmCO2conc, CO2_factor, m_CO2_scalar, M_effBulkStomatalResistance);
+      msg.Format("*** EvapTrans::StartYear() weatherYear = %d, scenarioName = %s, M_TurnerScenario = %d, M_atmCO2conc = %f, CO2_factor = %f, M_CO2_scalar = %f, M_effBulkStomatalResistance = %f",
+         pFlowContext->pEnvContext->weatherYear, (pFlowContext->pFlowModel->GetScenarioName()).GetString(), M_TurnerScenario, M_atmCO2conc, CO2_factor, M_CO2_scalar, M_effBulkStomatalResistance);
       Report::LogMsg(msg);
 
       m_dateEvapTransLastExecuted = SYSDATE(1, 1, pFlowContext->pEnvContext->currentYear);
@@ -548,14 +537,14 @@ bool EvapTrans::EndYear( FlowContext *pFlowContext )
    rowCO2effectMetrics.SetSize(5);
    rowCO2effectMetrics[0] = (float)pFlowContext->pEnvContext->currentYear;
    rowCO2effectMetrics[1] = (float)pFlowContext->pEnvContext->weatherYear;
-   rowCO2effectMetrics[2] = m_atmCO2conc;
-   rowCO2effectMetrics[3] = m_CO2_scalar;
+   rowCO2effectMetrics[2] = M_atmCO2conc;
+   rowCO2effectMetrics[3] = M_CO2_scalar;
    rowCO2effectMetrics[4] = M_effBulkStomatalResistance;
-   m_CO2effectMetrics.AppendRow(rowCO2effectMetrics);
+   M_CO2effectMetrics.AppendRow(rowCO2effectMetrics);
 
    if (pFlowContext->pEnvContext->startYear + pFlowContext->pEnvContext->yearOfRun == pFlowContext->pEnvContext->endYear)
    { // This is the end of the run.  Set the input variables back to their default values.
-      m_TurnerScenario = 0; 
+      M_TurnerScenario = 0; 
       m_dateEvapTransLastExecuted = SYSDATE(1, 1, 9999);
    }
 
@@ -1283,15 +1272,15 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
          }
 
          if (idu_soilwater_est_begin_mm > threshold) fTheta = 1.0f; // wet conditions; ks = 1
-         else if (idu_soilwater_est_begin_mm <= wp) fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : 0.f; // dry conditions; ks = 0
+         else if (idu_soilwater_est_begin_mm <= wp) fTheta = (M_TurnerScenario == 1 || M_TurnerScenario == 3 || M_TurnerScenario == 4 || M_TurnerScenario == 5) ? 1.f : 0.f; // dry conditions; ks = 0
          else
          { // intermediate conditions; ks is a linear function of soilwater
             float slope = 1.0F / (threshold - wp);
-            fTheta = (m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) ? 1.f : (slope * (idu_soilwater_est_begin_mm - wp));
+            fTheta = (M_TurnerScenario == 1 || M_TurnerScenario == 3 || M_TurnerScenario == 4 || M_TurnerScenario == 5) ? 1.f : (slope * (idu_soilwater_est_begin_mm - wp));
          }
-         if (m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) vpd_scalar = 1.f;
+         if (M_TurnerScenario == 3 || M_TurnerScenario == 4 || M_TurnerScenario == 5) vpd_scalar = 1.f;
          aet = maxET * (fTheta < vpd_scalar ? fTheta : vpd_scalar);
-         if ((m_TurnerScenario == 1 || m_TurnerScenario == 3 || m_TurnerScenario == 4 || m_TurnerScenario == 5) && (idu_soilwater_est_begin_mm - aet < wp)) phonyFlux = wp - (idu_soilwater_est_begin_mm - aet);
+         if ((M_TurnerScenario == 1 || M_TurnerScenario == 3 || M_TurnerScenario == 4 || M_TurnerScenario == 5) && (idu_soilwater_est_begin_mm - aet < wp)) phonyFlux = wp - (idu_soilwater_est_begin_mm - aet);
 
          // reset iduCropDemandArray
          m_iduIrrRequestArray[idu] = 0.0f;
