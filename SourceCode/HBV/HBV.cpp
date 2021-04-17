@@ -561,13 +561,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       float water_in_snowpack_mm = (float)(((water_in_snowpack_m3 / natural_area_m2)*1000.f > 0.0f) ? (water_in_snowpack_m3 / natural_area_m2)*1000.f : 0.0f); // mm
       HRULayer *pHRULayer0 = pHRU->GetLayer(BOX_SNOWPACK);
       float snow_in_snowpack_m3SWE = (float)pHRULayer0->m_volumeWater;
-      if (pHRU->m_standingH2Oflag && snow_in_snowpack_m3SWE > 0.)
-      {
-         CString msg;
-         msg.Format("HBV_IrrigatedSoil() Snow and standing water at the same time in HRU %d", pHRU->m_id);
-         Report::FatalMsg(msg);
-      }
-      float snow_in_snowpack_mmSWE = (float)(((snow_in_snowpack_m3SWE/natural_area_m2)*1000.f > 0.0f) ? (snow_in_snowpack_m3SWE / natural_area_m2)*1000.f : 0.0f); // mm
+      float snow_in_snowpack_mmSWE = (float)(((snow_in_snowpack_m3SWE/natural_area_m2)*1000.f > 0.0f) ? (snow_in_snowpack_m3SWE / natural_area_m2)*1000.f : 0.0f); 
 
       float hruIrrigatedArea = 0.0f;
       double hru_wetland_area_m2 = 0.;
@@ -610,7 +604,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       if (pHRU->m_standingH2Oflag)
       {
          double hru_standing_H2O_m3 = pHRU->GetLayer(BOX_STANDING_H2O)->m_volumeWater;
-         int idus_in_hru = pHRU->m_polyIndexArray.GetSize();
+         int idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize();
          double wetness_check_m3 = 0.;
 
          // How much room is there in the topsoil for more water to infiltrate from standing water?
@@ -664,7 +658,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       // gwNonIrrigated is the proportion of rain/snowmelt/infiltration_from_standing_H2O that bypasses the non-irrigated soil bucket, and is added directly to GW
       double infiltration_from_standing_H2O_mm = hru_non_irrigated_area_m2 > 0 ?
          ((infiltration_from_standing_H2O_m3 / hru_non_irrigated_area_m2) * 1000.) : 0;
-      float gwNonIrrigated = GroundWaterRechargeFraction(precip + infiltration_from_standing_H2O_mm, nonIrrigatedSoilWater_mm, fc, Beta);
+      float gwNonIrrigated = GroundWaterRechargeFraction((float)(precip + infiltration_from_standing_H2O_mm), nonIrrigatedSoilWater_mm, fc, Beta);
       if (h == hru_of_interest) 
          if (gwNonIrrigated >= 1.f)
          {
@@ -823,8 +817,8 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       rain_and_melt_to_soil_m3 = (float)(rain_and_melt_to_soil_mm * natural_area_m2 / 1000.f);
       double total_infiltration_m3 = rain_and_melt_to_soil_m3 + infiltration_from_standing_H2O_m3;
       rechargeToIrrigatedSoil_m3 = (irrigatedFracOfArea * rain_and_melt_to_soil_m3) * (1 - gwIrrigated); // Recharge into the irrigated soil bucket, from rain/melt
-      rechargeToNonIrrigatedSoil_m3 = ((1.f - irrigatedFracOfArea) * total_infiltration_m3) * (1 - gwNonIrrigated); // Recharge into the nonirrigated soil bucket, from rain/melt/standing water
-      rechargeToUpperGW_m3 = total_infiltration_m3 - rechargeToIrrigatedSoil_m3 - rechargeToNonIrrigatedSoil_m3;
+      rechargeToNonIrrigatedSoil_m3 = (float)(((1.f - irrigatedFracOfArea) * total_infiltration_m3) * (1 - gwNonIrrigated)); // Recharge into the nonirrigated soil bucket, from rain/melt/standing water
+      rechargeToUpperGW_m3 = (float)(total_infiltration_m3 - rechargeToIrrigatedSoil_m3 - rechargeToNonIrrigatedSoil_m3);
       if (rechargeToUpperGW_m3 < 0.f) rechargeToUpperGW_m3 = 0.f;
 
       pHRU->m_rainThrufall_mm = hruRainThrufall_mm; //mm/d
@@ -833,7 +827,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       pHRU->m_snowEvap_mm = (float)(hruSnowEvap_liters/natural_area_m2); // mm SWE
       pHRU->m_melt_mm = hruMelt_mm;
       pHRU->m_refreezing_mm =  refreezing_mm;
-      pHRU->m_infiltration_mm = (total_infiltration_m3 / natural_area_m2) * 1000.;
+      pHRU->m_infiltration_mm = (float)((total_infiltration_m3 / natural_area_m2) * 1000.);
       pHRU->m_infiltrationFromStandingH2O_m3 = infiltration_from_standing_H2O_m3;
       pHRU->m_rechargeToIrrigatedSoil_mm = (float)((rechargeToIrrigatedSoil_m3 / natural_area_m2) * 1000.f);
       pHRU->m_rechargeToNonIrrigatedSoil_mm = (float)((rechargeToNonIrrigatedSoil_m3 / natural_area_m2) * 1000.f);
@@ -871,9 +865,9 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
                pHRULayer->AddFluxFromGlobalHandler(hruRainThrufall_liters / 1000.0f, FL_TOP_SOURCE);     //m3/d
                if (pHRU->m_standingH2Oflag)
                { // This compartment represents wetland standing water.
-                  pHRULayer->AddFluxFromGlobalHandler(infiltration_from_standing_H2O_m3, FL_BOTTOM_SINK);     //m3/d
+                  pHRULayer->AddFluxFromGlobalHandler((float)infiltration_from_standing_H2O_m3, FL_BOTTOM_SINK);     //m3/d
                   if (hru_wetl2q_m3 > 0.)
-                     pHRULayer->AddFluxFromGlobalHandler(hru_wetl2q_m3, FL_STREAM_SINK);
+                     pHRULayer->AddFluxFromGlobalHandler((float)hru_wetl2q_m3, FL_STREAM_SINK);
                }
                else
                { // This compartment represents water in the snowpack.

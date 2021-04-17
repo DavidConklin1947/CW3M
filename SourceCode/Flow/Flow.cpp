@@ -3943,7 +3943,6 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pReachLayer->SetColDataU(m_colReachRESAREA_HA, 0);
    if (!InitRunReservoirs( pEnvContext )) return(false);
 
-   m_pIDUlayer->SetColDataU(m_colSNOWPACK, 0.f);
    m_pIDUlayer->SetColDataU(m_colSNOWCANOPY, 0.f);
    m_pIDUlayer->SetColDataU(m_colSM2ATM, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
@@ -4878,15 +4877,16 @@ bool FlowModel::ReadState()
 
       }
    else //read the file to populate initial conditions
-      {
+   {
       m_ICincludesWP = fileStateVarCount == model_state_var_countWP;
       float _val = 0;
       double h2o_temp_degC = -1;
+      bool water_balance_flag = true;
       for (int i = 0; i < hruCount; i++)
-         {
+      {
          HRU *pHRU = m_hruArray[i];
          for (int j = 0; j < hruLayerCount; j++)
-            {
+         {
             HRULayer *pLayer = pHRU->GetLayer(j);
             double orig_water_vol_m3 = 0.;
             fread(&orig_water_vol_m3, sizeof(double), 1, fp);
@@ -4897,8 +4897,15 @@ bool FlowModel::ReadState()
             // pLayer->m_hru_layer_h2oWP = WaterParcel(natural_water_vol_m3, h2o_temp_degC); // eventually
             tot_HRU_natural_vol_m3 += pLayer->m_volumeWater;
             tot_HRU_other_vol_m3 += other_water_vol_m3;
-            } // end of loop on HRU layers
-         } // end of loop on HRUs
+         } // end of loop on HRU layers
+         water_balance_flag &= CheckHRUwaterBalance(pHRU);
+      } // end of loop on HRUs
+      if (!water_balance_flag)
+      {
+         CString msg;
+         msg.Format("ReadState() HRU water balance failed.");
+         Report::WarningMsg(msg);
+      }
 
       for (int i = 0; i < reachCount; i++)
       {
@@ -4995,7 +5002,7 @@ bool FlowModel::ReadState()
          CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
       Report::LogMsg(msg);
 
-      }//end of else read the file to populate initial conditions
+   }//end of else read the file to populate initial conditions
 
    m_saveStateAtEndOfRun = true; // Always save the state at the end of the run in the user's Documents folder.
 
@@ -5449,8 +5456,6 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       for (int hru_ndx = 0; hru_ndx < num_hrus; hru_ndx++)
       {
          HRU* pHRU = GetHRU(hru_ndx);
-         HRULayer* pSnowLayer = pHRU->GetLayer(BOX_SNOW);
-         bool snow_flag = pSnowLayer->m_depth > 0.;
 
          double hru_q2wetl_cms = 0.; // hru_q2wetl_m3 = 0.;
          int num_reaches_in_hru = (int)pHRU->m_reachNdxArray.GetCount();
@@ -5489,13 +5494,6 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             pWetl->QtoWetland(reach_q2wetlWP);
          } // end of loop through reaches
          if (hru_q2wetl_cms <= 0.) continue;
-
-         if (snow_flag)
-         {
-            CString msg; msg.Format("ApplyQ2WETL() Snow and standing water at the same time. hru_id = %d", pHRU->m_id);
-            Report::ErrorMsg(msg);
-         }
-
          HRULayer* pStandingH2Olayer = pHRU->GetLayer(BOX_STANDING_H2O);
          if (!pHRU->m_standingH2Oflag)
          {
@@ -6826,7 +6824,6 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
          SetAtt(idu_poly_ndx, SM_DAY, hru_topsoil_h2o_mm);
       } // end of loop thru IDUs in this HRU
       ASSERT(close_enough(hru_area_m2, idu_area_accum_m2, 0.0001));
-      CheckHRUwaterBalance(pHRU);
    } // end of loop thru HRUs
    return true;
 } // end of InitHRULayers()
@@ -14323,30 +14320,39 @@ void FlowModel::GetNashSutcliffe(float *ns)
 
 
 void FlowModel::ResetStateVariables()
-   {
+{
    m_timeOffset = 0;
 
    m_isReadStateOK = ReadState(); // Read file including initial values for the state variables. 
+   bool hru_h2o_balance_flag = true;
    int catchmentCount = GetCatchmentCount();
    // iterate through catchments/hrus/hrulayers, calling fluxes as needed
    for ( int i = 0; i < catchmentCount; i++ )
-      {
+   {
       Catchment *pCatchment = GetCatchment(i);
       int hruCount = pCatchment->GetHRUCount();
       for ( int h = 0; h < hruCount; h++ )
-         {
+      {
          HRU *pHRU = pCatchment->GetHRU( h );
          int hruLayerCount = pHRU->GetLayerCount();
          float waterDepth = 0.0f;
          for ( int l = 0; l < hruLayerCount; l++ )     
-            {
+         {
             HRULayer *pHRULayer = pHRU->GetLayer( l );
             waterDepth += float((pHRULayer->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.0f ); // mm of total storage
-            }
+         } // end of loop thru compartments in HBV model
          pHRU->m_initStorage = waterDepth;
-         }
-      }
+         hru_h2o_balance_flag &= CheckHRUwaterBalance(pHRU);
+      } // end of loop thru hrus in this catchment
+   } // end of loop thru catchments
+
+   if (!hru_h2o_balance_flag)
+   {
+      CString msg;
+      msg.Format("ResetStateVariables() HRU water balance failed.");
+      Report::FatalMsg(msg);
    }
+} // end of ResetStateVariables()
 
 void FlowModel::GetTotalStorage(float &channel, float &terrestrial)
    {
