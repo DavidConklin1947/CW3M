@@ -6717,6 +6717,64 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
          HRU *pHRU = pCatchment->GetHRU( h );
          ASSERT( pHRU != NULL );
 
+         int hbvcalib = pHRU->AttInt(HruHBVCALIB);
+         ParamTable* pHBVparams = GetTable("HBV");
+         int col_fc = pHBVparams->GetFieldCol("FC");
+         float field_cap_mm = 0.;
+         pHBVparams->Lookup(hbvcalib, col_fc, field_cap_mm);
+
+         bool use_IDU_layer_values = true;
+         for (int idu_HRU_ndx = 0; use_IDU_layer_values && idu_HRU_ndx < pHRU->m_polyIndexArray.GetSize(); idu_HRU_ndx++)
+         {
+            int idu_poly_ndx = pHRU->m_polyIndexArray[idu_HRU_ndx];
+            float sm_day_mm = AttFloat(idu_poly_ndx, SM_DAY);
+            use_IDU_layer_values = 10. <= sm_day_mm && sm_day_mm < 1000.;
+         } // end of loop through IDUs
+
+         if (use_IDU_layer_values)
+         {
+            double sm_day_accum_m3 = 0., snowpack_accum_m3 = 0., h2o_melt_accum_m3 = 0.;
+            double positive_wetness_accum_m3 = 0., negative_wetness_accum_m3, wetland_area_accum_m2 = 0.;
+            for (int idu_HRU_ndx = 0; use_IDU_layer_values && idu_HRU_ndx < pHRU->m_polyIndexArray.GetSize(); idu_HRU_ndx++)
+            {
+               int idu_poly_ndx = pHRU->m_polyIndexArray[idu_HRU_ndx];
+               float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
+
+               float snowpack_mm = AttFloat(idu_poly_ndx, SNOWPACK); snowpack_accum_m3 += (snowpack_mm / 1000.) * idu_area_m2;
+               double h2o_melt_mm = Att(idu_poly_ndx, H2O_MELT); h2o_melt_accum_m3 += (h2o_melt_mm / 1000.) * idu_area_m2;
+               double wetness_mm = Att(idu_poly_ndx, WETNESS);
+               ASSERT(h2o_melt_mm == 0. || wetness_mm == 0.);
+               int lulc_a = AttInt(idu_poly_ndx, LULC_A);
+               if (lulc_a != LULCA_WETLAND)
+               { // This is not a wetland IDU.
+                 ASSERT(wetness_mm == 0.);
+                 float sm_day_mm = AttFloat(idu_poly_ndx, SM_DAY); sm_day_accum_m3 += (sm_day_mm / 1000.) * idu_area_m2;
+               }
+               else
+               { // This is a wetland IDU.
+                  wetland_area_accum_m2 += idu_area_m2;
+                  if (wetness_mm > 0.) positive_wetness_accum_m3 += (wetness_mm / 1000.) * idu_area_m2;
+                  else if (wetness_mm < 0.) negative_wetness_accum_m3 += (wetness_mm / 1000.) * idu_area_m2;
+               }
+            } // end of loop through IDUs
+
+            HRULayer* pBox_snowpack = pHRU->GetLayer(BOX_SNOWPACK); pBox_snowpack->m_volumeWater = snowpack_accum_m3;
+            double surface_h2o_m3 = h2o_melt_accum_m3 + positive_wetness_accum_m3;
+            HRULayer* pBox_surface_h2o = pHRU->GetLayer(BOX_SURFACE_H2O); pBox_surface_h2o->m_volumeWater = surface_h2o_m3;
+
+            double wetland_field_cap_m3 = (field_cap_mm / 1000.) * wetland_area_accum_m2;
+            double wetland_nat_soil_h2o_m3 = wetland_field_cap_m3 + negative_wetness_accum_m3;
+            double nat_soil_h2o_m3 = sm_day_accum_m3 + wetland_nat_soil_h2o_m3;
+            HRULayer* pBox_nat_soil = pHRU->GetLayer(BOX_NAT_SOIL); pBox_nat_soil->m_volumeWater = nat_soil_h2o_m3;
+            HRULayer* pBox_irrig_soil = pHRU->GetLayer(BOX_IRRIG_SOIL); pBox_irrig_soil->m_volumeWater = 0.;
+         } // end of if (use_IDU_layer_values)
+         else
+         { // Values in the IDU layer are not plausible.
+
+         } // end of if (use_IDU_layer_values) ... else 
+
+
+
          int hru_row = m_pHRUlayer->FindIndex(col_hruHRU_ID, pHRU->m_id);
 
          // Initialize m_frc_naturl to 1 and m_HRUeffArea_m2 to m_HRUtotArea_m2.  SWMM may calculate different values later. 
@@ -6739,9 +6797,9 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
             pBox->m_verticalDrainage = 0.0f;
             pBox->m_horizontalExchange = 0.0f;
             if (l <= BOX_MELT)
-            { // Aboveground soil water compartments: Layer[0] is Snow and Layer[1] is meltwater in snowpack or standing water in a wetland
+            { // Aboveground soil water compartments: Layer[0] is Snow and Layer[1] is meltwater in snowpack and standing water in a wetland
                pBox->m_volumeWater = 0.f;
-               if (gpModel->m_initWaterContent.GetSize() == hruLayerCount)//water content for each layer was specified
+               if (gpModel->m_initWaterContent.GetSize() == hruLayerCount) //water content for each layer was specified
                   pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * pHRU->m_HRUeffArea_m2;
             }
             else
