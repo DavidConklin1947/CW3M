@@ -28,6 +28,8 @@ using namespace alglib_impl;
 
 extern FlowProcess *gpFlow;
 extern FlowModel   *gpModel;
+extern FlowModel* gpFlowModel;
+
 
 int SortWrData(const void *e0, const void *e1);
 
@@ -405,8 +407,9 @@ void AltWaterMaster::SetUpstreamReachAttributes(Reach * pReach, int newValue, in
 
 bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
 {
-   MapLayer *pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
- 
+   MapLayer* pIDUlayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+   MapLayer* pHRUlayer = (MapLayer*)pFlowContext->pEnvContext->pHRUlayer;
+
    for (int iPt = 0; iPt < NUM_HBV_CALIB_PTS; iPt++) if (HBVcalibPts[iPt][2] == -99)
    {
       int idu_index = IDUatXY(HBVcalibPts[iPt][0], HBVcalibPts[iPt][1], pIDUlayer);
@@ -437,6 +440,7 @@ bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
    pStreamLayer->m_readOnly = readOnlyFlag;
 
    int missing_reach_count = 0;
+
    for (MapLayer::Iterator idu = pIDUlayer->Begin(); idu != pIDUlayer->End(); idu++)
    {
       int idu_comid = -1; pIDUlayer->GetData(idu, m_colCOMID, idu_comid);
@@ -452,6 +456,22 @@ bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
       }
       pIDUlayer->SetDataU(idu, m_colHBVCALIB, HBVcalib);
    }
+
+   int catchmentCount = (int)gpFlowModel->m_catchmentArray.GetSize();
+   for (int i = 0; i < catchmentCount; i++)
+   {
+      Catchment* pCatchment = gpFlowModel->m_catchmentArray[i];
+      int hruCount = pCatchment->GetHRUCount();
+      for (int h = 0; h < hruCount; h++)
+      {
+         HRU* pHRU = pCatchment->GetHRU(h);
+         int hru_comid = pHRU->AttInt(HruCOMID);
+         int reachNdx = pStreamLayer->FindIndex(m_colStreamCOMID, hru_comid);
+         Reach* pReach = gpFlowModel->m_reachArray[reachNdx];
+         int hbvcalib = pReach->AttInt(ReachHBVCALIB);
+         pHRU->SetAttInt(HruHBVCALIB, hbvcalib);
+      } // end of loop thru HRUs in this catchment
+   } // end of loop thru catchments
 
    return(true);
 } // end of PopulateHBVCALIB()

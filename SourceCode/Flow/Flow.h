@@ -106,11 +106,13 @@ using namespace std;
 #define WINDSPEED gpFlowModel->m_colWINDSPEED
 
 #define HruCOMID gpFlowModel->m_colHruCOMID
+#define HruHBVCALIB gpFlowModel->m_colHruHBVCALIB
 #define HruHRU_ID gpFlowModel->m_colHruHRU_ID
 #define HruMELT_BOX gpFlowModel->m_colHruMELT_BOX
 #define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
 
 #define ReachDIRECTION gpFlowModel->m_colReachDIRECTION
+#define ReachHBVCALIB gpFlowModel->m_colReachHBVCALIB
 #define ReachQ_CAP gpFlowModel->m_colReachQ_CAP
 #define ReachQSPILL_FRC gpFlowModel->m_colReachQSPILL_FRC
 #define ReachQ2WETL gpFlowModel->m_colReachQ2WETL
@@ -805,6 +807,7 @@ public:
    int AttInt(int hruCol);
    float AttFloat(int hruCol);
    void SetAtt(int col, double attValue);
+   void SetAttInt(int col, int attValue);
    };
 
 
@@ -836,7 +839,6 @@ public:
    float m_currentGroundLoss;
    float m_meltRate;
    float m_contributionToReach;    // m3/day
-
    CArray< HRU*, HRU* > m_hruArray;     // (memory managed in FlowModel::m_hruArray)
 
 
@@ -1032,7 +1034,9 @@ public:
 public:
    // reach-level parameters
    double Att(int col); 
+   int AttInt(int col);
    void SetAtt(int col, double attValue);
+   void SetAttInt(int col, int attValue);
 
    int m_wetlNdx; // index into gpFlowModel->m_wetlArray[]; not the same as WETL_ID; -1 if the reach isn't associated with a wetland
    double m_q2wetl_cms;
@@ -1728,8 +1732,6 @@ protected:
 
 protected:
    // various collections
-   PtrArray< Catchment > m_catchmentArray;         // list of catchments included in this model
-   PtrArray< HRU >       m_hruArray;               // list of HRUs included in this model, ordered as in the HRU shapefile
    IDataObj              *m_pHruGrid;               // a gridded form of the HRU array (useful for gridded models only)
    PtrArray< Reservoir > m_reservoirArray;         // list of reservoirs included in this model
    PtrArray< ControlPoint > m_controlPointArray;   // list of control points included in this model
@@ -1738,6 +1740,8 @@ public:
    CArray< Reach*, Reach* > m_reachArray;       // N.B. the index to m_ReachArray is not necessarily the same as the index to the corresponding reach in the Reach shapefile
 												// pReach->m_polyIndex is the index to the Reach shapefile
    CArray< Wetland *, Wetland *> m_wetlArray; // The index to m_wetlArray is not the same as WETL_ID.
+   PtrArray< Catchment > m_catchmentArray;         // list of catchments included in this model
+   PtrArray< HRU >       m_hruArray;               // list of HRUs included in this model, ordered as in the HRU shapefile
    CString m_path;
 
    // flux information
@@ -1886,6 +1890,7 @@ public:
 
    int m_colHruHRU_ID;
    int m_colHruCOMID;
+   int m_colHruHBVCALIB;
    int m_colHruTEMP;
    int m_colHruTMAX;
    int m_colHruTMIN;
