@@ -3639,9 +3639,9 @@ bool FlowModel::Init( EnvContext *pEnvContext )
       {
       Catchment *pCatchment = m_catchmentArray[i];
       areaTotal += pCatchment->m_area;
-      for (int j=0; j < pCatchment->GetHRUCount(); j++)
+      for (int j=0; j < pCatchment->GetHRUCountInCatchment(); j++)
          {
-         HRU *pHRU = pCatchment->GetHRU( j );
+         HRU *pHRU = pCatchment->GetHRUfromCatchment( j );
          for (int k=0;k < pHRU->m_polyIndexArray.GetSize(); k++)
             numPoly++;
          numHRU++;
@@ -3830,9 +3830,9 @@ void FlowModel::SummarizeIDULULC()
    for (int i = 0; i < m_catchmentArray.GetSize(); i++)
       {
       Catchment *pCatchment = m_catchmentArray[i];
-      for (int j = 0; j < pCatchment->GetHRUCount(); j++)
+      for (int j = 0; j < pCatchment->GetHRUCountInCatchment(); j++)
          {
-         HRU *pHRU = pCatchment->GetHRU(j);
+         HRU *pHRU = pCatchment->GetHRUfromCatchment(j);
          float meanLAI = 0.0f;
          float areaIrrigated = 0.0f;
          float totalArea = 0.0f;
@@ -6711,10 +6711,10 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
       Catchment *pCatchment = m_catchmentArray[ i ];
       ASSERT( pCatchment != NULL );
 
-      int hruCount = pCatchment->GetHRUCount();
+      int hruCount = pCatchment->GetHRUCountInCatchment();
       for ( int h=0; h < hruCount; h++ )
          {
-         HRU *pHRU = pCatchment->GetHRU( h );
+         HRU *pHRU = pCatchment->GetHRUfromCatchment( h );
          ASSERT( pHRU != NULL );
 
 // We should only need these next few lines temporarily 4/18/21
@@ -7633,9 +7633,9 @@ void FlowModel::UpdateYearlyDeltas(EnvContext *pEnvContext )
          Catchment *pCatchment = m_catchmentArray[ i ];
          HRU *pHRU = NULL;
 
-         for ( int j=0; j < pCatchment->GetHRUCount(); j++ )
+         for ( int j=0; j < pCatchment->GetHRUCountInCatchment(); j++ )
             {
-            HRU *pHRU = pCatchment->GetHRU( j );
+            HRU *pHRU = pCatchment->GetHRUfromCatchment( j );
 
             pHRU->m_temp_yr /= pEnvContext->daysInCurrentYear;   // note: assumed daily timestep
 
@@ -7679,9 +7679,9 @@ void FlowModel::GetMaxSnowPack(EnvContext *pEnvContext)
    for (int i = 0; i< catchmentCount; i++)
       {
       Catchment *pCatchment = m_catchmentArray[i];
-      for (int j = 0; j < pCatchment->GetHRUCount(); j++)
+      for (int j = 0; j < pCatchment->GetHRUCountInCatchment(); j++)
          {
-         HRU *pHRU = pCatchment->GetHRU(j);   
+         HRU *pHRU = pCatchment->GetHRUfromCatchment(j);
          if (pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater > 0.)
             // There is snow on the ground in this HRU.
             totalSnow += ((float)pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater + (float)pHRU->GetLayer(BOX_MELT)->m_volumeWater); //get the current year snowpack
@@ -7722,9 +7722,9 @@ void FlowModel::UpdateAprilDeltas(EnvContext *pEnvContext )
       for (int i=0; i< catchmentCount; i++)
          {
          Catchment *pCatchment = m_catchmentArray[ i ];
-         for ( int j=0; j < pCatchment->GetHRUCount(); j++ )
+         for ( int j=0; j < pCatchment->GetHRUCountInCatchment(); j++ )
             {
-            HRU *pHRU = pCatchment->GetHRU( j );
+            HRU *pHRU = pCatchment->GetHRUfromCatchment( j );
             for (int k=0; k< pHRU->m_polyIndexArray.GetSize();k++)
                {
                int idu = pHRU->m_polyIndexArray[k];
@@ -8682,9 +8682,9 @@ bool FlowModel::InitCatchments( void )
          Catchment *pCatchment = m_catchmentArray[ i ];
          HRU *pHRU = NULL;
 
-         for ( int j=0; j < pCatchment->GetHRUCount(); j++ )
+         for ( int j=0; j < pCatchment->GetHRUCountInCatchment(); j++ )
             {
-            HRU *pHRU = pCatchment->GetHRU( j );
+            HRU *pHRU = pCatchment->GetHRUfromCatchment( j );
 
             for (int k=0; k < pHRU->GetLayerCount(); k++ )
                {
@@ -8712,9 +8712,9 @@ bool FlowModel::SetAllCatchmentAttributes(void)
          {
          Catchment *pCatchment = m_catchmentArray[ i ];
          SetHRUAttributes( pCatchment );
-         for (int j = 0; j < pCatchment->GetHRUCount(); j++)
+         for (int j = 0; j < pCatchment->GetHRUCountInCatchment(); j++)
             {
-            HRU *pHRU = pCatchment->GetHRU(j);
+            HRU *pHRU = pCatchment->GetHRUfromCatchment(j);
 
             if (pHRU->m_elevation < 500.) area_below_500m += pHRU->m_HRUtotArea_m2;
             else if (pHRU->m_elevation < 1200.) area_500to1200m += pHRU->m_HRUtotArea_m2;
@@ -8735,10 +8735,10 @@ bool FlowModel::SetHRUAttributes( Catchment *pCatchment )
    {
    HRU *pHRU = NULL;
    pCatchment->m_area=0.0f;
-   for ( int j=0; j < pCatchment->GetHRUCount(); j++ )
+   for ( int j=0; j < pCatchment->GetHRUCountInCatchment(); j++ )
       {
       float area=0.0f; float elevation=0.0f;float _elev=0.0f;
-      HRU *pHRU = pCatchment->GetHRU( j );
+      HRU *pHRU = pCatchment->GetHRUfromCatchment( j );
 
       pHRU->m_HRUtotArea_m2 = 0;
 
@@ -9218,9 +9218,9 @@ bool FlowModel::BuildCatchmentsFromQueries( void )
 
             // does it satisfy an existing HRU for this catchment?
             HRU *pHRU = NULL;
-            for ( int k=0; k < pCatchment->GetHRUCount(); k++ )
+            for ( int k=0; k < pCatchment->GetHRUCountInCatchment(); k++ )
                {
-               HRU *_pHRU = pCatchment->GetHRU( k );
+               HRU *_pHRU = pCatchment->GetHRUfromCatchment( k );
               // _pHRU->m_hruValueArray.SetSize(hruCols);
                ASSERT( _pHRU != NULL );
                ASSERT( _pHRU->m_polyIndexArray.GetSize() > 0 );
@@ -9400,9 +9400,9 @@ bool FlowModel::BuildCatchmentsFromQueries( void )
 
          // catchment covered, now do HRU's
          HRU *pHRU = NULL;
-         for (int j = 0; j < pCatchment->GetHRUCount(); j++)
+         for (int j = 0; j < pCatchment->GetHRUCountInCatchment(); j++)
          {
-            HRU *_pHRU = pCatchment->GetHRU(j);
+            HRU *_pHRU = pCatchment->GetHRUfromCatchment(j);
 
             if (_pHRU->m_id == hruID)
             {
@@ -9533,9 +9533,9 @@ int FlowModel::BuildCatchmentFromPolygons( Catchment *pCatchment, int polyArray[
 
       // does it satisfy an existing HRU for this catchment?
       HRU *pHRU = NULL;
-      for ( int k=0; k < pCatchment->GetHRUCount(); k++ )
+      for ( int k=0; k < pCatchment->GetHRUCountInCatchment(); k++ )
          {
-         HRU *_pHRU = pCatchment->GetHRU( k );
+         HRU *_pHRU = pCatchment->GetHRUfromCatchment( k );
          // _pHRU->m_hruValueArray.SetSize(hruCols);
          ASSERT( _pHRU != NULL );
          ASSERT( _pHRU->m_polyIndexArray.GetSize() > 0 );         
@@ -9765,9 +9765,9 @@ bool FlowModel::ConnectCatchmentsToReaches(void)
       // we connect this catchment to the reach with the matching join ID
       //  ASSERT( pCatchment->GetHRUCount() > 0 );
 
-      if (pCatchment->GetHRUCount() > 0)
+      if (pCatchment->GetHRUCountInCatchment() > 0)
       {
-         HRU *pHRU = pCatchment->GetHRU(0);
+         HRU *pHRU = pCatchment->GetHRUfromCatchment(0);
          m_pCatchmentLayer->GetData(pHRU->m_polyIndexArray[0], m_colCatchmentJoin, catchmentJoinID);
 
          // look for this catchID in the reaches
@@ -10510,7 +10510,7 @@ int FlowModel::SimplifyNetwork( void )
    int startHRUCount=0;
    
    for ( int i=0; i < (int) m_catchmentArray.GetSize(); i++ )
-      startHRUCount += m_catchmentArray[i]->GetHRUCount();
+      startHRUCount += m_catchmentArray[i]->GetHRUCountInCatchment();
 
    CString msg( "Flow: Simplifying Catchments/Reaches: " );
 
@@ -10604,11 +10604,11 @@ int FlowModel::SimplifyNetwork( void )
    for ( int i=0; i < (int) m_catchmentArray.GetSize(); i++ )
       {
       Catchment *pCatchment = m_catchmentArray[ i ];
-      finalHRUCount += pCatchment->GetHRUCount();
+      finalHRUCount += pCatchment->GetHRUCountInCatchment();
 
-      for ( int j=0; j < pCatchment->GetHRUCount(); j++ )
+      for ( int j=0; j < pCatchment->GetHRUCountInCatchment(); j++ )
          {
-         HRU *pHRU = pCatchment->GetHRU( j );
+         HRU *pHRU = pCatchment->GetHRUfromCatchment( j );
          ASSERT( pHRU != NULL );
          areaTotal += pHRU->m_HRUtotArea_m2;
 
@@ -10991,13 +10991,13 @@ int FlowModel::MoveCatchments( Reach *pToReach, ReachNode *pFromNode, bool recur
 int FlowModel::CombineCatchments( Catchment *pTargetCatchment, Catchment *pSourceCatchment, bool deleteSource )
    {
    // get list of polygons to move from soure to target
-   int hruCount = pSourceCatchment->GetHRUCount();
+   int hruCount = pSourceCatchment->GetHRUCountInCatchment();
 
    CArray< int > polyArray;
 
    for ( int i=0; i < hruCount; i++ )
       {
-      HRU *pHRU = pSourceCatchment->GetHRU( i );
+      HRU *pHRU = pSourceCatchment->GetHRUfromCatchment( i );
       
       for ( int j=0; j < pHRU->m_polyIndexArray.GetSize(); j++ )
          polyArray.Add( pHRU->m_polyIndexArray[ j ] ); 
@@ -11031,11 +11031,11 @@ int FlowModel::CombineCatchments( Catchment *pTargetCatchment, Catchment *pSourc
 
 int FlowModel::RemoveCatchmentHRUs( Catchment *pCatchment )
    {
-   int count = pCatchment->GetHRUCount();
+   int count = pCatchment->GetHRUCountInCatchment();
    // first, remove from FlowModel
    for ( int i=0; i < count; i++ )
       {
-      HRU *pHRU = pCatchment->GetHRU( i );
+      HRU *pHRU = pCatchment->GetHRUfromCatchment( i );
       this->m_hruArray.Remove( pHRU );    // deletes the HHRU
       }
 
@@ -11513,9 +11513,9 @@ int FlowModel::AllocateFluxes( FluxInfo *pFluxInfo, Query *pQuery, FLUXLOCATION 
             {
             Catchment *pCatchment = m_catchmentArray[ i ];
 
-            for ( int h=0; h < pCatchment->GetHRUCount(); h++ )
+            for ( int h=0; h < pCatchment->GetHRUCountInCatchment(); h++ )
                {
-               HRU *pHRU = pCatchment->GetHRU( h );
+               HRU *pHRU = pCatchment->GetHRUfromCatchment( h );
 
                // assume that if a majority of idu's satisfy the query, the flux applies to the HRU
                int countSoFar = 0;
@@ -11669,7 +11669,7 @@ bool FlowModel::InitIntegrationBlocks( void )
    int hruSvCount = 0;
    for ( int i=0; i < catchmentCount; i++ )
       {
-      int count = m_catchmentArray[ i ]->GetHRUCount();
+      int count = m_catchmentArray[ i ]->GetHRUCountInCatchment();
       hruSvCount += ( count * hruLayerCount );
       }
 
@@ -11686,15 +11686,15 @@ bool FlowModel::InitIntegrationBlocks( void )
    hruSvCount = 0;
    for ( int i=0; i < catchmentCount; i++ )
       {
-      int count = m_catchmentArray[ i ]->GetHRUCount();
+      int count = m_catchmentArray[ i ]->GetHRUCountInCatchment();
 
       for ( int j=0; j < count; j++ )
          {
-         HRU *pHRU = m_catchmentArray[i]->GetHRU( j );
+         HRU *pHRU = m_catchmentArray[i]->GetHRUfromCatchment( j );
 
          for ( int k=0; k < hruLayerCount; k++ )
             {
-            HRULayer *pHRULayer = m_catchmentArray[ i ]->GetHRU( j )->GetLayer( k );
+            HRULayer *pHRULayer = m_catchmentArray[ i ]->GetHRUfromCatchment( j )->GetLayer( k );
 
             pHRULayer->m_svIndex = hruSvCount;
             m_hruBlock.SetStateVar(  &(pHRULayer->m_volumeWater), hruSvCount++ );
@@ -14186,7 +14186,7 @@ bool FlowModel::GetCatchmentData( Catchment *pCatchment, int col, VData &value, 
    {
    if ( method == DAM_FIRST )
       {
-      HRU *pHRU = pCatchment->GetHRU( 0 );
+      HRU *pHRU = pCatchment->GetHRUfromCatchment( 0 );
       if ( pHRU == NULL || pHRU->m_polyIndexArray.IsEmpty() )
          return false;
 
@@ -14196,10 +14196,10 @@ bool FlowModel::GetCatchmentData( Catchment *pCatchment, int col, VData &value, 
       {
       DataAggregator da( m_pCatchmentLayer );
 
-      int hruCount = pCatchment->GetHRUCount();
+      int hruCount = pCatchment->GetHRUCountInCatchment();
       for ( int i=0; i < hruCount; i++ )
          {
-         HRU *pHRU = pCatchment->GetHRU( i );
+         HRU *pHRU = pCatchment->GetHRUfromCatchment( i );
 
          da.AddPolys( (int*)(pHRU->m_polyIndexArray.GetData()),
                       (int ) pHRU->m_polyIndexArray.GetSize() );
@@ -14247,9 +14247,9 @@ bool FlowModel::SetCatchmentData( Catchment *pCatchment, int col, VData value )
    if ( col < 0 )
       return false;
 
-   for ( int i=0; i < pCatchment->GetHRUCount(); i++ )
+   for ( int i=0; i < pCatchment->GetHRUCountInCatchment(); i++ )
       {
-      HRU *pHRU = pCatchment->GetHRU( i );
+      HRU *pHRU = pCatchment->GetHRUfromCatchment( i );
       
       for ( int j=0; j < (int) pHRU->m_polyIndexArray.GetSize(); j++ )
          m_pCatchmentLayer->SetData( pHRU->m_polyIndexArray[ j ], col, value );
@@ -14413,10 +14413,10 @@ void FlowModel::ResetStateVariables()
    for ( int i = 0; i < catchmentCount; i++ )
    {
       Catchment *pCatchment = GetCatchment(i);
-      int hruCount = pCatchment->GetHRUCount();
+      int hruCount = pCatchment->GetHRUCountInCatchment();
       for ( int h = 0; h < hruCount; h++ )
       {
-         HRU *pHRU = pCatchment->GetHRU( h );
+         HRU *pHRU = pCatchment->GetHRUfromCatchment( h );
          int hruLayerCount = pHRU->GetLayerCount();
          float waterDepth = 0.0f;
          for ( int l = 0; l < hruLayerCount; l++ )     
@@ -14445,10 +14445,10 @@ void FlowModel::GetTotalStorage(float &channel, float &terrestrial)
    for ( int i=0; i < catchmentCount; i++ )
       {
       Catchment *pCatchment = GetCatchment(i);
-      int hruCount = pCatchment->GetHRUCount();
+      int hruCount = pCatchment->GetHRUCountInCatchment();
       for ( int h=0; h < hruCount; h++ )
          {
-         HRU *pHRU = pCatchment->GetHRU( h );
+         HRU *pHRU = pCatchment->GetHRUfromCatchment( h );
          int hruLayerCount=pHRU->GetLayerCount();
          for ( int l=0; l < hruLayerCount; l++ )     
             {

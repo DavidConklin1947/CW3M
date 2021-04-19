@@ -859,9 +859,9 @@ public:
    // Constructor/destructor
    Catchment( void );
 
-   int  GetHRUCount( void )   { return (int) m_catchmentHruArray.GetSize(); }
+   int  GetHRUCountInCatchment( void )   { return (int) m_catchmentHruArray.GetSize(); }
    //int  AddHRU( HRU *pHRU )   { m_hruArray.Add( pHRU ); pHRU->m_pCatchment = this; return (int) m_hruArray.GetSize(); }
-   HRU *GetHRU( int i )       { return m_catchmentHruArray[ i ]; }
+   HRU *GetHRUfromCatchment( int i )       { return m_catchmentHruArray[ i ]; }
    //void RemoveHRU( int i )    { return m_hruArray.RemoveAt( i ); }
    //void RemoveAllHRUs( void ) { m_area = 0; m_hruArray.RemoveAll(); }
 

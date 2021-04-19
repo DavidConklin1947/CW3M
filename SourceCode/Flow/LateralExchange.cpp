@@ -49,10 +49,10 @@ bool LateralExchange::SetGlobalHruToReachExchangesLinearRes( void )
       Catchment *pCatchment = gpModel->GetCatchment( i ); //m_catchmentArray[ i ];
       ASSERT( pCatchment != NULL );
 
-      int hruCount = pCatchment->GetHRUCount();
+      int hruCount = pCatchment->GetHRUCountInCatchment();
       for ( int h=0; h < hruCount; h++ )
          {
-         HRU *pHRU = pCatchment->GetHRU( h );
+         HRU *pHRU = pCatchment->GetHRUfromCatchment( h );
          
          int l = hruLayerCount-1;      // bottom layer only
          HRULayer *pHRULayer = pHRU->GetLayer( l );

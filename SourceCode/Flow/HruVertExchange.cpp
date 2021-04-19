@@ -47,11 +47,11 @@ bool HruVertExchange::SetGlobalHruVertFluxesBrooksCorey( void )
    for ( int i=0; i < catchmentCount; i++ )
       {
       Catchment *pCatchment = gpModel->GetCatchment( i );
-      int hruCount = pCatchment->GetHRUCount();
+      int hruCount = pCatchment->GetHRUCountInCatchment();
 
       for ( int h=0; h < hruCount; h++ )
          {
-         HRU *pHRU = pCatchment->GetHRU( h );
+         HRU *pHRU = pCatchment->GetHRUfromCatchment( h );
 
          for ( int l=0; l < hruLayerCount-1; l++ )     //All but the bottom layer
             {
