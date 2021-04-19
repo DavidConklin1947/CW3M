@@ -11040,7 +11040,7 @@ int FlowModel::RemoveCatchmentHRUs( Catchment *pCatchment )
       }
 
    // next, remove pointers from catchment
-   pCatchment->m_hruArray.RemoveAll();
+   pCatchment->m_catchmentHruArray.RemoveAll();
    pCatchment->m_area = 0;
 
    return count;

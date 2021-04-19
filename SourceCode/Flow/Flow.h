@@ -839,7 +839,7 @@ public:
    float m_currentGroundLoss;
    float m_meltRate;
    float m_contributionToReach;    // m3/day
-   CArray< HRU*, HRU* > m_hruArray;     // (memory managed in FlowModel::m_hruArray)
+   CArray< HRU*, HRU* > m_catchmentHruArray;     // (memory managed in FlowModel::m_hruArray)
 
 
 protected:
@@ -859,9 +859,9 @@ public:
    // Constructor/destructor
    Catchment( void );
 
-   int  GetHRUCount( void )   { return (int) m_hruArray.GetSize(); }
+   int  GetHRUCount( void )   { return (int) m_catchmentHruArray.GetSize(); }
    //int  AddHRU( HRU *pHRU )   { m_hruArray.Add( pHRU ); pHRU->m_pCatchment = this; return (int) m_hruArray.GetSize(); }
-   HRU *GetHRU( int i )       { return m_hruArray[ i ]; }
+   HRU *GetHRU( int i )       { return m_catchmentHruArray[ i ]; }
    //void RemoveHRU( int i )    { return m_hruArray.RemoveAt( i ); }
    //void RemoveAllHRUs( void ) { m_area = 0; m_hruArray.RemoveAll(); }
 
@@ -1570,7 +1570,7 @@ public:
 
    float  GetTotalReachLength( void );
 
-   int AddHRU( HRU *pHRU, Catchment *pCatchment ) { m_hruArray.Add( pHRU ); pCatchment->m_hruArray.Add( pHRU ); pHRU->m_pCatchment = pCatchment; return (int) m_hruArray.GetSize(); }
+   int AddHRU( HRU *pHRU, Catchment *pCatchment ) { m_hruArray.Add( pHRU ); pCatchment->m_catchmentHruArray.Add( pHRU ); pHRU->m_pCatchment = pCatchment; return (int) m_hruArray.GetSize(); }
    int GetHRUCount( void ) { return (int)m_hruArray.GetSize(); }
 
    int GetHRULayerCount( void ) { return m_soilLayerCount + m_vegLayerCount + m_snowLayerCount; }
