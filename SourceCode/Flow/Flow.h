@@ -106,6 +106,8 @@ using namespace std;
 #define WINDSPEED gpFlowModel->m_colWINDSPEED
 
 #define HruCOMID gpFlowModel->m_colHruCOMID
+#define HruGW_FASTBOX gpFlowModel->m_colHruGW_FASTBOX
+#define HruGW_SLOWBOX gpFlowModel->m_colHruGW_SLOWBOX
 #define HruHBVCALIB gpFlowModel->m_colHruHBVCALIB
 #define HruHRU_ID gpFlowModel->m_colHruHRU_ID
 #define HruMELT_BOX gpFlowModel->m_colHruMELT_BOX
@@ -808,6 +810,7 @@ public:
    float AttFloat(int hruCol);
    void SetAtt(int col, double attValue);
    void SetAttInt(int col, int attValue);
+   void SetAttFloat(int col, float attValue);
    };
 
 
@@ -1627,7 +1630,8 @@ protected:
    bool InitHRULayers(EnvContext*);
    bool CheckHRUwaterBalance(HRU* pHRU);
    bool FixHRUwaterBalance(HRU* pHRU);
-   bool InitReservoirs( void );
+   void SetAttributesFromHRUmemberData(HRU* pHRU);
+   bool InitReservoirs(void);
    bool InitReservoirControlPoints( void );
    bool InitRunReservoirs( EnvContext* );
    void BackDownTheTree(int * pReachComid, int * pReachNdx, bool * pRightBranchFlag, int downstreamLimit);
@@ -1638,7 +1642,8 @@ protected:
    int  ApplyCatchmentConstraints( ReachNode *pNode );
    int  ApplyAreaConstraints( ReachNode *pNode );
    int  SaveState(int calendar_year);
-   bool  ReadState();
+   bool ReadState();
+   bool IsICfileAvailable();
 
    int  OpenDetailedOutputFiles();
    int  SaveDetailedOutputIDU( CArray< FILE*, FILE* > & );
