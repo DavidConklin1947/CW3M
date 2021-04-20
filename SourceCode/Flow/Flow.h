@@ -110,8 +110,10 @@ using namespace std;
 #define HruGW_SLOWBOX gpFlowModel->m_colHruGW_SLOWBOX
 #define HruHBVCALIB gpFlowModel->m_colHruHBVCALIB
 #define HruHRU_ID gpFlowModel->m_colHruHRU_ID
+#define HruIRRIG_SOIL gpFlowModel->m_colHruIRRIG_SOIL
 #define HruMELT_BOX gpFlowModel->m_colHruMELT_BOX
 #define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
+#define HruSNOWPACK gpFlowModel->m_colHruSNOWPACK
 
 #define ReachDIRECTION gpFlowModel->m_colReachDIRECTION
 #define ReachHBVCALIB gpFlowModel->m_colReachHBVCALIB
@@ -1905,6 +1907,7 @@ public:
    int m_colHruRH;
    int m_colHruWINDSPEED;
 
+   int m_colHruSNOWPACK;
    int m_colHruMELT_BOX;
    int m_colHruNAT_SOIL;
    int m_colHruIRRIG_SOIL;
