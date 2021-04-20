@@ -42,7 +42,7 @@ public:
    , m_colSM2SOIL(-1)
    , m_colSM2ATM(-1)
    , m_colSM2ATM_YR(-1)
-   , m_colHruSNOWPACK(-1)
+   , m_colHruSNOW_BOX(-1)
    , m_colHruSM2SOIL(-1)
    , m_colHruSM2ATM(-1)
 
@@ -136,7 +136,7 @@ protected:
    int m_colSM2ATM;
    int m_colSM2ATM_YR;
 
-   int m_colHruSNOWPACK;
+   int m_colHruSNOW_BOX;
    int m_colHruSM2SOIL;
    int m_colHruSM2ATM;
 

@@ -2629,7 +2629,6 @@ FlowModel::FlowModel()
  , m_colHruTemp10Yr( -1 )
  , m_colHruPrecipYr( -1 )
  , m_colHruPrecip10Yr( -1 )
- , m_colSNOW( -1 )
  , m_colCLIMATENDX(-1)
  , m_colHruMaxSWE(-1 )
  , m_colHruApr1SWE10Yr( -1 )
@@ -3246,7 +3245,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruRH, "RH", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pHRUlayer, m_colHruWINDSPEED, "WINDSPEED", TYPE_FLOAT, CC_AUTOADD);
 
-   m_pHRUlayer->CheckCol(m_colHruSNOWPACK, "SNOWPACK", TYPE_FLOAT, CC_AUTOADD); 
+   m_pHRUlayer->CheckCol(m_colHruSNOW_BOX, "SNOW_BOX", TYPE_FLOAT, CC_AUTOADD); 
    m_pHRUlayer->CheckCol(m_colHruMELT_BOX, "MELT_BOX", TYPE_FLOAT, CC_AUTOADD); 
    m_pHRUlayer->CheckCol(m_colHruNAT_SOIL, "NAT_SOIL", TYPE_FLOAT, CC_AUTOADD); 
    m_pHRUlayer->CheckCol(m_colHruIRRIG_SOIL, "IRRIG_SOIL", TYPE_FLOAT, CC_AUTOADD); 
@@ -3272,7 +3271,6 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruTemp10Yr,          _T("TEMP_10YR"),    TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruPrecipYr,          _T("PRECIP_YR"),    TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruPrecip10Yr,        _T("PRCP_10YR"),    TYPE_FLOAT, CC_AUTOADD );
-   EnvExtension::CheckCol(m_pCatchmentLayer, m_colSNOW, _T("SNOW"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colCLIMATENDX, _T("CLIMATENDX"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruMaxSWE,            _T("MAXSNOW"),      TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruApr1SWE,           _T("SNOW_APR"),     TYPE_FLOAT, CC_AUTOADD );
@@ -3427,7 +3425,6 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    m_pCatchmentLayer->SetColData( m_colHruPrecipYr,      0.0f, true );
    m_pCatchmentLayer->SetColData( m_colHruPrecip10Yr,    0.0f, true );
 
-   m_pCatchmentLayer->SetColData( m_colSNOW,           0.0f, true );
    m_pCatchmentLayer->SetColData( m_colHruMaxSWE,        0.0f, true );
    m_pCatchmentLayer->SetColData( m_colHruApr1SWE,       0.0f, true );
    m_pCatchmentLayer->SetColData( m_colHruApr1SWE10Yr,   0.0f, true );
@@ -4926,7 +4923,7 @@ x*/
             pLayer->m_volumeWater = natural_water_vol_m3;
             switch (j)
             {
-               case BOX_SNOWPACK: pHRU->SetAttFloat(HruSNOWPACK, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+               case BOX_SNOWPACK: pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
                case BOX_MELT: pHRU->SetAttFloat(HruMELT_BOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
                case BOX_NAT_SOIL: pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
                case BOX_IRRIG_SOIL: pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
@@ -5964,12 +5961,22 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
    {
       HRU * pHRU = m_hruArray[h];
       for (int box_ndx = 0; box_ndx < pHRU->m_layerArray.GetSize(); box_ndx++)
-         {
+      {
          HRULayer * pBox = pHRU->GetLayer(box_ndx);
          pBox->m_nanOccurred = false;
          pBox->m_addedVolume_m3 = 0;
-         }
-   }
+      } // end of loop thru compartments
+
+      double wetland_area_accum_m2 = 0.;
+      int num_idus = (int)pHRU->m_polyIndexArray.GetSize();
+      for (int idu_in_hru = 0; idu_in_hru < num_idus; idu_in_hru++)
+      {
+         int idu_poly_ndx = pHRU->m_polyIndexArray[idu_in_hru];
+         if (AttInt(idu_poly_ndx, LULC_A) == LULCA_WETLAND) wetland_area_accum_m2 += AttFloat(idu_poly_ndx, AREA);
+      } // end of loop thru IDUs in this HRU
+      pHRU->m_wetlandArea_m2 = wetland_area_accum_m2;
+      pHRU->m_snowpackArea_m2 = pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2;
+   } // end of loop thru HRUs
 
    return true;
    } // end of FlowModel::StartYear()
@@ -6827,7 +6834,7 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
 
             HRULayer* pBox_snowpack = pHRU->GetLayer(BOX_SNOWPACK); pBox_snowpack->m_volumeWater = snowpack_accum_m3;
             float snowpack_mm = (float)(1000. * snowpack_accum_m3 / pHRU->m_HRUtotArea_m2);
-            pHRU->SetAttFloat(HruSNOWPACK, snowpack_mm);
+            pHRU->SetAttFloat(HruSNOW_BOX, snowpack_mm);
 
             double surface_h2o_m3 = h2o_melt_accum_m3 + positive_wetness_accum_m3;
             HRULayer* pBox_surface_h2o = pHRU->GetLayer(BOX_SURFACE_H2O); pBox_surface_h2o->m_volumeWater = surface_h2o_m3;
@@ -6884,7 +6891,7 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
                } // end of loop thru state variables in this layer
             } // end of loop thru layers in this HRU
 
-            pHRU->SetAttFloat(HruSNOWPACK, 0.f);
+            pHRU->SetAttFloat(HruSNOW_BOX, 0.f);
             pHRU->SetAttFloat(HruMELT_BOX, 0.f);
             pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
             pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
@@ -7073,10 +7080,10 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
    } // end of loop thru idus for this hru
 
    
-   bool rtnval = close_enough(hru_area_m2, idu_area_accum_m2, 0.0001)
-      && close_enough(snowpack_accum_m3, hru_snowpack_m3swe, 0.0001)
-      && close_enough(surface_h2o_accum_m3, hru_surface_h2o_m3, 0.0001)
-      && close_enough(sm_day_accum_m3, hru_topsoil_h2o_m3, 0.0001);
+   bool rtnval = close_enough(hru_area_m2, idu_area_accum_m2, 0.0001, 0.01)
+      && close_enough(snowpack_accum_m3, hru_snowpack_m3swe, 0.0001, 0.01)
+      && close_enough(surface_h2o_accum_m3, hru_surface_h2o_m3, 0.0001, 0.01)
+      && close_enough(sm_day_accum_m3, hru_topsoil_h2o_m3, 0.0001, 0.01);
    if (!rtnval)
    {
       int hru_id = pHRU->AttInt(HruHRU_ID);
@@ -7899,28 +7906,6 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
    {
    int activeField = m_pCatchmentLayer->GetActiveField();
    m_pCatchmentLayer->m_readOnly=false;
-   int catchmentCount = (int) m_catchmentArray.GetSize();
-
-   if ( !m_pGrid )   //m_buildCatchmentsMethod != 2 )    // not a grid based model?
-      {
-      int hruCount = (int) m_hruArray.GetSize();
-      //#pragma omp parallel for  // firstprivate( pEnvContext )
-      for ( int h=0; h < hruCount; h++ )
-         {
-         float airTemp=-999.0f;
-         float prec=0.0f;
-         HRU *pHRU = m_hruArray[h];
-         GetTodaysHRUclimate(CDT_TMEAN,  pHRU, airTemp);
-         GetTodaysHRUclimate(CDT_PRECIP, pHRU, prec);
-         for (int k=0; k< pHRU->m_polyIndexArray.GetSize();k++)
-            {  
-            int idu = pHRU->m_polyIndexArray[k];
-            float snow = (float) pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater/pHRU->m_HRUeffArea_m2*1000.0f;
-            m_pCatchmentLayer->SetDataU( idu, m_colSNOW, snow ); //mm of snow
-            }
-         }
-      }
-
    int reachCount = (int)m_reachArray.GetSize();
    for ( int i=0; i < reachCount; i++ )
       {
@@ -7978,8 +7963,25 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
       m_pIDUlayer->SetDataU(idu, m_colET_YR, et_yr);
    } // end of loop thru IDUs
 
+   for (int hru_ndx = 0; hru_ndx < m_hruArray.GetSize(); hru_ndx++)
+   {
+      HRU* pHRU = m_hruArray[hru_ndx];
+      HRULayer* pSnow_box = pHRU->GetLayer(BOX_SNOWPACK);
+      double hru_snowpack_m3 = pSnow_box->m_volumeWater;
+      float hru_snowpack_mm = (pHRU->m_snowpackArea_m2 > 0.f) ? 
+         (float)(1000. * hru_snowpack_m3 / pHRU->m_snowpackArea_m2) : 0.f;
+
+      for (int idu_in_hru = 0; idu_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_in_hru++)
+      {
+         int idu_poly_ndx = pHRU->m_polyIndexArray[idu_in_hru];
+         int lulc_a = AttInt(idu_poly_ndx, LULC_A);
+         float idu_snowpack_mm = (lulc_a == LULCA_WETLAND) ? 0.f : hru_snowpack_mm;
+         SetAttFloat(idu_poly_ndx, SNOWPACK, idu_snowpack_mm);
+      } // end of loop thru IDUs in this HRU        
+   } // end of loop thru HRUs
+
    return true;
-   }
+} // end of WriteDataToMap()
 
 
 bool FlowModel::ResetFluxValuesForStep(  EnvContext *pEnvContext  )
@@ -12088,7 +12090,7 @@ void FlowModel::GetCatchmentDerivatives( double time, double timeStep, int svCou
 
          switch (l)
          {
-            case BOX_SNOWPACK: pHRU->SetAttFloat(HruSNOWPACK, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+            case BOX_SNOWPACK: pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
             case BOX_MELT: pHRU->SetAttFloat(HruMELT_BOX, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
             case BOX_NAT_SOIL: pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
             case BOX_IRRIG_SOIL: pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
@@ -14233,15 +14235,6 @@ void FlowModel::UpdateHRULevelVariables(EnvContext *pEnvContext)
       pHRU->m_et_yr     += pHRU->m_currentET;
       pHRU->m_aquifer_recharge_yr_mm += pHRU->m_aquifer_recharge_mm;
       pHRU->m_runoff_yr += pHRU->m_currentRunoff;
-
-      // THIS SHOULDN"T BE HERE!!!!!!
-      for (int k = 0; k < pHRU->m_polyIndexArray.GetSize(); k++)
-         {
-         int idu = pHRU->m_polyIndexArray[k];
-         // assume snow is in top two layers.  Note that this is the same as pHRU->m_depthSWE
-         float snow = (((float)pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater + (float)pHRU->GetLayer(BOX_MELT)->m_volumeWater) / pHRU->m_HRUeffArea_m2 * 1000.0f);
-         gpFlow->UpdateIDU(pEnvContext, idu, m_colSNOW, snow , false);  // SetData, not AddDelta   // m_colHruSWE_yr
-         }
 
       if (pEnvContext->yearOfRun == 0 && m_flowContext.dayOfYear == 0)
          {

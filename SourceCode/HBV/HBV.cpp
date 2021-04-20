@@ -63,7 +63,7 @@ float HBV::InitHBV_Global(FlowContext *pFlowContext, LPCTSTR inti)
    pIDULayer->CheckCol(m_colSM2ATM, "SM2ATM", TYPE_FLOAT, CC_AUTOADD);
    pIDULayer->CheckCol(m_colSM2ATM_YR, "SM2ATM_YR", TYPE_FLOAT, CC_AUTOADD);
 
-   m_pHRUlayer->CheckCol(m_colHruSNOWPACK, "SNOWPACK", TYPE_FLOAT, CC_AUTOADD);
+   m_pHRUlayer->CheckCol(m_colHruSNOW_BOX, "SNOW_BOX", TYPE_FLOAT, CC_AUTOADD);
    m_pHRUlayer->CheckCol(m_colHruSM2SOIL, "SM2SOIL", TYPE_FLOAT, CC_AUTOADD);
    m_pHRUlayer->CheckCol(m_colHruSM2ATM, "SM2ATM", TYPE_FLOAT, CC_AUTOADD);
 
@@ -498,7 +498,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       float hru_sm2soil_mmH2O = (float)((hru_sm2soil_m3  / hru_area) * 1000.);
       float hru_sm2atm_mmH2O = (float)((hru_sm2atm_m3 / hru_area) * 1000.);
 
-      m_pHRUlayer->SetDataU(h, m_colHruSNOWPACK, hru_snowpack_mmH2O);
+      m_pHRUlayer->SetDataU(h, m_colHruSNOW_BOX, hru_snowpack_mmH2O);
       m_pHRUlayer->SetDataU(h, m_colHruSM2SOIL, hru_sm2soil_mmH2O);
       m_pHRUlayer->SetDataU(h, m_colHruSM2ATM, hru_sm2atm_mmH2O);
       int hruLayerCount = pHRU->GetLayerCount();

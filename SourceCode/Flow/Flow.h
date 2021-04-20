@@ -113,7 +113,7 @@ using namespace std;
 #define HruIRRIG_SOIL gpFlowModel->m_colHruIRRIG_SOIL
 #define HruMELT_BOX gpFlowModel->m_colHruMELT_BOX
 #define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
-#define HruSNOWPACK gpFlowModel->m_colHruSNOWPACK
+#define HruSNOW_BOX gpFlowModel->m_colHruSNOW_BOX
 
 #define ReachDIRECTION gpFlowModel->m_colReachDIRECTION
 #define ReachHBVCALIB gpFlowModel->m_colReachHBVCALIB
@@ -671,6 +671,7 @@ public:
    bool m_standingH2Oflag; // true => there exists an IDU in this HRU which has standing water (can only happen for wetland IDUs)
    bool m_snowpackFlag; // true => there exists an IDU in this HRU which has snow on the ground
    double m_wetlandArea_m2; // Update each year in FlowModel::StartYear()
+   double m_snowpackArea_m2; // = m_HRUtotArea_m2 - m_wetlandArea_m2
    double m_infiltrationFromStandingH2O_m3; // Calculate in HBV daily process. Use to reduce WETNESS in Wetland daily process.
 
    float m_HRUtotArea_m2;  // total area of the HRU
@@ -1907,7 +1908,7 @@ public:
    int m_colHruRH;
    int m_colHruWINDSPEED;
 
-   int m_colHruSNOWPACK;
+   int m_colHruSNOW_BOX;
    int m_colHruMELT_BOX;
    int m_colHruNAT_SOIL;
    int m_colHruIRRIG_SOIL;
@@ -1983,15 +1984,12 @@ public:
    int m_colHruPrecip10Yr;
    int m_colHruTempYr;
    int m_colHruTemp10Yr;
-   int m_colSNOW;
    int m_colHruMaxSWE;
    int m_colHruApr1SWE;
    int m_colHruApr1SWE10Yr;
    int m_colCLIMATENDX;
 
-   //int m_colHruAnnualSnow;
    int m_colHruDecadalSnow;
-//x   int m_colReachQ;
    int m_colReachQ_DISCHARG;
    int m_colReachLOG_Q;
    int m_colReachQ_CAP;
