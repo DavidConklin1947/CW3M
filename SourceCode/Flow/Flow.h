@@ -1980,7 +1980,6 @@ public:
    int m_colStreamIDU_ID;
 
    int m_colHruSWC;
-   int m_colHruPrecipYr;
    int m_colHruPrecip10Yr;
    int m_colHruTempYr;
    int m_colHruTemp10Yr;

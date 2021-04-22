@@ -2627,7 +2627,6 @@ FlowModel::FlowModel()
  , m_colHruSWC( -1 )
  , m_colHruTempYr( -1 )
  , m_colHruTemp10Yr( -1 )
- , m_colHruPrecipYr( -1 )
  , m_colHruPrecip10Yr( -1 )
  , m_colCLIMATENDX(-1)
  , m_colHruMaxSWE(-1 )
@@ -3269,7 +3268,6 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colCatchmentHruID,       m_hruIDCol,         TYPE_INT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruTempYr,            _T("TEMP_YR"),      TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruTemp10Yr,          _T("TEMP_10YR"),    TYPE_FLOAT, CC_AUTOADD );
-   EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruPrecipYr,          _T("PRECIP_YR"),    TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruPrecip10Yr,        _T("PRCP_10YR"),    TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colCLIMATENDX, _T("CLIMATENDX"), TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruMaxSWE,            _T("MAXSNOW"),      TYPE_FLOAT, CC_AUTOADD);
@@ -3422,7 +3420,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    m_pCatchmentLayer->SetColData( m_colHruTemp10Yr,      0.0f, true );
 
    m_pCatchmentLayer->SetColData( m_colPRECIP,           0.0f, true );
-   m_pCatchmentLayer->SetColData( m_colHruPrecipYr,      0.0f, true );
+   m_pCatchmentLayer->SetColDataU( m_colPRECIP_YR,      0.0f);
    m_pCatchmentLayer->SetColData( m_colHruPrecip10Yr,    0.0f, true );
 
    m_pCatchmentLayer->SetColData( m_colHruMaxSWE,        0.0f, true );
@@ -5841,6 +5839,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
    m_pIDUlayer->SetColDataU(m_colSM2ATM_YR, 0.f);
 
    // Initialize yearly values which accumulate from daily values
+   m_pIDUlayer->SetColDataU(m_colPRECIP_YR, 0.f);
    m_pIDUlayer->SetColDataU(m_colET_YR, 0); // Accumulates ET_DAY.
    m_pReachLayer->SetColDataU(m_colReachXFLUX_Y, 0); // Accumulates XFLUX_D.
 
@@ -7772,11 +7771,13 @@ void FlowModel::UpdateYearlyDeltas(EnvContext *pEnvContext )
       {
       for (int i=0; i< catchmentCount; i++)
          {
+//x         CString msg; msg.Format("UpdateYearlyDeltas() i = %d", i); Report::LogMsg(msg);
          Catchment *pCatchment = m_catchmentArray[ i ];
          HRU *pHRU = NULL;
 
          for ( int j=0; j < pCatchment->GetHRUCountInCatchment(); j++ )
             {
+//x            msg.Format("j = %d", j); Report::LogMsg(msg);
             HRU *pHRU = pCatchment->GetHRUfromCatchment( j );
 
             pHRU->m_temp_yr /= pEnvContext->daysInCurrentYear;   // note: assumed daily timestep
@@ -7792,7 +7793,7 @@ void FlowModel::UpdateYearlyDeltas(EnvContext *pEnvContext )
                gpFlow->UpdateIDU( pEnvContext, idu, m_colHruTempYr,   pHRU->m_temp_yr, true );   // C
                gpFlow->UpdateIDU( pEnvContext, idu, m_colHruTemp10Yr, pHRU->m_temp_10yr.GetValue(), true ); // C
 
-               gpFlow->UpdateIDU( pEnvContext, idu, m_colHruPrecipYr,   pHRU->m_precip_yr, true );   // mm/year
+               gpFlow->UpdateIDU( pEnvContext, idu, m_colPRECIP_YR,   pHRU->m_precip_yr, true );   // mm/year
                gpFlow->UpdateIDU( pEnvContext, idu, m_colHruPrecip10Yr, pHRU->m_precip_10yr.GetValue(), true ); // mm/year
                // m_precip_wateryr????
 

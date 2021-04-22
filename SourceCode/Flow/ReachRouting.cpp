@@ -712,6 +712,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
             pSubreach->m_discharge = NOMINAL_LOW_FLOW_CMS;
          }
       } // end of loop through subreaches
+
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachAREA_H2O, total_surface_in_subreaches_m2);
       pReach->m_reach_volume_m3 = volume_accum_m3;
       pReach->m_rad_lw_kJ = reach_net_lw_kJ;
@@ -734,8 +735,6 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachDEPTH, reach_depth_m);
       double reach_manning_depth_m = manning_depth_x_length_accum / pReach->m_length;
       gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachDEPTHMANNG, reach_manning_depth_m);
-      double turnover = (pReach->GetReachDischargeWP()).m_volume_m3 / volume_accum_m3;
-      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachTURNOVER, turnover);
 
       if (pReach->m_wetlNdx >= 0)
       { // Wetlands stuff
@@ -753,7 +752,9 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
             pReach->SetAtt(ReachQ2WETL, pReach->m_q2wetl_cms);
          } // end of if (q_cap_cms > 0)
       } // end of if (pReach->m_wetlNdx >= 0)
-      
+      double turnover = (pReach->GetReachDischargeWP()).m_volume_m3 / volume_accum_m3;
+      gpModel->m_pStreamLayer->SetDataU(pReach->m_polyIndex, gpModel->m_colReachTURNOVER, turnover);
+
    } // end of loop through reaches
 
    clock_t finish = clock();
