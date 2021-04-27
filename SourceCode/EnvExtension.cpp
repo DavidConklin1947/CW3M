@@ -169,8 +169,8 @@ bool EnvExtension::UpdateIDU( EnvContext *pContext, int idu, int col, float valu
    if ( useAddDelta )
       {
       float oldValue;
-      pContext->pMapLayer->GetData( idu, col, oldValue );
-      if ( oldValue != value )
+      bool successful = pContext->pMapLayer->GetData( idu, col, oldValue );
+      if ( !successful || oldValue != value )
          this->AddDelta( pContext, idu, col, value );
       }
    else

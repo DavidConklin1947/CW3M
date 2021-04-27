@@ -5,6 +5,7 @@
 class LIBSAPI MovingAvg
 {
 public:   
+   MovingAvg() { MovingAvg(-1); }
    MovingAvg( int length );
    ~MovingAvg( void );
 

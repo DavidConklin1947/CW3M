@@ -1343,33 +1343,6 @@ bool MapLayer::GetData(int rec, int col, COleVariant &value) const
    return m_pData->Get(col, rec, value);
    }
 
-inline
-bool MapLayer::GetData(int rec, int col, float &value) const
-   {
-   ASSERT(m_pData != NULL);
-   ASSERT(rec >= 0 && rec < m_pData->GetRowCount());
-   ASSERT(col >= 0 && col < m_pData->GetColCount());
-
-   COleVariant v;
-   GetData(rec, col, v);
-   v.ChangeType(VT_R4);
-   value = v.fltVal;
-   return true;
-   }
-
-inline
-bool MapLayer::GetData(int rec, int col, double &value) const
-   {
-   ASSERT(m_pData != NULL);
-   ASSERT(rec >= 0 && rec < m_pData->GetRowCount());
-   ASSERT(col >= 0 && col < m_pData->GetColCount());
-
-   COleVariant v;
-   GetData(rec, col, v);
-   v.ChangeType(VT_R8);
-   value = v.dblVal;
-   return true;
-   }
 
 inline
 bool MapLayer::GetData(int rec, int col, VData &value) const

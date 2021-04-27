@@ -681,7 +681,7 @@ public:
    // climate variables
    float m_precip_wateryr;    // mm/year
    float m_precip_yr;         // mm/year, accumulates throughout the year
-   MovingAvg m_precip_10yr;   // mm/year (avg)
+   MovingAvg m_precip_10yr;   // mm/year (avg) 20 yr moving avg
    float m_precipCumApr1;     // mm accumulated from Jan 1 through April 1
 
    float m_gwRecharge_yr;       // mm

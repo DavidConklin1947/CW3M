@@ -3700,7 +3700,11 @@ void EnvModel::RunAutonomousProcesses( bool isPostYear )
                }
             }
          catch( ... )
-            { }
+         {
+            int errcode = GetLastError();
+            CString msg; msg.Format("RunAutonomousProcesses() caught error. errcode = %d", errcode);
+            Report::ErrorMsg(msg);
+         }
 
          ApplyDeltaArray( m_pIDULayer );
          m_apFirstUnseenDelta[i] = m_pDeltaArray->GetCount();

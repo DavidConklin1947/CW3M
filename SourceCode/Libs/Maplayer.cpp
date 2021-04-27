@@ -55,8 +55,67 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-MapLayer *pMapLayer;
+bool MapLayer::GetData(int rec, int col, float& value) const
+{
+   ASSERT(m_pData != NULL);
+   ASSERT(rec >= 0 && rec < m_pData->GetRowCount());
+   ASSERT(col >= 0 && col < m_pData->GetColCount());
 
+   COleVariant v;
+
+   bool rtnval = false;
+   try
+   {
+      GetData(rec, col, v);
+      v.ChangeType(VT_R4);
+      value = v.fltVal;
+      rtnval = true;
+   }
+   catch (...)
+   {
+      DWORD errcode = GetLastError();
+      CString msg;
+      msg.Format("MapLayer::GetData(%d,%d, float&) caught error %ld. This can happen if the value"
+         "being read turns out to be a NaN.", rec, col, errcode);
+      Report::WarningMsg(msg);
+      rtnval = false;
+   }
+
+   return rtnval;
+} // end of GetData(int,int,float&)
+
+
+bool MapLayer::GetData(int rec, int col, double& value) const
+{
+   ASSERT(m_pData != NULL);
+   ASSERT(rec >= 0 && rec < m_pData->GetRowCount());
+   ASSERT(col >= 0 && col < m_pData->GetColCount());
+
+   COleVariant v;
+
+   bool rtnval = false;
+   try
+   {
+      GetData(rec, col, v);
+      v.ChangeType(VT_R8);
+      value = v.dblVal;
+      rtnval = true;
+   }
+   catch (...)
+   {
+      DWORD errcode = GetLastError();
+      CString msg;
+      msg.Format("MapLayer::GetData(%d,%d, float&) caught error %ld. This can happen if the value"
+         "being read turns out to be a NaN.", rec, col, errcode);
+      Report::WarningMsg(msg);
+      rtnval = false;
+   }
+
+   return(rtnval);
+} // end of GetData(int,int,double&)
+
+
+MapLayer *pMapLayer;
 
 FIELD_ATTR *MAP_FIELD_INFO::FindAttribute(VData &value, int *index /*=NULL*/)
    {

@@ -7767,50 +7767,31 @@ void FlowModel::UpdateYearlyDeltas(EnvContext *pEnvContext )
    int catchmentCount = (int) m_catchmentArray.GetSize();
    float airTemp = -999.0f;
    
-   if ( ! m_pGrid )   //m_buildCatchmentsMethod != 2 )    // not a grid based model?
+   int num_hrus = (int)m_hruArray.GetSize();
+   for (int hru_ndx = 0; hru_ndx < num_hrus; hru_ndx++)
+   {
+      HRU* pHRU = m_hruArray[hru_ndx];
+      pHRU->m_temp_yr /= pEnvContext->daysInCurrentYear;   
+      pHRU->m_temp_10yr.AddValue(pHRU->m_temp_yr);
+      pHRU->m_precip_10yr.AddValue(pHRU->m_precip_yr);
+
+      // annual climate variables
+      for (int k = 0; k < pHRU->m_polyIndexArray.GetSize(); k++)
       {
-      for (int i=0; i< catchmentCount; i++)
-         {
-//x         CString msg; msg.Format("UpdateYearlyDeltas() i = %d", i); Report::LogMsg(msg);
-         Catchment *pCatchment = m_catchmentArray[ i ];
-         HRU *pHRU = NULL;
+         int idu = pHRU->m_polyIndexArray[k];
 
-         for ( int j=0; j < pCatchment->GetHRUCountInCatchment(); j++ )
-            {
-//x            msg.Format("j = %d", j); Report::LogMsg(msg);
-            HRU *pHRU = pCatchment->GetHRUfromCatchment( j );
 
-            pHRU->m_temp_yr /= pEnvContext->daysInCurrentYear;   // note: assumed daily timestep
+         gpFlow->UpdateIDU(pEnvContext, idu, m_colHruTempYr, pHRU->m_temp_yr, true);   // C
+         gpFlow->UpdateIDU(pEnvContext, idu, m_colHruTemp10Yr, pHRU->m_temp_10yr.GetValue(), true); // C
+         gpFlow->UpdateIDU(pEnvContext, idu, m_colPRECIP_YR, pHRU->m_precip_yr, true);   // mm/year
+         gpFlow->UpdateIDU(pEnvContext, idu, m_colHruPrecip10Yr, pHRU->m_precip_10yr.GetValue(), true); // mm/year
+         gpFlow->UpdateIDU(pEnvContext, idu, m_colRunoff_yr, pHRU->m_runoff_yr, true);
+         gpFlow->UpdateIDU(pEnvContext, idu, m_colStorage_yr, pHRU->m_storage_yr, true);
+         // ET_YR and MAX_ET_YR are accumulated IDU by IDU from daily values in EvapTrans::GetHruET().
+      } // end of loop thru the IDUs in this HRU
+   } // end of loop thru HRUs
 
-            for (int k=0; k< pHRU->m_polyIndexArray.GetSize();k++)
-               {
-               int idu = pHRU->m_polyIndexArray[ k ];
-
-               // annual climate variables
-               pHRU->m_temp_10yr.AddValue( pHRU->m_temp_yr );
-               pHRU->m_precip_10yr.AddValue( pHRU->m_precip_yr );
-
-               gpFlow->UpdateIDU( pEnvContext, idu, m_colHruTempYr,   pHRU->m_temp_yr, true );   // C
-               gpFlow->UpdateIDU( pEnvContext, idu, m_colHruTemp10Yr, pHRU->m_temp_10yr.GetValue(), true ); // C
-
-               gpFlow->UpdateIDU( pEnvContext, idu, m_colPRECIP_YR,   pHRU->m_precip_yr, true );   // mm/year
-               gpFlow->UpdateIDU( pEnvContext, idu, m_colHruPrecip10Yr, pHRU->m_precip_10yr.GetValue(), true ); // mm/year
-               // m_precip_wateryr????
-
-               // annual hydrologic variables
-
-               // SWE-related variables (Note: Apr1 value previously Updated()
-               //gpFlow->UpdateIDU( pEnvContext, idu, m_colHruApr1SWE, pHRU->m_depthApr1SWE_yr, true );
-               //gpFlow->UpdateIDU( pEnvContext, idu, m_colHruApr1SWE10yr, pHRU->m_apr1SWE_10yr.GetValue(), true );
-
-               gpFlow->UpdateIDU( pEnvContext, idu, m_colRunoff_yr, pHRU->m_runoff_yr, true );
-               gpFlow->UpdateIDU( pEnvContext, idu, m_colStorage_yr, pHRU->m_storage_yr, true );
-               // ET_YR and MAX_ET_YR are accumulated IDU by IDU from daily values in EvapTrans::GetHruET().
-               }
-            }
-         }
-      }
-   }
+} // end of UpdateYearlyDeltas()
 
 
 void FlowModel::GetMaxSnowPack(EnvContext *pEnvContext)
