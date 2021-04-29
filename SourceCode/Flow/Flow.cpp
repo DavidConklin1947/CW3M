@@ -6815,15 +6815,31 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
                float snowpack_mm = AttFloat(idu_poly_ndx, SNOWPACK); snowpack_accum_m3 += (snowpack_mm / 1000.) * idu_area_m2;
                double h2o_melt_mm = Att(idu_poly_ndx, H2O_MELT); h2o_melt_accum_m3 += (h2o_melt_mm / 1000.) * idu_area_m2;
                double wetness_mm = Att(idu_poly_ndx, WETNESS);
-               ASSERT(h2o_melt_mm == 0. || wetness_mm == 0.);
                int lulc_a = AttInt(idu_poly_ndx, LULC_A);
                if (lulc_a != LULCA_WETLAND)
                { // This is not a wetland IDU.
-                 ASSERT(wetness_mm == 0.);
-                 float sm_day_mm = AttFloat(idu_poly_ndx, SM_DAY); sm_day_accum_m3 += (sm_day_mm / 1000.) * idu_area_m2;
+                 if (wetness_mm != NON_WETLAND_WETNESS_TOKEN)
+                  {
+                     CString msg;
+                     msg.Format("InitHRULayers() idu_poly_ndx = %d, lulc_a = %d, wetness = %lf"
+                        " Setting WETNESS to NON_WETLAND_WETNESS_TOKEN now.", idu_poly_ndx, lulc_a, wetness_mm);
+                     Report::WarningMsg(msg);
+                     SetAtt(idu_poly_ndx, WETNESS, NON_WETLAND_WETNESS_TOKEN);
+                  }
+
+                  float sm_day_mm = AttFloat(idu_poly_ndx, SM_DAY); sm_day_accum_m3 += (sm_day_mm / 1000.) * idu_area_m2;
                }
                else
                { // This is a wetland IDU.
+                  if (wetness_mm <= NON_WETLAND_WETNESS_TOKEN)
+                  {
+                     CString msg;
+                     msg.Format("InitHRULayers() idu_poly_ndx = %d, lulc_a = %d, wetness = %lf"
+                        " Setting WETNESS to 0. now.", idu_poly_ndx, lulc_a, wetness_mm);
+                     Report::WarningMsg(msg);
+                     SetAtt(idu_poly_ndx, WETNESS, NON_WETLAND_WETNESS_TOKEN);
+                  }
+
                   wetland_area_accum_m2 += idu_area_m2;
                   if (wetness_mm > 0.) positive_wetness_accum_m3 += (wetness_mm / 1000.) * idu_area_m2;
                   else if (wetness_mm < 0.) negative_wetness_accum_m3 += (wetness_mm / 1000.) * idu_area_m2;
@@ -7071,7 +7087,14 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
       ASSERT(!(idu_standing_h2o_m3 > 0. && idu_melt_h2o_m3 > 0.));
       
       int lulc_a = AttInt(idu_poly_ndx, LULC_A);
-      ASSERT(!(idu_wetness_mm != 0 && lulc_a != LULCA_WETLAND));
+      if (idu_wetness_mm != NON_WETLAND_WETNESS_TOKEN && lulc_a != LULCA_WETLAND)
+      {
+         CString msg;
+         msg.Format("CheckHRUwaterBalance() idu_poly_ndx = %d, lulc_a = %d, idu_wetness_mm = %lf"
+            " Setting WETNESS to NON_WETLAND_WETNESS_TOKEN noW.", idu_poly_ndx, lulc_a, idu_wetness_mm);
+         Report::WarningMsg(msg);
+         SetAtt(idu_poly_ndx, WETNESS, NON_WETLAND_WETNESS_TOKEN);
+      }
 
       float sm_day_mm = AttFloat(idu_poly_ndx, SM_DAY);
       double sm_day_m3 = (sm_day_mm / 1000.) * idu_area_m2;

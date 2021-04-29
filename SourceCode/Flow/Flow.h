@@ -56,6 +56,7 @@ using namespace std;
 #define BOX_FAST_GW 4
 #define BOX_SLOW_GW 5
 
+#define NON_WETLAND_WETNESS_TOKEN -1000.
 #define NOMINAL_LOW_FLOW_CMS 0.010 /* 10 liters of water per sec */
 #define NOMINAL_LOW_WATER_LITERS_PER_METER 1 /* one liter of water per meter of stream length*/
 #define NOMINAL_MINIMUM_SOIL_WATER_CONTENT 0.001 /* 1 mm of water content per meter of soil depth*/
