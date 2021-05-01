@@ -175,7 +175,7 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       int collectPolicyData = 1;
       int discardMultiRunDeltas = 0;
       int startRunNumber = 0;
-      int coldStartFlag = 0;
+      int coldStartFlag = 0, spinupFlag = 0;
       int maxDaysInYear = -1;
       int useWaterYears = 0;
       LPCTSTR fieldInfoFiles       = NULL;
@@ -226,6 +226,7 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          { _T("path"),                       TYPE_STRING,   &paths,                 false,  0 },
          { _T("startRunNumber"),             TYPE_INT,      &startRunNumber,        false,  0 },
          { _T("coldStart"),                  TYPE_INT,      &coldStartFlag,         false,  0 },
+         { _T("spinup"),                  TYPE_INT,      &spinupFlag,         false,  0 },
       { _T("maxDaysInYear"),              TYPE_INT,      &maxDaysInYear,         false,  0 },
       { _T("useWaterYears"),              TYPE_INT,      &useWaterYears,         false,  0 },
       { NULL,                             TYPE_NULL,     NULL,                   false,  0 } };
@@ -248,6 +249,15 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
       m_pModel->m_envContext.m_substituteStrings.Add(&m_pModel->m_envContext.m_studyAreaName);
 
       m_pModel->m_envContext.coldStartFlag = coldStartFlag == 1;
+      m_pModel->m_envContext.spinupFlag = spinupFlag == 1;
+      if (m_pModel->m_envContext.coldStartFlag) m_pModel->m_envContext.spinupFlag = true;
+      if (m_pModel->m_envContext.coldStartFlag || m_pModel->m_envContext.spinupFlag)
+      {
+         CString msg;
+         msg.Format("coldStartFlag is %s and spinupFlag is %s",
+            m_pModel->m_envContext.coldStartFlag ? "on" : "off", m_pModel->m_envContext.spinupFlag ? "on" : "off");
+         Report::LogMsg(msg);
+      }
 
       if (maxDaysInYear != -1)
       {

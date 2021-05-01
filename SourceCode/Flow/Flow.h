@@ -1646,7 +1646,7 @@ protected:
    int  ApplyCatchmentConstraints( ReachNode *pNode );
    int  ApplyAreaConstraints( ReachNode *pNode );
    int  SaveState(int calendar_year);
-   bool ReadState();
+   bool ReadState(bool spinupFlag);
    bool IsICfileAvailable();
 
    int  OpenDetailedOutputFiles();
@@ -2151,7 +2151,7 @@ public:
    //bool InitializeHRULayerSampleArray(void);
    //bool InitializeReservoirSampleArray(void);
    void CollectData( int dayOfYear );
-   void ResetStateVariables( void );
+   void ResetStateVariables(bool spinupFlag);
    void ResetDataStorageArrays( EnvContext *pEnvContext );
    //void CollectHRULayerData( void );
    //void CollectHRULayerExtraSVData( void );

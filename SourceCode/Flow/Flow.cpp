@@ -3463,7 +3463,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    // allocate integrators, state variable ptr arrays
    InitIntegrationBlocks();
    
-   ResetStateVariables();
+   ResetStateVariables(pEnvContext->spinupFlag);
 
    // Init() to any plugins that have an init method
    InitPlugins();
@@ -4812,7 +4812,7 @@ bool FlowModel::IsICfileAvailable()
 } // end of IsICfileAvailable()
 
 
-bool FlowModel::ReadState()
+bool FlowModel::ReadState(bool spinupFlag)
 // Returns true if able to read and restore the state of the hydrology variables, false otherwise.
 // WP suffix refers to WaterParcel objects.
 {
@@ -4820,24 +4820,6 @@ bool FlowModel::ReadState()
    m_ICincludesWP = false;
    
    CString effective_IC_filename;
-
-   bool user_specified_a_file = m_initConditionsFileName.GetLength() > 0;
-   if (user_specified_a_file) effective_IC_filename = m_initConditionsFileName;
-   else
-      {
-      // Set the string "effective_IC_filename" equal to "flow<startYear>.ic"
-      CString year_string;
-      year_string.Format("%d", m_flowContext.pEnvContext->startYear);
-      effective_IC_filename = "flow" + year_string + ".ic";
-      }
-
-   if (!IsICfileAvailable())
-   {
-      CString msg;
-      msg.Format("ReadState(): Initial Conditions file '%s' cannot be found.", (LPCTSTR)effective_IC_filename);
-      Report::WarningMsg(msg);
-      return false;
-   }
 
    int hruCount = GetHRUCount();
    int hru_countWP = 2 * GetHRUCount();
@@ -4850,193 +4832,253 @@ bool FlowModel::ReadState()
    int subreach_countWP = 0;
    for (int i = 0; i < reachCount; i++)
    {
-      Reach *pReach = m_reachArray[i];
+      Reach* pReach = m_reachArray[i];
       int num_subreaches = (int)pReach->m_subnodeArray.GetSize();
       reachSVcount += 2 * num_subreaches; // this counts discharge and volume for each subnode
       subreach_countWP += 3 * num_subreaches;
    }
 
-   int modelStateVarCount = hruCount*hruLayerCount + reachSVcount + reservoirCount;
+   int modelStateVarCount = hruCount * hruLayerCount + reachSVcount + reservoirCount;
    int model_state_var_countWP = hru_countWP * hruLayerCount + subreach_countWP + reservoir_countWP;
 
    double tot_HRU_natural_vol_m3, tot_HRU_other_vol_m3, totReachVol, totReservoirVol;
    tot_HRU_natural_vol_m3 = tot_HRU_other_vol_m3 = totReachVol = totReservoirVol = 0.;
 
-   CString tmpPath = PathManager::GetPath(PM_IDU_DIR);//directory with the idu
-   PathManager::FindPath(effective_IC_filename, tmpPath);
-
-/*x
-   if (PathManager::FindPath(effective_IC_filename, tmpPath) < 0) 
+   bool user_specified_a_file = false;
+   if (!spinupFlag)
+   {
+      user_specified_a_file = m_initConditionsFileName.GetLength() > 0;
+      if (user_specified_a_file) effective_IC_filename = m_initConditionsFileName;
+      else
       {
-      CString msg;
-      msg.Format("ReadState(): Initial Conditions file '%s' cannot be found.", (LPCTSTR)effective_IC_filename);
-      Report::WarningMsg(msg);
-      return false;
-      }
-x*/
-   FILE *fp;
-   const char *file = tmpPath;
-   errno_t err;
-   if ((err = fopen_s(&fp, file, "rb")) != 0) 
-      {
-      CString msg;
-      msg.Format("ReadState(): Unable to open file %s.  Initial conditions won't be restored.  ", (LPCTSTR)tmpPath);
-      Report::WarningMsg(msg);
-      if (!user_specified_a_file)
-         {
-         CString msg;
-         msg.Format("ReadState(): No Flow initial conditions file was specified by the user, and we were unable to open the default file %s.", (LPCTSTR)m_initConditionsFileName);
-         Report::LogMsg(msg);
-         }
-       return false;
+      // Set the string "effective_IC_filename" equal to "flow<startYear>.ic"
+         CString year_string;
+         year_string.Format("%d", m_flowContext.pEnvContext->startYear);
+         effective_IC_filename = "flow" + year_string + ".ic";
       }
 
-   int fileStateVarCount = 0;
-   fread(&fileStateVarCount, sizeof(int), 1, fp);
-   if (fileStateVarCount != modelStateVarCount && fileStateVarCount != model_state_var_countWP) 
-   {
-      CString msg;
-      msg.Format("The current model is different than that saved in %s. %i versus %i or %i state variables.  %s will be overwritten at the end of this run", 
-         (LPCTSTR) m_initConditionsFileName, fileStateVarCount, modelStateVarCount, model_state_var_countWP, (LPCTSTR) m_initConditionsFileName);
-      Report::LogMsg(msg, RT_WARNING);
-      m_saveStateAtEndOfRun = true;
-   }
-   else //read the file to populate initial conditions
-   {
-      m_ICincludesWP = fileStateVarCount == model_state_var_countWP;
-      float _val = 0;
-      double h2o_temp_degC = -1;
-      bool water_balance_flag = true;
-      for (int i = 0; i < hruCount; i++)
-      {
-         HRU *pHRU = m_hruArray[i];
-         for (int j = 0; j < hruLayerCount; j++)
-         {
-            HRULayer *pLayer = pHRU->GetLayer(j);
-            double orig_water_vol_m3 = 0.;
-            fread(&orig_water_vol_m3, sizeof(double), 1, fp);
-            if (m_ICincludesWP) fread(&h2o_temp_degC, sizeof(double), 1, fp);
-            double natural_water_vol_m3 = orig_water_vol_m3 * pHRU->m_frc_naturl;
-            double other_water_vol_m3 = orig_water_vol_m3 - natural_water_vol_m3;
-            pLayer->m_volumeWater = natural_water_vol_m3;
-            switch (j)
-            {
-               case BOX_SNOWPACK: pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-               case BOX_MELT: pHRU->SetAttFloat(HruMELT_BOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-               case BOX_NAT_SOIL: pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-               case BOX_IRRIG_SOIL: pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-               case BOX_FAST_GW: pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-               case BOX_SLOW_GW: pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-            }
-            // pLayer->m_hru_layer_h2oWP = WaterParcel(natural_water_vol_m3, h2o_temp_degC); // eventually
-            tot_HRU_natural_vol_m3 += pLayer->m_volumeWater;
-            tot_HRU_other_vol_m3 += other_water_vol_m3;
-         } // end of loop on HRU layers
-         water_balance_flag &= CheckHRUwaterBalance(pHRU);
-      } // end of loop on HRUs
-      if (!water_balance_flag)
+      if (!IsICfileAvailable())
       {
          CString msg;
-         msg.Format("ReadState() HRU water balance failed.");
+         msg.Format("ReadState(): Initial Conditions file '%s' cannot be found.", (LPCTSTR)effective_IC_filename);
          Report::WarningMsg(msg);
+         return false;
       }
 
-      for (int i = 0; i < reachCount; i++)
+      CString tmpPath = PathManager::GetPath(PM_IDU_DIR);//directory with the idu
+      PathManager::FindPath(effective_IC_filename, tmpPath);
+      FILE* fp;
+      const char* file = tmpPath;
+      errno_t err;
+      if ((err = fopen_s(&fp, file, "rb")) != 0)
       {
-         Reach *pReach = m_reachArray[i];
-         pReach->m_reach_volume_m3 = 0.;
-         for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
+         CString msg;
+         msg.Format("ReadState(): Unable to open file %s.  Initial conditions won't be restored.  ", (LPCTSTR)tmpPath);
+         Report::WarningMsg(msg);
+         if (!user_specified_a_file)
          {
-            ReachSubnode *pSubreach = pReach->GetReachSubnode(j);
+            CString msg;
+            msg.Format("ReadState(): No Flow initial conditions file was specified by the user, and we were unable to open the default file %s.", (LPCTSTR)m_initConditionsFileName);
+            Report::LogMsg(msg);
+         }
+         return false;
+      }
 
-            double discharge_as_double; // m_discharge is a float
-            fread(&discharge_as_double, sizeof(double), 1, fp);
-            if (isnan(discharge_as_double) || discharge_as_double <= 0.)
+      int fileStateVarCount = 0;
+      fread(&fileStateVarCount, sizeof(int), 1, fp);
+      if (fileStateVarCount != modelStateVarCount && fileStateVarCount != model_state_var_countWP) 
+      {
+         CString msg;
+         msg.Format("The current model is different than that saved in %s. %i versus %i or %i state variables.  %s will be overwritten at the end of this run", 
+            (LPCTSTR) m_initConditionsFileName, fileStateVarCount, modelStateVarCount, model_state_var_countWP, (LPCTSTR) m_initConditionsFileName);
+         Report::LogMsg(msg, RT_WARNING);
+         m_saveStateAtEndOfRun = true;
+      }
+      else 
+      { // Read the file to populate initial conditions.
+         m_ICincludesWP = fileStateVarCount == model_state_var_countWP;
+         float _val = 0;
+         double h2o_temp_degC = -1;
+         bool water_balance_flag = true;
+         for (int i = 0; i < hruCount; i++)
+         {
+            HRU *pHRU = m_hruArray[i];
+            for (int j = 0; j < hruLayerCount; j++)
             {
-               CString msg;
-               msg.Format("ReadState() i = %d, j = %d, discharge_as_double (%lf) is a nan or <= 0,", i, j, discharge_as_double);
-               discharge_as_double = pReach->NominalLowFlow_cms();
-               CString msg2; 
-               msg2.Format(" replacing with %lf", discharge_as_double);
-               msg = msg + msg2;
-               Report::LogMsg(msg);
-            }
-            pSubreach->m_discharge = (float)discharge_as_double;
-            pSubreach->m_dischargeWP = WaterParcel(SEC_PER_DAY * discharge_as_double, DEFAULT_REACH_H2O_TEMP_DEGC);
-            pSubreach->m_dischargeDOY = -1;
-            pSubreach->m_manning_depth_m = pReach->GetManningDepthFromQ(pSubreach->m_discharge, pReach->m_wdRatio);
+               HRULayer *pLayer = pHRU->GetLayer(j);
+               double orig_water_vol_m3 = 0.;
+               fread(&orig_water_vol_m3, sizeof(double), 1, fp);
+               if (m_ICincludesWP) fread(&h2o_temp_degC, sizeof(double), 1, fp);
+               double natural_water_vol_m3 = orig_water_vol_m3 * pHRU->m_frc_naturl;
+               double other_water_vol_m3 = orig_water_vol_m3 - natural_water_vol_m3;
+               pLayer->m_volumeWater = natural_water_vol_m3;
+               switch (j)
+               {
+                  case BOX_SNOWPACK: pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+                  case BOX_MELT: pHRU->SetAttFloat(HruMELT_BOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+                  case BOX_NAT_SOIL: pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+                  case BOX_IRRIG_SOIL: pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+                  case BOX_FAST_GW: pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+                  case BOX_SLOW_GW: pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+               }
+               // pLayer->m_hru_layer_h2oWP = WaterParcel(natural_water_vol_m3, h2o_temp_degC); // eventually
+               tot_HRU_natural_vol_m3 += pLayer->m_volumeWater;
+               tot_HRU_other_vol_m3 += other_water_vol_m3;
+            } // end of loop on HRU layers
+            water_balance_flag &= CheckHRUwaterBalance(pHRU);
+         } // end of loop on HRUs
+         if (!water_balance_flag)
+         {
+            CString msg;
+            msg.Format("ReadState() HRU water balance failed.");
+            Report::WarningMsg(msg);
+         }
 
-            double subreach_volume;
-            fread(&subreach_volume, sizeof(double), 1, fp);
-            if (isnan(subreach_volume) || (subreach_volume < pSubreach->m_min_volume_m3 && !close_enough(subreach_volume, pSubreach->m_min_volume_m3, 0.0001)))
+         for (int i = 0; i < reachCount; i++)
+         {
+            Reach *pReach = m_reachArray[i];
+            pReach->m_reach_volume_m3 = 0.;
+            for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
             {
-               CString msg;
-               msg.Format("ReadState() i = %d, j = %d, subreach_volume (%lf) is a nan or < pSubreach->m_min_volume_m3 (= %lf),", i, j, subreach_volume, pSubreach->m_min_volume_m3);
-               subreach_volume = pSubreach->m_min_volume_m3;
-               CString msg2;
-               msg2.Format(" replacing with %lf", subreach_volume);
-               msg = msg + msg2;
-               Report::WarningMsg(msg);
-            }
-            pReach->m_reach_volume_m3 += subreach_volume;
+               ReachSubnode *pSubreach = pReach->GetReachSubnode(j);
 
+               double discharge_as_double; // m_discharge is a float
+               fread(&discharge_as_double, sizeof(double), 1, fp);
+               if (isnan(discharge_as_double) || discharge_as_double <= 0.)
+               {
+                  CString msg;
+                  msg.Format("ReadState() i = %d, j = %d, discharge_as_double (%lf) is a nan or <= 0,", i, j, discharge_as_double);
+                  discharge_as_double = pReach->NominalLowFlow_cms();
+                  CString msg2; 
+                  msg2.Format(" replacing with %lf", discharge_as_double);
+                  msg = msg + msg2;
+                  Report::LogMsg(msg);
+               }
+               pSubreach->m_discharge = (float)discharge_as_double;
+               pSubreach->m_dischargeWP = WaterParcel(SEC_PER_DAY * discharge_as_double, DEFAULT_REACH_H2O_TEMP_DEGC);
+               pSubreach->m_dischargeDOY = -1;
+               pSubreach->m_manning_depth_m = pReach->GetManningDepthFromQ(pSubreach->m_discharge, pReach->m_wdRatio);
+
+               double subreach_volume;
+               fread(&subreach_volume, sizeof(double), 1, fp);
+               if (isnan(subreach_volume) || (subreach_volume < pSubreach->m_min_volume_m3 && !close_enough(subreach_volume, pSubreach->m_min_volume_m3, 0.0001)))
+               {
+                  CString msg;
+                  msg.Format("ReadState() i = %d, j = %d, subreach_volume (%lf) is a nan or < pSubreach->m_min_volume_m3 (= %lf),", i, j, subreach_volume, pSubreach->m_min_volume_m3);
+                  subreach_volume = pSubreach->m_min_volume_m3;
+                  CString msg2;
+                  msg2.Format(" replacing with %lf", subreach_volume);
+                  msg = msg + msg2;
+                  Report::WarningMsg(msg);
+               }
+               pReach->m_reach_volume_m3 += subreach_volume;
+
+               h2o_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
+               if (m_ICincludesWP) fread(&h2o_temp_degC, sizeof(double), 1, fp);
+ 
+               WaterParcel initialWP(subreach_volume, h2o_temp_degC);
+               pSubreach->m_waterParcel = initialWP;
+               pSubreach->m_previousWP = initialWP;
+               pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
+               pSubreach->SetSubreachGeometry(subreach_volume, pReach->m_wdRatio);
+            } // end of subnode loop
+            totReachVol += pReach->m_reach_volume_m3; 
+         } // end of reach loop
+   
+         int numNonzeroReservoirs = 0;
+         for (int i = 0; i < reservoirCount; i++)
+            {
+            Reservoir *pRes = m_reservoirArray[i];
+            fread(&pRes->m_volume, sizeof(double), 1, fp);
             h2o_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
             if (m_ICincludesWP) fread(&h2o_temp_degC, sizeof(double), 1, fp);
- 
-            WaterParcel initialWP(subreach_volume, h2o_temp_degC);
-            pSubreach->m_waterParcel = initialWP;
-            pSubreach->m_previousWP = initialWP;
-            pSubreach->m_manning_depth_m = GetManningDepthFromQ(pReach, pSubreach->m_discharge, pReach->m_wdRatio);
-            pSubreach->SetSubreachGeometry(subreach_volume, pReach->m_wdRatio);
-         } // end of subnode loop
-         totReachVol += pReach->m_reach_volume_m3; 
-      } // end of reach loop
-   
-      int numNonzeroReservoirs = 0;
-      for (int i = 0; i < reservoirCount; i++)
+
+            pRes->m_resWP = WaterParcel(pRes->m_volume, h2o_temp_degC);
+            if (pRes->m_volume > 0.f)
+               {
+               totReservoirVol += pRes->m_volume;
+               numNonzeroReservoirs++;
+               }
+            } // end of loop on reservoirs
+
+         fclose(fp);
+
+         CString msg1;
+         msg1.Format("FlowModel::ReadState() Initial Conditions file %s successfully read. modelStateVarCount = %d \ntot_HRU_natural_vol, tot_HRU_other_vol, totReachVol, totReservoirVol = %lf %lf %lf, %lf",
+            (LPCTSTR)file, m_ICincludesWP ? model_state_var_countWP : modelStateVarCount, tot_HRU_natural_vol_m3, tot_HRU_other_vol_m3, totReachVol, totReservoirVol);
+         Report::LogMsg(msg1);
+         msg1.Format("FlowModel::ReadState() modelStateVarCount = %d, hruCount = %d, hruLayerCount = %d, reachCount = %d, reservoirCount = %d, numNonzeroReservoirs = %d",
+            m_ICincludesWP ? model_state_var_countWP : modelStateVarCount, hruCount, hruLayerCount, reachCount, reservoirCount, numNonzeroReservoirs);
+         Report::LogMsg(msg1);
+         if (m_ICincludesWP)
          {
-         Reservoir *pRes = m_reservoirArray[i];
-         fread(&pRes->m_volume, sizeof(double), 1, fp);
-         h2o_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
-         if (m_ICincludesWP) fread(&h2o_temp_degC, sizeof(double), 1, fp);
-
-         pRes->m_resWP = WaterParcel(pRes->m_volume, h2o_temp_degC);
-         if (pRes->m_volume > 0.f)
-            {
-            totReservoirVol += pRes->m_volume;
-            numNonzeroReservoirs++;
-            }
-/*         
-         if (pRes != NULL)
-            {
-            CString msg; msg.Format("ReadState() m_id = %d, m_volume = %f ", pRes->m_id, pRes->m_volume);
+            CString msg;
+            msg.Format("FlowModel::ReadState() IC file includes water temperatures.");
             Report::LogMsg(msg);
-            }
-*/
-         } // end of loop on reservoirs
+         }
 
-      fclose(fp);
-
-      CString msg1;
-      msg1.Format("FlowModel::ReadState() Initial Conditions file %s successfully read. modelStateVarCount = %d \ntot_HRU_natural_vol, tot_HRU_other_vol, totReachVol, totReservoirVol = %lf %lf %lf, %lf",
-         (LPCTSTR)file, m_ICincludesWP ? model_state_var_countWP : modelStateVarCount, tot_HRU_natural_vol_m3, tot_HRU_other_vol_m3, totReachVol, totReservoirVol);
-      Report::LogMsg(msg1);
-      msg1.Format("FlowModel::ReadState() modelStateVarCount = %d, hruCount = %d, hruLayerCount = %d, reachCount = %d, reservoirCount = %d, numNonzeroReservoirs = %d",
-         m_ICincludesWP ? model_state_var_countWP : modelStateVarCount, hruCount, hruLayerCount, reachCount, reservoirCount, numNonzeroReservoirs);
-      Report::LogMsg(msg1);
-      if (m_ICincludesWP)
-      {
          CString msg;
-         msg.Format("FlowModel::ReadState() IC file includes water temperatures.");
+         msg.Format("FlowModel::ReadState() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f, m_totArea = %f",
+            CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
          Report::LogMsg(msg);
-      }
+
+      } //end of else read the file to populate initial conditions
+   } // end of if (!spinupFlag)
+   else
+   { // Spinup. Initialize all the state variables from default values.
+
+      // Use the default Reach state variable values which were set in InitReaches().
+
+      // Initialize attribute values and HRU member values
+      for (int i = 0; i < hruCount; i++)
+      {
+         HRU* pHRU = m_hruArray[i];
+         for (int l = 0; l < hruLayerCount; l++)
+         {
+            HRULayer* pBox = pHRU->GetLayer(l);
+            pBox->m_contributionToReach = 0.0f;
+            pBox->m_verticalDrainage = 0.0f;
+            pBox->m_horizontalExchange = 0.0f;
+            if (l <= BOX_MELT)
+            { // Aboveground soil water compartments: Layer[0] is Snow and Layer[1] is meltwater in snowpack and standing water in a wetland
+               pBox->m_volumeWater = 0.f;
+               if (gpModel->m_initWaterContent.GetSize() == hruLayerCount) //water content for each layer was specified
+                  pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * pHRU->m_HRUeffArea_m2;
+            }
+            else
+            { // Belowground soil water compartments
+               if (gpModel->m_initWaterContent.GetSize() == hruLayerCount)//water content for each layer was specified
+                  pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * 0.4f * pHRU->m_HRUeffArea_m2;//assumes porosity is 0.4...we don't know that value at this point in the code, but 0.4 is probably close.
+               else if (gpModel->m_initWaterContent.GetSize() == 1) // a single value for water content was specified 
+                  pBox->m_volumeWater = atof(gpModel->m_initWaterContent[0]) * 0.4f * pHRU->m_HRUeffArea_m2;
+               else pBox->m_volumeWater = 0.2 * (double)pHRU->m_HRUeffArea_m2;
+            }
+            for (int k = 0; k < m_hruSvCount - 1; k++)
+            {
+               pBox->m_svArray[k] = 0.0f;//concentration = 1 kg/m3 ???????
+               pBox->m_svArrayTrans[k] = 0.0f;//concentration = 1 kg/m3
+            } // end of loop thru state variables in this compartment
+         } // end of loop thru compartments in this HRU
+
+         pHRU->SetAttFloat(HruSNOW_BOX, 0.f);
+         pHRU->SetAttFloat(HruMELT_BOX, 0.f);
+         pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
+         pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
+         pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
+         pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
+
+         pHRU->m_snowpackFlag = pHRU->m_standingH2Oflag = false;
+      } // end of loop through HRUs
+
+      // Use the default Reservoir state variable values which were set in InitReaches().
 
       CString msg;
+      msg.Format("FlowModel::ReadState() set default values for state variables.");
+      Report::LogMsg(msg);
       msg.Format("FlowModel::ReadState() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f, m_totArea = %f",
          CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
       Report::LogMsg(msg);
-
-   }//end of else read the file to populate initial conditions
+   } // end of if (!spinupFlag) ... else ...
 
    m_saveStateAtEndOfRun = true; // Always save the state at the end of the run in the user's Documents folder.
 
@@ -5050,7 +5092,7 @@ x*/
       ASSERT(CheckHRUwaterBalance(pHRU));
    } // end of loop thru HRUs
 
-   return true;
+   return(true);
 } // end of ReadState()
 
 
@@ -5156,7 +5198,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
    m_pIDUlayer->SetColDataU(m_colET_DAY, 0);
 
-   if (pEnvContext->yearOfRun == 0) ResetStateVariables();
+   if (pEnvContext->yearOfRun == 0) ResetStateVariables(pEnvContext->spinupFlag);
 
    CString msg;
 
@@ -6757,7 +6799,7 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
    int catchmentCount = (int) m_catchmentArray.GetSize();
    int hruLayerCount = GetHRULayerCount();
 
-   bool use_attribute_values = IsICfileAvailable();
+   bool use_attribute_values = !pEnvContext->spinupFlag && IsICfileAvailable();
    CString msg;
    msg.Format("InitHRULayers() use_attribute_values = %d", use_attribute_values);
    Report::LogMsg(msg);
@@ -14552,11 +14594,11 @@ void FlowModel::GetNashSutcliffe(float *ns)
    }
 
 
-void FlowModel::ResetStateVariables()
+void FlowModel::ResetStateVariables(bool spinupFlag)
 {
    m_timeOffset = 0;
 
-   m_isReadStateOK = ReadState(); // Read file including initial values for the state variables. 
+   m_isReadStateOK = ReadState(spinupFlag); // Read file including initial values for the state variables. 
    bool hru_h2o_balance_flag = true;
    int catchmentCount = GetCatchmentCount();
    // iterate through catchments/hrus/hrulayers, calling fluxes as needed

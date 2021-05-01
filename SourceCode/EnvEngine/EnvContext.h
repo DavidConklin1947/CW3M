@@ -396,6 +396,7 @@ class EnvContext
 public:
    INT_PTR         (*ptrAddDelta)(EnvModel *pModel,  int cell, int col, int year, VData newValue, int handle );
    bool coldStartFlag;
+   bool spinupFlag;
    int m_maxDaysInYear; // 360=>12 equal length months of 30 days (Hadley), 365=>no leap days, 366=>Gregorian calendar. Also 0 and 1 for debugging.
    int             startYear;             // calendar year in which the simulation started (e.g. 2008)
    int             endYear;               // last calendar year of simulation (e.g. 2050)
@@ -489,6 +490,7 @@ public:
       , pLinkLayer( NULL )
       , pGWlayer(NULL)
       , coldStartFlag(false)
+      , spinupFlag(false)
       , m_maxDaysInYear(366) 
       , daysInCurrentYear(365)
       , m_useWaterYears(0)
