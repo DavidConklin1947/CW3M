@@ -3193,6 +3193,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pIDUlayer, m_colIDU_ID, "IDU_ID", TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colHBVCALIB, "HBVCALIB", TYPE_INT, CC_AUTOADD);
    m_pHRUlayer->CheckCol(m_colHruHBVCALIB, "HBVCALIB", TYPE_INT, CC_AUTOADD);
+   m_pHRUlayer->CheckCol(m_colHruFIELD_CAP, "FIELD_CAP", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colECOREGION, "ECOREGION", TYPE_INT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colAREA, "AREA", TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pIDUlayer, m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_AUTOADD);
@@ -5033,6 +5034,8 @@ bool FlowModel::ReadState(bool spinupFlag)
       for (int i = 0; i < hruCount; i++)
       {
          HRU* pHRU = m_hruArray[i];
+         float field_cap_mm = pHRU->AttFloat(HruFIELD_CAP);
+
          for (int l = 0; l < hruLayerCount; l++)
          {
             HRULayer* pBox = pHRU->GetLayer(l);
@@ -5044,6 +5047,13 @@ bool FlowModel::ReadState(bool spinupFlag)
                pBox->m_volumeWater = 0.f;
                if (gpModel->m_initWaterContent.GetSize() == hruLayerCount) //water content for each layer was specified
                   pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * pHRU->m_HRUeffArea_m2;
+               if (l == BOX_SURFACE_H2O && pHRU->m_wetlandArea_m2 > 0.)
+               { // Special case for the surface water compartment.  Wetlands initialize at field capacity.
+                  double wetland_frac = pHRU->m_wetlandArea_m2 / pHRU->m_HRUeffArea_m2; 
+                  double unadjusted_vol_mm = (pBox->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.;
+                  double adjusted_vol_mm = wetland_frac * field_capacity_mm + (1. - wetland_frac) * unadjusted_vol_mm;
+                  pBox->m_volumeWater = (adjusted_vol_mm / 1000.) * pHRU->m_HRUeffArea_m2;
+               }
             }
             else
             { // Belowground soil water compartments
@@ -5066,8 +5076,17 @@ bool FlowModel::ReadState(bool spinupFlag)
          pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
          pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
          pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-
          pHRU->m_snowpackFlag = pHRU->m_standingH2Oflag = false;
+
+         for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
+         {
+            int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
+            SetAttFloat(idu_ndx, FIELD_CAP, field_cap_mm);
+            int lulc_a = AttInt(idu_ndx, LULC_A);
+            double wetness_mm = (lulc_a == LULCA_WETLAND) ? 0. : NON_WETLAND_WETNESS_TOKEN;
+            SetAtt(idu_ndx, WETNESS, wetness_mm);
+            SetAtt(idu_ndx, H2O_MELT, 0.);
+         } // end of loop thru IDUs in this HRU
       } // end of loop through HRUs
 
       // Use the default Reservoir state variable values which were set in InitReaches().
@@ -6842,6 +6861,7 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
          int col_fc = pHBVparams->GetFieldCol("FC");
          float field_cap_mm = 0.;
          pHBVparams->Lookup(hbvcalib, col_fc, field_cap_mm);
+         pHRU->SetAttFloat(HruFIELD_CAP, field_cap_mm);
 
          if (use_attribute_values)
          {

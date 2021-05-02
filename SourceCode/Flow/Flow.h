@@ -107,6 +107,7 @@ using namespace std;
 #define WINDSPEED gpFlowModel->m_colWINDSPEED
 
 #define HruCOMID gpFlowModel->m_colHruCOMID
+#define HruFIELD_CAP gpFlowModel->m_colHruFIELD_CAP
 #define HruGW_FASTBOX gpFlowModel->m_colHruGW_FASTBOX
 #define HruGW_SLOWBOX gpFlowModel->m_colHruGW_SLOWBOX
 #define HruHBVCALIB gpFlowModel->m_colHruHBVCALIB
@@ -1900,6 +1901,7 @@ public:
    int m_colHruHRU_ID;
    int m_colHruCOMID;
    int m_colHruHBVCALIB;
+   int m_colHruFIELD_CAP;
    int m_colHruTEMP;
    int m_colHruTMAX;
    int m_colHruTMIN;
