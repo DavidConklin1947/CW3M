@@ -5051,7 +5051,7 @@ bool FlowModel::ReadState(bool spinupFlag)
                { // Special case for the surface water compartment.  Wetlands initialize at field capacity.
                   double wetland_frac = pHRU->m_wetlandArea_m2 / pHRU->m_HRUeffArea_m2; 
                   double unadjusted_vol_mm = (pBox->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.;
-                  double adjusted_vol_mm = wetland_frac * field_capacity_mm + (1. - wetland_frac) * unadjusted_vol_mm;
+                  double adjusted_vol_mm = wetland_frac * field_cap_mm + (1. - wetland_frac) * unadjusted_vol_mm;
                   pBox->m_volumeWater = (adjusted_vol_mm / 1000.) * pHRU->m_HRUeffArea_m2;
                }
             }
