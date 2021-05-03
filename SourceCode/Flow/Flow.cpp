@@ -1970,7 +1970,7 @@ WaterParcel Reservoir::GetResOutflowWP(Reservoir* pRes, int doy)
    // check for river run reservoirs 
    if (pRes->m_reservoirType == ResType_RiverRun)
    {
-      outflow = pRes->m_inflow / SEC_PER_DAY;    // convert outflow to m3/day
+      outflow = (pRes->m_inflow - evap_m3) / SEC_PER_DAY;    // outflow is in cms
       pRes->m_activeRule = "RunOfRiver"; pRes->m_constraintValue = 0.f;
    }
    else
@@ -4996,10 +4996,16 @@ bool FlowModel::ReadState(bool spinupFlag)
 
             pRes->m_resWP = WaterParcel(pRes->m_volume, h2o_temp_degC);
             if (pRes->m_volume > 0.f)
-               {
+            {
                totReservoirVol += pRes->m_volume;
                numNonzeroReservoirs++;
-               }
+            }
+
+            Reach* pReach = pRes->m_pReach;
+            if (pReach == NULL) continue;
+            pReach->SetAtt(ReachRES_H2O, pRes->m_resWP.m_volume_m3);
+            pReach->SetAtt(ReachRES_TEMP, pRes->m_resWP.WaterTemperature());
+
             } // end of loop on reservoirs
 
          fclose(fp);
@@ -5089,7 +5095,7 @@ bool FlowModel::ReadState(bool spinupFlag)
          } // end of loop thru IDUs in this HRU
       } // end of loop through HRUs
 
-      // Use the default Reservoir state variable values which were set in InitReaches().
+      // Use the default Reservoir state variable values which were set in InitReservoirs().
 
       CString msg;
       msg.Format("FlowModel::ReadState() set default values for state variables.");
@@ -10479,7 +10485,14 @@ bool FlowModel::InitReservoirs( void )
 */
                } // end of block to write out reservoir locations to the log
 
-            pDownstreamReach->m_pReservoir = pRes;
+            Reach* pReach = pDownstreamReach;
+            ASSERT(pReach != NULL);
+            if (pReach != NULL)
+            {
+               pReach->m_pReservoir = pRes;
+               pReach->SetAtt(ReachRES_H2O, pRes->m_resWP.m_volume_m3);
+               pReach->SetAtt(ReachRES_TEMP, pRes->m_resWP.WaterTemperature());
+            }
             pRes->m_in_use = true;
             usedResCount++;
 

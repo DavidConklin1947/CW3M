@@ -123,6 +123,8 @@ using namespace std;
 #define ReachQSPILL_FRC gpFlowModel->m_colReachQSPILL_FRC
 #define ReachQ2WETL gpFlowModel->m_colReachQ2WETL
 #define ReachREACH_H2O gpFlowModel->m_colReachREACH_H2O
+#define ReachRES_H2O gpFlowModel->m_colReachRES_H2O
+#define ReachRES_TEMP gpFlowModel->m_colReachRES_TEMP
 #define ReachTEMP_H2O gpFlowModel->m_colReachTEMP_H2O
 #define ReachVEGHTREACH gpFlowModel->m_colReachVEGHTREACH
 #define ReachWIDTH_CALC gpFlowModel->m_colReachWIDTH_CALC
