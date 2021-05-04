@@ -91,11 +91,13 @@ using namespace std;
 #define H2O_MELT gpFlowModel->m_colH2O_MELT
 #define LAI gpFlowModel->m_colLAI
 #define LULC_A gpFlowModel->m_colLulcA
+#define MAXSNOW gpFlowModel->m_colMAXSNOW
 #define PVT gpFlowModel->m_colPVT
 #define RAD_SW gpFlowModel->m_colRAD_SW
 #define SM_DAY gpFlowModel->m_colSM_DAY
 #define SNOWPACK gpFlowModel->m_colSNOWPACK
 #define SPHUMIDITY gpFlowModel->m_colSPHUMIDITY
+#define STORAGE_YR gpFlowModel->m_colSTORAGE_YR
 #define TEMP gpFlowModel->m_colTEMP
 #define TMAX gpFlowModel->m_colTMAX
 #define TMIN gpFlowModel->m_colTMIN
@@ -1988,7 +1990,7 @@ public:
    int m_colHruPrecip10Yr;
    int m_colHruTempYr;
    int m_colHruTemp10Yr;
-   int m_colHruMaxSWE;
+   int m_colMAXSNOW;
    int m_colHruApr1SWE;
    int m_colHruApr1SWE10Yr;
    int m_colCLIMATENDX;
@@ -2053,7 +2055,7 @@ public:
    int m_colIrrigation_yr;
    int m_colIrrigation;
    int m_colRunoff_yr;
-   int m_colStorage_yr;
+   int m_colSTORAGE_YR;
    int m_colAgeClass;
 
    int m_colIRRIGATION;

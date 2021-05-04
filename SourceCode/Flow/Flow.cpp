@@ -2629,7 +2629,7 @@ FlowModel::FlowModel()
  , m_colHruTemp10Yr( -1 )
  , m_colHruPrecip10Yr( -1 )
  , m_colCLIMATENDX(-1)
- , m_colHruMaxSWE(-1 )
+ , m_colMAXSNOW(-1 )
  , m_colHruApr1SWE10Yr( -1 )
  , m_colHruApr1SWE( -1 )
  , m_colHRUPercentIrrigated(-1)
@@ -2638,7 +2638,7 @@ FlowModel::FlowModel()
  , m_colIrrigation_yr(-1)
  , m_colIrrigation(-1)
  , m_colRunoff_yr(-1)
- , m_colStorage_yr(-1)
+ , m_colSTORAGE_YR(-1)
  , m_colLulcB(-1)
  , m_colLulcA(-1)
  , m_colPVT(-1)
@@ -3271,14 +3271,14 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruTemp10Yr,          _T("TEMP_10YR"),    TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruPrecip10Yr,        _T("PRCP_10YR"),    TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colCLIMATENDX, _T("CLIMATENDX"), TYPE_INT, CC_AUTOADD);
-   EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruMaxSWE,            _T("MAXSNOW"),      TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol( m_pCatchmentLayer, m_colMAXSNOW,            _T("MAXSNOW"),      TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruApr1SWE,           _T("SNOW_APR"),     TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colHruApr1SWE10Yr,       _T("SNOW_APR10"),   TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colARIDITYNDX,         _T("ARIDITYNDX"),   TYPE_FLOAT, CC_AUTOADD );  
 
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colMaxET_yr,              _T("MAX_ET_yr"),    TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colRunoff_yr  ,          _T("Runoff_yr"),    TYPE_FLOAT, CC_AUTOADD );
-   EnvExtension::CheckCol( m_pCatchmentLayer, m_colStorage_yr  ,         _T("Storage_yr"),   TYPE_FLOAT, CC_AUTOADD );
+   EnvExtension::CheckCol( m_pCatchmentLayer, m_colSTORAGE_YR  ,         _T("STORAGE_YR"),   TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colIrrigation_yr  ,      _T("Irrig_yr"),     TYPE_FLOAT, CC_AUTOADD );
 
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colIrrigation, "IRRIGATION", TYPE_INT, CC_AUTOADD); 
@@ -3424,7 +3424,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    m_pCatchmentLayer->SetColDataU( m_colPRECIP_YR,      0.0f);
    m_pCatchmentLayer->SetColData( m_colHruPrecip10Yr,    0.0f, true );
 
-   m_pCatchmentLayer->SetColData( m_colHruMaxSWE,        0.0f, true );
+   m_pCatchmentLayer->SetColData( m_colMAXSNOW,        0.0f, true );
    m_pCatchmentLayer->SetColData( m_colHruApr1SWE,       0.0f, true );
    m_pCatchmentLayer->SetColData( m_colHruApr1SWE10Yr,   0.0f, true );
 
@@ -4577,10 +4577,10 @@ int FlowModel::SaveDetailedOutputIDU(CArray< FILE*, FILE* > &filePtrArray )
       m_pIDUlayer->GetData(i, m_colPRECIP_YR, precip_yr);
       m_flowContext.pEnvContext->pMapLayer->GetData(i,m_colIrrigation_yr,irrig_yr);
       m_flowContext.pEnvContext->pMapLayer->GetData(i,m_colRunoff_yr,runoff_yr);
-      m_flowContext.pEnvContext->pMapLayer->GetData(i,m_colStorage_yr,storage_yr);
+      m_flowContext.pEnvContext->pMapLayer->GetData(i,m_colSTORAGE_YR,storage_yr);
       m_flowContext.pEnvContext->pMapLayer->GetData(i,m_colLulcB,lulcB);
       m_flowContext.pEnvContext->pMapLayer->GetData(i,m_colLulcA,lulcA);
-      m_flowContext.pEnvContext->pMapLayer->GetData(i, m_colHruMaxSWE, max_snow);
+      m_flowContext.pEnvContext->pMapLayer->GetData(i, m_colMAXSNOW, max_snow);
 
       fwrite( &lai,        sizeof(float), 1, filePtrArray[0] );
       fwrite( &age,        sizeof(float), 1, filePtrArray[1] );
@@ -4904,6 +4904,8 @@ bool FlowModel::ReadState(bool spinupFlag)
          for (int i = 0; i < hruCount; i++)
          {
             HRU *pHRU = m_hruArray[i];
+            double hru_water_m3 = 0.;
+
             for (int j = 0; j < hruLayerCount; j++)
             {
                HRULayer *pLayer = pHRU->GetLayer(j);
@@ -4925,7 +4927,18 @@ bool FlowModel::ReadState(bool spinupFlag)
                // pLayer->m_hru_layer_h2oWP = WaterParcel(natural_water_vol_m3, h2o_temp_degC); // eventually
                tot_HRU_natural_vol_m3 += pLayer->m_volumeWater;
                tot_HRU_other_vol_m3 += other_water_vol_m3;
+               hru_water_m3 += pLayer->m_volumeWater;
             } // end of loop on HRU layers
+            pHRU->m_initStorage = pHRU->m_endingStorage = (float)((hru_water_m3 / pHRU->m_HRUeffArea_m2) * 1000.); // mm
+
+            // This should only be necessary until we redo the spinups.
+            for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
+            {
+               int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
+               SetAttFloat(idu_ndx, STORAGE_YR, pHRU->m_endingStorage);
+            }
+            // end of what should only be necessary temporarily
+
             water_balance_flag &= CheckHRUwaterBalance(pHRU);
          } // end of loop on HRUs
          if (!water_balance_flag)
@@ -5041,6 +5054,7 @@ bool FlowModel::ReadState(bool spinupFlag)
       {
          HRU* pHRU = m_hruArray[i];
          float field_cap_mm = pHRU->AttFloat(HruFIELD_CAP);
+         double hru_water_m3 = 0;
 
          for (int l = 0; l < hruLayerCount; l++)
          {
@@ -5074,6 +5088,8 @@ bool FlowModel::ReadState(bool spinupFlag)
                pBox->m_svArray[k] = 0.0f;//concentration = 1 kg/m3 ???????
                pBox->m_svArrayTrans[k] = 0.0f;//concentration = 1 kg/m3
             } // end of loop thru state variables in this compartment
+
+            hru_water_m3 += pBox->m_volumeWater;
          } // end of loop thru compartments in this HRU
 
          pHRU->SetAttFloat(HruSNOW_BOX, 0.f);
@@ -5084,6 +5100,7 @@ bool FlowModel::ReadState(bool spinupFlag)
          pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
          pHRU->m_snowpackFlag = pHRU->m_standingH2Oflag = false;
 
+         pHRU->m_endingStorage = pHRU->m_initStorage = (hru_water_m3 / pHRU->m_HRUeffArea_m2) * 1000.;
          for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
          {
             int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
@@ -5092,7 +5109,9 @@ bool FlowModel::ReadState(bool spinupFlag)
             double wetness_mm = (lulc_a == LULCA_WETLAND) ? 0. : NON_WETLAND_WETNESS_TOKEN;
             SetAtt(idu_ndx, WETNESS, wetness_mm);
             SetAtt(idu_ndx, H2O_MELT, 0.);
+            SetAttFloat(idu_ndx, STORAGE_YR, pHRU->m_endingStorage);
          } // end of loop thru IDUs in this HRU
+
       } // end of loop through HRUs
 
       // Use the default Reservoir state variable values which were set in InitReservoirs().
@@ -5899,7 +5918,10 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
    m_annualTotalDischarge = 0; //acre-ft
    m_annualTotalRainfall  = 0; // acre-ft
    m_annualTotalSnowfall  = 0; // acre-ft
+
    m_volumeMaxSWE = 0.0f; // m3 H2O
+   m_pIDUlayer->SetColDataU(MAXSNOW, 0.);
+
    m_totEvapFromReachesYr_m3 = 0.; // m3 H2O
    m_totEvapFromReservoirsYr_m3 = 0.;
 
@@ -7877,7 +7899,7 @@ void FlowModel::UpdateYearlyDeltas(EnvContext *pEnvContext )
          gpFlow->UpdateIDU(pEnvContext, idu, m_colPRECIP_YR, pHRU->m_precip_yr, true);   // mm/year
          gpFlow->UpdateIDU(pEnvContext, idu, m_colHruPrecip10Yr, pHRU->m_precip_10yr.GetValue(), true); // mm/year
          gpFlow->UpdateIDU(pEnvContext, idu, m_colRunoff_yr, pHRU->m_runoff_yr, true);
-         gpFlow->UpdateIDU(pEnvContext, idu, m_colStorage_yr, pHRU->m_storage_yr, true);
+         gpFlow->UpdateIDU(pEnvContext, idu, m_colSTORAGE_YR, pHRU->m_storage_yr, true);
          // ET_YR and MAX_ET_YR are accumulated IDU by IDU from daily values in EvapTrans::GetHruET().
       } // end of loop thru the IDUs in this HRU
    } // end of loop thru HRUs
@@ -7886,43 +7908,52 @@ void FlowModel::UpdateYearlyDeltas(EnvContext *pEnvContext )
 
 
 void FlowModel::GetMaxSnowPack(EnvContext *pEnvContext)
+{
+   // First sum the total volume of snow for this day.
+   double totalSnow_m3 = 0.0f;
+   for (int j = 0; j < m_hruArray.GetSize(); j++)
    {
-   m_pCatchmentLayer->m_readOnly = false;
-   int catchmentCount = (int)m_catchmentArray.GetSize();
-   float totalSnow = 0.0f;
-   //First sum the total volume of snow for this day
-   for (int i = 0; i< catchmentCount; i++)
+      HRU* pHRU = m_hruArray.GetAt(j);
+      if (!pHRU->m_snowpackFlag) continue;
+      totalSnow_m3 += pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater;
+      for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
       {
-      Catchment *pCatchment = m_catchmentArray[i];
-      for (int j = 0; j < pCatchment->GetHRUCountInCatchment(); j++)
-         {
-         HRU *pHRU = pCatchment->GetHRUfromCatchment(j);
-         if (pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater > 0.)
-            // There is snow on the ground in this HRU.
-            totalSnow += ((float)pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater + (float)pHRU->GetLayer(BOX_MELT)->m_volumeWater); //get the current year snowpack
-         }
-      }
-   // then compare the total volume to the previously defined maximum volume
-   if (totalSnow > m_volumeMaxSWE)
-      {
-      m_volumeMaxSWE = totalSnow;
+         int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
+         int lulc_a = AttInt(idu_ndx, LULC_A);
+         if (lulc_a == LULCA_WETLAND) continue;
+         double h2o_melt_mm = Att(idu_ndx, H2O_MELT);
+         float area_m2 = AttFloat(idu_ndx, AREA);
+         double h2o_melt_m3 = (h2o_melt_mm / 1000.) * area_m2;
+         totalSnow_m3 += h2o_melt_m3;
+      } // end of loop thru IDUs in HRU j
+   } // end of loop thru HRUs
+
+   // Then compare the total volume to the previously defined maximum volume.
+   if (totalSnow_m3 > m_volumeMaxSWE)
+   {
+      m_volumeMaxSWE = totalSnow_m3;
       int dayOfYear = int(m_timeInRun - m_yearStartTime);  // zero based day of year
       m_dateMaxSWE = dayOfYear;
 
-//#pragma omp parallel for
+      // Update the IDU MAXSNOW attribute values.
       for (int j = 0; j < m_hruArray.GetSize(); j++)
+      {
+         HRU* pHRU = m_hruArray.GetAt(j);
+         if (!pHRU->m_snowpackFlag) continue;
+         for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
          {
-         HRU *pHRU = m_hruArray.GetAt(j);
-         for (int k = 0; k < pHRU->m_polyIndexArray.GetSize(); k++)
-            {
-            float snow_m3_H2O = (float)(pHRU->GetLayer(BOX_SNOWPACK)->m_volumeWater + pHRU->GetLayer(1)->m_volumeWater);
-            float snow_mm_H2O = (snow_m3_H2O / pHRU->m_HRUeffArea_m2) * 1000.f;
-            gpFlow->UpdateIDU(pEnvContext, pHRU->m_polyIndexArray[k], m_colHruMaxSWE, snow_mm_H2O, false);
-            } // end of loop thru IDUs in HRU j
-         } // end of loop thru HRUs
-      } // end of if (totalSnow > m_volumeMaxSWE)
-   m_pCatchmentLayer->m_readOnly = true;
-   }
+            int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
+            int lulc_a = AttInt(idu_ndx, LULC_A);
+            if (lulc_a == LULCA_WETLAND) continue;
+            float snowpack_mm = AttFloat(idu_ndx, SNOWPACK);
+            double h2o_melt_mm = Att(idu_ndx, H2O_MELT);
+            float maxsnow_mm = (float)(snowpack_mm + h2o_melt_mm);
+            SetAttFloat(idu_ndx, MAXSNOW, maxsnow_mm);
+         } // end of loop thru IDUs in HRU j
+      } // end of loop thru HRUs
+   } // end of if (totalSnow > m_volumeMaxSWE)
+
+} // end of GetMaxSnowPack()
 
 
 void FlowModel::UpdateAprilDeltas(EnvContext *pEnvContext )
@@ -8102,30 +8133,20 @@ bool FlowModel::ResetCumulativeYearlyValues( )
    EnvContext *pContext = m_flowContext.pEnvContext;
    
    for ( int i=0; i < m_hruArray.GetSize(); i++ )
-      {
+   {
       HRU *pHRU = m_hruArray.GetAt(i);
       
       int hruLayerCount = pHRU->GetLayerCount();
-      float waterDepth=0.0f;
+      double hru_water_m3 = 0.;
       for ( int l=0; l < hruLayerCount; l++ )     
-         {
+      {
          HRULayer *pHRULayer = pHRU->GetLayer( l );
-         waterDepth += float(pHRULayer->m_wDepth);//mm of total storage ???Flow shouldn't add non-irrig and irrig depths because the areas are different
-         }
-      
-      pHRU->m_endingStorage = waterDepth;
-      pHRU->m_storage_yr    = pHRU->m_endingStorage-pHRU->m_initStorage;
+         hru_water_m3 += pHRULayer->m_volumeWater;
+      }
+      double hru_water_mm = (hru_water_m3 / pHRU->m_HRUeffArea_m2) * 1000.;
+      pHRU->m_endingStorage = hru_water_mm;
+      pHRU->m_storage_yr    = pHRU->m_endingStorage - pHRU->m_initStorage;
       pHRU->m_initStorage   = pHRU->m_endingStorage;
-
-      //for ( int i=0; i < pHRU->m_polyIndexArray.GetSize(); i++ )
-      //   {
-      //   int idu = pHRU->m_polyIndexArray[ i ];
-      //
-      //   gpFlow->UpdateIDU( pContext, idu, m_colPrecip_yr,  pHRU->m_precip_yr, true );
-      //   gpFlow->UpdateIDU( pContext, idu, m_colRunoff_yr,  pHRU->m_runoff_yr, true );
-      //   gpFlow->UpdateIDU( pContext, idu, m_colStorage_yr, pHRU->m_storage_yr, true );
-      //   gpFlow->UpdateIDU( pContext, idu, m_colMaxET_yr,   pHRU->m_maxET_yr, true);
-      //   }
 
       pHRU->m_temp_yr   = 0;
       pHRU->m_precip_yr = 0;
@@ -8138,10 +8159,10 @@ bool FlowModel::ResetCumulativeYearlyValues( )
       pHRU->m_et_yr = 0.0f;
       pHRU->m_aquifer_recharge_yr_mm = 0.0f;
       pHRU->m_runoff_yr =0.0f;
-      }
+   } // end of loop through HRUs
 
-   return true;
-   }
+   return(true);
+} // end of ResetCumulativeYearlyValues()
 
 
 bool FlowModel::ResetCumulativeWaterYearValues()

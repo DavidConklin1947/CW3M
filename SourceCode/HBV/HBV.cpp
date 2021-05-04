@@ -948,6 +948,8 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
          ending_water_m3 += ending_layer_m3;
          } // end of loop thru the soil layers
 
+      pHRU->m_snowpackFlag = (snow_in_snowpack_m3SWE + pHRULayer0->GetFluxValue()) > 0.;
+
       if (h == hru_of_interest) // bottom end of HJA
          if ((snow_in_snowpack_m3SWE + water_in_snowpack_m3 + pHRULayer0->GetFluxValue() + pHRULayer1->GetFluxValue()) < -0.1f)
          {
