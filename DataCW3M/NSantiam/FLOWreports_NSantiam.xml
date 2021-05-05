@@ -6,6 +6,9 @@
       <output name="H2O_MELT (mm)" query="1" value="H2O_MELT" type="areaWtMean" domain="idu" />
       <output name="SWE (=SNOWPACK+H2O_MELT) (mm)" query="1" value="SNOWPACK+H2O_MELT" type="areaWtMean" domain="idu" />
       <output name="MAXSNOW (mm)" query="1" value="MAXSNOW" type="areaWtMean" domain="idu" />
+      <output name="tot SNOWPACK (m3)" query="1" value="SNOWPACK*AREA/1000" type="sum" domain="idu" />
+      <output name="tot H2O_MELT (m3)" query="1" value="H2O_MELT*AREA/1000" type="sum" domain="idu" />
+      <output name="tot SWE (=SNOWPACK+H2O_MELT) (m3)" query="1" value="(SNOWPACK+H2O_MELT)*AREA/1000" type="sum" domain="idu" />
     </output_group>
     
     <output_group name="FLOW Big Cliff daily volume and temperature" interval="daily" >
