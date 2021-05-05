@@ -5485,11 +5485,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       duration = (float)(finish - start) / CLOCKS_PER_SEC;   
       m_collectDataRunTime += (float) duration;   
 
-      if (!m_estimateParameters)
-         {
-         if (dayOfYear<180)//get maximum winter snowpack for this year.  
-            GetMaxSnowPack(pEnvContext);
-         }
+      GetMaxSnowPack(pEnvContext);
 
       EndStep( &m_flowContext );
       UpdateHRULevelVariables(pEnvContext);
@@ -7939,7 +7935,7 @@ void FlowModel::GetMaxSnowPack(EnvContext *pEnvContext)
       for (int j = 0; j < m_hruArray.GetSize(); j++)
       {
          HRU* pHRU = m_hruArray.GetAt(j);
-         if (!pHRU->m_snowpackFlag) continue;
+//x         if (!pHRU->m_snowpackFlag) continue;
          for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
          {
             int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
