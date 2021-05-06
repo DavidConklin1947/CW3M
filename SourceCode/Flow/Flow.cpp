@@ -3441,8 +3441,6 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    AssignReachesToHRUs();
    AssignIDUsToStreamBanks();
    
-   PopulateCatchmentCumulativeAreas();
-
    IdentifyMeasuredReaches();
 
    bool ok = true; //InitializeReachSampleArray();   // allocates m_pReachDischargeData object
@@ -3454,6 +3452,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
       }
 */
    SetAllCatchmentAttributes();
+   PopulateCatchmentCumulativeAreas();
    InitHRULayers(pEnvContext);
 
    // iterate through catchments/hrus/hrulayers, setting up the fluxes

@@ -300,7 +300,7 @@ flow_cms="1.10"
     <!--
     <Spring name="Blowout Cr." COMID="23780557" flow_cfs="9" temp_C="4.9" />
     -->
-    <Spring name="Breitenbush" COMID="23780701" flow_cfs="20" temp_C="4.9" />
+    <Spring name="Breitenbush" COMID="23780701" flow_cfs="30" temp_C="4.9" />
     <Spring name="French Cr." COMID="23780793" flow_cfs="155" temp_C="4.9" />
 
     <external name="MCfire"

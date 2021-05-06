@@ -54,10 +54,10 @@
 
     <output_group name="FLOW NSantiam flow skill assessment monthly" interval ="monthly" >
       <output in_use="1" name="USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591"
-              query="COMID=23780591" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780591" value="Q_DISCHARG*35.3146667*1.003" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591.csv" format="E0" />
       <output in_use="1" name="USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_237807011"
-              query="COMID=23780701" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780701" value="Q_DISCHARG*35.3146667*1.024" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701.csv" format="E0" />
       <output in_use="1" name="USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
               query="COMID=23780557" value="Q_DISCHARG*35.3146667*1.012" type="sum" domain="reach"
@@ -111,10 +111,10 @@
 
     <output_group name="FLOW NSantiam flow skill assessment daily" interval ="daily" >
       <output in_use="1" name="USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591"
-              query="COMID=23780591" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780591" value="Q_DISCHARG*35.3146667*1.003" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591.csv" format="E0" />
       <output in_use="1" name="USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_237807011"
-              query="COMID=23780701" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780701" value="Q_DISCHARG*35.3146667*1.024" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701.csv" format="E0" />
       <output in_use="1" name="USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
               query="COMID=23780557" value="Q_DISCHARG*35.3146667*1.012" type="sum" domain="reach"
