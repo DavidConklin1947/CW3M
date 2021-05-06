@@ -60,19 +60,19 @@
               query="COMID=23780701" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701.csv" format="E0" />
       <output in_use="1" name="USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
-              query="COMID=23780557" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780557" value="Q_DISCHARG*35.3146667*1.012" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
       <output in_use="1" name="USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511"
-              query="COMID=23780511" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780511" value="Q_DISCHARG*35.3146667*1.043" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511.csv" format="E0" />
       <output in_use="1" name="USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805"
-              query="COMID=23780805" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780805" value="Q_DISCHARG*35.3146667*0.993" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
       <output in_use="1" name="USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481"
-              query="COMID=23780481" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780481" value="Q_DISCHARG*35.3146667*1.203" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481.csv" format="E0" />
       <output in_use="1" name="USGS_14184100_flow_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883"
-              query="COMID=23780883" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780883" value="Q_DISCHARG*35.3146667*1.004" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14184100_flow_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883.csv" format="E0" />
     </output_group>
 
@@ -117,19 +117,19 @@
               query="COMID=23780701" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701.csv" format="E0" />
       <output in_use="1" name="USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
-              query="COMID=23780557" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780557" value="Q_DISCHARG*35.3146667*1.012" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
       <output in_use="1" name="USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511"
-              query="COMID=23780511" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780511" value="Q_DISCHARG*35.3146667*1.043" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511.csv" format="E0" />
       <output in_use="1" name="USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805"
-              query="COMID=23780805" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780805" value="Q_DISCHARG*35.3146667*0.993" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
       <output in_use="1" name="USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481"
-              query="COMID=23780481" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780481" value="Q_DISCHARG*35.3146667*1.203" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481.csv" format="E0" />
       <output in_use="1" name="USGS_14184100_flow_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883"
-              query="COMID=23780883" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              query="COMID=23780883" value="Q_DISCHARG*35.3146667*1.004" type="sum" domain="reach"
              obs="..\Observations\NSantiam\USGS_14184100_flow_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883.csv" format="E0" />
     </output_group>
 

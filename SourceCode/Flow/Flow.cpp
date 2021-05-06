@@ -7935,7 +7935,6 @@ void FlowModel::GetMaxSnowPack(EnvContext *pEnvContext)
       for (int j = 0; j < m_hruArray.GetSize(); j++)
       {
          HRU* pHRU = m_hruArray.GetAt(j);
-//x         if (!pHRU->m_snowpackFlag) continue;
          for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
          {
             int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
