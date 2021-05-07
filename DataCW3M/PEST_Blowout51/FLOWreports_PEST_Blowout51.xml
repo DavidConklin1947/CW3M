@@ -3,12 +3,12 @@
 
 <outputs>
   <output_group name="FLOW Q_DISCHARG at gage daily" interval="daily" >
-    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.0" type="sum" domain="reach"
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
     obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
   </output_group>
 
   <output_group name="FLOW Q_DISCHARG at gage monthly" interval="monthly" >
-    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.0" type="sum" domain="reach"
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
     obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
   </output_group>
 
@@ -24,7 +24,7 @@
     <output in_use="1" name="ET from Blowout51 mm" query="HBVCALIB=51" value="ET_DAY" type="areaWtMean" domain="idu" />
     <output name="SPRING_CMS" query="HBVCALIB=51" value="SPRING_CMS" type="sum" domain="reach" />
     <output name="ADDED_VOL (m3)" query="HBVCALIB=51" value="ADDED_VOL" type="sum" domain="reach" />
-    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.0" type="sum" domain="reach"
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
     obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
   </output_group>
 <!--
