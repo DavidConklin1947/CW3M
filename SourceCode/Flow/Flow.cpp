@@ -3372,6 +3372,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSHADE_VEG, _T("SHADE_VEG"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachLAI_REACH, _T("LAI_REACH"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachVEGHTREACH, _T("VEGHTREACH"), TYPE_DOUBLE, CC_AUTOADD);
+   m_pReachLayer->CheckCol(m_colReachVEGHTGIVEN, "VEGHTGIVEN", TYPE_DOUBLE, CC_AUTOADD);
 
    m_pReachLayer->CheckCol(m_colReachWIDTHREACH, "WIDTHREACH", TYPE_DOUBLE, CC_AUTOADD);
    m_pReachLayer->CheckCol(m_colReachWIDTHGIVEN, "WIDTHGIVEN", TYPE_DOUBLE, CC_AUTOADD);
@@ -5099,7 +5100,7 @@ bool FlowModel::ReadState(bool spinupFlag)
          pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
          pHRU->m_snowpackFlag = pHRU->m_standingH2Oflag = false;
 
-         pHRU->m_endingStorage = pHRU->m_initStorage = (hru_water_m3 / pHRU->m_HRUeffArea_m2) * 1000.;
+         pHRU->m_endingStorage = pHRU->m_initStorage = (float)((hru_water_m3 / pHRU->m_HRUeffArea_m2) * 1000.);
          for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
          {
             int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
@@ -5706,18 +5707,19 @@ bool Reach::CalcReachVegParamsIfNecessary()
       gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVGDNS_CALC, m_topo.m_vegDensity);
 
       double width_calc_m = Att(ReachWIDTH_CALC);
-      ASSERT(width_calc_m >= Att(ReachWIDTH_MIN));
+      double width_min_m = Att(ReachWIDTH_MIN);
       width_reach_m = (width_given_m > 0.) ? width_given_m : width_calc_m;
+      if (width_reach_m < width_min_m) width_reach_m = width_min_m;
    }
-   double orig_veg_ht_reach_m = Att(ReachVEGHTREACH);
-   if (orig_veg_ht_reach_m == 0) // ??? temporary
-      gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVEGHTREACH, veg_ht_m);
+   gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachWIDTHREACH, width_reach_m);
+   ASSERT(width_reach_m > 0.);
+
+   double veghtgiven_m = Att(ReachVEGHTGIVEN);
+   double veghtreach_m = (veghtgiven_m >= 0.) ? veghtgiven_m : veg_ht_m;
+   gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVEGHTREACH, veghtreach_m);
 
    gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachLAI_REACH, lai_reach);
    gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachVGDNSREACH, m_topo.m_vegDensity);
-
-   gpModel->m_pReachLayer->SetDataU(m_polyIndex, gpModel->m_colReachWIDTHREACH, width_reach_m);
-   ASSERT(width_reach_m > 0.);
 
    double direction_deg = 0.; gpModel->m_pReachLayer->GetData(m_polyIndex, gpModel->m_colReachDIRECTION, direction_deg);
    m_topo.m_vegElevEW_deg = m_topo.VegElevEW_deg(direction_deg, width_reach_m, veg_ht_m);
@@ -7926,7 +7928,7 @@ void FlowModel::GetMaxSnowPack(EnvContext *pEnvContext)
    // Then compare the total volume to the previously defined maximum volume.
    if (totalSnow_m3 > m_volumeMaxSWE)
    {
-      m_volumeMaxSWE = totalSnow_m3;
+      m_volumeMaxSWE = (float)totalSnow_m3;
       int dayOfYear = int(m_timeInRun - m_yearStartTime);  // zero based day of year
       m_dateMaxSWE = dayOfYear;
 
@@ -8138,7 +8140,7 @@ bool FlowModel::ResetCumulativeYearlyValues( )
          hru_water_m3 += pHRULayer->m_volumeWater;
       }
       double hru_water_mm = (hru_water_m3 / pHRU->m_HRUeffArea_m2) * 1000.;
-      pHRU->m_endingStorage = hru_water_mm;
+      pHRU->m_endingStorage = (float)hru_water_mm;
       pHRU->m_storage_yr    = pHRU->m_endingStorage - pHRU->m_initStorage;
       pHRU->m_initStorage   = pHRU->m_endingStorage;
 
@@ -8382,6 +8384,25 @@ bool FlowModel::InitReaches(void)
       Report::ErrorMsg("Flow: Stream layer is missing a required column (FNODE_ and/or TNODE_).  These are necessary to establish topology");
       return false;
       }
+
+   // ??? This next part may be temporary.  If we ever get a source of real data other than Shade-a-lator for these parameters,
+   // then we won't want to wipe out the real data here.
+   if (m_flowContext.pEnvContext->spinupFlag)
+   {
+      m_pReachLayer->SetColDataU(ReachDEPTH_MIN, -1.);
+      m_pReachLayer->SetColDataU(ReachWIDTH_MIN, -1.);
+      m_pReachLayer->SetColDataU(ReachWIDTHGIVEN, -1.);
+      m_pReachLayer->SetColDataU(ReachVGDNSGIVEN, -1.);
+      m_pReachLayer->SetColDataU(ReachVEGHTGIVEN, -1.);
+      m_pReachLayer->SetColDataU(ReachVEG_HT_L, -1.);
+      m_pReachLayer->SetColDataU(ReachVEG_HT_R, -1.);
+      m_pReachLayer->SetColDataU(ReachTOPOELEV_E, -1.);
+      m_pReachLayer->SetColDataU(ReachTOPOELEV_S, -1.);
+      m_pReachLayer->SetColDataU(ReachTOPOELEV_W, -1.);
+      m_pReachLayer->SetColDataU(ReachRADSWGIVEN, -1.);
+   } // end of if (...spinupFlag)
+   // end of possibly temporary code
+
 
    /////////////////////
    //   FDataObj dataObj;

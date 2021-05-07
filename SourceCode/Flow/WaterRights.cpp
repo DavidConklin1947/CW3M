@@ -623,10 +623,10 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
       PopulateSUB_AREA(pFlowContext);
       } // end of coldstart logic
    else
-   { 
+   {
       m_pReachLayer->CheckCol(m_colStreamSTRMVERT0X, "STRMVERT0X", TYPE_INT, CC_MUST_EXIST);
       m_pReachLayer->CheckCol(m_colStreamSTRMVERT0Y, "STRMVERT0Y", TYPE_INT, CC_MUST_EXIST);
-      if (pFlowContext->pEnvContext->spinupFlag) PopulateHBVCALIB(pFlowContext);   // uncomment when creating new HBVCALIB rows
+      if (pFlowContext->pEnvContext->spinupFlag) PopulateHBVCALIB(pFlowContext);
    }
 
    m_pReachLayer->m_readOnly = streamReadOnlyFlag;

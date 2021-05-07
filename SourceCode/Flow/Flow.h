@@ -119,15 +119,24 @@ using namespace std;
 #define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
 #define HruSNOW_BOX gpFlowModel->m_colHruSNOW_BOX
 
+#define ReachDEPTH_MIN gpFlowModel->m_colReachDEPTH_MIN
 #define ReachDIRECTION gpFlowModel->m_colReachDIRECTION
 #define ReachHBVCALIB gpFlowModel->m_colReachHBVCALIB
 #define ReachQ_CAP gpFlowModel->m_colReachQ_CAP
 #define ReachQSPILL_FRC gpFlowModel->m_colReachQSPILL_FRC
 #define ReachQ2WETL gpFlowModel->m_colReachQ2WETL
+#define ReachRADSWGIVEN gpFlowModel->m_colReachRADSWGIVEN
 #define ReachREACH_H2O gpFlowModel->m_colReachREACH_H2O
 #define ReachRES_H2O gpFlowModel->m_colReachRES_H2O
 #define ReachRES_TEMP gpFlowModel->m_colReachRES_TEMP
 #define ReachTEMP_H2O gpFlowModel->m_colReachTEMP_H2O
+#define ReachTOPOELEV_E gpFlowModel->m_colReachTOPOELEV_E
+#define ReachTOPOELEV_S gpFlowModel->m_colReachTOPOELEV_S
+#define ReachTOPOELEV_W gpFlowModel->m_colReachTOPOELEV_W
+#define ReachVEG_HT_L gpFlowModel->m_colReachVEG_HT_L
+#define ReachVEG_HT_R gpFlowModel->m_colReachVEG_HT_R
+#define ReachVGDNSGIVEN gpFlowModel->m_colReachVGDNSGIVEN
+#define ReachVEGHTGIVEN gpFlowModel->m_colReachVEGHTGIVEN
 #define ReachVEGHTREACH gpFlowModel->m_colReachVEGHTREACH
 #define ReachWIDTH_CALC gpFlowModel->m_colReachWIDTH_CALC
 #define ReachWIDTH_MIN gpFlowModel->m_colReachWIDTH_MIN
@@ -2033,6 +2042,7 @@ public:
    int m_colReachSHADE_VEG;
    int m_colReachLAI_REACH;
    int m_colReachVEGHTREACH;
+   int m_colReachVEGHTGIVEN;
    int m_colReachWIDTHREACH;
    int m_colReachWIDTHGIVEN;
    int m_colReachRADSWGIVEN;
