@@ -37,7 +37,7 @@
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
     useWaterYears              ='0'
-    spinup='1'
+    spinup='0'
   />
   <!-- for debugging, to run for just 1 day in each year    maxDaysInYear ='1'
 -->
