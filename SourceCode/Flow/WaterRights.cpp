@@ -466,8 +466,7 @@ bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
       {
          HRU* pHRU = pCatchment->GetHRUfromCatchment(h);
          int hru_comid = pHRU->AttInt(HruCOMID);
-         int reachNdx = pStreamLayer->FindIndex(m_colStreamCOMID, hru_comid);
-         Reach* pReach = gpFlowModel->m_reachArray[reachNdx];
+         Reach* pReach = gpFlowModel->FindReachFromID(hru_comid);
          int hbvcalib = pReach->AttInt(ReachHBVCALIB);
          pHRU->SetAttInt(HruHBVCALIB, hbvcalib);
       } // end of loop thru HRUs in this catchment

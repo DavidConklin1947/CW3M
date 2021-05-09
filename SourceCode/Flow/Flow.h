@@ -1623,6 +1623,8 @@ public:
       return NULL; 
    } // end of FindReachFromPolyIndex()
 
+   Reach* FindReachFromID(int id) { for (int i = 0; i < m_reachArray.GetCount(); i++) if (m_reachArray[i]->m_reachID == id) return m_reachArray[i]; return NULL; }
+
    StateVar *GetStateVar(int i) { return m_stateVarArray.GetAt(i); }
    StateVar *FindStateVar(LPCTSTR varName) { for (int i = 0; i < m_stateVarArray.GetCount(); i++) if (m_stateVarArray[i]->m_name.CompareNoCase(varName) == 0) return m_stateVarArray[i]; return NULL; }
 
@@ -1728,7 +1730,6 @@ protected:
    int  GetStateVarCount( void ) { return (int) m_stateVarArray.GetSize(); }
 
    Reservoir *FindReservoirFromID( int id ) {  for ( int i=0; i < m_reservoirArray.GetCount(); i++ ) if ( m_reservoirArray[i]->m_id == id ) return m_reservoirArray[ i ]; return NULL; }
-   Reach *FindReachFromID( int id ) {  for ( int i=0; i < m_reachArray.GetCount(); i++ ) if ( m_reachArray[i]->m_reachID == id ) return m_reachArray[ i ]; return NULL; }
 
    void UpdateSummaries() { }
 

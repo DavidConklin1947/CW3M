@@ -6876,8 +6876,7 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
          int hbvcalib = pHRU->AttInt(HruHBVCALIB);
 // We should only need these next few lines temporarily 4/18/21
          int hru_comid = pHRU->AttInt(HruCOMID);
-         int reachNdx = m_pReachLayer->FindIndex(m_colStreamCOMID, hru_comid);
-         Reach* pReach = gpFlowModel->m_reachArray[reachNdx];
+         Reach* pReach = gpFlowModel->FindReachFromID(hru_comid);
          hbvcalib = pReach->AttInt(ReachHBVCALIB);
          pHRU->SetAttInt(HruHBVCALIB, hbvcalib);
 // end of temporary addition 4/18/21
@@ -9704,6 +9703,15 @@ bool FlowModel::BuildCatchmentsFromQueries( void )
          float area_m2 = 0.f; m_pHRUlayer->GetData(common_ndx, m_colHruAREA_M2, area_m2);
 
          Reach * pReach = FindReachFromID(comid);
+         if (pReach == NULL)
+         {
+            CString msg;
+            msg.Format("BuildCatchmentsFromHRUlayer() Can't find comid = %d in m_reachArray using FindReachFromID(). common_ndx = %d", 
+               comid, common_ndx);
+            Report::ErrorMsg(msg);
+            continue;
+         }
+
          Catchment * pCatch = AddCatchment(catch_id, pReach);
          m_pHRUlayer->SetDataU(common_ndx, m_colhruCATCH_NDX, common_ndx);
 
@@ -9727,6 +9735,13 @@ bool FlowModel::BuildCatchmentsFromQueries( void )
          { 
             hru_ndx = m_pHRUlayer->FindIndex(m_colhruHRU_ID, hru_id);
             HRU * pHRU = GetHRU(hru_ndx);
+            if (pHRU == NULL)
+            {
+               CString msg;
+               msg.Format("BuildCatchmentsFromHRUlayer() pHRU is NULL for hru_id = %d, hru_ndx = %d.", hru_id, hru_ndx);
+               Report::ErrorMsg(msg);
+               continue;
+            }
             pHRU->m_polyIndexArray.Add((int)idu);
          }
          m_pIDUlayer->SetDataU(idu, m_colHRU_NDX, hru_ndx);
