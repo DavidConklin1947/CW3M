@@ -97,7 +97,6 @@ using namespace std;
 #define SM_DAY gpFlowModel->m_colSM_DAY
 #define SNOWPACK gpFlowModel->m_colSNOWPACK
 #define SPHUMIDITY gpFlowModel->m_colSPHUMIDITY
-#define STORAGE_YR gpFlowModel->m_colSTORAGE_YR
 #define TEMP gpFlowModel->m_colTEMP
 #define TMAX gpFlowModel->m_colTMAX
 #define TMIN gpFlowModel->m_colTMIN
@@ -756,9 +755,6 @@ public:
    float m_elws;                //elevation (map units) of the water surface
    float m_et_yr;             // mm/year      
    float m_runoff_yr;         // mm/year
-   float m_initStorage;
-   float m_endingStorage;     // UNITS?????
-   float m_storage_yr;        // mm/year?
    float m_percentIrrigated;  // fraction of area (0-1)
    float m_meanLAI;           // dimensionless
 
@@ -920,7 +916,7 @@ public:
    WaterParcel m_waterParcel;
    WaterParcel m_previousWP;
    WaterParcel m_runoffWP; // lateral flow into the subreach
-   WaterParcel m_withdrawalWP; // lateral flow out of the subreach
+   double m_withdrawal_m3; // lateral flow out of the subreach, at the temperature of the water in the subreach
    double m_subreach_width_m;
    double m_subreach_depth_m;
    double m_manning_depth_m;
@@ -1662,7 +1658,9 @@ protected:
    int  ApplyCatchmentConstraints( ReachNode *pNode );
    int  ApplyAreaConstraints( ReachNode *pNode );
    int  SaveState(int calendar_year);
-   bool ReadState(bool spinupFlag);
+   bool ReadState();
+//x   bool ReadState(bool spinupFlag);
+   bool InitializeSpinup(void);
    bool IsICfileAvailable();
 
    int  OpenDetailedOutputFiles();
@@ -2066,7 +2064,6 @@ public:
    int m_colIrrigation_yr;
    int m_colIrrigation;
    int m_colRunoff_yr;
-   int m_colSTORAGE_YR;
    int m_colAgeClass;
 
    int m_colIRRIGATION;
@@ -2079,9 +2076,6 @@ public:
 
 // reservoir column (in stream coverage)
    int m_colResID;
-
-// boolean that Initial Conditions file is successfully read
-   bool m_isReadStateOK;
 
 // layer structures
    Map *m_pMap;
@@ -2168,7 +2162,7 @@ public:
    //bool InitializeHRULayerSampleArray(void);
    //bool InitializeReservoirSampleArray(void);
    void CollectData( int dayOfYear );
-   void ResetStateVariables(bool spinupFlag);
+   bool RestoreStateVariables(bool spinupFlag);
    void ResetDataStorageArrays( EnvContext *pEnvContext );
    //void CollectHRULayerData( void );
    //void CollectHRULayerExtraSVData( void );

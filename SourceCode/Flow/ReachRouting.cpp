@@ -564,32 +564,32 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
    int reachCount = gpModel->GetReachCount();
    clock_t start = clock();
 
-   int prev_hbvcalib_int = -1;
+   int prev_hbvcalibInt = -1;
    for (int i = 0; i < reachCount; i++)
    {
       Reach* pReach = gpModel->GetReach(i);     // Note: these are guaranteed to be non-phantom
 
-      int hbvcalib_int; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalib_int);
-      VData hbvcalib = hbvcalib_int;
-      if (m_pHBVtable->m_type == DOT_FLOAT) hbvcalib.ChangeType(TYPE_FLOAT);
+      int hbvcalibInt; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalibInt);
+      VData hbvcalibV = hbvcalibInt;
+      if (m_pHBVtable->m_type == DOT_FLOAT) hbvcalibV.ChangeType(TYPE_FLOAT);
       float w2a_slp = 0; 
       float w2a_int = 0; 
-      bool ok = m_pHBVtable->Lookup(hbvcalib, gpModel->m_colHbvW2A_SLP, w2a_slp);
-      ok &= m_pHBVtable->Lookup(hbvcalib, gpModel->m_colHbvW2A_INT, w2a_int);
+      bool ok = m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_SLP, w2a_slp);
+      ok &= m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_INT, w2a_int);
       if (!ok || (w2a_slp == 0 && w2a_int == 0))
       {
-         if (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalib_int != prev_hbvcalib_int)
+         if (pFlowContext->dayOfYear == 0 && pFlowContext->pEnvContext->yearOfRun == 0 && hbvcalibInt != prev_hbvcalibInt)
          {
             CString msg;
-            msg.Format("SolveReachKinematicWave() For hbvcalib_int = %d, w2a_slp = %f and w2a_int = %f.  "
+            msg.Format("SolveReachKinematicWave() For hbvcalibInt = %d, w2a_slp = %f and w2a_int = %f.  "
                "Will use DEFAULT_SOIL_H2O_TEMP_DEGC = %f for the temperature of runoff water going into the streams.",
-               hbvcalib_int, w2a_slp, w2a_int, DEFAULT_SOIL_H2O_TEMP_DEGC);
+               hbvcalibInt, w2a_slp, w2a_int, DEFAULT_SOIL_H2O_TEMP_DEGC);
             Report::LogMsg(msg);
          }
          w2a_int = DEFAULT_SOIL_H2O_TEMP_DEGC;
          w2a_slp = 0;
       }
-      prev_hbvcalib_int = hbvcalib_int;
+      prev_hbvcalibInt = hbvcalibInt;
 
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
       Reach* pUpstreamLeftReach = gpModel->GetReachFromNode(pReach->m_pLeft);
@@ -663,12 +663,12 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
             temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
             lateralInflowWP.m_temp_degC = temp_h2o_degC;
             pSubreach->m_runoffWP = lateralInflowWP;
-            pSubreach->m_withdrawalWP = WaterParcel(0, 0);
+            pSubreach->m_withdrawal_m3 = 0.;
          }
          else
          { // lateralInflow_m3 is negative or zero, meaning the flow, if any, is a withdrawal from the reach
             pSubreach->m_runoffWP = WaterParcel(0, 0);
-            pSubreach->m_withdrawalWP = WaterParcel(-lateralInflow_m3, pSubreach->m_waterParcel.WaterTemperature());
+            pSubreach->m_withdrawal_m3 = -lateralInflow_m3;
          }
 
          double evap_m3, evap_kJ, sw_kJ, lw_kJ;
@@ -910,7 +910,7 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
    double old_Q_cms = pSubnode->m_dischargeWP.m_volume_m3 / SEC_PER_DAY; ASSERT(old_Q_cms > 0); // old_Q_cms is yesterday's outflow rate from this subreach.
 
    // Make sure there is enough water available to handle any withdrawals from the reach for irrigation or municipal use.
-   double net_lateral_inflow_m3 = pSubnode->m_runoffWP.m_volume_m3 - pSubnode->m_withdrawalWP.m_volume_m3;
+   double net_lateral_inflow_m3 = pSubnode->m_runoffWP.m_volume_m3 - pSubnode->m_withdrawal_m3;
    if (net_lateral_inflow_m3 < 0)
    { // net lateral inflow is negative, so there must be withdrawals of some sort
       if ((original_volume_m3 + upstream_inflowWP.m_volume_m3 + net_lateral_inflow_m3) < pSubnode->m_min_volume_m3)
@@ -936,7 +936,7 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
    double Qnew_cms = 0.;
    // How much water is available?
    double available_for_discharge_m3 = pSubnode->m_waterParcel.m_volume_m3 + upstream_inflowWP.m_volume_m3 + pSubnode->m_runoffWP.m_volume_m3
-      - pSubnode->m_withdrawalWP.m_volume_m3 - pSubnode->m_min_volume_m3;
+      - pSubnode->m_withdrawal_m3 - pSubnode->m_min_volume_m3;
    double available_for_discharge_cms = available_for_discharge_m3 / SEC_PER_DAY;
    // Is there enough available to provide the minimum flow?
    double min_Q_cms = pReach->NominalLowFlow_cms();
@@ -975,12 +975,11 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
       pSubnode->m_addedVolumeWP.MixIn(magicWP);
    }
 
-   if (pSubnode->m_withdrawalWP.m_volume_m3 > 0)
+   if (pSubnode->m_withdrawal_m3 > 0.)
    { // Deal with lateral withdrawals, as for irrigation and drinking water
       // Adjust the temperature of any water being withdrawn laterally to match the temperature of the water in the reach,
       // now that runoff into the reach, upstream inflow, and magic water have been mixed in.
-      pSubnode->m_withdrawalWP.m_temp_degC = pSubnode->m_waterParcel.m_temp_degC;
-      pSubnode->m_waterParcel.Discharge(pSubnode->m_withdrawalWP);
+      pSubnode->m_waterParcel.Discharge(pSubnode->m_withdrawal_m3);
    }
 
    pSubnode->m_discharge = Qnew_cms;
