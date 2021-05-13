@@ -4,12 +4,12 @@
 <outputs>
   <output_group name="FLOW Q_DISCHARG at gage daily" interval="daily" >
     <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
-    obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
+    obs="..\Observations\Willamette Gages\Flow\USGS 14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
   </output_group>
 
   <output_group name="FLOW Q_DISCHARG at gage monthly" interval="monthly" >
     <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
-    obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
+    obs="..\Observations\Willamette Gages\Flow\USGS 14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
   </output_group>
 
   <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >

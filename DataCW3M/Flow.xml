@@ -297,10 +297,9 @@ flow_cms="1.10"
     <Spring name="Whitewater Cr." COMID="23781597" flow_cfs="15" temp_C="4.9" />
     <Spring name="Horn Cr." COMID="23781739" flow_cfs="31" temp_C="4.9" />
     <Spring name="Boulder Cr." COMID="23780901" flow_cfs="120" temp_C="4.9" />
-    <!--
-    <Spring name="Blowout Cr." COMID="23780557" flow_cfs="9" temp_C="4.9" />
-    -->
+    <Spring name="Blowout Cr." COMID="23780557" flow_cfs="8" temp_C="4.9" />
     <Spring name="Breitenbush" COMID="23780701" flow_cfs="30" temp_C="4.9" />
+    <Spring name="Breitenbush Hot Spring" COMID="23781273" flow_cfs="0.42" temp_C="84." />
     <Spring name="French Cr." COMID="23780793" flow_cfs="155" temp_C="4.9" />
 
     <external name="MCfire"
