@@ -4,6 +4,7 @@
 <Envision ver='5.0'>
 
   <settings
+    studyAreaName='Clackamas'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'
@@ -36,13 +37,14 @@
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
     useWaterYears              ='0'
+    spinup='1'
   />
 
   <layers >
 
     <layer
       name         ='IDU'
-      path         ='Clackamas\IDU_Clackamas.shp'
+      path         ='{studyAreaName}\IDU_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,0'
@@ -53,7 +55,7 @@
 	/>
     <layer
   name         ='HRU'
-  path         ='Clackamas\HRU_Clackamas.shp'
+  path         ='{studyAreaName}\HRU_{studyAreaName}.shp'
   type         ='0'
   includeData  ='1'
   color        ='0,0,155'
@@ -65,7 +67,7 @@
 
   <layer
       name         ='Reach'
-      path         ='Clackamas\Reach_Clackamas.shp'
+      path         ='{studyAreaName}\Reach_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,155'
@@ -265,7 +267,7 @@ timing       ='0'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='Clackamas\Flow_Clackamas.xml'
+initInfo     ='Flow.xml'
    />
 
     <!-- Policies are applied here, i.e. after all the APs with timing=0 have run, but before any of the APs with timing=1 begin to run. -->
@@ -449,9 +451,11 @@ initRunOnStartup  ='0'
                       S C E N A R I O S 
 ===================================================================================
 -->
+  <scenarios
+    climate_scenarios_file='ClimateScenarios.xml' default_climate_scenario='13'
+    simulation_scenarios_file='SimulationScenarios.xml' default_simulation_scenario='0'
+  />
   
-  <scenarios default ='0' file='Scenarios.xml' />
-
 </Envision>
   
 
