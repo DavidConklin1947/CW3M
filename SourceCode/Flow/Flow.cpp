@@ -3450,7 +3450,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 */
    SetAllCatchmentAttributes();
    PopulateCatchmentCumulativeAreas();
-   InitHRULayers(pEnvContext);
+   if (!InitHRULayers(pEnvContext)) return(false);
 
    // iterate through catchments/hrus/hrulayers, setting up the fluxes
    InitFluxes();
@@ -6865,6 +6865,14 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
 // end of temporary addition 4/18/21
 
          ParamTable* pHBVparams = GetTable("HBV");
+         if (pHBVparams == NULL)
+         {
+            CString msg;
+            msg.Format("InitHRULayers() pHBVparams is NULL. This can happen when the HBV CSV file is missing or is present, but open in Excel.");
+            Report::ErrorMsg(msg);
+            return(false);
+         }
+
          int col_fc = pHBVparams->GetFieldCol("FC");
          float field_cap_mm = 0.;
          pHBVparams->Lookup(hbvcalib, col_fc, field_cap_mm);
