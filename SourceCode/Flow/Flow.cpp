@@ -2491,7 +2491,6 @@ FlowModel::FlowModel()
  , m_doySPHUMIDITY(-1)
  , m_doyWINDSPEED(-1)
 
- , m_saveStateAtEndOfRun(false)
  , m_ICincludesWP(false)
  , m_detailedOutputFlags( 0 )
  , m_reachTree()
@@ -4192,11 +4191,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
 bool FlowModel::EndRun( EnvContext *pEnvContext )
    {
-   if (m_saveStateAtEndOfRun)
-      {
-      int calendar_year = pEnvContext->currentYear + 1;
-      SaveState(calendar_year);
-      }
+   int calendar_year = pEnvContext->currentYear + 1;
+   SaveState(calendar_year);
 
    m_flowContext.Reset();
    m_flowContext.pFlowModel = this;
@@ -4782,7 +4778,6 @@ int FlowModel::SaveState(int calendar_year)
    msg1.Format("FlowModel::SaveState() Initial Conditions file %s successfully written. modelStateVarCount = %d \ntotHRUvol, totReachVol, totReservoirVol = %lf %lf %lf", 
          (LPCTSTR)filename, modelStateVarCount, totHRUvol, totReachVol, totReservoirVol);
    Report::LogMsg(msg1);
-   m_saveStateAtEndOfRun=false;
    return 1;
 } // end of SaveState()
 
@@ -4895,8 +4890,7 @@ bool FlowModel::ReadState()
 // Returns true if able to read and restore the state of the hydrology variables, false otherwise.
 // WP suffix refers to WaterParcel objects.
 {
-   m_saveStateAtEndOfRun = true;
-   m_ICincludesWP = false;
+  m_ICincludesWP = false;
 
    CString effective_IC_filename;
 
@@ -4967,7 +4961,6 @@ bool FlowModel::ReadState()
       msg.Format("The current model is different than that saved in %s. %i versus %i or %i state variables.  %s will be overwritten at the end of this run",
          (LPCTSTR)m_initConditionsFileName, fileStateVarCount, modelStateVarCount, model_state_var_countWP, (LPCTSTR)m_initConditionsFileName);
       Report::LogMsg(msg, RT_WARNING);
-      m_saveStateAtEndOfRun = true;
       return(false);
    }
 
@@ -5106,8 +5099,6 @@ bool FlowModel::ReadState()
    msg.Format("FlowModel::ReadState() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f, m_totArea = %f",
       CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
    Report::LogMsg(msg);
-
-   m_saveStateAtEndOfRun = true; // Always save the state at the end of the run in the user's Documents folder.
 
    // Make sure the water volumes in the attributes are consistent with the water volumes in the HRUs.
    int num_hrus = (int)m_hruArray.GetSize();

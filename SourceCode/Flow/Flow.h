@@ -1679,7 +1679,6 @@ protected:
    CArray< FILE*, FILE* > m_reachAnnualFilePtrArray;   // list of file pointers
    CArray< FILE*, FILE* > m_reachDailyFilePtrArray;   // list of file pointers
    
-   bool m_saveStateAtEndOfRun;
    bool m_ICincludesWP;
       
    int  MoveCatchments( Reach *pToReach, ReachNode *pStartNode, bool recurse );  // recursive

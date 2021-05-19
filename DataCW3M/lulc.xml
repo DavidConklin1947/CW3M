@@ -293,8 +293,9 @@
       <lulc id='6056320' parentID='425' name='(MH:Sc2) Mountain_hemlock Smtree_close_multi' />
       <lulc id='6056220' parentID='425' name='(MH:Sm2) Mountain_hemlock Smtree_med_multi' />
       <lulc id='6056110' parentID='425' name='(MH:So1) Mountain_hemlock Smtree_open_single' />
-      <lulc id='4356410' parentID='425' name='(SFDF:S1p) Pacific_silver_fir_Douglas-fir Smtree_single_PostDist' />
-      <lulc id='4356320' parentID='425' name='(SFDF:Sc2) Pacific_silver_fir_Douglas-fir Smtree_close_multi' />
+    <lulc id='4356210' parentID='425' name='(SFDF:Sm1) Pacific_silver_fir_Douglas-fir Smtree_med_single' />
+    <lulc id='4356410' parentID='425' name='(SFDF:S1p) Pacific_silver_fir_Douglas-fir Smtree_single_PostDist' />
+    <lulc id='4356320' parentID='425' name='(SFDF:Sc2) Pacific_silver_fir_Douglas-fir Smtree_close_multi' />
       <lulc id='4356220' parentID='425' name='(SFDF:Sm2) Pacific_silver_fir_Douglas-fir Smtree_med_multi' />
       <lulc id='7057320' parentID='426' name='(LP:Mc2) Lodgepole_pine' />
       <lulc id='4007410' parentID='425' name='(DF:M1p) Douglas-fir Mdtree_single_PostDist' />
