@@ -163,6 +163,13 @@
       <output in_use="1" name="Total XFLUX_D (cms)" query="SUB_AREA=6" value="XFLUX_D" type="sum" domain="reach" />
     </output_group>
 
+    <output_group name="FLOW NSantiam Reach Exchanges Monthly (cms positive out of reach, negative into reach)" interval ="monthly" >
+      <output in_use="1" name="Total OUT_IRRIG (cms)" query="SUB_AREA=6" value="OUT_IRRIG" type="sum" domain="reach" />
+      <output in_use="1" name="Total OUT_MUNI (cms)" query="SUB_AREA=6" value="OUT_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total IN_MUNI (cms negative for into reach)" query="SUB_AREA=6" value="-IN_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total XFLUX_D (cms)" query="SUB_AREA=6" value="XFLUX_D" type="sum" domain="reach" />
+    </output_group>
+
     <output_group name="FLOW NSantiam Reach Exchanges Yearly (cms positive out of reach, negative into reach)" interval ="yearly" >
       <output in_use="1" name="Total OUT_IRRIG (cms)" query="SUB_AREA=6" value="OUT_IRRIG" type="sum" domain="reach" />
       <output in_use="1" name="Total OUT_MUNI (cms)" query="SUB_AREA=6" value="OUT_MUNI" type="sum" domain="reach" />
