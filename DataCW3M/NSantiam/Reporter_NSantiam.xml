@@ -28,6 +28,13 @@
   </output_group>
 -->
 
+  <output_group name="REP NSantiam water budget" >
+    <output name="IN Precipitation (mm)" query="SUB_AREA=6" value="PRECIP_YR" type="areaWtMean" />
+    <output name="IN Wells (m3)" query="SUB_AREA=6" value="IRGWAF_Y*1233+GWMUNALL_Y" type="sum" />
+    <output name="OUT Evapotranspiration (mm)" query="SUB_AREA=6" value="ET_YR" type="areaWtMean" />
+    <output name="OUT Snow sublimation and evaporation (mm)" query="SUB_AREA=6" value="SNOWEVAP_Y" type="areaWtMean" />
+  </output_group>
+
   <output_group name="REP Population Analysis" >
     <output name="Total population POP" query="1" value="POP" type="sum" />
     <output name="Population in UGAs" query="UGB>0" value="POP" type="sum" />

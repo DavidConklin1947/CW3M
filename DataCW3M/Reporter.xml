@@ -12,6 +12,13 @@
   <const name="inches_per_mm" value="0.039370" />
   <const name="ft_per_m" value="3.28084" />
 
+  <output_group name="REP NSantiam water budget" >
+    <output name="IN Precipitation (mm)" query="SUB_AREA=6" value="PRECIP_YR" type="areaWtMean" />
+    <output name="IN Wells (m3)" query="SUB_AREA=6" value="IRGWAF_Y*1233+GWMUNALL_Y" type="sum" />
+    <output name="OUT Evapotranspiration (mm)" query="SUB_AREA=6" value="ET_YR" type="areaWtMean" />
+    <output name="OUT Snow sublimation and evaporation (mm)" query="SUB_AREA=6" value="SNOWEVAP_Y" type="areaWtMean" />
+  </output_group>
+
   <output_group name="REP Mohawk25 water budget" >
     <output name="ET_yr (mm H2O) Mohawk25" query="HBVCALIB=25" value="GET_yr" type="areaWtMean" />
     <output name="GWMUNALL_Y (cms) Mohawk25" query="HBVCALIB=25" value="GWMUNALL_Y" type="sum" />

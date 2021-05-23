@@ -10,6 +10,24 @@
   <output_group name="FLOW Q_DISCHARG at gage monthly" interval="monthly" >
     <output in_use="1" name="adjusted Q_DISCHARG (cfs)" query="COMID=23780883" value="Q_DISCHARG*35.315*0.996" type="sum" domain="reach"
     obs="..\Observations\NSantiam\USGS_14184100_flow_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883.csv" format="E0" />
+    <output in_use="1" name="USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591"
+            query="COMID=23780591" value="Q_DISCHARG*35.3146667*1.003" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591.csv" format="E0" />
+    <output in_use="1" name="USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_237807011"
+            query="COMID=23780701" value="Q_DISCHARG*35.3146667*1.024" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701.csv" format="E0" />
+    <output in_use="1" name="USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
+            query="COMID=23780557" value="Q_DISCHARG*35.3146667*1.012" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
+    <output in_use="1" name="USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511"
+            query="COMID=23780511" value="Q_DISCHARG*35.3146667*1.034" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511.csv" format="E0" />
+    <output in_use="1" name="USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805"
+            query="COMID=23780805" value="Q_DISCHARG*35.3146667*0.993" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
+    <output in_use="1" name="USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481"
+            query="COMID=23780481" value="Q_DISCHARG*35.3146667*1.195" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481.csv" format="E0" />
   </output_group>
 
   <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >

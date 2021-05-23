@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
   <outputs>
+
+    <output_group name="FLOW NSantiam Water Budget" interval="yearly" >
+      <output name="IN precipitation (mm)" query="SUB_AREA=6" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output name="IN springs (cms)" query="SUB_AREA=6" value="SPRING_CMS" type="sum" domain="reach" />
+      <output name="OUT Basin discharge (cms)" query="COMID=23780877" value="Q_DISCHARG" type="sum" domain="reach" />
+    </output_group>
+    
     <output_group name="FLOW MAXSNOW analysis" interval="daily" >
       <output name="SNOWPACK (mm)" query="1" value="SNOWPACK" type="areaWtMean" domain="idu" />
       <output name="H2O_MELT (mm)" query="1" value="H2O_MELT" type="areaWtMean" domain="idu" />
