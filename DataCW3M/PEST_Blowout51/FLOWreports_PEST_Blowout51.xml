@@ -2,6 +2,14 @@
 
 
 <outputs>
+  <output_group name="FLOW NSantiam temperature skill assessment monthly" interval ="monthly" >
+    <output in_use="1" name="USGS_14180300_temp_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
+          query="COMID=23780557" value="TEMP_H2O" type="sum" domain="reach"
+         obs="..\Observations\NSantiam\USGS_14180300_temp_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
+    <output in_use="1" name="Air temperature at reach_23780557 from climate dataset"
+         query="COMID=23780557" value="TEMP_AIR" type="sum" domain="reach" />
+  </output_group>
+
   <output_group name="FLOW Q_DISCHARG at gage daily" interval="daily" >
     <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780557" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
     obs="..\Observations\Willamette Gages\Flow\USGS 14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />

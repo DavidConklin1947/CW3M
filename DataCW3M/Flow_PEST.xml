@@ -515,14 +515,15 @@ flow_cms="1.10"
                rule_priorities="detroit_rule_priorities.csv"      rp_dir="Rules_Detroit\"                             tailwater_elev="375"
                turbine_efficiency="0.9"                           td_elev="481.0"                                     fc1_elev="480.0"
                buffer_zone="Detroit_buffer.csv"                   ressim_output_f="DET_ressim_flow_1935_2008.csv"     ressim_output_r="DET_ressim_rule_1935_2008.csv"
-               inactive_elev="441.96"                             reservoir_type="FloodControl" />
+               inactive_elev="441.96"                             reservoir_type="FloodControl"                       solar_radiation_multiplier="0.9"/>
 
     <reservoir id="13"  name="Big Cliff Reservoir (USACE - re-regulating)"  path="Reservoirs\"     initVolume="3885468"
                area_vol_curve="Big_Cliff_area_capacity.csv"       av_dir="Area_Capacity_Curves\"                      minOutflow="34"
                composite_rc="BC_composite_rc.csv"                 re_dir="Rel_Cap\"                                   maxPowerFlow="79.6"
                RO_rc="BC_RO_capacity.csv"                         spillway_rc="BC_spillway_capacity.csv"              tailwater_elev="342"
-               turbine_efficiency="0.9"                           inactive_elev="353.99"                              reservoir_type="RiverRun"/>
-  
+               turbine_efficiency="0.9"                           inactive_elev="353.99"                              reservoir_type="RiverRun"
+               solar_radiation_multiplier="0.9"  />
+
   </reservoirs>
 
   <fluxes>
