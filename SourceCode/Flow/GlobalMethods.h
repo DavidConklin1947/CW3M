@@ -207,6 +207,7 @@ protected:
    bool  SolveReachKinematicWave( FlowContext* );
 
    double GetLateralInflow( Reach *pReach );
+   WaterParcel GetAdditionsToReach(Reach* pReach);
 
    double GetReachFluxes( FlowContext*, Reach *pReach );
 

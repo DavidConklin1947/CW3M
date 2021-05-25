@@ -1478,31 +1478,63 @@ bool Reach::GetUpstreamInflow(double &QLeft, double &QRight)
 }
 
 
-/*x
-bool Reach::GetUpstreamTemperature(float &tempLeft, float &tempRight)
+bool Reach::AccumAdditions(WaterParcel incomingWP)
 {
-   ReachSubnode *pNodeLeft = NULL;
-   if (this->m_pLeft && this->m_pLeft->m_polyIndex >= 0)
+   if (isnan(incomingWP.m_volume_m3) || isnan(m_additionsWP.m_volume_m3))
    {
-      int lastSubnode = this->m_pLeft->GetSubnodeCount() - 1;
-      pNodeLeft = (ReachSubnode*) this->m_pLeft->m_subnodeArray[lastSubnode];
+      ASSERT(false);
+      m_nanOccurred = true;
+      return(false);
    }
 
-   ReachSubnode *pNodeRight = NULL;
-   if (this->m_pRight && this->m_pRight->m_polyIndex >= 0)
+   WaterParcel orig_stored_valueWP = m_additionsWP;
+   m_additionsWP.MixIn(incomingWP); 
+   if (isnan(m_additionsWP.m_volume_m3))
    {
-      int lastSubnode = this->m_pRight->GetSubnodeCount() - 1;
-      pNodeRight = (ReachSubnode*) this->m_pRight->m_subnodeArray[lastSubnode];
+      ASSERT(false);
+      m_nanOccurred = true;
+      m_additionsWP = orig_stored_valueWP;
+      return(false);
    }
 
-   if (pNodeLeft != NULL)
-      tempLeft = pNodeLeft->m_temperature;
-   if (pNodeRight != NULL)
-      tempRight = pNodeRight->m_temperature;
+   return(true);
+} // end of AccumAdditions();
 
-   return true;
-}
-x*/
+
+bool Reach::AccumWithdrawals(double withdrawal_volume_m3)
+{
+   ASSERT(withdrawal_volume_m3 >= 0.); // This should also catch NaNs in withdrawal_volume_m3.
+   ASSERT(!isnan(m_globalHandlerFluxValue));
+
+   m_globalHandlerFluxValue = (float)(m_globalHandlerFluxValue + withdrawal_volume_m3);
+   return(true);
+} // end of AccumWithdrawals()
+
+
+bool Reach::AddFluxFromGlobalHandler(float value)
+// negative values of m_globalHandlerFluxValue are sinks (water entering the reach), positive values are sources (water leaving the reach) (m3/day)  
+{
+   // ASSERT(value >= 0.); // Eventually, for water entering reaches, use AccumAdditions(WP) instead of AddFluxFromGlobalHandler(volume_m3).
+   // For the moment, water entering reaches from the soil uses AddFluxFromGlobalHandler() and is assigned a temperature in 
+   // ReachRouting::SolveReachKinematicWave(). DRC 5/25/21
+
+   if (isnan(value) || isnan(m_globalHandlerFluxValue))
+   {
+      m_nanOccurred = true;
+      return(false);
+   }
+
+   float orig_stored_value = m_globalHandlerFluxValue;
+   m_globalHandlerFluxValue += value;
+   if (isnan(m_globalHandlerFluxValue))
+   {
+      m_nanOccurred = true;
+      m_globalHandlerFluxValue = orig_stored_value;
+      return(false);
+   }
+
+   return(true);
+} // end of AddFluxFromGlobalHandler(float) 
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8022,7 +8054,7 @@ bool FlowModel::ResetFluxValuesForStep(  EnvContext *pEnvContext  )
    for ( int i=0; i < m_reachArray.GetSize(); i++ )
       {
       Reach *pReach = m_reachArray.GetAt(i);
-      pReach->ResetFluxValue();
+      pReach->ResetFluxValue(); pReach->m_additionsWP = WaterParcel(0, 0); // pReach->m_withdrawals_m3 = 0.;
 
       ReachSubnode *subnode = pReach->GetReachSubnode(0);
       for (int k=0;k<m_hruSvCount-1;k++)

@@ -2,6 +2,14 @@
 
 
 <outputs>
+  <output_group name="FLOW NSantiam temperature skill assessment monthly" interval ="monthly" >
+    <output in_use="1" name="USGS_14182500_temp_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805"
+          query="COMID=23780805" value="TEMP_H2O" type="sum" domain="reach"
+         obs="..\Observations\NSantiam\USGS_14182500_temp_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
+    <output in_use="1" name="Air temperature at reach_23780805 from climate dataset"
+         query="COMID=23780805" value="TEMP_AIR" type="sum" domain="reach" />
+  </output_group>
+
   <output_group name="FLOW Q_DISCHARG at gage daily" interval="daily" >
     <output in_use="1" name="adjusted Q (cfs)" query="COMID=23780805" value="Q_DISCHARG*35.315*0.993" type="sum" domain="reach"
     obs="..\Observations\NSantiam\USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />

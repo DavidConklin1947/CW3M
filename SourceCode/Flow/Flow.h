@@ -399,12 +399,11 @@ class FluxContainer
    friend class Flow; 
 
 protected:
-    FluxContainer() : m_globalHandlerFluxValue( 0.0f ), m_nanOccurred(false), m_fluxWP(0,0) { }
+   FluxContainer() : m_globalHandlerFluxValue(0.0f), m_nanOccurred(false) { }
    ~FluxContainer() { }
 
 protected:
    float m_globalHandlerFluxValue;        // current value of the global flux  - m3/day
-   WaterParcel m_fluxWP;
 
 public:
    bool m_nanOccurred; // true when a not-a-number has occurred
@@ -1000,46 +999,9 @@ public:
    static double LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC);
    static double Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity);
 
-   bool  AddFluxFromGlobalHandler(float value) 
-   // negative values of m_globalHandlerFluxValue are sinks (water entering the reach), positive values are sources (water leaving the reach) (m3/day)   
-   {
-      if (isnan(value) || isnan(m_globalHandlerFluxValue))
-      {
-         m_nanOccurred = true;
-         return(false);
-      }
-
-      float orig_stored_value = m_globalHandlerFluxValue;
-      m_globalHandlerFluxValue += value;
-      if (isnan(m_globalHandlerFluxValue))
-      {
-         m_nanOccurred = true;
-         m_globalHandlerFluxValue = orig_stored_value;
-         return(false);
-      }
-
-      return(true);
-   } // end of AddFluxFromGlobalHandler(float) 
-
-
-   bool  AddH2OfromGlobalHandlerWP(WaterParcel H2OtoAddWP) // Put water into the reach.
-   {
-      WaterParcel origWP = m_fluxWP;
-      m_fluxWP.MixIn(H2OtoAddWP);
-
-      float orig_stored_value = m_globalHandlerFluxValue;
-      m_globalHandlerFluxValue -= (float)H2OtoAddWP.m_volume_m3; // Negative values of m_globalHandlerFluxValue represent water entering the reach.
-      if (isnan(m_globalHandlerFluxValue))
-      {
-         m_nanOccurred = true;
-         m_globalHandlerFluxValue = orig_stored_value;
-         m_fluxWP = origWP;
-         return(false);
-      }
-
-      return(true);
-   } // end of AddH2OfromGlobalHandlerWP(WP)
-
+   bool AccumAdditions(WaterParcel incomingWP);
+   bool AccumWithdrawals(double withdrawal_volume_m3);
+   bool  AddFluxFromGlobalHandler(float value);
 
    bool CheckForNaNs(CString callerName, bool OKflag)
       {
@@ -1047,6 +1009,10 @@ public:
       CString msg; msg.Format("*** CheckforNaNs() found evidence of NaNs in call from %s", callerName); Report::LogMsg(msg);
       return(true);
       } // end of CheckForNaNs()
+
+   public:
+   WaterParcel m_additionsWP;
+//   double m_withdrawals_m3;
 
 public:
    // reach-level parameters

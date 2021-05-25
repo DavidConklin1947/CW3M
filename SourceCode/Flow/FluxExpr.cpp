@@ -628,15 +628,13 @@ bool FluxExpr::Step( FlowContext *pFlowContext )
                   }  // end of: for each sink
 
                // totalSatisfiedDemand < 0 means we're adding water to the reach; totalSatisfiedDemand > 0 means we're taking water out of the reach
-               pReach->CheckForNaNs("FluxExpr::Step 2", pReach->AddFluxFromGlobalHandler( totalSatisfiedDemand ));              // m3/d, includes additional conveyance losses
-/*
-               if (-totalSatisfiedDemand > 0)
+               if (totalSatisfiedDemand < 0)
                {
-                  FluxContainer* pFlux = (FluxContainer*)pReach;
                   WaterParcel water_going_into_the_reachWP(-totalSatisfiedDemand, m_temp_C);
-                  pFlux->m_fluxWP.MixIn(water_going_into_the_reachWP);
+                  pReach->AccumAdditions(water_going_into_the_reachWP);
                }
-*/
+               else pReach->CheckForNaNs("FluxExpr::Step 2", pReach->AddFluxFromGlobalHandler( totalSatisfiedDemand ));
+
                float totalSatisfiedDemand_cms = totalSatisfiedDemand / SEC_PER_DAY;
                pReach->m_availableDischarge -= totalSatisfiedDemand_cms;     // m3/sec
 
@@ -1182,22 +1180,6 @@ bool Spring::Step(FlowContext* pFlowContext)
    WaterParcel seasonal_springWP(0, 0);
    if (m_pReach->m_reachID == 23773373)
    {
-/*x
-      double avg_additional_cms = 3.053;
-      double seasonal_amplitude_cms = 5.403;
-      double phase_deg = 0;
-      double theta_deg = 360 * ((double)pFlowContext->dayOfYear / (double)pFlowContext->pEnvContext->daysInCurrentYear);
-      double angle_rad = ((theta_deg + phase_deg) / 360) * 2 * PI;
-      double seasonal_adjustment_cms = seasonal_amplitude_cms * sin(angle_rad);
-      double total_additional_m3 = (avg_additional_cms + seasonal_adjustment_cms) * SEC_PER_DAY;
-      WaterParcel additionalWP(total_additional_m3, m_temp_C);
-x*/
-/*x
-      double additional_frac = 0.8351;
-      double from_upstream_cms = m_pReach->GetUpstreamInflow();
-      double additional_m3 = additional_frac * from_upstream_cms * SEC_PER_DAY;
-      WaterParcel additionalWP(additional_m3, m_temp_C);
-x*/
       double tau_for_avg_in_days = 45; // days
       static double upstream_inflow_avg_cms;
       double upstream_inflow_today_cms = m_pReach->GetUpstreamInflow();
@@ -1216,7 +1198,7 @@ x*/
       H2O_to_addWP.MixIn(additionalWP);
    } // end of   if (m_pReach->m_reachID == 23773373)  special logic for the Clear Lake springs
 
-   m_pReach->AddH2OfromGlobalHandlerWP(H2O_to_addWP);
+   m_pReach->AccumAdditions(H2O_to_addWP);
    m_pReach->m_availableDischarge += H2O_to_addWP.m_volume_m3 / SEC_PER_DAY;
 
    // This reach may already have been affected by another flux today.
