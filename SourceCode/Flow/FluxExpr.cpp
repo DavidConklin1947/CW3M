@@ -1081,7 +1081,7 @@ Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel * pModel, MapLaye
    int spring_comid;
    float spring_flow_cms = 0.f;
    float spring_flow_cfs = 0.f;
-   float temp_C = DEFAULT_SOIL_H2O_TEMP_DEGC;
+   float temp_C = -1.;
 
    XML_ATTR attrs[] = {
       // attr                 type          address               isReq  checkCol
@@ -1114,9 +1114,10 @@ Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel * pModel, MapLaye
    if (temp_C < 0. || temp_C >100.)
    {
       CString msg;
-      msg.Format("Spring::LoadXml() Spring %s temperature = %f is out of range for liquid water; changing it to %f now.", name, temp_C, DEFAULT_SOIL_H2O_TEMP_DEGC);
-      Report::WarningMsg(msg);
-      temp_C = DEFAULT_SOIL_H2O_TEMP_DEGC;
+      msg.Format("Spring::LoadXml() Spring %s temperature = %f is out of range for liquid water; changing it to -1. now. "
+         "This will cause the spring water to enter at the same temperature as surface runoff.", name, temp_C);
+      Report::LogMsg(msg);
+      temp_C = -1.;
    }
 
    Spring * pSpring = new Spring(name, spring_comid, spring_flow_cms, temp_C);
@@ -1174,7 +1175,7 @@ bool Spring::Step(FlowContext* pFlowContext)
 
    // Add water to reach.
    double H2O_to_add_m3 = m_springFlow_cms * SEC_PER_DAY;
-   WaterParcel H2O_to_addWP(H2O_to_add_m3, m_temp_C);
+   WaterParcel H2O_to_addWP(H2O_to_add_m3, m_temp_C > 0. ? m_temp_C : 0.);
 
    // Special logic for Clear Lake
    WaterParcel seasonal_springWP(0, 0);
@@ -1198,7 +1199,8 @@ bool Spring::Step(FlowContext* pFlowContext)
       H2O_to_addWP.MixIn(additionalWP);
    } // end of   if (m_pReach->m_reachID == 23773373)  special logic for the Clear Lake springs
 
-   m_pReach->AccumAdditions(H2O_to_addWP);
+   if (m_temp_C > 0.) m_pReach->AccumAdditions(H2O_to_addWP);
+   else m_pReach->AddFluxFromGlobalHandler((float)(-H2O_to_add_m3));
    m_pReach->m_availableDischarge += H2O_to_addWP.m_volume_m3 / SEC_PER_DAY;
 
    // This reach may already have been affected by another flux today.

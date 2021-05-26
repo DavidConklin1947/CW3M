@@ -1511,7 +1511,7 @@ bool Reach::AccumWithdrawals(double withdrawal_volume_m3)
 } // end of AccumWithdrawals()
 
 
-bool Reach::AddFluxFromGlobalHandler(float value)
+bool Reach::AddFluxFromGlobalHandler(float value) // value is in m3
 // negative values of m_globalHandlerFluxValue are sinks (water entering the reach), positive values are sources (water leaving the reach) (m3/day)  
 {
    // ASSERT(value >= 0.); // Eventually, for water entering reaches, use AccumAdditions(WP) instead of AddFluxFromGlobalHandler(volume_m3).

@@ -668,10 +668,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
 
          double orig_m_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
          double vts_frac = pReach->GetSubreachViewToSky_frac(l);
-         WaterParcel addition_to_subreachWP = WaterParcel(addition_to_reachWP.m_volume_m3 / num_subnodes, addition_to_reachWP.WaterTemperature());
-         pSubreach->m_waterParcel.MixIn(addition_to_subreachWP);
-         double withdrawal_from_subreach_m3 = withdrawal_from_reach_m3 / num_subnodes;
-         pSubreach->m_waterParcel.Discharge(withdrawal_from_subreach_m3);
+         pSubreach->m_runoffWP = WaterParcel(addition_to_reachWP.m_volume_m3 / num_subnodes, addition_to_reachWP.WaterTemperature());
+         pSubreach->m_withdrawal_m3 = withdrawal_from_reach_m3 / num_subnodes;
 
          double evap_m3, evap_kJ, sw_kJ, lw_kJ;
          WaterParcel adjustedWP = ApplyEnergyFluxes(pSubreach->m_waterParcel, pSubreach->m_subreach_surf_area_m2, rad_sw_net_W_m2, 
