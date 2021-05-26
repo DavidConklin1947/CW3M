@@ -296,12 +296,12 @@ flow_cms="1.10"
     <Spring name="Pamelia Cr." COMID="23780957" flow_cfs="23" temp_C="4.9" />
     <Spring name="Whitewater Cr." COMID="23781597" flow_cfs="15" temp_C="4.9" />
     <Spring name="Horn Cr." COMID="23781739" flow_cfs="31" temp_C="4.9" />
-    <Spring name="Boulder Cr." COMID="23780901" flow_cfs="120" temp_C="4.9" />
-    <Spring name="Blowout Cr." COMID="23780557" flow_cfs="8" temp_C="4.9" />
-    <Spring name="Breitenbush" COMID="23780701" flow_cfs="139" temp_C="4.9" />
+    <Spring name="Boulder Cr." COMID="23780901" flow_cfs="120" />
+    <Spring name="Blowout Cr." COMID="23780557" flow_cfs="8" />
+    <Spring name="Breitenbush" COMID="23780701" flow_cfs="139" />
     <Spring name="Breitenbush Hot Spring" COMID="23781273" flow_cfs="0.42" temp_C="84." />
     <Spring name="French Cr." COMID="23780793" flow_cfs="155" temp_C="4.9" />
-    <Spring name="Little N Santiam" COMID="23780805" flow_cfs="173" temp_C="4.9" />
+    <Spring name="Little N Santiam" COMID="23780805" flow_cfs="173" />
 
     <external name="MCfire"
             method="fn=MCfire.dll:CW3Mfire_DailyProcess"
@@ -309,7 +309,7 @@ flow_cms="1.10"
             timing="1+2+4+16"
             initInfo="..\ForestStates.csv"
               />
-  </global_methods>
+      </global_methods>
 
   <controlPoints>
     <controlPoint id="1"      name="Min flow at Salem"                path="Reservoirs\ControlPoints\{ScenarioName}\"
@@ -523,7 +523,7 @@ flow_cms="1.10"
                RO_rc="BC_RO_capacity.csv"                         spillway_rc="BC_spillway_capacity.csv"              tailwater_elev="342"
                turbine_efficiency="0.9"                           inactive_elev="353.99"                              reservoir_type="RiverRun"
                solar_radiation_multiplier="0.9"  />
-  
+
   </reservoirs>
 
   <fluxes>
