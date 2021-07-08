@@ -101,7 +101,8 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
 
             float node_current_added_volume_m3 = (float)(volume - pNode->m_waterParcel.m_volume_m3);
             WaterParcel node_current_added_volumeWP = WaterParcel(node_current_added_volume_m3, H2O_temp_degC);
-            pNode->m_addedVolumeWP.MixIn(node_current_added_volumeWP);
+            pNode->m_addedVolTodayWP.MixIn(node_current_added_volumeWP);
+            pNode->m_addedVolYTD_WP.MixIn(node_current_added_volumeWP);
             pNode->m_waterParcel = WaterParcel(volume, H2O_temp_degC);
          }
       } // end of loop thru subnodes
@@ -924,7 +925,8 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
          // Add some magic water. This violates conservation of mass.
          double magic_H2O_to_add_m3 = pSubnode->m_min_volume_m3 - (original_volume_m3 + upstream_inflowWP.m_volume_m3 + net_lateral_inflow_m3);
          WaterParcel magic_H2O_to_addWP(magic_H2O_to_add_m3, original_temp_degC);
-         pSubnode->m_addedVolumeWP.MixIn(magic_H2O_to_addWP);
+         pSubnode->m_addedVolTodayWP.MixIn(magic_H2O_to_addWP);
+         pSubnode->m_addedVolYTD_WP.MixIn(magic_H2O_to_addWP);
          pSubnode->m_waterParcel.MixIn(WaterParcel(magic_H2O_to_addWP));
      } // end of block for adding magic water to the reach
    } // end of block for net lateral flow out of the reach
@@ -978,7 +980,8 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
       double magic_H2O_temp_degC = original_temp_degC;
       WaterParcel magicWP = WaterParcel(magic_H2O_to_add_m3, magic_H2O_temp_degC);
       pSubnode->m_waterParcel.MixIn(magicWP);
-      pSubnode->m_addedVolumeWP.MixIn(magicWP);
+      pSubnode->m_addedVolTodayWP.MixIn(magicWP);
+      pSubnode->m_addedVolYTD_WP.MixIn(magicWP);
    }
 
    if (pSubnode->m_withdrawal_m3 > 0.)

@@ -1176,7 +1176,7 @@ bool Spring::Step(FlowContext* pFlowContext)
    // Add water to reach.
    double H2O_to_add_m3 = m_springFlow_cms * SEC_PER_DAY;
    WaterParcel H2O_to_addWP(H2O_to_add_m3, m_temp_C > 0. ? m_temp_C : 0.);
-
+/*x
    // Special logic for Clear Lake
    WaterParcel seasonal_springWP(0, 0);
    if (m_pReach->m_reachID == 23773373)
@@ -1198,7 +1198,7 @@ bool Spring::Step(FlowContext* pFlowContext)
 
       H2O_to_addWP.MixIn(additionalWP);
    } // end of   if (m_pReach->m_reachID == 23773373)  special logic for the Clear Lake springs
-
+x*/
    if (m_temp_C > 0.) m_pReach->AccumAdditions(H2O_to_addWP);
    else m_pReach->AddFluxFromGlobalHandler((float)(-H2O_to_add_m3));
    m_pReach->m_availableDischarge += H2O_to_addWP.m_volume_m3 / SEC_PER_DAY;

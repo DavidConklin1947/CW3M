@@ -927,7 +927,8 @@ public:
    double m_evap_m3;
    double m_evap_kJ;
 
-   WaterParcel m_addedVolumeWP; // amount added to keep compartment from going negative
+   WaterParcel m_addedVolTodayWP; // amount added today to keep compartment from going negative
+   WaterParcel m_addedVolYTD_WP; // amount added so far this year to keep compartment from going negative
    double m_addedDischarge_cms; // amount added to ensure discharge is always > 0
    bool m_nanOccurred;
  
@@ -936,7 +937,7 @@ public:
       ReachSubnode(void) : SubNode(), StateVarContainer(), m_discharge(0.11), m_dischargeWP(0.11 * SEC_PER_DAY, DEFAULT_REACH_H2O_TEMP_DEGC),
          m_previousDischarge(0.11), m_previousVolume(0.0),
          m_waterParcel(0, 0),
-      m_addedVolumeWP(0,0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
+      m_addedVolTodayWP(0,0), m_addedVolYTD_WP(0,0), m_addedDischarge_cms(0), m_nanOccurred(false) { }
    virtual ~ReachSubnode( void ) { }
 
 };
@@ -1040,7 +1041,7 @@ public:
    int m_IDUndxForReach; // index to an IDU in the IDU layer which contains a vertex of this reach
 
    double m_addedDischarge_cms;
-   WaterParcel m_reachAddedVolumeWP;
+   WaterParcel m_reachAddedVolumeWP; // amount added so far this year to keep compartment from going negative
 
    // kinematic wave parameters
    float m_alpha;

@@ -5957,7 +5957,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
       {
          ReachSubnode * pNode = pReach->GetReachSubnode(node_ndx);
          pNode->m_addedDischarge_cms = 0.;
-         pNode->m_addedVolumeWP = WaterParcel(0,0);
+         pNode->m_addedVolYTD_WP = WaterParcel(0,0);
          pNode->m_nanOccurred = false;
          pNode->m_dischargeDOY = -1;
       } // end of loop thru subnodes
@@ -6085,6 +6085,17 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
       pHRU->m_currentGWFlowOut = 0;
       pHRU->m_currentGWRecharge = 0;
       }
+
+   for (int reach_ndx = 0; reach_ndx < m_reachArray.GetSize(); reach_ndx++)
+   {
+      Reach* pReach = m_reachArray[reach_ndx];
+      int subnode_count = pReach->GetSubnodeCount();
+      for (int subnode_ndx = 0; subnode_ndx < subnode_count; subnode_ndx++)
+      {
+         ReachSubnode* pNode = pReach->GetReachSubnode(subnode_ndx);
+         pNode->m_addedVolTodayWP = WaterParcel(0, 0);
+      } // end of loop thru subnodes
+   } // end of loop thru reaches
 
    m_pReachLayer->SetColDataU(m_colReachXFLUX_D, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
@@ -6474,14 +6485,15 @@ double FlowModel::MagicHRUwaterReport_m3(bool msgFlag) // Report on NaNs and add
       Reach* pReach = m_reachArray[reach_ndx];
 
       pReach->m_addedDischarge_cms = 0;
-      pReach->m_reachAddedVolumeWP = WaterParcel(0, 0);
+      WaterParcel reachAddedVolumeThisYearBeforeTodayWP = pReach->m_reachAddedVolumeWP;
+      pReach->m_reachAddedVolumeWP = WaterParcel(0, 0); 
       pReach->m_nanOccurred = false;
       int subnode_count = pReach->GetSubnodeCount();
       for (int subnode_ndx = 0; subnode_ndx < subnode_count; subnode_ndx++)
       {
          ReachSubnode* pNode = pReach->GetReachSubnode(subnode_ndx);
          pReach->m_addedDischarge_cms += pNode->m_addedDischarge_cms / pReach->GetSubnodeCount();
-         pReach->m_reachAddedVolumeWP.MixIn(pNode->m_addedVolumeWP);
+         pReach->m_reachAddedVolumeWP.MixIn(pNode->m_addedVolYTD_WP);
          pReach->m_nanOccurred = pReach->m_nanOccurred || pNode->m_nanOccurred;
       } // end of loop thru subnodes
 
@@ -6505,7 +6517,8 @@ double FlowModel::MagicHRUwaterReport_m3(bool msgFlag) // Report on NaNs and add
          }
       }
 
-      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_VOL, pReach->m_reachAddedVolumeWP.m_volume_m3);
+      double reachAddedVolumeToday_m3 = pReach->m_reachAddedVolumeWP.m_volume_m3 - reachAddedVolumeThisYearBeforeTodayWP.m_volume_m3;
+      m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_VOL, reachAddedVolumeToday_m3);
       m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDEDVOL_C, pReach->m_reachAddedVolumeWP.m_temp_degC);
       m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachADDED_Q, pReach->m_addedDischarge_cms);
    } // end of loop thru reaches
