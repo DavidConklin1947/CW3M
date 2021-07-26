@@ -2694,6 +2694,7 @@ label:  readable field description
       <attr value="28" color="(46,139,162)" label="28 Clackamas above River Mill" />
       <attr value="29" color="(11,34,104)" label="29 Willamette above Salem" />
       <attr value="31" color="(0,0,0)" label="31 lower Yamhill" />
+      <attr value="32" color="(255,0,0)" label="32 Willamette Outlet" />
       <attr value="33" color="(0,0,0)" label="33 Oak Creek watershed" />
       <attr value="34" color="(231,185,46)" label="34 McKenzie above Walterville" />
       <attr value="35" color="(197,81,243)" label="35 Long Tom above Monroe" />
@@ -2701,6 +2702,7 @@ label:  readable field description
       <attr value="37" color="(127,127,127)" label="37 N Santiam above Mehama" />
       <attr value="38" color="(92,23,69)" label="38 Middle Fork above Jasper" />
       <attr value="39" color="(57,173,11)" label="39 Coast Fork above Goshen" />
+      <attr value="40" color="(255,0,0)" label="40 Oak Grove Fork" />
       <attr value="41" color="(243,220,150)" label="41 Tualatin above West Linn" />
       <attr value="42" color="(208,115,92)" label="42 Yamhill above McMinnville" />
       <attr value="43" color="(0,0,0)" label="43 lower S. Santiam" />

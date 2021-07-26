@@ -343,8 +343,7 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
    { 0, 0, 23800564, 20 }, // Pudding outlet into the Molalla
    { 0, 0, 23800560, 19 }, // Molalla outlet into the Willamette
 // Clackamas basin
-   { 0, 0, 0, 27 }, // now spare27 { 572965.6503, 4997255.136, 23809158, 27 }, //", 27, Oak Grove, 45.125000, -122.072200
-   { 0, 0, 0, 40 }, // now spare40 { 572870, 4997237, -99, 40 }, // 40 Above Three Lynx Creek
+   { 0, 0, 23809450, 40 }, // OakGrove40
    { 550742.3607, 5016481.187, 23809080, 28 }, //", 28, River Mill, 45.300000, -122.352800
    { 0, 0, 23809000, 26 }, // Clackamas outlet into the Willamette
 // Yamhill basin
@@ -361,6 +360,7 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
    { 0, 0, 0, 11 }, //", 11, spare11, ,
 // Willamette River mainstem
    { 0, 0, 23735691, 32 }, // Willamette outlet into the Columbia
+   { 0, 0, 0, 0 } //
 };
 
 #define NUM_SUB_AREAS 14
