@@ -14642,7 +14642,12 @@ void FlowModel::GetNashSutcliffe(float *ns)
 bool FlowModel::RestoreStateVariables(bool spinupFlag)
 {
    bool OK_flag = spinupFlag ? InitializeSpinup() : ReadState();
-   if (!OK_flag) return(false);
+   if (!OK_flag)
+   {
+      CString msg = "FlowModel::RestoreStateVariables() failed. If no initial conditions file is available, then you may have to run a spinup.";
+      Report::ErrorMsg(msg);
+      return(false);
+   }
 
    bool hru_h2o_balance_flag = true;
    int hru_count = (int)m_hruArray.GetSize();

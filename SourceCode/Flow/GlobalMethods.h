@@ -730,7 +730,11 @@ protected:
    static PtrArray< GlobalMethod > m_gmArray;
 
 public:
-   static int AddGlobalMethod( GlobalMethod *pMethod ) { return (int) m_gmArray.Add( pMethod ); }
+   static int AddGlobalMethod( GlobalMethod *pMethod ) 
+   { 
+      int i = (int)m_gmArray.Add(pMethod);
+      return i; 
+   }
 
    static bool Init     ( FlowContext* );    // start of Envision session
    static bool InitRun  ( FlowContext* );    // start of an Envision Run

@@ -2,22 +2,23 @@
 
 
 <outputs>
-  <output_group name="FLOW Clackamas temperature skill assessment monthly" interval ="monthly" >
-    <output in_use="1" name="USGS_14208700_temp_OAK GROVE FORK near GOVERNMENT CAMP_23810706"
-          query="COMID=23810706" value="TEMP_H2O" type="sum" domain="reach"
-         obs="..\Observations\Willamette Gages\Temp\USGS_14208700_temp_OAK GROVE FORK near GOVERNMENT CAMP_23810706.csv" format="E0" />
-    <output in_use="1" name="Air temperature at reach_23780557 from climate dataset"
-         query="COMID=23810706" value="TEMP_AIR" type="sum" domain="reach" />
+  <!--
+  <output_group name="FLOW <study area> temperature skill assessment monthly" interval ="monthly" >
+    <output in_use="1" name="USGS_<gage #>_temp_<gage name>_<comid>"
+          query="COMID=..." value="TEMP_H2O" type="sum" domain="reach"
+         obs="..\Observations\Willamette Gages\Temp\USGS_<gage #>_temp_<gage name>_<comid>.csv" format="E0" />
+    <output in_use="1" name="Air temperature at reach <comid> from climate dataset"
+         query="COMID=..." value="TEMP_AIR" type="sum" domain="reach" />
   </output_group>
-
+  -->
   <output_group name="FLOW Q_DISCHARG at gage daily" interval="daily" >
     <output in_use="1" name="adjusted Q (cfs)" query="COMID=23810706" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
-    obs="..\Observations\Willamette Gages\Flow\USGS_14208700_flow_OAK GROVE FORK near GOVERNMENT CAMP_23810706.csv" format="E0" />
+    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706.csv" format="E0" />
   </output_group>
 
   <output_group name="FLOW Q_DISCHARG at gage monthly" interval="monthly" >
     <output in_use="1" name="adjusted Q (cfs)" query="COMID=23810706" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
-    obs="..\Observations\Willamette Gages\Flow\USGS_14208700_flow_OAK GROVE FORK near GOVERNMENT CAMP_23810706.csv" format="E0" />
+    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706.csv" format="E0" />
   </output_group>
 
   <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
@@ -33,7 +34,7 @@
     <output name="SPRING_CMS" query="HBVCALIB=40" value="SPRING_CMS" type="sum" domain="reach" />
     <output name="ADDED_VOL (m3)" query="HBVCALIB=40" value="ADDED_VOL" type="sum" domain="reach" />
     <output in_use="1" name="adjusted Q (cfs)" query="COMID=23810706" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
-    obs="..\Observations\Willamette Gages\Flow\USGS_14208700_flow_OAK GROVE FORK near GOVERNMENT CAMP_23810706.csv" format="E0" />
+    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706.csv" format="E0" />
   </output_group>
 <!--
   <output name="SNOWPACK (mm SWE)" query="HBVCALIB=40" value="SNOWPACK" type="areaWtMean" domain="hru" />
