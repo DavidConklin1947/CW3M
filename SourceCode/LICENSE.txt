@@ -1,6 +1,16 @@
 			      COPYRIGHT NOTICE
+    CW3M - Community Willamette Whole Watershed Model
 
     Portions of this software are Copyright (C) 2010-2019 Oregon State University.
+    Portions of this software are Copyright (C) 2019-2021 CW3M Steering Committee
+
+    For a description of CW3M, refer to the CW3M Digital Handbook in the CW3M repository at
+    trunk/DataCW3M/CW3MdigitalHandbook.
+
+    The CW3M Steering Committee designates a Principal Developer to maintain the repository 
+    of CW3M's canonical source code and data.  As of July 30, 2021, the Principal Developer is 
+    Oregon Freshwater Simulations, Inc., Portland, OR, USA.  For information about CW3M from 
+    Oregon Freshwater, contact David Conklin at david.conklin@freshwatersim.com.
 
 				 PERMISSION
 
@@ -658,5 +668,3 @@ Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.
 
                      END OF TERMS AND CONDITIONS
-
-           
