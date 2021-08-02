@@ -274,7 +274,7 @@ label:  readable field description
 				<attr value="7055210" color="(46,139,164)" label="7055210 LP:Pm1" />
 				<attr value="7056320" color="(37,111,80)" label="7056320" />
 				<attr value="7057320" color="(127,127,127)" label="7057320" />
-
+<!--
         <attr value="621" color="(0,23,127)" label="Wetland, unconsolidated bottom, palustrine non-isolated" />
         <attr value="622" color="(0,47,127)" label="Wetland, aquatic bed, palustrine non-isolated" />
         <attr value="623" color="(0,71,127)" label="Wetland, unconsolidated shore, palustrine non-isolated" />
@@ -283,71 +283,71 @@ label:  readable field description
         <attr value="627" color="(31,127,127)" label="Wetland, evergreen shrub-scrub, palustrine non-isolated" />
         <attr value="628" color="(47,127,127)" label="Wetland, deciduous forested, palustrine non-isolated" />
         <attr value="629" color="(63,127,127)" label="Wetland, evergreen forested, palustrine non-isolated" />
+-->
+        <attr value="6211" color="(0,23,20)" label="Wetland PUBH permanently flooded, unconsolidated bottom, palustrine non-isolated" />
+        <attr value="6212" color="(0,23,40)" label="Wetland PUBF semi-permanently flooded, unconsolidated bottom, palustrine non-isolated" />
+        <attr value="6213" color="(0,23,60)" label="Wetland PUBG intermittently exposed, unconsolidated bottom, palustrine non-isolated" />
+        <attr value="6214" color="(0,23,80)" label="Wetland PUBK artificially flooded, unconsolidated bottom, palustrine non-isolated" />
 
-        <attr value="6211" color="(0,0,0)" label="Wetland PUBH permanently flooded, unconsolidated bottom, palustrine non-isolated" />
-        <attr value="6212" color="(0,0,0)" label="Wetland PUBF semi-permanently flooded, unconsolidated bottom, palustrine non-isolated" />
-        <attr value="6213" color="(0,0,0)" label="Wetland PUBG intermittently exposed, unconsolidated bottom, palustrine non-isolated" />
-        <attr value="6214" color="(0,0,0)" label="Wetland PUBK artificially flooded, unconsolidated bottom, palustrine non-isolated" />
+        <attr value="6221" color="(0,47,20)" label="Wetland PABH permanently flooded, aquatic bed, palustrine non-isolated" />
+        <attr value="6222" color="(0,47,40)" label="Wetland PABF semi-permanently flooded, aquatic bed, palustrine non-isolated" />
+        <attr value="6223" color="(0,47,60)" label="Wetland PABG intermittently exposed, aquatic bed, palustrine non-isolated" />
+        <attr value="6224" color="(0,47,80)" label="Wetland PABK artificially flooded, aquatic bed, palustrine non-isolated" />
 
-        <attr value="6221" color="(0,0,0)" label="Wetland PABH permanently flooded, aquatic bed, palustrine non-isolated" />
-        <attr value="6222" color="(0,0,0)" label="Wetland PABF semi-permanently flooded, aquatic bed, palustrine non-isolated" />
-        <attr value="6223" color="(0,0,0)" label="Wetland PABG intermittently exposed, aquatic bed, palustrine non-isolated" />
-        <attr value="6224" color="(0,0,0)" label="Wetland PABK artificially flooded, aquatic bed, palustrine non-isolated" />
+        <attr value="6234" color="(0,71,80)" label="Wetland PUSK artificially flooded, unconsolidated shore, palustrine non-isolated" />
+        <attr value="6235" color="(0,71,100)" label="Wetland PUSA temporarily flooded, unconsolidated shore, palustrine non-isolated" />
+        <attr value="6236" color="(0,71,120)" label="Wetland PUSC seasonally flooded, unconsolidated shore, palustrine non-isolated" />
+        <attr value="6237" color="(0,71,140)" label="Wetland PUSE seasonally flooded/saturated, unconsolidated shore, palustrine non-isolated" />
 
-        <attr value="6234" color="(0,0,0)" label="Wetland PUSK artificially flooded, unconsolidated shore, palustrine non-isolated" />
-        <attr value="6235" color="(0,0,0)" label="Wetland PUSA temporarily flooded, unconsolidated shore, palustrine non-isolated" />
-        <attr value="6236" color="(0,0,0)" label="Wetland PUSC seasonally flooded, unconsolidated shore, palustrine non-isolated" />
-        <attr value="6237" color="(0,0,0)" label="Wetland PUSE seasonally flooded/saturated, unconsolidated shore, palustrine non-isolated" />
+        <attr value="6241" color="(0,95,20)" label="Wetland PEMH permanently flooded, emergent, palustrine non-isolated" />
+        <attr value="6242" color="(0,95,40)" label="Wetland PEMF semi-permanently flooded, emergent, palustrine non-isolated" />
+        <attr value="6243" color="(0,95,60)" label="Wetland PEMG intermittently exposed, emergent, palustrine non-isolated" />
+        <attr value="6244" color="(0,95,80)" label="Wetland PEMK artificially flooded, emergent, palustrine non-isolated" />
+        <attr value="6245" color="(0,95,100)" label="Wetland PEMA temporarily flooded, emergent, palustrine non-isolated" />
+        <attr value="6246" color="(0,95,120)" label="Wetland PEMC seasonally flooded, emergent, palustrine non-isolated" />
+        <attr value="6247" color="(0,95,140)" label="Wetland PEME seasonally flooded/saturated, emergent, palustrine non-isolated" />
+        <attr value="6248" color="(0,95,160)" label="Wetland PEMD continuously saturated, emergent, palustrine non-isolated" />
+        <attr value="6249" color="(0,95,180)" label="Wetland PEMB seasonally saturated, emergent, palustrine non-isolated" />
 
-        <attr value="6241" color="(0,0,0)" label="Wetland PEMH permanently flooded, emergent, palustrine non-isolated" />
-        <attr value="6242" color="(0,0,0)" label="Wetland PEMF semi-permanently flooded, emergent, palustrine non-isolated" />
-        <attr value="6243" color="(0,0,0)" label="Wetland PEMG intermittently exposed, emergent, palustrine non-isolated" />
-        <attr value="6244" color="(0,0,0)" label="Wetland PEMK artificially flooded, emergent, palustrine non-isolated" />
-        <attr value="6245" color="(0,0,0)" label="Wetland PEMA temporarily flooded, emergent, palustrine non-isolated" />
-        <attr value="6246" color="(0,0,0)" label="Wetland PEMC seasonally flooded, emergent, palustrine non-isolated" />
-        <attr value="6247" color="(0,0,0)" label="Wetland PEME seasonally flooded/saturated, emergent, palustrine non-isolated" />
-        <attr value="6248" color="(0,0,0)" label="Wetland PEMD continuously saturated, emergent, palustrine non-isolated" />
-        <attr value="6249" color="(0,0,0)" label="Wetland PEMB seasonally saturated, emergent, palustrine non-isolated" />
+        <attr value="6261" color="(15,127,20)" label="Wetland PSS6H permanently flooded, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6262" color="(15,127,40)" label="Wetland PSS6F semi-permanently flooded, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6263" color="(15,127,60)" label="Wetland PSS6G intermittently exposed, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6264" color="(15,127,80)" label="Wetland PSS6K artificially flooded, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6265" color="(15,127,100)" label="Wetland PSS6A temporarily flooded, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6266" color="(15,127,120)" label="Wetland PSS6C seasonally flooded, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6267" color="(15,127,140)" label="Wetland PSS6E seasonally flooded/saturated, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6268" color="(15,127,160)" label="Wetland PSS6D continuously saturated, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6269" color="(15,127,180)" label="Wetland PSS6B seasonally saturated, deciduous scrub-shrub, palustrine non-isolated" />
 
-        <attr value="6261" color="(0,0,0)" label="Wetland PSS6H permanently flooded, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="6262" color="(0,0,0)" label="Wetland PSS6F semi-permanently flooded, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="6263" color="(0,0,0)" label="Wetland PSS6G intermittently exposed, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="6264" color="(0,0,0)" label="Wetland PSS6K artificially flooded, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="6265" color="(0,0,0)" label="Wetland PSS6A temporarily flooded, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="6266" color="(0,0,0)" label="Wetland PSS6C seasonally flooded, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="6267" color="(0,0,0)" label="Wetland PSS6E seasonally flooded/saturated, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="6268" color="(0,0,0)" label="Wetland PSS6D continuously saturated, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="6269" color="(0,0,0)" label="Wetland PSS6B seasonally saturated, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="6271" color="(31,127,20)" label="Wetland PSS7H permanently flooded, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6272" color="(31,127,40)" label="Wetland PSS7F semi-permanently flooded, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6273" color="(31,127,60)" label="Wetland PSS7G intermittently exposed, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6274" color="(31,127,80)" label="Wetland PSS7K artificially flooded, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6275" color="(31,127,100)" label="Wetland PSS7A temporarily flooded, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6276" color="(31,127,120)" label="Wetland PSS7C seasonally flooded, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6277" color="(31,127,140)" label="Wetland PSS7E seasonally flooded/saturated, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6278" color="(31,127,160)" label="Wetland PSS7D continuously saturated, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6279" color="(31,127,180)" label="Wetland PSS7B seasonally saturated, evergreen scrub-shrub, palustrine non-isolated" />
 
-        <attr value="6271" color="(0,0,0)" label="Wetland PSS7H permanently flooded, evergreen scrub-shrub, palustrine non-isolated" />
-        <attr value="6272" color="(0,0,0)" label="Wetland PSS7F semi-permanently flooded, evergreen scrub-shrub, palustrine non-isolated" />
-        <attr value="6273" color="(0,0,0)" label="Wetland PSS7G intermittently exposed, evergreen scrub-shrub, palustrine non-isolated" />
-        <attr value="6274" color="(0,0,0)" label="Wetland PSS7K artificially flooded, evergreen scrub-shrub, palustrine non-isolated" />
-        <attr value="6275" color="(0,0,0)" label="Wetland PSS7A temporarily flooded, evergreen scrub-shrub, palustrine non-isolated" />
-        <attr value="6276" color="(0,0,0)" label="Wetland PSS7C seasonally flooded, evergreen scrub-shrub, palustrine non-isolated" />
-        <attr value="6277" color="(0,0,0)" label="Wetland PSS7E seasonally flooded/saturated, evergreen scrub-shrub, palustrine non-isolated" />
-        <attr value="6278" color="(0,0,0)" label="Wetland PSS7D continuously saturated, evergreen scrub-shrub, palustrine non-isolated" />
-        <attr value="6279" color="(0,0,0)" label="Wetland PSS7B seasonally saturated, evergreen scrub-shrub, palustrine non-isolated" />
+        <attr value="6281" color="(47,127,20)" label="Wetland PFO6H permanently flooded, deciduous forested, palustrine non-isolated" />
+        <attr value="6282" color="(47,127,40)" label="Wetland PFO6F semi-permanently flooded, deciduous forested, palustrine non-isolated" />
+        <attr value="6283" color="(47,127,60)" label="Wetland PFO6G intermittently exposed, deciduous forested, palustrine non-isolated" />
+        <attr value="6284" color="(47,127,80)" label="Wetland PFO6K artificially flooded, deciduous forested, palustrine non-isolated" />
+        <attr value="6285" color="(47,127,100)" label="Wetland PFO6A temporarily flooded, deciduous forested, palustrine non-isolated" />
+        <attr value="6286" color="(47,127,120)" label="Wetland PFO6C seasonally flooded, deciduous forested, palustrine non-isolated" />
+        <attr value="6287" color="(47,127,140)" label="Wetland PFO6E seasonally flooded/saturated, deciduous forested, palustrine non-isolated" />
+        <attr value="6288" color="(47,127,160)" label="Wetland PFO6D continuously saturated, deciduous forested, palustrine non-isolated" />
+        <attr value="6289" color="(47,127,180)" label="Wetland PFO6B seasonally saturated, deciduous forested, palustrine non-isolated" />
 
-        <attr value="6281" color="(0,0,0)" label="Wetland PFO6H permanently flooded, deciduous forested, palustrine non-isolated" />
-        <attr value="6282" color="(0,0,0)" label="Wetland PFO6F semi-permanently flooded, deciduous forested, palustrine non-isolated" />
-        <attr value="6283" color="(0,0,0)" label="Wetland PFO6G intermittently exposed, deciduous forested, palustrine non-isolated" />
-        <attr value="6284" color="(0,0,0)" label="Wetland PFO6K artificially flooded, deciduous forested, palustrine non-isolated" />
-        <attr value="6285" color="(0,0,0)" label="Wetland PFO6A temporarily flooded, deciduous forested, palustrine non-isolated" />
-        <attr value="6286" color="(0,0,0)" label="Wetland PFO6C seasonally flooded, deciduous forested, palustrine non-isolated" />
-        <attr value="6287" color="(0,0,0)" label="Wetland PFO6E seasonally flooded/saturated, deciduous forested, palustrine non-isolated" />
-        <attr value="6288" color="(0,0,0)" label="Wetland PFO6D continuously saturated, deciduous forested, palustrine non-isolated" />
-        <attr value="6289" color="(0,0,0)" label="Wetland PFO6B seasonally saturated, deciduous forested, palustrine non-isolated" />
-
-        <attr value="6291" color="(0,0,0)" label="Wetland PFO7H permanently flooded, evergreen forested, palustrine non-isolated" />
-        <attr value="6292" color="(0,0,0)" label="Wetland PFO7F semi-permanently flooded, evergreen forested, palustrine non-isolated" />
-        <attr value="6293" color="(0,0,0)" label="Wetland PFO7G intermittently exposed, evergreen forested, palustrine non-isolated" />
-        <attr value="6294" color="(0,0,0)" label="Wetland PFO7K artificially flooded, evergreen forested, palustrine non-isolated" />
-        <attr value="6295" color="(0,0,0)" label="Wetland PFO7A temporarily flooded, evergreen forested, palustrine non-isolated" />
-        <attr value="6296" color="(0,0,0)" label="Wetland PFO7C seasonally flooded, evergreen forested, palustrine non-isolated" />
-        <attr value="6297" color="(0,0,0)" label="Wetland PFO7E seasonally flooded/saturated, evergreen forested, palustrine non-isolated" />
-        <attr value="6298" color="(0,0,0)" label="Wetland PFO7D continuously saturated, evergreen forested, palustrine non-isolated" />
-        <attr value="6299" color="(0,0,0)" label="Wetland PFO7B seasonally saturated, evergreen forested, palustrine non-isolated" />
+        <attr value="6291" color="(63,127,20)" label="Wetland PFO7H permanently flooded, evergreen forested, palustrine non-isolated" />
+        <attr value="6292" color="(63,127,40)" label="Wetland PFO7F semi-permanently flooded, evergreen forested, palustrine non-isolated" />
+        <attr value="6293" color="(63,127,60)" label="Wetland PFO7G intermittently exposed, evergreen forested, palustrine non-isolated" />
+        <attr value="6294" color="(63,127,80)" label="Wetland PFO7K artificially flooded, evergreen forested, palustrine non-isolated" />
+        <attr value="6295" color="(63,127,100)" label="Wetland PFO7A temporarily flooded, evergreen forested, palustrine non-isolated" />
+        <attr value="6296" color="(63,127,120)" label="Wetland PFO7C seasonally flooded, evergreen forested, palustrine non-isolated" />
+        <attr value="6297" color="(63,127,140)" label="Wetland PFO7E seasonally flooded/saturated, evergreen forested, palustrine non-isolated" />
+        <attr value="6298" color="(63,127,160)" label="Wetland PFO7D continuously saturated, evergreen forested, palustrine non-isolated" />
+        <attr value="6299" color="(63,127,180)" label="Wetland PFO7B seasonally saturated, evergreen forested, palustrine non-isolated" />
 
       </attributes>
 		</field>
