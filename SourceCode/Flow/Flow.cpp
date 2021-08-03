@@ -6950,7 +6950,7 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
                      msg.Format("InitHRULayers() idu_poly_ndx = %d, lulc_a = %d, wetness = %lf"
                         " Setting WETNESS to 0. now.", idu_poly_ndx, lulc_a, wetness_mm);
                      Report::WarningMsg(msg);
-                     SetAtt(idu_poly_ndx, WETNESS, NON_WETLAND_WETNESS_TOKEN);
+                     SetAtt(idu_poly_ndx, WETNESS, 0.);
                   }
 
                   wetland_area_accum_m2 += idu_area_m2;
