@@ -24,6 +24,29 @@
     -->
 
   <outputs>
+    <output_group name="FLOW Wetland 14 analysis" interval="daily" >
+      <output name="idu 33803 LULC_A" query="IDU_ID=33803" value="LULC_A" type="areaWtMean" domain="idu" />
+      <output name="idu 33803 LULC_B" query="IDU_ID=33803" value="LULC_B" type="areaWtMean" domain="idu" />
+      <output name="idu 33803 LULC_C" query="IDU_ID=33803" value="VEGCLASS" type="areaWtMean" domain="idu" />
+      <output name="idu 33803 LAI" query="IDU_ID=33803" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="hru 1946 LAI" query="HRU_ID=1946" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="idu 33803 WETNESS (mm)" query="IDU_ID=33803" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="hru 1946 MELT_BOX (mm)" query="HRU_ID=1946" value="MELT_BOX" type="areaWtMean" domain="hru" />
+      <output name="hru 1946 NAT_SOIL (mm)" query="HRU_ID=1946" value="NAT_SOIL" type="areaWtMean" domain="hru" />
+      <output name="hru 1946 IRRIG_SOIL (mm)" query="HRU_ID=1946" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
+      <output name="wetland 14 ET (mm per day)" query="WETL_ID=14" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output name="hru 1946 ET (mm per day)" query="HRU_ID=1946" value="ET_DAY" type="areaWtMean" domain="hru" />
+      <output name="reach 23772747 Q_DISCHARG (cms)" query="COMID=23772747" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23773509 Q_DISCHARG (cms)" query="COMID=23773509" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23772747 + 23773509 Q_DISCHARG (cms)" query="COMID=23772747 or COMID=23773509" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23772745 Q_DISCHARG (cms)" query="COMID=23772745" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23772745 Q2WETL (cms)" query="COMID=23772745" value="Q2WETL" type="sum" domain="reach" />
+      <output name="reach 23772743 Q_DISCHARG (cms)" query="COMID=23772743" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23772745 Q_CAP (cms)" query="COMID=23772745" value="Q_CAP" type="sum" domain="reach" />
+      <output name="idu 33803 WETL_CAP (mm)" query="IDU_ID=33803" value="WETL_CAP" type="areaWtMean" domain="idu" />
+      <output name="idu 33803 WETL2Q (cms)" query="IDU_ID=33803" value="WETL2Q" type="areaWtMean" domain="idu" />
+    </output_group>
+    
     <output_group name="FLOW Wetland 17 analysis" interval="daily" >
       <output name="idu 31325 LULC_A" query="IDU_ID=31325" value="LULC_A" type="areaWtMean" domain="idu" />
       <output name="idu 31325 LULC_B" query="IDU_ID=31325" value="LULC_B" type="areaWtMean" domain="idu" />

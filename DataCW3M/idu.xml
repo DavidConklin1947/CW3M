@@ -108,11 +108,12 @@ label:  readable field description
         <attr value="621" color="(255,0,0)" label="Wetland, unconsolidated bottom, palustrine non-isolated" />
         <attr value="622" color="(0,255,0)" label="Wetland, aquatic bed, palustrine non-isolated" />
         <attr value="623" color="(0,0,255)" label="Wetland, unconsolidated shore, palustrine non-isolated" />
-        <attr value="624" color="(191,0,0)" label="Wetland, emergent, palustrine non-isolated" />
-        <attr value="626" color="(0,0,191)" label="Wetland, deciduous scrub-shrub, palustrine non-isolated" />
-        <attr value="627" color="(127,0,0)" label="Wetland, evergreen shrub-scrub, palustrine non-isolated" />
-        <attr value="628" color="(0,127,0)" label="Wetland, deciduous forested, palustrine non-isolated" />
-        <attr value="629" color="(0,0,127)" label="Wetland, evergreen forested, palustrine non-isolated" />
+        <attr value="624" color="(255,255,0)" label="Wetland, emergent, palustrine non-isolated" />
+        <attr value="625" color="(0,255,255)" label="Wetland, ???, palustrine non-isolated" />
+        <attr value="626" color="(255,0,255)" label="Wetland, deciduous scrub-shrub, palustrine non-isolated" />
+        <attr value="627" color="(191,191,0)" label="Wetland, evergreen shrub-scrub, palustrine non-isolated" />
+        <attr value="628" color="(0,191,191)" label="Wetland, deciduous forested, palustrine non-isolated" />
+        <attr value="629" color="(191,0,191)" label="Wetland, evergreen forested, palustrine non-isolated" />
 
         <attr value="71" color="(0,0,127)" label="Open Water" />
 				<attr value="72" color="(255,255,255)" label="Snow and Ice" />
