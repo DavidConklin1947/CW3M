@@ -165,7 +165,7 @@
     };
 -->
     
-    <external name="HBV"   method="fn=hbv.dll:HBV_IrrigatedSoil" use="1" timing="1+16"/> 
+    <external name="HBV"   method="fn=hbv.dll:HBVdailyProcess" use="1" timing="1+16"/> 
 
     <!--The layers tag will remove water from the layer distribution matching the query first and then remove the unmatched idus 
       using the second layer distribution tag in the percentages indicated -->

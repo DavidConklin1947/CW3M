@@ -57,6 +57,7 @@ using namespace std;
 #define BOX_SLOW_GW 5
 
 #define NON_WETLAND_WETNESS_TOKEN -1000.
+#define NON_WETLAND_TOKEN -1
 #define NOMINAL_LOW_FLOW_CMS 0.010 /* 10 liters of water per sec */
 #define NOMINAL_LOW_WATER_LITERS_PER_METER 1 /* one liter of water per meter of stream length*/
 #define NOMINAL_MINIMUM_SOIL_WATER_CONTENT 0.001 /* 1 mm of water content per meter of soil depth*/
@@ -82,12 +83,14 @@ using namespace std;
 #define BEERS_LAW_K 0.5
 
 #define AREA gpFlowModel->m_colAREA
+#define COMID gpFlowModel->m_colCOMID
 #define ECOREGION gpFlowModel->m_colECOREGION
 #define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
 #define F_THETA gpFlowModel->m_colF_THETA
 #define FIELD_CAP gpFlowModel->m_colFIELD_CAP
 #define HBVCALIB gpFlowModel->m_colHBVCALIB
 #define HRU_ID gpFlowModel->m_colHRU_ID
+#define HRU_NDX gpFlowModel->m_colHRU_NDX
 #define H2O_MELT gpFlowModel->m_colH2O_MELT
 #define LAI gpFlowModel->m_colLAI
 #define LULC_A gpFlowModel->m_colLulcA
@@ -605,7 +608,8 @@ public:
     ~HRULayer( void ) { }
    // State Variables
    SVTYPE m_volumeWater;                // m3
-   float m_depth ;  //total depth of the HRULayer
+   float m_soilThickness_m ;  // thickness of soil layer (m)
+   double m_standingH2O_mm; // amount of liquid water on the surface, either melt water in the snowpack or standing water in a wetland
 
    // Next variable is usually 1.  However, for topsoil, the irrigated part of the HRU is in one layer, and the non-irrigated part is in another layer.
    // That allows for keeping track of soil moisture separately in the irrigated part vs. the non-irrigated part.
@@ -770,9 +774,9 @@ public:
 
    PtrArray< HRULayer > m_layerArray;     // (memory managed locally)
    CArray< HRU*, HRU* > m_neighborArray;        // (memory managed by FlowModel::m_hruArray)
-   CUIntArray m_polyIndexArray;
 
-   CUIntArray m_reachNdxArray; // Holds the indices into the Reach shapefile for the reaches associated with this IDU.
+   CUIntArray m_polyIndexArray; // Holds the indices into the IDU shapefile for the IDUs in the HRU.
+   CUIntArray m_reachNdxArray; // Holds the indices into the Reach shapefile for the reaches associated with this HRU.
 
    // the following static members hold value for model variables
    static MTDOUBLE m_mvDepthMelt;  // volume of water in snow
@@ -1481,20 +1485,30 @@ class Wetland
 public:
    Wetland(int wetlID);
    ~Wetland() {  };
-   bool QtoWetland(WaterParcel q2wetlWP);
+   bool H2OtoWetland(double H2OtoWetl_m3);
 
 public:
    int m_wetlID;
    int m_wetlNdx;
-   int m_wetlHruID;
-   int m_wetlHruNdx; // Same index is used for the HRU shapefile and the internal HRU array.
    double m_wetlArea_m2;
 
    // m_wetlIDUndxArray is an ordered list of the IDU polygon indices of the IDUs in the wetland.
    // Note these are IDU index values, not IDU_ID values.
    // The IDUs are in the order in which they would fill when water overflows the banks of the associated reaches,
    // i.e. from lowest elevation to highest elevation.
-   CArray <int, int> m_wetlIDUndxArray; 
+   CArray <int, int> m_wetlIDUndxArray;
+
+   // m_wetlHRUndxArray is a list of the HRU polygon indices of the HRUs in the wetland.
+   // Note that HRU index values are the same for the HRU shapefile and m_hruArray.
+   // This list has a 1-to-1 correspondence to m_wetlIDUndxArray, so a given HRU index
+   // may appear more than once in the list.
+   CArray <int, int> m_wetlHRUndxArray;
+
+   // m_wetlReachNdxArray is a list of indices into m_reachArray of the reaches associated with the IDUs in the wetland.
+   // Note that indices into m_reachArray, are not the same as the indices into the Reach shapefile.
+   // This list has a 1-to-1 correspondence to m_wetlIDUndxArray, so a given reach index
+   // may appear more than once in the list.
+   CArray <int, int> m_wetlReachNdxArray;
 }; // end of class Wetland
 
 

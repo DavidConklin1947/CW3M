@@ -6,5 +6,4 @@ EXPORTS
     ; Explicit exports can go here
 
 CalcDailyUrbanWater @20
-HBV_IrrigatedSoil @22
-;x HBVdailyProcess @23
+HBVdailyProcess @22

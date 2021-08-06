@@ -594,23 +594,24 @@ int FluxContainer::RemoveFlux( Flux *pFlux, bool doDelete )
 // H R U L A Y E R  
 ///////////////////////////////////////////////////////////////////////////////
 
-HRULayer::HRULayer( HRU *pHRU )
+HRULayer::HRULayer(HRU* pHRU)
    : FluxContainer()
    , StateVarContainer()
-   , m_volumeWater( 0.0f )
+   , m_volumeWater(0.0f)
    , m_HRUareaFraction(1.0f)
-   , m_contributionToReach( 0.0f )
-   , m_verticalDrainage( 0.0f )
-   , m_horizontalExchange( 0.0f )
-   , m_wc( 0.0f )
-   , m_volumeLateralInflow( 0.0f )
-   , m_volumeLateralOutflow( 0.0f )
-   , m_volumeVerticalInflow( 0.0f )
-   , m_volumeVerticalOuflow( 0.0f )
-   , m_pHRU( pHRU )
-   , m_layer( -1 )
-   , m_type( HT_SOIL )
-   , m_depth( 1.0f )
+   , m_contributionToReach(0.0f)
+   , m_verticalDrainage(0.0f)
+   , m_horizontalExchange(0.0f)
+   , m_wc(0.0f)
+   , m_volumeLateralInflow(0.0f)
+   , m_volumeLateralOutflow(0.0f)
+   , m_volumeVerticalInflow(0.0f)
+   , m_volumeVerticalOuflow(0.0f)
+   , m_pHRU(pHRU)
+   , m_layer(-1)
+   , m_type(HT_SOIL)
+   , m_soilThickness_m(1.0f)
+   , m_standingH2O_mm(0.)
 {
    ASSERT( m_pHRU != NULL );
 }
@@ -629,7 +630,8 @@ HRULayer &HRULayer::operator = ( HRULayer &l )
    m_volumeLateralOutflow = l.m_volumeLateralOutflow;
    m_volumeVerticalInflow = l.m_volumeVerticalInflow;
    m_volumeVerticalOuflow = l.m_volumeVerticalOuflow;
-   m_depth = l.m_depth;
+   m_soilThickness_m = l.m_soilThickness_m;
+   m_standingH2O_mm = l.m_standingH2O_mm;
 
    // general info
    m_pHRU  = l.m_pHRU;
@@ -784,14 +786,14 @@ int HRU::AddLayers( int soilLayerCount, int snowLayerCount, int vegLayerCount, f
       m_layerArray[layer]->m_type = HT_SOIL;
 
       if (gpModel->m_hruLayerDepths.GetCount()>0)
-         m_layerArray[layer]->m_depth=(float) atof(gpModel->m_hruLayerDepths[i_soil]);
+         m_layerArray[layer]->m_soilThickness_m = (float) atof(gpModel->m_hruLayerDepths[i_soil]);
 
       if (gpModel->m_initWaterContent.GetCount()==1)
          m_layerArray[layer]->m_volumeWater=atof(gpModel->m_initWaterContent[0]);
       else if (gpModel->m_initWaterContent.GetCount()>1)
          {
          ASSERT(gpModel->m_hruLayerDepths.GetCount()>0);//if this asserts, it probably means you did not include the same number of initial watercontents as you did layer depths.  Check your xml file (catchments tag)
-         m_layerArray[layer]->m_volumeWater=atof(gpModel->m_initWaterContent[i_soil])*pHRULayer->m_depth*0.4f*m_HRUeffArea_m2;
+         m_layerArray[layer]->m_volumeWater=atof(gpModel->m_initWaterContent[i_soil])*pHRULayer->m_soilThickness_m*0.4f*m_HRUeffArea_m2;
          }
 
       layer++; i_soil++;
@@ -5584,14 +5586,14 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          for (int reachpoly_ndx = 0; reachpoly_ndx < num_reaches_in_hru; reachpoly_ndx++)
          { // Note that, although many of the deltas for reach attributes have been created already,
             // the reach attributes in the Reach layer itself haven't been updated yet today.
-            int reach_array_ndx = -1; m_pReachLayer->GetData(reachpoly_ndx, m_colReachREACH_NDX, reach_array_ndx);
+            int reach_array_ndx = -1; m_pReachLayer->GetData(pHRU->m_reachNdxArray[reachpoly_ndx], m_colReachREACH_NDX, reach_array_ndx);
             Reach* pReach = GetReachFromStreamIndex(reach_array_ndx);
             double reach_q2wetl_cms = pReach->m_q2wetl_cms;
             if (reach_q2wetl_cms <= 0.) continue;
 
             hru_q2wetl_cms += reach_q2wetl_cms;
             double reach_q2wetl_m3 = reach_q2wetl_cms * SEC_PER_DAY;
-
+/*x
             // Remove the water from the reach.
             WaterParcel reach_q2wetlWP(0, 0);
             // Remove it from each subreach in proportion as that subreach's volume is to the total volume of the reach.
@@ -5609,22 +5611,19 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                pSubreach->m_waterParcel.Discharge(vol_m3);      
                reach_q2wetlWP.MixIn(subreach_q2wetlWP);
             } // end of loop through the subreaches of this reach
-
+x*/
             // Add the water to the wetland IDUs associated with the reach.
             int wetl_ndx = pReach->m_wetlNdx;
             Wetland* pWetl = m_wetlArray[wetl_ndx];
-            pWetl->QtoWetland(reach_q2wetlWP);
+            pWetl->H2OtoWetland(reach_q2wetl_m3);
          } // end of loop through reaches
+
          if (hru_q2wetl_cms <= 0.) continue;
          HRULayer* pStandingH2Olayer = pHRU->GetLayer(BOX_STANDING_H2O);
-         if (!pHRU->m_standingH2Oflag)
-         {
-            ASSERT(pStandingH2Olayer->m_depth == 0 && pStandingH2Olayer->m_volumeWater == 0);
-            pHRU->m_standingH2Oflag = true;
-         }
+         pHRU->m_standingH2Oflag = true;
          double hru_q2wetl_m3 = hru_q2wetl_cms * SEC_PER_DAY;
          double hru_q2wetl_mm = (hru_q2wetl_m3 / pHRU->m_HRUtotArea_m2) * 1000.;
-         pStandingH2Olayer->m_depth += (float)hru_q2wetl_mm;
+         pStandingH2Olayer->m_standingH2O_mm += (float)hru_q2wetl_mm;
          pStandingH2Olayer->m_volumeWater += hru_q2wetl_m3;        
          pHRU->SetAtt(HruMELT_BOX, pStandingH2Olayer->m_volumeWater);
       } // end of loop through HRUs
@@ -5633,10 +5632,10 @@ bool FlowModel::Run( EnvContext *pEnvContext )
    } // end of ApplyQ2WETL()
 
 
-bool Wetland::QtoWetland(WaterParcel toWetlWP) // Returns true if wetland absorbs all the water.
+bool Wetland::H2OtoWetland(double H2OtoWetl_m3) // Returns true if wetland absorbs all the water.
 {
    int num_wetl_idus = (int)m_wetlIDUndxArray.GetSize();
-   double remaining_m3 = toWetlWP.m_volume_m3;
+   double remaining_m3 = H2OtoWetl_m3;
    for (int i = 0; remaining_m3 > 0. && i < num_wetl_idus; i++)
    {
       int idu_ndx = m_wetlIDUndxArray[i];
@@ -5651,26 +5650,25 @@ bool Wetland::QtoWetland(WaterParcel toWetlWP) // Returns true if wetland absorb
       double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
       wetness_mm += to_this_idu_mm;
       gpFlowModel->SetAtt(idu_ndx, WETNESS, wetness_mm);
+      int hru_ndx = m_wetlHRUndxArray[i];
+      HRU* pHRU = gpFlowModel->GetHRU(hru_ndx);
+      HRULayer* pHruLayer = pHRU->GetLayer(BOX_STANDING_H2O); // Layer 1 is used for both standing water and meltwater in the snowpack.
+      pHruLayer->AddFluxFromGlobalHandler((float)to_this_idu_m3, FL_SINK);
 
       remaining_m3 -= to_this_idu_m3;
    } // end of loop through IDUs in this wetland
 
-   WaterParcel h2o_to_wetlandWP = toWetlWP; h2o_to_wetlandWP.Discharge(remaining_m3);
-   HRU* pHRU = gpFlowModel->GetHRU(m_wetlHruNdx);
-   HRULayer* pHruLayer = pHRU->GetLayer(BOX_STANDING_H2O); // Layer 1 is used for both standing water and meltwater in the snowpack.
-   pHruLayer->AddFluxFromGlobalHandler((float)h2o_to_wetlandWP.m_volume_m3, FL_SINK);
-
-   bool Q_absorbed_by_wetland = remaining_m3 <= 0.;
    if (!Q_absorbed_by_wetland)
    { // Both the reach and the wetland are overflowing. A flood condition exists.
       CString msg;
-      msg.Format("QtoWetland() A flood condition exists. m_wetlID = %d, toWetlWP.m_volume_m3 = %f, remaining_m3 = %f",
-         m_wetlID, toWetlWP.m_volume_m3, remaining_m3);
-      Report::LogMsg(msg);
+      msg.Format("H2OtoWetland() A flood condition exists. m_wetlID = %d, H2OtoWetl_m3 = %f, remaining_m3 = %f",
+         m_wetlID, H2OtoWetl_m3, remaining_m3);
+      msg = msg + "/nThe remaining_m3 have been added to the standing water HRU layer but not to the wetland IDUs.";
+      Report::ErrorMsg(msg);
    }
 
    return(Q_absorbed_by_wetland);
-} // end of QtoWetland()
+} // end of H2OtoWetland()
 
 
 bool Reach::CalcReachVegParamsIfNecessary()
@@ -8238,8 +8236,8 @@ inline void FlowModel::SetAttFloat(int IDUindex, int col, float attValue)
 } // end of SetAttFloat()
 
 
-Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.), m_wetlHruID(-1)
-{ 
+Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.)
+{
    m_wetlID = wetlID; 
    m_wetlIDUndxArray.RemoveAll();
 } // end of Wetland constructor
@@ -8249,8 +8247,16 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
 {
    if (WETL_ID < 0) return(0);
 
-   m_wetlArray.RemoveAll();
+   int reach_count = (int)m_reachArray.GetSize();
+   int reach_array_ndx;
+   for (reach_array_ndx = 0; reach_array_ndx < reach_count; reach_array_ndx++)
+   {
+      Reach * pReach = m_reachArray[reach_array_ndx];
+      pReach->m_wetlNdx = NON_WETLAND_TOKEN;
+   } // end of loop thru m_reachArray
+
    int num_wetlands = 0;
+   m_wetlArray.RemoveAll();
    for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu != m_pIDUlayer->End(); idu++)
    {
       int wetl_id = AttInt(idu, WETL_ID);
@@ -8264,7 +8270,6 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
          pWetl = new Wetland(wetl_id);
          m_wetlArray.Add(pWetl);
          pWetl->m_wetlNdx = wetl_ndx;
-         pWetl->m_wetlHruID = AttInt(idu, HRU_ID);
          num_wetlands++;
       }
       else pWetl = m_wetlArray[wetl_ndx];
@@ -8281,12 +8286,6 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
    for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
    {
       Wetland* pWetl = m_wetlArray[wetl_ndx];
-      pWetl->m_wetlHruNdx = m_pHRUlayer->FindIndex(HruHRU_ID, pWetl->m_wetlHruID);
-      HRU* pHRU = GetHRU(pWetl->m_wetlHruNdx);
-      int comid = pHRU->AttInt(HruCOMID);
-      Reach* pReach = GetReachFromCOMID(comid);
-      pReach->m_wetlNdx = wetl_ndx;
-
       int num_idus = (int)pWetl->m_wetlIDUndxArray.GetSize();
       CArray <int, int> idus; idus.SetSize(num_idus);
       CArray <float, float> elevations; elevations.SetSize(num_idus);
@@ -8320,7 +8319,28 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
          elevations.RemoveAt(j_min_elev);
          num_remaining_idus--;
       } // end of while (num_remaining_idus > 0)
-   }
+
+      // Now load up pWetl->m_wetlHRUndxArray, pWetl->m_wetlReachNdxArray and pReach->m_wetlNdx.
+      pWetl->m_wetlHRUndxArray.SetSize(num_idus);
+      pWetl->m_wetlReachNdxArray.SetSize(num_idus);
+      for (int i = 0; i < num_idus; i++)
+      {
+         int idu_ndx = pWetl->m_wetlIDUndxArray[i];
+         int hru_ndx = AttInt(idu_ndx, HRU_NDX);
+         pWetl->m_wetlHRUndxArray[i] = hru_ndx;
+         HRU* pHRU = GetHRU(hru_ndx);
+         int comid = pHRU->AttInt(HruCOMID);
+         Reach* pReach = GetReachFromCOMID(comid);
+         pWetl->m_wetlReachNdxArray[i] = pReach->m_reachIndex;
+         // By convention, a reach may only be associated with a single wetland.
+         if (pReach->m_wetlNdx != wetl_ndx)
+         {
+            ASSERT(pReach->m_wetlNdx = NON_WETLAND_TOKEN);
+            pReach->m_wetlNdx = wetl_ndx;
+         }
+      } // end of loop through m_wetlIDUndxArray
+
+   } // end of loop through all wetlands
 
    CString msg;
    msg.Format("InitWetlands() initialized %d Wetland objects.", num_wetlands);
@@ -12173,11 +12193,11 @@ void FlowModel::GetCatchmentDerivatives( double time, double timeStep, int svCou
             {
             float nominal_minimum_mm;
             if (pHRULayer->m_layer == BOX_SNOW || pHRULayer->m_layer == BOX_MELT) nominal_minimum_mm = 0.f;
-            else nominal_minimum_mm = (float)(NOMINAL_MINIMUM_SOIL_WATER_CONTENT * pHRULayer->m_depth);
+            else nominal_minimum_mm = (float)(NOMINAL_MINIMUM_SOIL_WATER_CONTENT * pHRULayer->m_soilThickness_m);
             pHRULayer->m_addedVolume_m3 += (float)((pHRU->m_HRUeffArea_m2 * pHRULayer->m_HRUareaFraction * nominal_minimum_mm / MM_PER_M) - pHRULayer->m_volumeWater);
             pHRULayer->m_wDepth = nominal_minimum_mm;
-            pHRULayer->m_wc = nominal_minimum_mm / pHRULayer->m_depth;
-            pHRULayer->m_volumeWater = (float)(pHRU->m_HRUeffArea_m2 * pHRULayer->m_HRUareaFraction * pHRULayer->m_depth * nominal_minimum_mm / MM_PER_M);
+            pHRULayer->m_wc = nominal_minimum_mm / pHRULayer->m_soilThickness_m;
+            pHRULayer->m_volumeWater = (float)(pHRU->m_HRUeffArea_m2 * pHRULayer->m_HRUareaFraction * pHRULayer->m_soilThickness_m * nominal_minimum_mm / MM_PER_M);
             }
 
          switch (l)

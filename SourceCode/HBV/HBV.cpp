@@ -427,7 +427,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 x*/
 
 
-float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
+float HBV::HBVdailyProcess(FlowContext *pFlowContext)
    {
    int hru_of_interest = 1816;  
 
@@ -536,7 +536,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       ok &= pLULC_Table->Lookup(hbvcalib, m_col_k2, k2) && k2>0;                           // Recession coefficient (day-1)
       if (!ok)
          {
-         CString msg; msg.Format("*** HBV_IrrigatedSoil()1 ok = %d, h = %d, hbvcalib = %f Error getting parameter value", ok, h, hbvcalib);
+         CString msg; msg.Format("*** HBVdailyProcess()1 ok = %d, h = %d, hbvcalib = %f Error getting parameter value", ok, h, hbvcalib);
          Report::ErrorMsg(msg);
          }
       // Get the current Day/HRU weather data and calculate terms which depend only on weather data
@@ -649,7 +649,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
             pIDULayer->SetDataU(idu_ndx, WETNESS, wetness_mm);
          } // end of loop through IDUs
 
-         ASSERT(close_enough(wetness_check_m3, hru_standing_H2O_m3, 1e-5));
+         ASSERT(pHRU->m_snowpackFlag || close_enough(wetness_check_m3, hru_standing_H2O_m3, 1e-5));
       } // end of if (pHRU->m_standingH2Oflag)
 
       // gwIrrigated is the proportion of rain/snowmelt that bypasses the irrigated soil bucket, and is added directly to GW
@@ -662,7 +662,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       if (h == hru_of_interest) 
          if (gwNonIrrigated >= 1.f)
          {
-         CString msg; msg.Format("*** HBV_IrrigatedSoil()2: gwNonIrrigated = %f, nonIrrigatedSoilWater_mm = %f, fc = %f, Beta = %f", gwNonIrrigated, nonIrrigatedSoilWater_mm, fc, Beta);
+         CString msg; msg.Format("*** HBVdailyProcess()2: gwNonIrrigated = %f, nonIrrigatedSoilWater_mm = %f, fc = %f, Beta = %f", gwNonIrrigated, nonIrrigatedSoilWater_mm, fc, Beta);
          Report::LogMsg(msg);
          }
       float potentialPercolation_mm = Percolation(upperGroundWater_mm, kPerc); // filling the deepest reservoir
@@ -746,10 +746,10 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
          if (abs(massBalDiscrepancyFrac) > 1.e-5f)
          {
          CString msg; 
-         msg.Format("HBV_IrrigatedSoil()3 h = %d, precip = %f, natural_area_m2 = %f, pHRU->m_HRUtotArea_m2 = %f, pHRU->m_frc_naturl = %f",
+         msg.Format("HBVdailyProcess()3 h = %d, precip = %f, natural_area_m2 = %f, pHRU->m_HRUtotArea_m2 = %f, pHRU->m_frc_naturl = %f",
                h, precip, natural_area_m2, pHRU->m_HRUtotArea_m2, pHRU->m_frc_naturl);
          Report::LogMsg(msg);
-         msg.Format("*** HBV_IrrigatedSoil()4 h = %d, massBalDiscrepancyFrac = %f, precip_liters = %f, hruSnowThrufall_liters = %f, hruSnowEvap_liters = %f, hruRainThrufall_liters = %f,"
+         msg.Format("*** HBVdailyProcess()4 h = %d, massBalDiscrepancyFrac = %f, precip_liters = %f, hruSnowThrufall_liters = %f, hruSnowEvap_liters = %f, hruRainThrufall_liters = %f,"
             " hruRainEvap_liters = %f", h, massBalDiscrepancyFrac, precip_liters, hruSnowThrufall_liters, hruSnowEvap_liters, hruRainThrufall_liters, hruRainEvap_liters);
          Report::LogMsg(msg);
          }
@@ -782,7 +782,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
          if (h == hru_of_interest) 
             if (hruMelt_mm > (available_to_melt_mm + 5.e-4))
             {
-            CString msg; msg.Format("*** HBV_IrrigatedSoil()5: h = %d, hruMelt_mm = %f is greater than available_to_melt_mm = %f", h, hruMelt_mm, available_to_melt_mm);
+            CString msg; msg.Format("*** HBVdailyProcess()5: h = %d, hruMelt_mm = %f is greater than available_to_melt_mm = %f", h, hruMelt_mm, available_to_melt_mm);
             Report::LogMsg(msg);
             }
          if (hruMelt_mm > available_to_melt_mm) hruMelt_mm = available_to_melt_mm;
@@ -899,7 +899,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
                pHRULayer->AddFluxFromGlobalHandler(q0_m3, FL_STREAM_SINK);     //m3/d
                if (h == hru_of_interest)
                {
-                  CString msg; msg.Format("HBV_IrrigatedSoil()6 waterDepth = %f, k0 = %f, k1 = %f, UZL = %f, q0_mm = %f, q0_m3 = %f, adjusted_percolation_m3 = %f", 
+                  CString msg; msg.Format("HBVdailyProcess()6 waterDepth = %f, k0 = %f, k1 = %f, UZL = %f, q0_mm = %f, q0_m3 = %f, adjusted_percolation_m3 = %f", 
                         waterDepth, k0, k1, UZL, q0_mm, q0_m3, adjusted_percolation_m3);
                   Report::LogMsg(msg);
                }
@@ -914,7 +914,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
                pHRULayer->AddFluxFromGlobalHandler(q2_m3, FL_STREAM_SINK);     //m3/d
                if (h == hru_of_interest)
                   {
-                  CString msg; msg.Format("HBV_IrrigatedSoil()7 waterDepth = %f, k2 = %f, q2_mm = %f, q2_m3 = %f", waterDepth, k2, q2_mm, q2_m3);
+                  CString msg; msg.Format("HBVdailyProcess()7 waterDepth = %f, k2 = %f, q2_mm = %f, q2_m3 = %f", waterDepth, k2, q2_mm, q2_m3);
                   Report::LogMsg(msg);
                   }
                if (ecoregion == HC_ECOREGION) pHRU->m_aquifer_recharge_mm = q2_mm;
@@ -929,7 +929,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
             if (h == hru_of_interest) // bottom end of HJA
                if (trial_ending_layer_m3 < -1.f)
                {
-               CString msg; msg.Format("*** HBV_IrrigatedSoil()8: h = %d, l = %d, pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f, pHRULayer->m_volumeWater = %f, pHRULayer->GetFluxValue() = %f"
+               CString msg; msg.Format("*** HBVdailyProcess()8: h = %d, l = %d, pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f, pHRULayer->m_volumeWater = %f, pHRULayer->GetFluxValue() = %f"
                   ", hruSnowThrufall_mm*natural_area_m2 / 1000.0f = %f, hruMelt_mm*natural_area_m2 / 1000.0f = %f, refreezing_mm*natural_area_m2 / 1000.0f = %f, hruRainThrufall_mm*natural_area_m2 / 1000.0f = %f, "
                   "rain_and_melt_to_soil_m3 = %f", 
                   h, l, pHRULayer->m_layer, trial_ending_layer_m3, pHRULayer->m_volumeWater, pHRULayer->GetFluxValue(),
@@ -953,7 +953,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       if (h == hru_of_interest) // bottom end of HJA
          if ((snow_in_snowpack_m3SWE + water_in_snowpack_m3 + pHRULayer0->GetFluxValue() + pHRULayer1->GetFluxValue()) < -0.1f)
          {
-         CString msg; msg.Format("*** HBV_IrrigatedSoil()9: SWE < -0.1 m3SWE snow_in_snowpack_m3SWE = %f, water_in_snowpack_m3 = %f, pHRULayer0->GetFluxValue() = %f, pHRULayer1->GetFluxValue() = %f"
+         CString msg; msg.Format("*** HBVdailyProcess()9: SWE < -0.1 m3SWE snow_in_snowpack_m3SWE = %f, water_in_snowpack_m3 = %f, pHRULayer0->GetFluxValue() = %f, pHRULayer1->GetFluxValue() = %f"
             ", starting_total_flux_m3 = %f",
             snow_in_snowpack_m3SWE, water_in_snowpack_m3, pHRULayer0->GetFluxValue(), pHRULayer1->GetFluxValue(), starting_total_flux_m3);
          Report::LogMsg(msg);
@@ -994,7 +994,7 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
       if (h == hru_of_interest) // bottom end of HJA
          if (abs(mass_balance_discrep / tot_water_m3) > 1.e-2)
          {
-         CString msg; msg.Format("*** HBV_IrrigatedSoil()10: h = %d, mass balance discrepancy fraction = %f, tot_water_m3 = %f, ending_water_m3 = %f, pHRU->m_currentRunoff*natural_area_m2/1000 = %f, "
+         CString msg; msg.Format("*** HBVdailyProcess()10: h = %d, mass balance discrepancy fraction = %f, tot_water_m3 = %f, ending_water_m3 = %f, pHRU->m_currentRunoff*natural_area_m2/1000 = %f, "
             "q0_m3 = %f, q2_m3 = %f, mass_balance_discrep = %f, hruRainThrufall_liters/1000 = %f, hruSnowThrufall_liters/1000 = %f, natural_area_m2 = %f", 
             h, mass_balance_discrep / tot_water_m3, tot_water_m3, ending_water_m3, pHRU->m_currentRunoff*natural_area_m2 / 1000.f, q0_m3, q2_m3, mass_balance_discrep,
             hruRainThrufall_liters / 1000.f, hruSnowThrufall_liters / 1000.f, natural_area_m2);
@@ -1015,11 +1015,11 @@ float HBV::HBV_IrrigatedSoil(FlowContext *pFlowContext)
 
    if (hbvcalib_error_flag && pFlowContext->dayOfYear==0)
       {
-      CString msg; msg.Format("*** HBV_IrrigatedSoil()11 For some HRU, hbvcalib<0"); Report::LogMsg(msg);
+      CString msg; msg.Format("*** HBVdailyProcess()11 For some HRU, hbvcalib<0"); Report::LogMsg(msg);
       }
 
    return 0.0f;
-   } // end of HBV_IrrigatedSoil()
+   } // end of HBVdailyProcess()
 
 
 float HBV::Snow( float waterDepth, float precip, float temp,float CFMAX, float CFR, float TT  )
