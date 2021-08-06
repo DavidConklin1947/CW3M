@@ -5658,7 +5658,8 @@ bool Wetland::H2OtoWetland(double H2OtoWetl_m3) // Returns true if wetland absor
       remaining_m3 -= to_this_idu_m3;
    } // end of loop through IDUs in this wetland
 
-   if (!Q_absorbed_by_wetland)
+   bool H2O_absorbed_by_wetland = (remaining_m3 <= 0.);
+   if (!H2O_absorbed_by_wetland)
    { // Both the reach and the wetland are overflowing. A flood condition exists.
       CString msg;
       msg.Format("H2OtoWetland() A flood condition exists. m_wetlID = %d, H2OtoWetl_m3 = %f, remaining_m3 = %f",
@@ -5667,7 +5668,7 @@ bool Wetland::H2OtoWetland(double H2OtoWetl_m3) // Returns true if wetland absor
       Report::ErrorMsg(msg);
    }
 
-   return(Q_absorbed_by_wetland);
+   return(H2O_absorbed_by_wetland);
 } // end of H2OtoWetland()
 
 
