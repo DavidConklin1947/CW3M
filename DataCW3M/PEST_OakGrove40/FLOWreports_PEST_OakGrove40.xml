@@ -12,13 +12,13 @@
   </output_group>
   -->
   <output_group name="FLOW Q_DISCHARG at gage daily" interval="daily" >
-    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23810706" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
-    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706.csv" format="E0" />
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23809450" value="Q_DISCHARG*35.315*1.007" type="sum" domain="reach"
+    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23809450.csv" format="E0" />
   </output_group>
 
   <output_group name="FLOW Q_DISCHARG at gage monthly" interval="monthly" >
-    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23810706" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
-    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706.csv" format="E0" />
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23809450" value="Q_DISCHARG*35.315*1.007" type="sum" domain="reach"
+    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23809450.csv" format="E0" />
   </output_group>
 
   <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
@@ -33,8 +33,8 @@
     <output in_use="1" name="ET from OakGrove40 mm" query="HBVCALIB=40" value="ET_DAY" type="areaWtMean" domain="idu" />
     <output name="SPRING_CMS" query="HBVCALIB=40" value="SPRING_CMS" type="sum" domain="reach" />
     <output name="ADDED_VOL (m3)" query="HBVCALIB=40" value="ADDED_VOL" type="sum" domain="reach" />
-    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23810706" value="Q_DISCHARG*35.315*1.012" type="sum" domain="reach"
-    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23810706.csv" format="E0" />
+    <output in_use="1" name="adjusted Q (cfs)" query="COMID=23809450" value="Q_DISCHARG*35.315*1.007" type="sum" domain="reach"
+    obs="..\Observations\Willamette Gages\Flow\USGS 14208700_flow_OAK GROVE FORK NEAR GOVERNMENT CAMP, OR_23809450.csv" format="E0" />
   </output_group>
 <!--
   <output name="SNOWPACK (mm SWE)" query="HBVCALIB=40" value="SNOWPACK" type="areaWtMean" domain="hru" />

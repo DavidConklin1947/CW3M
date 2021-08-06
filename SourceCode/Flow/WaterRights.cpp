@@ -289,7 +289,7 @@ delete[] m_myGeo;
 
 
 // {EASTING, NORTHING, COMID, HBVCALIB attribute value}, 
-#define NUM_HBV_CALIB_PTS 52
+#define NUM_HBV_CALIB_PTS 57
 double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
 { // These entries should be ordered so that upstream points in a drainage come before downstream points.
 // Coast Fork Willamette basin
@@ -310,14 +310,14 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
    { 0, 0, 23773393, 47 }, // Smith47 - Smith R above Smith R reservoir; gage 14158790. 
    { 0, 0, 23773037, 48 }, // SFork48 - S Fork McKenzie R above Cougar; gage 14159200. 
    { 0, 0, 23773011, 8 }, //", 8, Cougar, ,
-   { 518418.3531, 4879673.347, 23772801, 34 }, //", 34, Walterville, 44.070000, -122.770000
+   { 518418, 4879673, 23772801, 34 }, //", 34, Walterville, 44.070000, -122.770000
    { 0, 0, 23773513, 25 }, // Mohawk at gage 14165000
    { 0, 0, 23765583, 16 }, // McKenzie outlet
 // Upper Willamette basin
    { 0, 0, 23763395, 15 }, // upper Willamette mainstem at the confluence with the McKenzie
 // Long Tom basin
    { 0, 0, 23763141, 7 }, //", 7, Fern Ridge, ,
-   { 476354.78, 4906669.65, 23763077, 35 }, // 35 Long Tom at Monroe
+   { 476354, 4906669, 23763077, 35 }, // 35 Long Tom at Monroe
    { 0, 0, 23763069, 24 }, // Long Tom outlet into the Willamette
 // Marys basin
    { 0, 0, 23762881, 23 }, // Marys outlet into the Willamette
@@ -326,8 +326,14 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
 // Luckiamute basin
    { 0, 0, 23762647, 21 }, // Luckiamute outlet into the Willamette
 // South Santiam basin
-   { 0, 0, 23785925, 10 }, //", 10, Green Peter, ,
+   { 540109, 4915530, 23785793, 54 }, // 54, S. Santiam below Cascadia
+   { 544907, 4932038, 23785925, 53 }, // 53, Quartzville Creek 
+   { 0, 0, 0, 10 }, // 10, Green Peter outlet, gage doesn't exist,
+   { 530120, 4913316, 23785721, 55 }, // 55, Wiley Creek near Foster
+   { 524880, 4917737, 23785717, 11 }, // 11, S. Santiam near Foster
    { 514578, 4925728, 23785687, 36 }, // 36 S. Santiam near Waterloo WTLO
+   { 542466, 4940847, 23786665, 52 }, // 52, Schaffer Creek
+   { 518306, 4951008, 23786251, 56 }, // 56 Thomas Creek near Scio
    { 0, 0, 23785607, 43}, // 43 lower S. Santiam
 // North Santiam basin
    { 0, 0, 23780557, 51 }, // 51 Blowout Cr.
@@ -336,15 +342,15 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
    { 530169, 4959583, 23780481, 37 }, // 37 Mehama MEHO
    { 0, 0, 23780877, 44 }, // 44 lower N Santiam
 // Lower Santiam
-   { 0, 0, 23780405, 45 }, // 45, lower Santiam basin, below the confluence of NSantiam and SSantiam
+   { 578076, 4951733, 23780405, 45 }, // 45, lower Santiam basin, below the confluence of NSantiam and SSantiam
 // Willamette River mainstem
-   { 497372.4074, 4975541.458, 23791093, 29 }, //", 29, Salem, 44.933300, -123.033300
+   { 497372, 4975541, 23791093, 29 }, //", 29, Salem, 44.933300, -123.033300
 // Molalla basin
    { 0, 0, 23800564, 20 }, // Pudding outlet into the Molalla
    { 0, 0, 23800560, 19 }, // Molalla outlet into the Willamette
 // Clackamas basin
-   { 0, 0, 23809450, 40 }, // OakGrove40
-   { 550742.3607, 5016481.187, 23809080, 28 }, //", 28, River Mill, 45.300000, -122.352800
+   { 593298, 4996286, 23809450, 40 }, // OakGrove40
+   { 550742, 5016481, 23809080, 28 }, //", 28, River Mill, 45.300000, -122.352800
    { 0, 0, 23809000, 26 }, // Clackamas outlet into the Willamette
 // Yamhill basin
    { 485660, 5005815, 23796627, 42 }, // 42 McMinnville
