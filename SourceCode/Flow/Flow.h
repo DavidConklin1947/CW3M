@@ -1505,7 +1505,7 @@ public:
    CArray <int, int> m_wetlHRUndxArray;
 
    // m_wetlReachNdxArray is a list of indices into m_reachArray of the reaches associated with the IDUs in the wetland.
-   // Note that indices into m_reachArray, are not the same as the indices into the Reach shapefile.
+   // Note that indices into m_reachArray are not the same as the indices into the Reach shapefile.
    // This list has a 1-to-1 correspondence to m_wetlIDUndxArray, so a given reach index
    // may appear more than once in the list.
    CArray <int, int> m_wetlReachNdxArray;

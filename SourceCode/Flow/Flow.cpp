@@ -5662,10 +5662,41 @@ bool Wetland::H2OtoWetland(double H2OtoWetl_m3) // Returns true if wetland absor
    if (!H2O_absorbed_by_wetland)
    { // Both the reach and the wetland are overflowing. A flood condition exists.
       CString msg;
-      msg.Format("H2OtoWetland() A flood condition exists. m_wetlID = %d, H2OtoWetl_m3 = %f, remaining_m3 = %f",
+      msg.Format("H2OtoWetland() The wetland is overflowing back to the reach. m_wetlID = %d, H2OtoWetl_m3 = %f, remaining_m3 = %f",
          m_wetlID, H2OtoWetl_m3, remaining_m3);
-      msg = msg + "/nThe remaining_m3 have been added to the standing water HRU layer but not to the wetland IDUs.";
       Report::ErrorMsg(msg);
+
+      // Put the excess water back into the reaches which supply the water to this wetland.
+      // Since there is excess water, it must be true that, for every IDU in this wetland, WETNESS = WETL_CAP.
+      double excess_h2o_mm = (remaining_m3 / m_wetlArea_m2) * 1000.;
+
+      // How should we divide the excess water up between the reaches which supply the water to this wetland?
+      // First guess: just put all the excess water into the most downstream reach, on the premise that the excess water
+      // flows to the pourpoint of the wetland across the wetland IDU surfaces rather than down the stream channel.
+      // Which is the most downstream reach? It is presumably the reach associated with the IDU at the lowest elevation.
+      int downstream_reach_ndx = m_wetlReachNdxArray[0];
+      Reach* pReach = gpFlowModel->m_reachArray[downstream_reach_ndx];
+
+      // What is the temperature of the water that returns to the stream after flowing across the wetland?
+      // ??? temporary workaround: use the same temperature at which runoff enters the stream reach
+      double temp_air_degC = gpFlowModel->Att(m_wetlIDUndxArray[0], TEMP);
+      int hbvcalibInt; gpFlowModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalibInt);
+      VData hbvcalibV = hbvcalibInt;
+      ParamTable* pHBVtable = gpFlowModel->GetTable("HBV");
+
+      if (pHBVtable->m_type == DOT_FLOAT) hbvcalibV.ChangeType(TYPE_FLOAT);
+      float w2a_slp = 0;
+      float w2a_int = 0;
+      bool ok = pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_SLP, w2a_slp);
+      ok &= pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_INT, w2a_int);
+      ASSERT(ok);
+
+      double temp_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
+         : w2a_slp * max(0, temp_air_degC) + w2a_int;
+      temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
+
+      WaterParcel remainingWP(remaining_m3, temp_h2o_degC);     //m3/d
+      pReach->AccumAdditions(remainingWP);
    }
 
    return(H2O_absorbed_by_wetland);
