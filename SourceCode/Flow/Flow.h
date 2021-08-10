@@ -107,6 +107,7 @@ using namespace std;
 #define VPD_SCALAR gpFlowModel->m_colVPD_SCALAR
 #define WETL_CAP gpFlowModel->m_colWETL_CAP
 #define WETL_ID gpFlowModel->m_colWETL_ID
+#define WETL2Q gpFlowModel->m_colWETL2Q
 #define WETNESS gpFlowModel->m_colWETNESS
 #define WINDSPEED gpFlowModel->m_colWINDSPEED
 

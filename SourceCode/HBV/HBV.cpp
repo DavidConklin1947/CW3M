@@ -599,6 +599,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       if (natural_area_m2 > 0.0f) upperGroundWater_mm = float(pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / natural_area_m2*1000.0f);//convert from m to mm
 
       //Calculate rates
+/*x*/
       double infiltration_from_standing_H2O_m3 = 0.;
       double hru_wetl2q_m3 = 0.;
       if (pHRU->m_standingH2Oflag)
@@ -627,7 +628,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
                infiltration_from_standing_H2O_m3 += idu_standing_H2O_m3;
                wetness_mm = 0.;
             } // end of if (room_mm > wetness_mm)
-            else
+            else if (room_mm > 0.)
             { // Drain enough standing water out of this IDU to saturate the soil.
                double idu_room_m3 = (room_mm / 1000.) * idu_area_m2;
                infiltration_from_standing_H2O_m3 += idu_room_m3;
@@ -636,35 +637,34 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
                wetness_mm = (wetness_m3 / idu_area_m2) * 1000.;
             } // end of if (room_mm > wetness_mm) ... else
 
+            double wetl2q_cms = 0.;
             // Is there enough standing water in the IDU to overflow back into the reach?
             double wetl_cap_mm = gpFlowModel->Att(idu_ndx, WETL_CAP);
             if (wetness_mm > wetl_cap_mm)
             { // Yes.
                double wetl2q_mm = wetness_mm - wetl_cap_mm;
                wetl2q_m3 = (wetl2q_mm / 1000.) * idu_area_m2;
+               wetl2q_cms = wetl2q_m3 / SEC_PER_DAY;
                wetness_mm -= wetl2q_mm;
             } // end of if (wetness_mm > wetl_cap_mm)
 
             hru_wetl2q_m3 += wetl2q_m3;
             pIDULayer->SetDataU(idu_ndx, WETNESS, wetness_mm);
+            gpFlowModel->SetAtt(idu_ndx, WETL2Q, wetl2q_cms);
          } // end of loop through IDUs
 
          ASSERT(pHRU->m_snowpackFlag || close_enough(wetness_check_m3, hru_standing_H2O_m3, 1e-5));
       } // end of if (pHRU->m_standingH2Oflag)
-
+/*x*/
       // gwIrrigated is the proportion of rain/snowmelt that bypasses the irrigated soil bucket, and is added directly to GW
-      float gwIrrigated = GroundWaterRechargeFraction(precip, irrigatedSoilWater_mm, fc, Beta); 
+      float gwIrrigated = GroundWaterRechargeFraction(irrigatedSoilWater_mm, fc, Beta); 
 
-      // gwNonIrrigated is the proportion of rain/snowmelt/infiltration_from_standing_H2O that bypasses the non-irrigated soil bucket, and is added directly to GW
-      double infiltration_from_standing_H2O_mm = hru_non_irrigated_area_m2 > 0 ?
-         ((infiltration_from_standing_H2O_m3 / hru_non_irrigated_area_m2) * 1000.) : 0;
-      float gwNonIrrigated = GroundWaterRechargeFraction((float)(precip + infiltration_from_standing_H2O_mm), nonIrrigatedSoilWater_mm, fc, Beta);
-      if (h == hru_of_interest) 
-         if (gwNonIrrigated >= 1.f)
-         {
-         CString msg; msg.Format("*** HBVdailyProcess()2: gwNonIrrigated = %f, nonIrrigatedSoilWater_mm = %f, fc = %f, Beta = %f", gwNonIrrigated, nonIrrigatedSoilWater_mm, fc, Beta);
-         Report::LogMsg(msg);
-         }
+      // gwNonIrrigated is the proportion of rain/snowmelt/standing_H2O that bypasses the non-irrigated soil bucket, and is added directly to GW
+      double hru_surface_H2O_m3 = pHRU->GetLayer(BOX_SURFACE_H2O)->m_volumeWater;
+      double surface_H2O_mm = hru_non_irrigated_area_m2 > 0 ?
+         ((hru_surface_H2O_m3 / hru_non_irrigated_area_m2) * 1000.) : 0;
+      float gwNonIrrigated = GroundWaterRechargeFraction((float)nonIrrigatedSoilWater_mm, fc, Beta);
+
       float potentialPercolation_mm = Percolation(upperGroundWater_mm, kPerc); // filling the deepest reservoir
       float potentialPercolation_m3 = (float)(potentialPercolation_mm * natural_area_m2 / 1000.f);
 
@@ -1055,7 +1055,7 @@ float HBV::GroundWaterRecharge(float precip, float waterDepth, float FC,  float 
 
    }
 
-float HBV::GroundWaterRechargeFraction(float precip, float waterDepth, float FC,  float Beta )
+float HBV::GroundWaterRechargeFraction(float waterDepth, float FC,  float Beta )
    {
    float value=0.0f;
    float lossFraction = (pow((waterDepth/FC),Beta));

@@ -5664,7 +5664,7 @@ bool Wetland::H2OtoWetland(double H2OtoWetl_m3) // Returns true if wetland absor
       CString msg;
       msg.Format("H2OtoWetland() The wetland is overflowing back to the reach. m_wetlID = %d, H2OtoWetl_m3 = %f, remaining_m3 = %f",
          m_wetlID, H2OtoWetl_m3, remaining_m3);
-      Report::ErrorMsg(msg);
+      Report::LogMsg(msg);
 
       // Put the excess water back into the reaches which supply the water to this wetland.
       // Since there is excess water, it must be true that, for every IDU in this wetland, WETNESS = WETL_CAP.
@@ -5691,9 +5691,12 @@ bool Wetland::H2OtoWetland(double H2OtoWetl_m3) // Returns true if wetland absor
       ok &= pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_INT, w2a_int);
       ASSERT(ok);
 
-      double temp_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
+      double temp_soil_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
          : w2a_slp * max(0, temp_air_degC) + w2a_int;
-      temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
+      temp_soil_h2o_degC = max(temp_soil_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
+
+      double temp_h2o_degC = temp_soil_h2o_degC;
+      if (temp_soil_h2o_degC < temp_air_degC) temp_h2o_degC = (temp_soil_h2o_degC + temp_air_degC) / 2.;
 
       WaterParcel remainingWP(remaining_m3, temp_h2o_degC);     //m3/d
       pReach->AccumAdditions(remainingWP);
