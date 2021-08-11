@@ -118,7 +118,9 @@ using namespace std;
 #define HruHBVCALIB gpFlowModel->m_colHruHBVCALIB
 #define HruHRU_ID gpFlowModel->m_colHruHRU_ID
 #define HruIRRIG_SOIL gpFlowModel->m_colHruIRRIG_SOIL
-#define HruMELT_BOX gpFlowModel->m_colHruMELT_BOX
+#define HruBOXSURF_M3 gpFlowModel->m_colHruBOXSURF_M3
+#define HruH2OMELT_M3 gpFlowModel->m_colHruH2OMELT_M3
+#define HruH2OSTNDGM3 gpFlowModel->m_colHruH2OSTNDGM3
 #define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
 #define HruSNOW_BOX gpFlowModel->m_colHruSNOW_BOX
 
@@ -610,7 +612,6 @@ public:
    // State Variables
    SVTYPE m_volumeWater;                // m3
    float m_soilThickness_m ;  // thickness of soil layer (m)
-   double m_standingH2O_mm; // amount of liquid water on the surface, either melt water in the snowpack or standing water in a wetland
 
    // Next variable is usually 1.  However, for topsoil, the irrigated part of the HRU is in one layer, and the non-irrigated part is in another layer.
    // That allows for keeping track of soil moisture separately in the irrigated part vs. the non-irrigated part.
@@ -1905,7 +1906,9 @@ public:
    int m_colHruWINDSPEED;
 
    int m_colHruSNOW_BOX;
-   int m_colHruMELT_BOX;
+   int m_colHruBOXSURF_M3;
+   int m_colHruH2OMELT_M3;
+   int m_colHruH2OSTNDGM3;
    int m_colHruNAT_SOIL;
    int m_colHruIRRIG_SOIL;
    int m_colHruGW_FASTBOX;
@@ -2224,6 +2227,9 @@ protected:
    static void GetReservoirDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra ) ;
    //static void GetReachDerivatives( float time, float timestep, int svCount, double *derivatives, void *extra );
    static void GetTotalDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra ) ;
+
+   bool CheckSurfaceH2O(HRU* pHRU); // Confirm that HruBOXSURF_M3 is consistent with HruH2OMELT_M3 and HruH2OSTNDGM3.
+
    
 protected:
 // parameter tables
