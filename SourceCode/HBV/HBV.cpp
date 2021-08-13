@@ -609,6 +609,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          double wetness_check_m3 = 0.;
 
          // How much room is there in the topsoil for more water to infiltrate from standing water?
+         // ??? is the topsoil moisture for the whole HRU representative of the soil moisture for the wetland IDU
          double room_mm = (double)fc - (double)nonIrrigatedSoilWater_mm; ASSERT(room_mm > 0.);
 
          for (int i = 0; i < idus_in_hru; i++)

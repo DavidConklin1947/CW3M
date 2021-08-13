@@ -207,7 +207,7 @@
           query="LULC_A=62 {Wetlands}"
           lulc_col="LULC_B"
           soil_col="HBVCALIB"
-          soil_table="HBV.csv"
+          soil_table="HBV_PEST.csv"
           bulkStomatalResistance="150"
           latitude="45"
           longitude="123">
