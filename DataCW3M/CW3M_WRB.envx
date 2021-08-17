@@ -4,7 +4,7 @@
 <Envision ver='5.0'>
 
   <settings
-    studyAreaName='WRB'
+    studyAreaName              ='WRB'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'
@@ -12,7 +12,7 @@
     logMsgLevel                ='0'
     noBuffering                ='0'
     multiRunDecadalMapsModulus ='10'
-    defaultPeriod              ='1'
+    defaultPeriod              ='9'
     dynamicUpdate              ='15'
     spatialIndexDistance       ='0'
     areaCutoff                 ='0'
@@ -30,7 +30,7 @@
     collectPolicyData          ='0'
     exportMapInterval          ='-1'
 	  exportBmpInterval          ='-1'
-    exportBmpPixelSize          ='60'
+    exportBmpPixelSize         ='60'
     exportBmpCols              =''
     exportOutputs              ='1'
     exportDeltas               ='0'
@@ -38,7 +38,7 @@
     discardMultiRunDeltas      ='1'
     useWaterYears              ='0'
     coldStart                  ='0'
-    spinup='0'
+    spinup                     ='0'
   />
   <!-- for debugging, to run for just 1 day in each year    maxDaysInYear ='1'
 -->

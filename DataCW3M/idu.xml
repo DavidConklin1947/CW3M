@@ -2768,40 +2768,45 @@ label:  readable field description
       <attr value="13" color="(255,0,0)" label="13 Chicken Creek watershed" />
       <attr value="15" color="(0,0,0)" label="15 Upper Willamette mainstem" />
       <attr value="16" color="(255,255,0)" label="16 McKenzie outlet" />
-      <attr value="17" color="(0,0,0)" label="17 Coast Fork" />
-      <attr value="18" color="(0,0,0)" label="18 Middle Fork" />
-      <attr value="19" color="(0,0,0)" label="19 Molalla basin" />
-      <attr value="20" color="(0,0,0)" label="20 Pudding basin" />
-      <attr value="21" color="(0,0,0)" label="21 Luckiamute basin" />
-      <attr value="22" color="(0,0,0)" label="22 Calapooia basin" />
+      <attr value="17" color="(158,81,98)" label="17 Coast Fork" />
+      <attr value="18" color="(131,196,43)" label="18 Middle Fork" />
+      <attr value="19" color="(73,228,1)" label="19 Molalla basin" />
+      <attr value="20" color="(179,160,235)" label="20 Pudding basin" />
+      <attr value="21" color="(236,85,118)" label="21 Luckiamute basin" />
+      <attr value="22" color="(203,120,46)" label="22 Calapooia basin" />
       <attr value="23" color="(220,150,197)" label="23 Marys River basin" />
-      <attr value="24" color="(0,0,0)" label="24 Long Tom outlet" />
+      <attr value="24" color="(57,17,202)" label="24 Long Tom outlet" />
       <attr value="25" color="(255,255,255)" label="25 Mohawk basin" />
-      <attr value="26" color="(0,0,0)" label="26 lower Clackamas" />
+      <attr value="26" color="(153,199,44)" label="26 lower Clackamas" />
       <attr value="27" color="(81,243,220)" label="27 Johnson Creek watershed" />
       <attr value="28" color="(46,139,162)" label="28 Clackamas above River Mill" />
       <attr value="29" color="(11,34,104)" label="29 Willamette above Salem" />
-      <attr value="31" color="(0,0,0)" label="31 lower Yamhill" />
-      <attr value="32" color="(255,0,0)" label="32 Willamette Outlet" />
-      <attr value="33" color="(0,0,0)" label="33 Oak Creek watershed" />
+      <attr value="31" color="(13,255,12)" label="31 lower Yamhill" />
+      <attr value="32" color="(255,0,82)" label="32 Willamette Outlet" />
+      <attr value="33" color="(0,48,255)" label="33 Oak Creek watershed" />
       <attr value="34" color="(231,185,46)" label="34 McKenzie above Walterville" />
       <attr value="35" color="(197,81,243)" label="35 Long Tom above Monroe" />
       <attr value="36" color="(162,231,185)" label="36 S Santiam above Waterloo" />
       <attr value="37" color="(127,127,127)" label="37 N Santiam above Mehama" />
       <attr value="38" color="(92,23,69)" label="38 Middle Fork above Jasper" />
       <attr value="39" color="(57,173,11)" label="39 Coast Fork above Goshen" />
-      <attr value="40" color="(255,0,0)" label="40 Oak Grove Fork" />
+      <attr value="40" color="(255,155,0)" label="40 Oak Grove Fork" />
       <attr value="41" color="(243,220,150)" label="41 Tualatin above West Linn" />
       <attr value="42" color="(208,115,92)" label="42 Yamhill above McMinnville" />
-      <attr value="43" color="(0,0,0)" label="43 lower S. Santiam" />
-      <attr value="44" color="(0,0,0)" label="44 lower N. Santiam" />
-      <attr value="45" color="(0,0,0)" label="45 lower Santiam" />
-      <attr value="46" color="(0,0,0)" label="46 Clear Lake on McKenzie" />
-      <attr value="47" color="(0,0,0)" label="47 Smith R above Smith R Reservoir" />
-      <attr value="48" color="(0,0,0)" label="48 S Fork McKenzie above CGR" />
-      <attr value="49" color="(0,0,0)" label="49 Lookout Cr near Blue R" />
-      <attr value="50" color="(0,0,0)" label="50 Little N Santiam" />
-      <attr value="51" color="(0,0,0)" label="51 Blowout Cr on N Santiam" />
+      <attr value="43" color="(99,159,91)" label="43 lower S. Santiam" />
+      <attr value="44" color="(177,208,240)" label="44 lower N. Santiam" />
+      <attr value="45" color="(166,78,213)" label="45 lower Santiam" />
+      <attr value="46" color="(255,200,192)" label="46 Clear Lake on McKenzie" />
+      <attr value="47" color="(22,187,113)" label="47 Smith R above Smith R Reservoir" />
+      <attr value="48" color="(45,254,190)" label="48 S Fork McKenzie above CGR" />
+      <attr value="49" color="(209,58,26)" label="49 Lookout Cr near Blue R" />
+      <attr value="50" color="(167,46,113)" label="50 Little N Santiam" />
+      <attr value="51" color="(51,82,134)" label="51 Blowout Cr on N Santiam" />
+      <attr value="52" color="(165,194,150)" label="52 Schaffer Creek near Lacomb" />
+      <attr value="53" color="(27,164,164)" label="53 Quartzville Creek near Cascadia" />
+      <attr value="54" color="(192,124,105)" label="54 S. Santiam at Cascadia" />
+      <attr value="55" color="(141,80,225)" label="55 Wiley Creek near Foster" />
+      <attr value="56" color="(66,21,217)" label="56 Thomas Creek near Scio" />
     </attributes>
   </field>
 
