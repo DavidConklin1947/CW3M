@@ -92,6 +92,7 @@ using namespace std;
 #define HRU_ID gpFlowModel->m_colHRU_ID
 #define HRU_NDX gpFlowModel->m_colHRU_NDX
 #define H2O_MELT gpFlowModel->m_colH2O_MELT
+#define IRRIGATION gpFlowModel->m_colIRRIGATION
 #define LAI gpFlowModel->m_colLAI
 #define LULC_A gpFlowModel->m_colLulcA
 #define MAXSNOW gpFlowModel->m_colMAXSNOW
@@ -1553,6 +1554,7 @@ public:
    int AttInt(int IDUindex, int col); // value of IDU attribute
    float AttFloat(int IDUindex, int col); // value of IDU attribute
    void SetAtt(int IDUindex, int col, double attValue);
+   void SetAttInt(int IDUindex, int col, int attValue);
    void SetAttFloat(int IDUindex, int col, float attValue);
    static double VegDensity(double lai);
    Reach* GetReachFromCOMID(int comid);
