@@ -15521,6 +15521,26 @@ bool FlowModel::GetDailyWeatherField(CDTYPE type, int tgtDoy0, int tgtYear)
          int tgt_month, tgt_day; GetCalDate0(tgtDoy0, &tgt_month, &tgt_day, days_in_year);
          SYSDATE tgtDate(tgt_month, tgt_day, tgtYear);
          int time_ndx = pInfo->GetTimeIndex(tgtDate, m_flowContext.pEnvContext->m_maxDaysInYear); // m_flowContext.pEnvContext->m_simDate, m_flowContext.pEnvContext->m_maxDaysInYear
+         if (time_ndx < 0)
+         {
+            CString msg;
+            switch (time_ndx)
+            {
+               case -1:
+                  msg.Format("GetDailyWeatherField() GetTimeIndex() returned %d. The target year %d is earlier than the first year of the climate data.",
+                     time_ndx, tgtDate.year);
+                  break;
+               case -3:
+                  msg.Format("GetDailyWeatherField() GetTimeIndex() returned %d. The target date %d %d %d is off the end of the climate data.",
+                     time_ndx, tgtDate.year, tgtDate.month, tgtDate.day);
+                  break;
+               default:
+                  msg.Format("GetDailyWeatherField() GetTimeIndex() returned %d.", time_ndx);
+                  break;
+            } // end of switch(time_ndx)
+            Report::ErrorMsg(msg);
+            return(false);
+         }
 
          float * field_vals = new float[NUM_OF_CLIMATE_GRIDCELLS];
          const long start[3] = { time_ndx, 0, 0 };
