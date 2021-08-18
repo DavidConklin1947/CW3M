@@ -5219,7 +5219,12 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
    double hru_standing_h2o_mm = wetland_area_accum_m2 > 0. ? (hru_standing_h2o_m3 / wetland_area_accum_m2) * 1000. : 0.;
    pHRU->m_standingH2Oflag = hru_standing_h2o_mm > 0.;
 
-   double hru_h2o_melt_m3 = hru_surface_h2o_m3 - hru_standing_h2o_m3;
+   double hru_h2o_melt_m3 = hru_surface_h2o_m3 - hru_standing_h2o_m3; 
+   if (hru_h2o_melt_m3 < 0.)
+   {
+      ASSERT(close_enough(hru_surface_h2o_m3, hru_standing_h2o_m3, 1e-6, 1));
+      hru_h2o_melt_m3 = 0.;
+   }
    double hru_h2o_melt_mm = snowpack_area_m2 > 0. ? (hru_h2o_melt_m3 / snowpack_area_m2) * 1000. : 0.;
 
    // Finally, update the SNOWPACK, WETNESS, H2O_MELT, and SM_DAY attributes for the IDUs in the HRU.
@@ -5457,6 +5462,11 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             }
          } // end of if (pHRU->m_standingH2Oflag)
          double hru_h2o_melt_m3 = surface_h2o_m3 - hru_standing_h2o_m3;
+         if (hru_h2o_melt_m3 < 0.)
+         {
+            ASSERT(close_enough(surface_h2o_m3, hru_standing_h2o_m3, 1e-6, 1));
+            hru_h2o_melt_m3 = 0.;
+         }
          double hru_h2o_melt_area_m2 = pHRU->m_HRUtotArea_m2 - hru_standing_h2o_area_m2;
          double hru_h2o_melt_mm = (hru_h2o_melt_area_m2 > 0.) ? (1000. * (hru_h2o_melt_m3 / hru_h2o_melt_area_m2)) : 0.;
 
