@@ -57,7 +57,6 @@ float HBV::InitHBV_Global(FlowContext *pFlowContext, LPCTSTR inti)
    pIDULayer->CheckCol(m_colRAINTHRU_Y, "RAINTHRU_Y", TYPE_FLOAT, CC_AUTOADD);
 
    pIDULayer->CheckCol(m_colAREA, "AREA", TYPE_FLOAT, CC_MUST_EXIST);
-   pIDULayer->CheckCol(m_colSNOWPACK, "SNOWPACK", TYPE_FLOAT, CC_AUTOADD);
    pIDULayer->CheckCol(m_colSNOWCANOPY, "SNOWCANOPY", TYPE_FLOAT, CC_AUTOADD);
    pIDULayer->CheckCol(m_colSM2SOIL, "SM2SOIL", TYPE_FLOAT, CC_AUTOADD);
    pIDULayer->CheckCol(m_colSM2ATM, "SM2ATM", TYPE_FLOAT, CC_AUTOADD);
@@ -476,31 +475,6 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       {
       HRU *pHRU = pFlowContext->pFlowModel->GetHRU(h);
 
-      double hru_snowpack_m3 = 0.;
-      double hru_sm2soil_m3 = 0.;
-      double hru_sm2atm_m3 = 0.;
-      double hru_area = 0.;
-      for (int i = 0; i < pHRU->m_polyIndexArray.GetSize(); i++)
-      { // Aggregate SnowMod data from the IDU level to the HRU level
-         int idu = pHRU->m_polyIndexArray[i];
-         float idu_area; m_pIDUlayer->GetData(idu, m_colAREA, idu_area);
-         float idu_snowpack; m_pIDUlayer->GetData(idu, m_colSNOWPACK, idu_snowpack);
-         float idu_snowcanopy; m_pIDUlayer->GetData(idu, m_colSNOWCANOPY, idu_snowcanopy);
-         float idu_sm2soil; m_pIDUlayer->GetData(idu, m_colSM2SOIL, idu_sm2soil);
-         float idu_sm2atm; m_pIDUlayer->GetData(idu, m_colSM2ATM, idu_sm2atm);
-
-         hru_area += idu_area;
-         hru_snowpack_m3 += ((idu_snowpack + idu_snowcanopy) / 1000.) * idu_area;
-         hru_sm2soil_m3 += (idu_sm2soil / 1000.) * idu_area;
-         hru_sm2atm_m3 += (idu_sm2atm / 1000.) * idu_area;
-      }
-      float hru_snowpack_mmH2O = (float)((hru_snowpack_m3 / hru_area) * 1000.);
-      float hru_sm2soil_mmH2O = (float)((hru_sm2soil_m3  / hru_area) * 1000.);
-      float hru_sm2atm_mmH2O = (float)((hru_sm2atm_m3 / hru_area) * 1000.);
-
-      m_pHRUlayer->SetDataU(h, m_colHruSNOW_BOX, hru_snowpack_mmH2O);
-      m_pHRUlayer->SetDataU(h, m_colHruSM2SOIL, hru_sm2soil_mmH2O);
-      m_pHRUlayer->SetDataU(h, m_colHruSM2ATM, hru_sm2atm_mmH2O);
       int hruLayerCount = pHRU->GetLayerCount();
       double natural_area_m2 = pHRU->m_HRUeffArea_m2;
       float CFMAX = 0.f, CFR = 0.f, Beta = 0.f, kPerc = 0.0f;

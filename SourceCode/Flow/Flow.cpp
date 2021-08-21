@@ -5473,6 +5473,20 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       for (int hru_ndx = 0; hru_ndx < m_hruArray.GetSize(); hru_ndx++)
       {
          HRU * pHRU = m_hruArray[hru_ndx];
+         HRULayer* pBox_snow = pHRU->GetLayer(BOX_SNOW);
+         HRULayer* pBox_surface_h2o = pHRU->GetLayer(BOX_SURFACE_H2O);
+         HRULayer* pBox_nat_soil = pHRU->GetLayer(BOX_NAT_SOIL);
+         HRULayer* pBox_irrig_soil = pHRU->GetLayer(BOX_IRRIG_SOIL);
+         HRULayer* pBox_fast_gw = pHRU->GetLayer(BOX_FAST_GW);
+         HRULayer* pBox_slow_gw = pHRU->GetLayer(BOX_SLOW_GW);
+         
+         pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pBox_snow->m_volumeWater / pHRU->m_HRUtotArea_m2)); 
+         pHRU->SetAtt(HruBOXSURF_M3, pBox_surface_h2o->m_volumeWater); 
+         pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pBox_nat_soil->m_volumeWater / pHRU->m_HRUtotArea_m2)); 
+         pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pBox_irrig_soil->m_volumeWater / pHRU->m_HRUtotArea_m2));
+         pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pBox_fast_gw->m_volumeWater / pHRU->m_HRUtotArea_m2));
+         pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pBox_slow_gw->m_volumeWater / pHRU->m_HRUtotArea_m2));
+
          int count = (int)pHRU->m_polyIndexArray.GetSize();
          float hru_irrigated_area_m2 = pHRU->m_areaIrrigated;
          float hru_natural_area_m2 = pHRU->m_HRUeffArea_m2 - hru_irrigated_area_m2;
@@ -5524,6 +5538,8 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             double idu_h2o_melt_mm = lulc_a == LULCA_WETLAND ? 0. : hru_h2o_melt_mm;
             SetAtt(idu_ndx, H2O_MELT, idu_h2o_melt_mm);
          } // end of loop thru the IDUs contained in this HRU
+
+         CheckSurfaceH2O(pHRU);
       } // end of loop thru HRUs
 
       finish = clock();
@@ -12365,20 +12381,7 @@ void FlowModel::GetCatchmentDerivatives( double time, double timeStep, int svCou
             pHRULayer->m_wc = nominal_minimum_mm / pHRULayer->m_soilThickness_m;
             pHRULayer->m_volumeWater = (float)(pHRU->m_HRUeffArea_m2 * pHRULayer->m_HRUareaFraction * pHRULayer->m_soilThickness_m * nominal_minimum_mm / MM_PER_M);
             }
-
-         switch (l)
-         {
-            case BOX_SNOWPACK: pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-            case BOX_SURFACE_H2O: pHRU->SetAtt(HruBOXSURF_M3, pHRULayer->m_volumeWater); break;
-            case BOX_NAT_SOIL: pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-            case BOX_IRRIG_SOIL: pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-            case BOX_FAST_GW: pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-            case BOX_SLOW_GW: pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pHRULayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-         }
-
          } // end of loop thru HRULayers of this HRU
-
-      gpFlowModel->CheckSurfaceH2O(pHRU);
       } // end of loop thru HRUs
 
    if (pModel->m_pReachRouting->GetMethod() == GM_RKF)

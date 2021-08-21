@@ -37,7 +37,6 @@ public:
    , m_col_sfcfCorrection(-1)
    , m_precipTotal(0.0f)
    , m_colAREA(-1)
-   , m_colSNOWPACK(-1)
    , m_colSNOWCANOPY(-1)
    , m_colSM2SOIL(-1)
    , m_colSM2ATM(-1)
@@ -130,7 +129,6 @@ protected:
    int   m_colRAINTHRU_Y;
 
    int m_colAREA;
-   int m_colSNOWPACK;
    int m_colSNOWCANOPY;
    int m_colSM2SOIL;
    int m_colSM2ATM;
