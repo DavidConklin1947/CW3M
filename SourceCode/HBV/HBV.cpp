@@ -865,13 +865,13 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             case 1: // Melt or wetland standing water
                pHRULayer->AddFluxFromGlobalHandler(hruRainThrufall_liters / 1000.0f, FL_TOP_SOURCE);     //m3/d
                if (pHRU->m_standingH2Oflag)
-               { // This compartment represents wetland standing water.
+               { // This compartment has wetland standing water.
                   pHRULayer->AddFluxFromGlobalHandler((float)infiltration_from_standing_H2O_m3, FL_BOTTOM_SINK);     //m3/d
                   if (hru_wetl2q_m3 > 0.)
                      pHRULayer->AddFluxFromGlobalHandler((float)hru_wetl2q_m3, FL_STREAM_SINK);
                }
-               else
-               { // This compartment represents water in the snowpack.
+               if (pHRU->m_snowpackFlag)
+               { // This compartment has water in the snowpack.
                   pHRULayer->AddFluxFromGlobalHandler(hruMelt_liters / 1000.0f, FL_TOP_SOURCE);     //m3/d
                   pHRULayer->AddFluxFromGlobalHandler(refreezing_m3, FL_TOP_SINK);     //m3/d
                }

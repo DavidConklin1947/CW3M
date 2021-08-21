@@ -99,7 +99,7 @@ using namespace std;
 #define PVT gpFlowModel->m_colPVT
 #define RAD_SW gpFlowModel->m_colRAD_SW
 #define SM_DAY gpFlowModel->m_colSM_DAY
-#define SNOWPACK gpFlowModel->m_colSNOWPACK
+#define SNOW_SWE gpFlowModel->m_colSNOW_SWE
 #define SPHUMIDITY gpFlowModel->m_colSPHUMIDITY
 #define TEMP gpFlowModel->m_colTEMP
 #define TMAX gpFlowModel->m_colTMAX
@@ -1846,7 +1846,7 @@ public:
    int m_colSNOWEVAP_Y;
    int m_colSM2ATM;
    int m_colSM2ATM_YR;
-   int m_colSNOWPACK;
+   int m_colSNOW_SWE;
    int m_colH2O_MELT;
    int m_colFIELD_CAP;
    int m_colSNOWCANOPY;
