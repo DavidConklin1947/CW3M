@@ -5632,7 +5632,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       m_flowContext.timing = GMT_END_STEP;
       GlobalMethodManager::EndStep( &m_flowContext );   // this invokes EndStep() for any internal global methods 
 
-	  CollectModelOutput();
+	  CollectModelOutput(); // Write the data out to the daily, monthly, and yearly FLOWreports.
 
       // update time...
       m_currentTime += stepSize;
@@ -13884,123 +13884,201 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
 
       while (output_groups_ok && pXmlGroup != NULL)
       {
-         ModelOutputGroup* pGroup = new ModelOutputGroup;
-         pGroup->m_name = pXmlGroup->Attribute("name");
-         if (pGroup->m_name.IsEmpty())
-            pGroup->m_name = _T("Flow Model Output");
-
-         CString interval_name = pXmlGroup->Attribute("interval");
-         if (interval_name.IsEmpty()) pGroup->m_moInterval = MOI_UNDEFINED;
-         else switch (interval_name[0])
+         CString group_name = pXmlGroup->Attribute("name");
+         if (group_name.IsEmpty())
          {
-            case 'y': // yearly, YEARLY
-            case 'Y': pGroup->m_moInterval = pEnvContext->m_useWaterYears ? MOI_WATERYEAR_YEARLY : MOI_YEARLY; break;
-            case 'm': // monthly, MONTHLY
-            case 'M': pGroup->m_moInterval = pEnvContext->m_useWaterYears ? MOI_WATERYEAR_MONTHLY : MOI_MONTHLY; break;
+            output_groups_ok = false;
+            CString msg = "FlowProcess::LoadXml() Output group name is an empty string.";
+            Report::ErrorMsg(msg);
+            continue;
+         }
+
+         int multiple_intervals = 0;
+         CString yes_or_no;
+         
+         yes_or_no = pXmlGroup->Attribute("daily"); yes_or_no.MakeLower();
+         if (!yes_or_no.IsEmpty() && (yes_or_no.GetAt(0) == 'y'))
+            multiple_intervals = multiple_intervals | (int)(pEnvContext->m_useWaterYears ? pow(2., MOI_WATERYEAR_DAILY) : pow(2., MOI_DAILY));
+
+         yes_or_no = pXmlGroup->Attribute("monthly"); yes_or_no.MakeLower();
+         if (!yes_or_no.IsEmpty() && (yes_or_no.GetAt(0) == 'y'))
+            multiple_intervals = multiple_intervals | (int)(pEnvContext->m_useWaterYears ? pow(2., MOI_WATERYEAR_MONTHLY) : pow(2., MOI_MONTHLY));
+
+         yes_or_no = pXmlGroup->Attribute("yearly"); yes_or_no.MakeLower();
+         if (!yes_or_no.IsEmpty() && (yes_or_no.GetAt(0) == 'y'))
+            multiple_intervals = multiple_intervals | (int)(pEnvContext->m_useWaterYears ? pow(2., MOI_WATERYEAR_YEARLY) : pow(2., MOI_YEARLY));
+
+         CString interval_name = pXmlGroup->Attribute("interval"); interval_name.MakeLower();
+         if (!interval_name.IsEmpty())  switch (interval_name[0])
+         {
             case 'd': // daily, DAILY
-            case 'D': pGroup->m_moInterval = pEnvContext->m_useWaterYears ? MOI_WATERYEAR_DAILY : MOI_DAILY; break;
-            case 'e': // end of year, i.e. value on Dec 31
-            case 'E': pGroup->m_moInterval = MOI_END_OF_YEAR; break;
+               multiple_intervals = multiple_intervals | (int)(pEnvContext->m_useWaterYears ? pow(2., MOI_WATERYEAR_DAILY) : pow(2., MOI_DAILY));
+               break;
+            case 'm': // monthly, MONTHLY
+               multiple_intervals = multiple_intervals | (int)(pEnvContext->m_useWaterYears ? pow(2., MOI_WATERYEAR_MONTHLY) : pow(2., MOI_MONTHLY));
+               break;
+            case 'y': // yearly, YEARLY
+               multiple_intervals = multiple_intervals | (int)(pEnvContext->m_useWaterYears ? pow(2., MOI_WATERYEAR_YEARLY) : pow(2., MOI_YEARLY));
+               break;
             default:
             {
-               pGroup->m_moInterval = MOI_UNDEFINED;
                CString msg("Flow: Unrecognized 'interval' attribute '");
                msg += interval_name;
                msg += "' reading <output_group> tag for '";
-               msg += pGroup->m_name;
+               msg += group_name;
                msg += "'. This output group will be ignored...";
                Report::ErrorMsg(msg);
                output_groups_ok = false;
+               continue;
             }
          } // end of ... else switch (interval_name_[0])
 
-         if (output_groups_ok)
+         if (multiple_intervals == 0) multiple_intervals = (int)(pEnvContext->m_useWaterYears ? pow(2., MOI_WATERYEAR_DAILY) : pow(2., MOI_DAILY));
+
+         bool first_interval = true;
+         int bit_num = 0;
+         while (multiple_intervals != 0)
          {
-            gpModel->m_modelOutputGroupArray.Add(pGroup);
-
-            TiXmlElement* pXmlModelOutput = pXmlGroup->FirstChildElement("output");
-            while (output_groups_ok && pXmlModelOutput != NULL)
+            bit_num++;
+            if ((multiple_intervals & (int)pow(2., bit_num)) == 0) continue;
+            MOINTERVAL interval = (MOINTERVAL) bit_num;
+            multiple_intervals = multiple_intervals - (int)pow(2., bit_num);
+            CString group_name_with_interval;
+            switch (interval)
             {
-               LPTSTR name = NULL;
-               LPTSTR query = NULL;
-               LPTSTR expr = NULL;
-               bool   inUse = true;
-               LPTSTR type = NULL;
-               CString domain;
-               LPCSTR obs = NULL;
-               LPCSTR format = NULL;
-               int site = -1;
+               case MOI_YEARLY:  group_name_with_interval = group_name + "_yearly"; break;
+               case MOI_MONTHLY: group_name_with_interval = group_name + "_monthly"; break;
+               case MOI_DAILY: group_name_with_interval = group_name + "_daily"; break;
+               case MOI_WATERYEAR_YEARLY: group_name_with_interval = group_name + "_wateryear"; break;
+               case MOI_WATERYEAR_MONTHLY: group_name_with_interval = group_name + "_monthly_in_wateryear"; break;
+               case MOI_WATERYEAR_DAILY: group_name_with_interval = group_name + "_daily_in_wateryear"; break;
+               default: ASSERT(0); break;
+            } // end of switch (interval)
 
-               XML_ATTR attrs[] = {
-                     // attr           type         address                 isReq checkCol
-                     { "name",         TYPE_STRING, &name,                  true,   0 },
-                     { "query",        TYPE_STRING, &query,                 false,  0 },
-                     { "value",        TYPE_STRING, &expr,                  true,   0 },
-                     { "in_use",       TYPE_BOOL,   &inUse,                 false,  0 },
-                     { "type",         TYPE_STRING, &type,                  true,   0 },
-                     { "domain",       TYPE_CSTRING, &domain,                true,   0 },
-                     { "obs",          TYPE_STRING, &obs,                   false,  0 },
-                     { "format",       TYPE_STRING, &format,                false,  0 },
-                     { "site",         TYPE_INT,    &site,                  false,  0 },
-                     { NULL,           TYPE_NULL,   NULL,                   false,  0 } };
+            if (first_interval)
+            {
+               ModelOutputGroup* pGroup = new ModelOutputGroup;
+               pGroup->m_moInterval = interval;
+               pGroup->m_name = group_name_with_interval;;
 
-               bool ok = TiXmlGetAttributes(pXmlModelOutput, attrs, filename);
-
-               if (!ok)
+               TiXmlElement* pXmlModelOutput = pXmlGroup->FirstChildElement("output");
+               while (output_groups_ok && pXmlModelOutput != NULL)
                {
-                  CString msg;
-                  msg.Format(_T("Flow: Misformed element reading <output> attributes in input file %s"), filename);
-                  Report::ErrorMsg(msg);
-               }
-               else
-               {
-                  ModelOutput* pOutput = new ModelOutput;
+                  LPTSTR name = NULL;
+                  LPTSTR query = NULL;
+                  LPTSTR expr = NULL;
+                  bool   inUse = true;
+                  LPTSTR type = NULL;
+                  CString domain;
+                  LPCSTR obs = NULL;
+                  LPCSTR format = NULL;
 
-                  pOutput->m_name = name;
-                  pOutput->m_queryStr = query;
+                  XML_ATTR attrs[] = {
+                        // attr           type         address                 isReq checkCol
+                        { "name",         TYPE_STRING, &name,                  true,   0 },
+                        { "query",        TYPE_STRING, &query,                 false,  0 },
+                        { "value",        TYPE_STRING, &expr,                  true,   0 },
+                        { "in_use",       TYPE_BOOL,   &inUse,                 false,  0 },
+                        { "type",         TYPE_STRING, &type,                  true,   0 },
+                        { "domain",       TYPE_CSTRING, &domain,                true,   0 },
+                        { "obs",          TYPE_STRING, &obs,                   false,  0 },
+                        { "format",       TYPE_STRING, &format,                false,  0 },
+                        { NULL,           TYPE_NULL,   NULL,                   false,  0 } };
 
-                  pOutput->m_inUse = inUse;
-                  if (obs != NULL)
+                  bool ok = TiXmlGetAttributes(pXmlModelOutput, attrs, filename);
+                  if (!ok)
                   {
-                     pOutput->m_nameObs = obs;
-                     CString fullPath;
-                     if (PathManager::FindPath(obs, fullPath) < 0)
+                     CString msg;
+                     msg.Format(_T("Flow: Misformed element reading <output> attributes in input file %s"), filename);
+                     Report::ErrorMsg(msg);
+                  }
+                  else
+                  {
+                     ModelOutput* pOutput = new ModelOutput;
+
+                     pOutput->m_name = name;
+                     pOutput->m_queryStr = query;
+
+                     pOutput->m_inUse = inUse;
+                     if (obs != NULL)
                      {
-                        CString msg;
-                        msg.Format("Flow: Unable to find observation file '%s' specified for Model Output '%s'", obs, name);
-                        Report::WarningMsg(msg);
-                        pOutput->m_inUse = false;
-                     }
-                     else
-                     {
-                        pOutput->m_pDataObjObs = new FDataObj;
-                        //CString inFile;
-                        //inFile.Format("%s%s",pModel->m_path,obs);    // m_path is not slash-terminated
-                        int rows = -1;
-                        switch (format[0])
+                        pOutput->m_nameObs = obs;
+                        CString fullPath;
+                        if (PathManager::FindPath(obs, fullPath) < 0)
                         {
-                           case 'E': // E<day number of observation on Jan 1, 1900>
-                              // E0 implies that observation index 0 is for Jan 1, 1900 (used when leap days are included)
-                              // E693500 implies that observation index 0 is for Jan 1 in the year 0000 (used for uniform 365-day years)
-                              // E by itself makes m_dayNumberOfObsFor1900Jan1 dependent on pEnvContext->m_maxDaysInYear
-                              pOutput->m_dayNumberOfObsFor1900Jan1 = pEnvContext->m_maxDaysInYear == 365 ? (1900 * 365) : 0;
-                              if (strlen(format) > 1)
-                              {
-                                 if (!isdigit(format[1]))
+                           CString msg;
+                           msg.Format("Flow: Unable to find observation file '%s' specified for Model Output '%s'", obs, name);
+                           Report::WarningMsg(msg);
+                           pOutput->m_inUse = false;
+                        }
+                        else
+                        {
+                           pOutput->m_pDataObjObs = new FDataObj;
+                           //CString inFile;
+                           //inFile.Format("%s%s",pModel->m_path,obs);    // m_path is not slash-terminated
+                           int rows = -1;
+                           switch (format[0])
+                           {
+                              case 'E': // E<day number of observation on Jan 1, 1900>
+                                 // E0 implies that observation index 0 is for Jan 1, 1900 (used when leap days are included)
+                                 // E693500 implies that observation index 0 is for Jan 1 in the year 0000 (used for uniform 365-day years)
+                                 // E by itself makes m_dayNumberOfObsFor1900Jan1 dependent on pEnvContext->m_maxDaysInYear
+                                 pOutput->m_dayNumberOfObsFor1900Jan1 = pEnvContext->m_maxDaysInYear == 365 ? (1900 * 365) : 0;
+                                 if (strlen(format) > 1)
                                  {
-                                    CString msg;
-                                    msg.Format("FlowModel::LoadXml() When reading <output> tag for %s, observation format %s cannot be interpreted as 'E' followed by an integer (the integer would represent the day number in the "
-                                       "observation file of an observation on Jan 1, 1900).", name, format);
-                                    Report::ErrorMsg(msg);
-                                    pOutput->m_inUse = false;
+                                    if (!isdigit(format[1]))
+                                    {
+                                       CString msg;
+                                       msg.Format("FlowModel::LoadXml() When reading <output> tag for %s, observation format %s cannot be interpreted as 'E' followed by an integer (the integer would represent the day number in the "
+                                          "observation file of an observation on Jan 1, 1900).", name, format);
+                                       Report::ErrorMsg(msg);
+                                       pOutput->m_inUse = false;
+                                    }
+                                    pOutput->m_dayNumberOfObsFor1900Jan1 = atoi(format + 1);
                                  }
-                                 pOutput->m_dayNumberOfObsFor1900Jan1 = atoi(format + 1);
+                                 rows = pOutput->m_pDataObjObs->ReadAscii(fullPath);
+                                 break;
+                              default:
+                              {
+                                 CString msg("Flow: Unrecognized observation 'format' attribute '");
+                                 msg += type;
+                                 msg += "' reading <output> tag for '";
+                                 msg += name;
+                                 msg += "'. This output will be ignored...";
+                                 Report::ErrorMsg(msg);
+                                 pOutput->m_inUse = false;
                               }
-                              rows = pOutput->m_pDataObjObs->ReadAscii(fullPath);
-                              break;
+                           }
+
+                           if (rows <= 0)
+                           {
+                              CString msg;
+                              msg.Format("Flow: Unable to load observation file '%s' specified for Model Output '%s'", (LPCTSTR)fullPath, name);
+                              Report::WarningMsg(msg);
+
+                              delete pOutput->m_pDataObjObs;
+                              pOutput->m_pDataObjObs = NULL;
+                              pOutput->m_inUse = false;
+                           }
+
+                           pModel->m_numQMeasurements++;
+                        }
+                     } // end of if (obs != NULL)
+
+                     pOutput->m_modelType = MOT_SUM;
+                     if (type != NULL)
+                     {
+                        switch (type[0])
+                        {
+                           case 'S':
+                           case 's':      pOutput->m_modelType = MOT_SUM;         break;
+                           case 'A':
+                           case 'a':      pOutput->m_modelType = MOT_AREAWTMEAN;  break;
+                           case 'P':
+                           case 'p':      pOutput->m_modelType = MOT_PCTAREA;     break;
                            default:
                            {
-                              CString msg("Flow: Unrecognized observation 'format' attribute '");
+                              CString msg("Flow: Unrecognized 'type' attribute '");
                               msg += type;
                               msg += "' reading <output> tag for '";
                               msg += name;
@@ -14009,105 +14087,79 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                               pOutput->m_inUse = false;
                            }
                         }
-   
-                        if (rows <= 0)
-                        {
-                           CString msg;
-                           msg.Format("Flow: Unable to load observation file '%s' specified for Model Output '%s'", (LPCTSTR)fullPath, name);
-                           Report::WarningMsg(msg);
+                     } // end of if (type != NULL)
 
-                           delete pOutput->m_pDataObjObs;
-                           pOutput->m_pDataObjObs = NULL;
-                           pOutput->m_inUse = false;
-                        }
-
-                        pModel->m_numQMeasurements++;
-                     }
-                  } // end of if (obs != NULL)
-
-                  pOutput->m_modelType = MOT_SUM;
-                  if (type != NULL)
-                  {
-                     switch (type[0])
+                     pOutput->m_modelDomain = MOD_IDU;
+                     if (!domain.IsEmpty())
                      {
-                        case 'S':
-                        case 's':      pOutput->m_modelType = MOT_SUM;         break;
-                        case 'A':
-                        case 'a':      pOutput->m_modelType = MOT_AREAWTMEAN;  break;
-                        case 'P':
-                        case 'p':      pOutput->m_modelType = MOT_PCTAREA;     break;
-                        default:
+                        if (domain.CompareNoCase("idu") == 0) pOutput->m_modelDomain = MOD_IDU;
+                        else if (domain.CompareNoCase("hru") == 0) pOutput->m_modelDomain = MOD_HRU;
+                        else if (domain.CompareNoCase("reach") == 0) pOutput->m_modelDomain = MOD_REACH;
+                        else
                         {
-                           CString msg("Flow: Unrecognized 'type' attribute '");
-                           msg += type;
+                           CString msg("Flow: Unrecognized 'domain' attribute '");
+                           msg += domain;
                            msg += "' reading <output> tag for '";
                            msg += name;
                            msg += "'. This output will be ignored...";
                            Report::ErrorMsg(msg);
                            pOutput->m_inUse = false;
                         }
-                     }
-                  }
+                     } // end of if ( !domain.IsEmpty() )
 
-
-                  pOutput->m_modelDomain = MOD_IDU;
-                  if (!domain.IsEmpty())
-                  {
-                     if (domain.CompareNoCase("idu") == 0) pOutput->m_modelDomain = MOD_IDU;
-                     else if (domain.CompareNoCase("hru") == 0) pOutput->m_modelDomain = MOD_HRU;
-                     else if (domain.CompareNoCase("reach") == 0) pOutput->m_modelDomain = MOD_REACH;
-                     else
+                     if (expr != NULL)
                      {
-                        CString msg("Flow: Unrecognized 'domain' attribute '");
-                        msg += domain;
-                        msg += "' reading <output> tag for '";
-                        msg += name;
-                        msg += "'. This output will be ignored...";
-                        Report::ErrorMsg(msg);
-                        pOutput->m_inUse = false;
+                        pOutput->m_exprStr = expr;
+
+                        // Do this next statement to ensure that the expression string can never be exactly
+                        // the same as a variable name.  Without this statement, an expression consisting of
+                        // a single variable name is not recognized as an error when the variable name is not 
+                        // a column name.  For example, without this statement, value="NOT_A_COL" would not
+                        // be recognized as uninterpretable.
+                        pOutput->m_exprStr = "(" + pOutput->m_exprStr + ")";
+                     } // end of if ( expr != NULL )
+
+                     pOutput->InitModelOutput(pIDULayer);
+                     bool pass = true;
+                     switch (pOutput->m_modelDomain)
+                     {
+                        default:
+                        case MOD_IDU:
+                           pass = pIDULayer != NULL && pOutput->InitIDUdomain(pIDULayer);
+                           break;
+                        case MOD_REACH:
+                           pass = pReachLayer != NULL && pOutput->InitReachDomain(pReachLayer);
+                           break;
+                        case MOD_HRU:
+                           pass = pHRUlayer != NULL && pOutput->InitHRUdomain(pHRUlayer);
+                           break;
                      }
-                  } // end of if ( !domain.IsEmpty() )
 
-                  if (expr != NULL)
-                  {
-                     pOutput->m_exprStr = expr;
-
-               // Do this next statement to ensure that the expression string can never be exactly
-               // the same as a variable name.  Without this statement, an expression consisting of
-               // a single variable name is not recognized as an error when the variable name is not 
-               // a column name.  For example, without this statement, value="NOT_A_COL" would not
-               // be recognized as uninterpretable.
-                     pOutput->m_exprStr = "(" + pOutput->m_exprStr + ")";
-                  } // end of if ( expr != NULL )
-
-                  if (site > 0)
-                     pOutput->m_siteNumber = site;
-
-                  pOutput->InitModelOutput(pIDULayer);
-                  bool pass = true;
-                  switch (pOutput->m_modelDomain)
-                  {
-                     default:
-                     case MOD_IDU:
-                        pass = pIDULayer != NULL && pOutput->InitIDUdomain(pIDULayer);
-                        break;
-                     case MOD_REACH:
-                        pass = pReachLayer != NULL && pOutput->InitReachDomain(pReachLayer);
-                        break;
-                     case MOD_HRU:
-                        pass = pHRUlayer != NULL && pOutput->InitHRUdomain(pHRUlayer);
-                        break;
+                     if (pOutput->m_inUse && pass)
+                        pGroup->Add(pOutput);
+                     else
+                        delete pOutput;
                   }
 
-                  if (pOutput->m_inUse && pass)
-                     pGroup->Add(pOutput);
-                  else
-                     delete pOutput;
-               }
+                  pXmlModelOutput = pXmlModelOutput->NextSiblingElement("output");
+               } // end of loop to read <output> blocks
 
-               pXmlModelOutput = pXmlModelOutput->NextSiblingElement("output");
-            } // end of loop to read <output> blocks
-         } // end of if (output_groups_ok)
+               gpModel->m_modelOutputGroupArray.Add(pGroup);
+               first_interval = false;
+            } // end of if (first_interval)
+            else
+            { // Replicate the output group with a different interval.
+               int previous_group_ndx = (int)gpModel->m_modelOutputGroupArray.GetSize() - 1;
+               ModelOutputGroup* pPreviousGroup = gpModel->m_modelOutputGroupArray[previous_group_ndx];
+               ModelOutputGroup* pReplicatedGroup = new ModelOutputGroup;
+               *pReplicatedGroup = *pPreviousGroup;
+               pReplicatedGroup->m_name = group_name_with_interval;
+               pReplicatedGroup->m_moInterval = interval;
+               gpModel->m_modelOutputGroupArray.Add(pReplicatedGroup);
+            } // end of if (first_interval) ... else
+
+         } // end of while (multiple_intervals != 0)
+
          pXmlGroup = pXmlGroup->NextSiblingElement("output_group");
       } // end of if (output_groups_ok && pXmlGroup != NULL)
    } // end of if ( pXmlModelOutputs != NULL ) 
@@ -16620,33 +16672,6 @@ bool FlowModel::CollectModelOutput(void)
          }  // end of: for ( each group )
       }  // end of: for ( each Subcatch )
    }  // end of: if ( moCountSubcatch > 0 )
-
-   // next look for Reservoirs
-   if (moCountReservoir > 0)
-   {
-      for (int j = 0; j < (int)m_modelOutputGroupArray.GetSize(); j++)
-      {
-         ModelOutputGroup* pGroup = m_modelOutputGroupArray[j];
-
-         for (int i = 0; i < (int)pGroup->GetSize(); i++)
-         {
-            ModelOutput* pOutput = pGroup->GetAt(i);
-
-            if (pOutput->m_inUse == false || pOutput->m_modelDomain != MOD_RESERVOIR)
-               continue;
-            else
-            {
-               for (int h = 0; h < (int)this->m_reservoirArray.GetSize(); h++)
-               {
-                  Reservoir* pRes = m_reservoirArray[h];
-                  if (pRes->m_id == pOutput->m_siteNumber)
-                     pOutput->m_value = pRes->m_elevation;
-               }
-            }  // end of: for ( each model )
-         }  // end of: for ( each output group )
-      }  // end of: for ( each reach )
-   }  // end of: if ( moCountReach > 0 )
-
 
 // Last, look for IDU specific values that are only stored in the HRUs.
 // This should be used if we have IDU specific queries AND model results that are not being written from HRUs to IDUs.

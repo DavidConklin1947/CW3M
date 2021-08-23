@@ -1298,7 +1298,7 @@ class ModelOutput
 {
 public:
    ModelOutput() : m_pQuery( NULL ), m_pMapExpr( NULL ), m_pDataObj( NULL ), m_pDataObjObs( NULL), m_modelType( MOT_UNDEFINED ), m_modelDomain( MOD_UNDEFINED ), m_inUse( true ), 
-      m_value( 0 ), m_totalQueryArea( 0 ), m_number(0), m_esvNumber(0), m_pLinkLayer(NULL) { }
+      m_value( 0 ), m_totalQueryArea( 0 ), m_number(0), m_esvNumber(0), m_pLinkLayer(NULL){ }
    ~ModelOutput() { if ( m_pDataObj != NULL ) delete m_pDataObj; if ( m_pDataObjObs != NULL ) delete m_pDataObjObs; }   // note that m_pQuery is managed by the queryengine
 
    ModelOutput( ModelOutput &mo ) { *this = mo; }
@@ -1338,7 +1338,6 @@ public:
 
    int m_number;
    int m_esvNumber;
-   int m_siteNumber; //an integer that can be used to locate a reservoir (from m_reservoirArray directly - the query engine cannot be used in this case)
 
 };
 
