@@ -13976,7 +13976,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                   XML_ATTR attrs[] = {
                         // attr           type         address                 isReq checkCol
                         { "name",         TYPE_STRING, &name,                  true,   0 },
-                        { "query",        TYPE_STRING, &query,                 false,  0 },
+                        { "query",        TYPE_STRING, &query,                 true,  0 },
                         { "value",        TYPE_STRING, &expr,                  true,   0 },
                         { "in_use",       TYPE_BOOL,   &inUse,                 false,  0 },
                         { "type",         TYPE_STRING, &type,                  true,   0 },
@@ -13985,11 +13985,11 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                         { "format",       TYPE_STRING, &format,                false,  0 },
                         { NULL,           TYPE_NULL,   NULL,                   false,  0 } };
 
-                  bool ok = TiXmlGetAttributes(pXmlModelOutput, attrs, filename);
+                  bool ok = TiXmlGetAttributes(pXmlModelOutput, attrs, output_groups_file);
                   if (!ok)
                   {
                      CString msg;
-                     msg.Format(_T("Flow: Misformed element reading <output> attributes in input file %s"), filename);
+                     msg.Format(_T("Flow: Misformed element reading <output> attributes in input file %s"), output_groups_file);
                      Report::ErrorMsg(msg);
                   }
                   else
@@ -16453,7 +16453,7 @@ bool FlowModel::CollectModelOutput(void)
 
                   if (pOutput->m_pMapExpr != NULL)
                   {
-                     bool ok = m_pME_Reach->EvaluateExpr(pOutput->m_pMapExpr, false ? true : false);
+                     bool ok = m_pME_Reach->EvaluateExpr(pOutput->m_pMapExpr, pOutput->m_pQuery ? true : false);
                      if (ok)
                         value = (float)pOutput->m_pMapExpr->GetValue();
                   }

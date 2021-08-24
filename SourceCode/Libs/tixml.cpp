@@ -428,7 +428,7 @@ bool TiXmlGetAttributes( TiXmlElement *pXml, XML_ATTR attrs[], LPCTSTR filename,
       if ( foundArray[ i ] == false && attrs[ i ].isRequired )
          {
          CString msg;
-         msg.Format( "Error: Xml element <%s> is missing required attribute %s when parsing file %s.  This attribute will be ignored", element, attrs[ i ].name, filename );
+         msg.Format( "Error: Xml element <%s> is missing required attribute '%s' when parsing file %s.  This attribute will be ignored", element, attrs[ i ].name, filename );
          //attrs[i].value = NULL;
          Report::ErrorMsg( msg );
          }
