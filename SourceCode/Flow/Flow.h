@@ -1487,7 +1487,8 @@ class Wetland
 public:
    Wetland(int wetlID);
    ~Wetland() {  };
-   bool H2OtoWetland(double H2OtoWetl_m3);
+//x   bool H2OtoWetland(double H2OtoWetl_m3);
+   double ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3); // Returns volume of water remaining when wetland is at its capacity.
 
 public:
    int m_wetlID;
@@ -1507,7 +1508,7 @@ public:
    CArray <int, int> m_wetlHRUndxArray;
 
    // m_wetlReachNdxArray is a list of indices into m_reachArray of the reaches associated with the IDUs in the wetland.
-   // Note that indices into m_reachArray are not the same as the indices into the Reach shapefile.
+   // Note that indices into m_reachArray are NOT the same as the indices into the Reach shapefile.
    // This list has a 1-to-1 correspondence to m_wetlIDUndxArray, so a given reach index
    // may appear more than once in the list.
    CArray <int, int> m_wetlReachNdxArray;
@@ -1892,6 +1893,7 @@ public:
    int m_colWETL_CAP;
    int m_colWETL2Q;
    int m_colWETL_ID;
+   int m_colCOMID;
 
    int m_colHruHRU_ID;
    int m_colHruCOMID;
