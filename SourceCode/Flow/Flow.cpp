@@ -5825,7 +5825,8 @@ bool FlowModel::ApplyQ2WETL()
    // Do it wetland by wetland.
    int num_wetlands = (int)m_wetlArray.GetSize();
    for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
-   { // Within a given wetland, move water from reaches into wetland
+   { 
+      // Within a given wetland, move water from reaches into wetland
       // IDUs in order by lowest elevation IDU to highest elevation IDU.
       Wetland* pWetl = m_wetlArray[wetl_ndx];
       int num_idus_in_wetl = (int)pWetl->m_wetlIDUndxArray.GetSize();
@@ -5837,24 +5838,25 @@ bool FlowModel::ApplyQ2WETL()
          Reach* pReach = m_reachArray[reach_ndx];
          ASSERT(gpFlowModel->AttInt(idu_poly_ndx, COMID) == pReach->m_reachID);
          double reach_remaining_cms = pReach->m_q2wetl_cms;
-         if (pReach->m_q2wetl_cms <= 0.) continue;
-
-         // This reach had water to move into a wetland, but some of it may already have
-         // been moved to an IDU at a lower elevation which drains to the same reach.
-         int ndx_to_remaining_array = idu_ndx_in_wetl;
-         while (ndx_to_remaining_array > 0)
-         {
-            ndx_to_remaining_array--;
-            if (reach_ndx == pWetl->m_wetlReachNdxArray[idu_ndx_in_wetl])
-            {
-               reach_remaining_cms = remaining_cms_array[ndx_to_remaining_array];
-               remaining_cms_array[ndx_to_remaining_array] = 0.;
-               break;
-            }
-         }
-
          double reach_remaining_m3 = reach_remaining_cms * SEC_PER_DAY;
-         reach_remaining_m3 = pWetl->ReachH2OtoWetland(reach_ndx, reach_remaining_m3);
+         if (pReach->m_q2wetl_cms > 0.)
+         { // This reach had water to move into a wetland, but some of it may already have
+            // been moved to an IDU at a lower elevation which drains to the same reach.
+            int ndx_to_remaining_array = idu_ndx_in_wetl;
+            while (ndx_to_remaining_array > 0)
+            {
+               ndx_to_remaining_array--;
+               if (reach_ndx == pWetl->m_wetlReachNdxArray[ndx_to_remaining_array])
+               {
+                  reach_remaining_cms = remaining_cms_array[ndx_to_remaining_array];
+                  remaining_cms_array[ndx_to_remaining_array] = 0.;
+                  break;
+               }
+            }
+            reach_remaining_m3 = reach_remaining_cms * SEC_PER_DAY;
+            if (reach_remaining_m3 > 0.) reach_remaining_m3 = pWetl->ReachH2OtoWetland(reach_ndx, reach_remaining_m3);
+         } // end of if (pReach->m_q2wetl_cms > 0.)
+
          reach_remaining_cms = reach_remaining_m3 / SEC_PER_DAY;
          remaining_cms_array.Add(reach_remaining_cms);
       } // end of loop thru the IDUs which make up this wetland
@@ -5960,7 +5962,8 @@ bool FlowModel::ApplyQ2WETL()
 x*/
 
    double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
-   // Returns volume of water remaining when wetland is at its capacity.
+   // Returns volume of water remaining out of H2OtoWetl_m3 when the wetland reaches its capacity.
+   // If all of H2OtoWetl_m3 can be absorbed by the wetland, then returns 0.
    // Updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attribute WETNESS.
    // Sets pHRU->m_standingH2Oflag to true.
    {
@@ -8789,7 +8792,10 @@ bool FlowModel::InitReaches(void)
       {
       ReachNode *pRoot = m_reachTree.GetRootNode(i);
       ReachNode *pReachNode = (Reach*)m_reachTree.FindLeftLeaf(pRoot);  // find leftmost leaf of entire tree
-      m_reachArray.Add((Reach*)pReachNode);   // add leftmost node
+      Reach* pReach = (Reach*)pReachNode;
+      m_reachArray.Add(pReach);   // add leftmost node
+      int reach_array_ndx = (int)m_reachArray.GetSize() - 1;
+      pReach->m_reachArrayNdx = reach_array_ndx;
 
       while (pReachNode)
          {
@@ -8805,9 +8811,10 @@ bool FlowModel::InitReaches(void)
 
          if (pReachNode->IsPhantomNode() == false)
             {
-            m_reachArray.Add((Reach*)pReachNode);
+            pReach = (Reach*)pReachNode;
+            m_reachArray.Add(pReach);   // add leftmost node
             int reach_array_ndx = (int)m_reachArray.GetSize() - 1;
-            m_reachArray[reach_array_ndx]->m_reachArrayNdx = reach_array_ndx;
+            pReach->m_reachArrayNdx = reach_array_ndx;
             }
          }
       }
