@@ -593,14 +593,14 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       prev_hbvcalibInt = hbvcalibInt;
 
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
-      Reach* pUpstreamLeftReach = gpModel->GetReachFromNode(pReach->m_pLeft);
+      Reach* pUpstreamLeftReach = GetReachFromNode(pReach->m_pLeft);
       if (pUpstreamLeftReach != NULL)
       {
          int final_subnode = pUpstreamLeftReach->GetSubnodeCount() - 1;
          ReachSubnode* pNode = (ReachSubnode*)pUpstreamLeftReach->m_subnodeArray[final_subnode];
          int upstream_discharge_doy = pNode->m_dischargeDOY;
          ASSERT(upstream_discharge_doy == pFlowContext->dayOfYear);
-         Reach* pUpstreamRightReach = gpModel->GetReachFromNode(pReach->m_pRight);
+         Reach* pUpstreamRightReach = GetReachFromNode(pReach->m_pRight);
          if (pUpstreamRightReach != NULL)
          {
             int final_subnode = pUpstreamRightReach->GetSubnodeCount() - 1;
@@ -1008,8 +1008,8 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
       if (pRes != NULL) inflowWP = pRes->m_outflowWP;
       else
       {
-         if (pReach->m_pLeft != NULL) inflowWP = (gpModel->GetReachFromNode(pReach->m_pLeft))->GetReachDischargeWP();
-         if (pReach->m_pRight != NULL) inflowWP.MixIn((gpModel->GetReachFromNode(pReach->m_pRight))->GetReachDischargeWP());
+         if (pReach->m_pLeft != NULL) inflowWP = (GetReachFromNode(pReach->m_pLeft))->GetReachDischargeWP();
+         if (pReach->m_pRight != NULL) inflowWP.MixIn((GetReachFromNode(pReach->m_pRight))->GetReachDischargeWP());
       }
    }
    else
@@ -1048,7 +1048,7 @@ double ReachRouting::GetReachSVOutflow( ReachNode *pReachNode, int sv )   // rec
       }
    else
       {
-      Reach *pReach = gpModel->GetReachFromNode( pReachNode );
+      Reach *pReach = GetReachFromNode( pReachNode );
       ReachSubnode *pNode = (ReachSubnode*) pReach->m_subnodeArray[ 0 ]; 
 
       if ( pReach != NULL && pNode->m_waterParcel.m_volume_m3 > 0.0f)

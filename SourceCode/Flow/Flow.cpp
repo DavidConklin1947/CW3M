@@ -3464,6 +3464,29 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    // build basic structures for streams, catchments, HRU's
    InitReaches();      // create, initialize reaches based on stream layer
+   { // Check whether reach indices are consistent.
+      int reachArray_len = (int)m_reachArray.GetSize();
+      int reachLayer_len = m_pReachLayer->GetRowCount();  
+      ASSERT(reachArray_len == reachLayer_len);
+      for (int poly_ndx = 0; poly_ndx < reachLayer_len; poly_ndx++)
+      {
+         int poly_comid = 0; m_pReachLayer->GetData(poly_ndx, m_colStreamCOMID, poly_comid);
+         int reach_ndx = -1; m_pReachLayer->GetData(poly_ndx, m_colReachREACH_NDX, reach_ndx);
+         int array_comid = m_reachArray[reach_ndx]->m_reachID;
+         ASSERT(poly_comid == array_comid);
+      }
+      for (int array_ndx = 0; array_ndx < reachArray_len; array_ndx++)
+      {
+         Reach* pReach = m_reachArray[array_ndx];
+         int poly_ndx = pReach->m_polyIndex;
+         int reach_ndx_from_layer = 0; m_pReachLayer->GetData(poly_ndx, m_colReachREACH_NDX, reach_ndx_from_layer);
+         ASSERT(array_ndx == reach_ndx_from_layer);
+         int reach_ndx_from_Reach_object = pReach->m_reachArrayNdx;
+         ASSERT(array_ndx == reach_ndx_from_Reach_object);
+      }
+   }
+
+
    InitCatchments();   // create, initialize catchments based on catchment layer
    InitReservoirs();   // initialize reservoirs
 
@@ -4557,14 +4580,14 @@ int FlowModel::OpenDetailedOutputFilesReach( CArray< FILE*, FILE* > &filePtrArra
          for (int j = 0; j < reachCount; j++)
             {
             Reach *pReach = m_reachArray[j];
-            if (pReach->m_reachIndex >= 0)
-               fwrite(&pReach->m_reachIndex, sizeof(int), 1, fp);
+            if (pReach->m_reachArrayNdx >= 0)
+               fwrite(&pReach->m_reachArrayNdx, sizeof(int), 1, fp);
             }
 
          for (int j = 0; j < reachCount; j++)
             {
             Reach *pReach = m_reachArray[j];
-            if (pReach->m_reachIndex >= 0)
+            if (pReach->m_reachArrayNdx >= 0)
                fwrite(&pReach->m_reachID, sizeof(int), 1, fp);
             }
 
@@ -5800,12 +5823,12 @@ bool FlowModel::ApplyQ2WETL()
    // Calls H2OtoWetland(), which sets pHRU->m_standingH2Oflag to true and 
    // updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attribute WETNESS. 
    // Do it wetland by wetland.
-   int num_wetlands = m_wetlArray.GetSize();
+   int num_wetlands = (int)m_wetlArray.GetSize();
    for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
    { // Within a given wetland, move water from reaches into wetland
       // IDUs in order by lowest elevation IDU to highest elevation IDU.
       Wetland* pWetl = m_wetlArray[wetl_ndx];
-      int num_idus_in_wetl = pWetl->m_wetlIDUndxArray.GetSize();
+      int num_idus_in_wetl = (int)pWetl->m_wetlIDUndxArray.GetSize();
       CArray <double, double> remaining_cms_array;
       for (int idu_ndx_in_wetl = 0; idu_ndx_in_wetl < num_idus_in_wetl; idu_ndx_in_wetl++)
       { // Since more than one IDU may drain to a given reach, this logic may be traversed more than once for a given reach.
@@ -8656,7 +8679,7 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
          HRU* pHRU = GetHRU(hru_ndx);
          int comid = pHRU->AttInt(HruCOMID);
          Reach* pReach = GetReachFromCOMID(comid);
-         pWetl->m_wetlReachNdxArray[i] = pReach->m_reachIndex;
+         pWetl->m_wetlReachNdxArray[i] = pReach->m_reachArrayNdx;
          // By convention, a reach may only be associated with a single wetland.
          if (pReach->m_wetlNdx != wetl_ndx)
          {
@@ -8781,7 +8804,11 @@ bool FlowModel::InitReaches(void)
             pReachNode = pDownNode;
 
          if (pReachNode->IsPhantomNode() == false)
+            {
             m_reachArray.Add((Reach*)pReachNode);
+            int reach_array_ndx = (int)m_reachArray.GetSize() - 1;
+            m_reachArray[reach_array_ndx]->m_reachArrayNdx = reach_array_ndx;
+            }
          }
       }
 

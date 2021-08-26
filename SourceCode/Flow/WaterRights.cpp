@@ -403,10 +403,10 @@ void AltWaterMaster::SetUpstreamReachAttributes(Reach * pReach, int newValue, in
 
    m_pReachLayer->SetDataU(polyNdx, reachColNum, newValue);
 
-   Reach * pUpstreamReachLeft = m_pFlowModel->GetReachFromNode(pReach->m_pLeft);
+   Reach * pUpstreamReachLeft = GetReachFromNode(pReach->m_pLeft);
    if (pUpstreamReachLeft != NULL) SetUpstreamReachAttributes(pUpstreamReachLeft, newValue, origValue, reachColNum);
 
-   Reach * pUpstreamReachRight = m_pFlowModel->GetReachFromNode(pReach->m_pRight);
+   Reach * pUpstreamReachRight = GetReachFromNode(pReach->m_pRight);
    if (pUpstreamReachRight != NULL) SetUpstreamReachAttributes(pUpstreamReachRight, newValue, origValue, reachColNum); 
 } // end of SetUpstreamReachAttributes()
 
@@ -1942,7 +1942,7 @@ bool AltWaterMaster::Step(FlowContext *pFlowContext)
                }
             else
                {
-               pReach = m_pFlowModel->GetReachFromNode(pReach->m_pDown); // Move to the next downstream reach.
+               pReach = GetReachFromNode(pReach->m_pDown); // Move to the next downstream reach.
                streamNdx = pReach->m_polyIndex;
                } // end of if (pReach->m_pDown == NULL || ...) ... else 
             } // end of while (pReach != NULL)
@@ -4486,7 +4486,7 @@ int AltWaterMaster::LoadWRDatabase(FlowContext *pFlowContext)
                      pReach = NULL; // Stop moving downstream.
                   else
                      { // Move to the next downstream reach.
-                     pReach = m_pFlowModel->GetReachFromNode(pReach->m_pDown);
+                     pReach = GetReachFromNode(pReach->m_pDown);
                      reachPolyNdx = pReach->m_polyIndex;
                      finalComid = pReach->m_reachID;
                      } // end of if ... else move to the next downstream reach
@@ -5720,8 +5720,8 @@ int AltWaterMaster::GetJuniorWaterRights( FlowContext *pFlowContext,  Reach *pRe
       }
      
 	// recurse upstream if needed
-	Reach *pUpstreamReachLeft = m_pFlowModel->GetReachFromNode(pReach->m_pLeft);
-	Reach *pUpstreamReachRight = m_pFlowModel->GetReachFromNode(pReach->m_pRight);
+	Reach *pUpstreamReachLeft = GetReachFromNode(pReach->m_pLeft);
+	Reach *pUpstreamReachRight = GetReachFromNode(pReach->m_pRight);
 /*      {
       CString msg; msg.Format("%s %s %s %d %d %d",
          pReach->m_pDown == NULL ? "pDown is NULL" : "",

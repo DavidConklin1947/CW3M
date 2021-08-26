@@ -14,6 +14,8 @@ class FDataObj;
 class Query;
 class ReachNode;
 class SubNode;
+class Reach;
+class FlowModel;
 
 struct OBSERVED_VALUE { int reachIndex; int subnodeIndex; float value; };
 
@@ -51,6 +53,9 @@ public:
 // class for btree implmentation
 class LIBSAPI ReachNode             // class of the node in the B tree
    {
+   friend class ReachTree;
+   friend Reach* GetReachFromNode(ReachNode* pNode);
+   friend int OpenDetailedOutputFilesReach(CArray< FILE*, FILE* >& filePtrArray);
    public:
       //-- constructor --//
       ReachNode( void ) : m_pLeft( NULL ), m_pRight( NULL ), m_pDown( NULL ), 
@@ -66,7 +71,9 @@ class LIBSAPI ReachNode             // class of the node in the B tree
       ReachNode *m_pDown;           // pointer to the downstream node
 
       int   m_polyIndex;  // offset for this reach in the stream layer (-1 for phantom node)
-      int   m_reachIndex; // offset in the reach info array
+   protected:
+      int   m_reachIndex; // offset in the reach info array. This is not the index to FlowModel::m_reachArray.
+   public:
       int   m_reachID;    // grid code (unique id) for this reach, or -1
 
       float m_length;     // length (UNITS)???

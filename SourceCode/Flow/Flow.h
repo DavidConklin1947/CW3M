@@ -1029,6 +1029,7 @@ public:
    void SetAtt(int col, double attValue);
    void SetAttInt(int col, int attValue);
 
+   int m_reachArrayNdx; // index into gpFlowModel->m_reachArray
    int m_wetlNdx; // index into gpFlowModel->m_wetlArray[]; not the same as WETL_ID; -1 if the reach isn't associated with a wetland
    double m_q2wetl_cms;
 
@@ -1559,7 +1560,7 @@ public:
    static double VegDensity(double lai);
    Reach* GetReachFromCOMID(int comid);
    Reach *GetReachFromStreamIndex( int index ) { return (Reach*) m_reachTree.GetReachNodeFromPolyIndex( index ); }
-   Reach *GetReachFromNode( ReachNode *pNode );
+//x   Reach *GetReachFromNode( ReachNode *pNode );
    Reach *GetReach( int i )  // from internal array
       {
       if (i >= 0 && i < m_reachArray.GetSize()) return(m_reachArray[i]);
@@ -2549,8 +2550,9 @@ bool FlowModel::SetCatchmentData( Catchment *pCatchment, int col, float value )
 
 
 inline 
-Reach *FlowModel::GetReachFromNode( ReachNode *pNode )
-   {
+//x Reach* FlowModel::GetReachFromNode(ReachNode* pNode)
+Reach* GetReachFromNode(ReachNode* pNode)
+{
    if ( pNode == NULL ) 
       return NULL;
    
