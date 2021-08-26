@@ -4866,14 +4866,25 @@ bool FlowModel::InitializeSpinup() // Initialize all the state variables from de
 {
    // Use the default Reach state variable values which were set in InitReaches().
 
-   // Initialize attribute values and HRU member values
+   // Initialize IDU and HRU attribute values and HRU member values
    int hruCount = GetHRUCount();
    int hruLayerCount = GetHRULayerCount();
    for (int i = 0; i < hruCount; i++)
    {
-      HRU* pHRU = m_hruArray[i];
+      HRU* pHRU = m_hruArray[i];   
+      HRULayer* pBox_nat_soil = pHRU->GetLayer(BOX_NAT_SOIL);
+      HRULayer* pBox_irrig_soil = pHRU->GetLayer(BOX_IRRIG_SOIL);
       float field_cap_mm = pHRU->AttFloat(HruFIELD_CAP);
-      double hru_water_m3 = 0;
+
+      double wetland_area_accum_m2 = 0.;
+      int num_idus = (int)pHRU->m_polyIndexArray.GetSize();
+      for (int idu_in_hru = 0; idu_in_hru < num_idus; idu_in_hru++)
+      {
+         int idu_poly_ndx = pHRU->m_polyIndexArray[idu_in_hru];
+         if (AttInt(idu_poly_ndx, LULC_A) == LULCA_WETLAND) wetland_area_accum_m2 += AttFloat(idu_poly_ndx, AREA);
+      } // end of loop thru IDUs in this HRU
+      pHRU->m_wetlandArea_m2 = wetland_area_accum_m2;
+      pHRU->m_snowpackArea_m2 = pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2;
 
       for (int l = 0; l < hruLayerCount; l++)
       {
@@ -4881,6 +4892,72 @@ bool FlowModel::InitializeSpinup() // Initialize all the state variables from de
          pBox->m_contributionToReach = 0.0f;
          pBox->m_verticalDrainage = 0.0f;
          pBox->m_horizontalExchange = 0.0f;
+
+         if (l <= BOX_MELT)
+         { // Aboveground soil water compartments: Layer[0] is Snow and Layer[1] is meltwater in snowpack and standing water in a wetland
+            pBox->m_volumeWater = 0.f;
+            if (gpModel->m_initWaterContent.GetSize() == hruLayerCount) //water content for each layer was specified
+               pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * pHRU->m_HRUeffArea_m2;
+            if (l == BOX_SURFACE_H2O && pHRU->m_wetlandArea_m2 > 0.)
+            { // Special case for the surface water compartment.  Wetlands initialize at field capacity.
+               double wetland_frac = pHRU->m_wetlandArea_m2 / pHRU->m_HRUeffArea_m2;
+               double unadjusted_vol_mm = (pBox->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.;
+               double adjusted_vol_mm = wetland_frac * field_cap_mm + (1. - wetland_frac) * unadjusted_vol_mm;
+               pBox->m_volumeWater = (adjusted_vol_mm / 1000.) * pHRU->m_HRUeffArea_m2;
+            }
+         }
+         else if (l == BOX_IRRIG_SOIL) pBox->m_volumeWater = 0.;
+         else
+         { // Belowground non-irrigated soil water compartments
+            if (gpModel->m_initWaterContent.GetSize() == hruLayerCount)//water content for each layer was specified
+               pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * 0.4f * pHRU->m_HRUeffArea_m2;//assumes porosity is 0.4...we don't know that value at this point in the code, but 0.4 is probably close.
+            else if (gpModel->m_initWaterContent.GetSize() == 1) // a single value for water content was specified 
+               pBox->m_volumeWater = atof(gpModel->m_initWaterContent[0]) * 0.4f * pHRU->m_HRUeffArea_m2;
+            else pBox->m_volumeWater = 0.2 * (double)pHRU->m_HRUeffArea_m2;
+         }
+         for (int k = 0; k < m_hruSvCount - 1; k++)
+         {
+            pBox->m_svArray[k] = 0.0f;//concentration = 1 kg/m3 ???????
+            pBox->m_svArrayTrans[k] = 0.0f;//concentration = 1 kg/m3
+         } // end of loop thru state variables in this layer
+      } // end of loop thru layers in this HRU
+
+      pHRU->SetAttFloat(HruSNOW_BOX, 0.);
+      pHRU->SetAtt(HruBOXSURF_M3, 0.);
+      pHRU->SetAtt(HruH2OMELT_M3, 0.);
+      pHRU->SetAtt(HruH2OSTNDGM3, 0.);
+
+      double nat_soil_h2o_mm = 1000. * pBox_nat_soil->m_volumeWater / pHRU->m_HRUtotArea_m2;
+      pHRU->SetAttFloat(HruNAT_SOIL, (float)nat_soil_h2o_mm);
+
+      double irrig_soil_h2o_mm = 1000. * pBox_irrig_soil->m_volumeWater / pHRU->m_HRUtotArea_m2;
+      pHRU->SetAttFloat(HruIRRIG_SOIL, (float)irrig_soil_h2o_mm);
+
+      pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
+      pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
+      pHRU->m_snowpackFlag = pHRU->m_standingH2Oflag = false;
+
+      for (int idu_HRU_ndx = 0; idu_HRU_ndx < pHRU->m_polyIndexArray.GetSize(); idu_HRU_ndx++)
+      {
+         int idu_poly_ndx = pHRU->m_polyIndexArray[idu_HRU_ndx];
+         SetAttFloat(idu_poly_ndx, FIELD_CAP, field_cap_mm);
+         SetAtt(idu_poly_ndx, SNOW_SWE, 0.);
+         SetAtt(idu_poly_ndx, H2O_MELT, 0.);
+
+         int lulc_a = AttInt(idu_poly_ndx, LULC_A);
+         bool is_wetland = lulc_a == LULCA_WETLAND;
+         SetAtt(idu_poly_ndx, WETNESS, is_wetland ? 0. : NON_WETLAND_WETNESS_TOKEN);
+
+         SetAttInt(idu_poly_ndx, IRRIGATION, 0);
+         SetAttFloat(idu_poly_ndx, SM_DAY, (float)nat_soil_h2o_mm);
+      } // end of loop through the IDUs in this HRU
+
+   } // end of loop through HRUs
+
+/*x
+      for (int l = 0; l < hruLayerCount; l++)
+      {
+         HRULayer* pBox = pHRU->GetLayer(l);
          if (l <= BOX_MELT)
          { // Aboveground soil water compartments: Layer[0] is Snow and Layer[1] is meltwater in snowpack and standing water in a wetland
             pBox->m_volumeWater = 0.f;
@@ -4910,28 +4987,7 @@ bool FlowModel::InitializeSpinup() // Initialize all the state variables from de
 
          hru_water_m3 += pBox->m_volumeWater;
       } // end of loop thru compartments in this HRU
-
-      pHRU->SetAttFloat(HruSNOW_BOX, 0.f);
-      pHRU->SetAttFloat(HruBOXSURF_M3, 0.f);
-      pHRU->SetAttFloat(HruH2OMELT_M3, 0.f);
-      pHRU->SetAttFloat(HruH2OSTNDGM3, 0.f);
-      pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-      pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-      pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-      pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-      pHRU->m_snowpackFlag = pHRU->m_standingH2Oflag = false;
-
-      for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < pHRU->m_polyIndexArray.GetSize(); idu_ndx_in_hru++)
-      {
-         int idu_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
-         SetAttFloat(idu_ndx, FIELD_CAP, field_cap_mm);
-         int lulc_a = AttInt(idu_ndx, LULC_A);
-         double wetness_mm = (lulc_a == LULCA_WETLAND) ? 0. : NON_WETLAND_WETNESS_TOKEN;
-         SetAtt(idu_ndx, WETNESS, wetness_mm);
-         SetAtt(idu_ndx, H2O_MELT, 0.);
-      } // end of loop thru IDUs in this HRU
-
-   } // end of loop through HRUs
+x*/
 
    // Use the default Reservoir state variable values which were set in InitReservoirs().
 
@@ -5488,6 +5544,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       start = clock();
       
       // Note: GetCatchmentDerivates() calls GlobalMethod::Run()'s for any method with (m_timing&GMT_CATCHMENT) != 0 
+      // This is when HBV does its work.
       m_flowContext.timing = GMT_CATCHMENT;
       m_hruBlock.Integrate( (double)m_currentTime, (double)m_currentTime+stepSize, GetCatchmentDerivatives, &m_flowContext );  // update HRU swc and associated state variables
 
@@ -5570,6 +5627,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             { // WETNESS was set earlier this day in HBV
                SetAtt(idu_ndx, SNOW_SWE, 0);
                SetAtt(idu_ndx, H2O_MELT, 0);
+               double wetness = Att(idu_ndx, WETNESS);
             }
             else
             { // Not a wetland, may have a snowpack.
@@ -7216,6 +7274,10 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
          HRU *pHRU = pCatchment->GetHRUfromCatchment( h );
          ASSERT( pHRU != NULL );
 
+         HRULayer* pBox_snow = pHRU->GetLayer(BOX_SNOW);
+         HRULayer* pBox_nat_soil = pHRU->GetLayer(BOX_NAT_SOIL);
+         HRULayer* pBox_irrig_soil = pHRU->GetLayer(BOX_IRRIG_SOIL);
+
          // Initialize m_frc_naturl to 1 and m_HRUeffArea_m2 to m_HRUtotArea_m2.  SWMM may calculate different values later. 
          pHRU->m_frc_naturl = 1.;
          pHRU->m_HRUeffArea_m2 = pHRU->m_HRUtotArea_m2;
@@ -7300,7 +7362,7 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
 
             // hruSNOW_BOX doesn't include melt water, and is a depth over the entire HRU area
             double hru_snow_box_mm = ((snow_swe_accum_m3 - h2o_melt_accum_m3) / pHRU->m_HRUtotArea_m2) * 1000.; 
-            HRULayer* pBox_snow = pHRU->GetLayer(BOX_SNOW);
+//x            HRULayer* pBox_snow = pHRU->GetLayer(BOX_SNOW);
             pHRU->SetAtt(HruSNOW_BOX, hru_snow_box_mm);
 
             double surface_h2o_m3 = h2o_melt_accum_m3 + positive_wetness_accum_m3;
@@ -7328,8 +7390,10 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
             pHRU->m_snowpackFlag = snow_swe_accum_m3 > 0.;
             pHRU->m_standingH2Oflag = positive_wetness_accum_m3 > 0.;
          } // end of if (use_IDU_layer_values)
-         else
-         { // Initialize attribute values and HRU member values
+//         else Spinup or no IC file: Initialization gets done in InitializeSpinup()
+/*x
+         { // Spinup or no IC file: Initialize attribute values and HRU member values for this HRU
+
             for (int l = 0; l < hruLayerCount; l++)
             {
                HRULayer* pBox = pHRU->GetLayer(l);
@@ -7342,8 +7406,9 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
                   if (gpModel->m_initWaterContent.GetSize() == hruLayerCount) //water content for each layer was specified
                      pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * pHRU->m_HRUeffArea_m2;
                }
+               else if (l == BOX_IRRIG_SOIL) pBox->m_volumeWater = 0.;
                else
-               { // Belowground soil water compartments
+               { // Belowground non-irrigated soil water compartments
                   if (gpModel->m_initWaterContent.GetSize() == hruLayerCount)//water content for each layer was specified
                      pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * 0.4f * pHRU->m_HRUeffArea_m2;//assumes porosity is 0.4...we don't know that value at this point in the code, but 0.4 is probably close.
                   else if (gpModel->m_initWaterContent.GetSize() == 1) // a single value for water content was specified 
@@ -7357,19 +7422,37 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
                } // end of loop thru state variables in this layer
             } // end of loop thru layers in this HRU
 
-            pHRU->SetAttFloat(HruSNOW_BOX, 0.f);
+            pHRU->SetAttFloat(HruSNOW_BOX, 0.);
             pHRU->SetAtt(HruBOXSURF_M3, 0.);
             pHRU->SetAtt(HruH2OMELT_M3, 0.);
             pHRU->SetAtt(HruH2OSTNDGM3, 0.);
-            pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-            pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
+
+            double nat_soil_h2o_mm = 1000. * pBox_nat_soil->m_volumeWater / pHRU->m_HRUtotArea_m2;
+            pHRU->SetAttFloat(HruNAT_SOIL, (float)nat_soil_h2o_mm);
+
+            double irrig_soil_h2o_mm = 1000. * pBox_irrig_soil->m_volumeWater / pHRU->m_HRUtotArea_m2;
+            pHRU->SetAttFloat(HruIRRIG_SOIL, (float)irrig_soil_h2o_mm);
+
             pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
             pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pHRU->GetLayer(BOX_SLOW_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-
-
             pHRU->m_snowpackFlag = pHRU->m_standingH2Oflag = false;
-         } // end of if (use_IDU_layer_values) ... else 
 
+            for (int idu_HRU_ndx = 0; idu_HRU_ndx < pHRU->m_polyIndexArray.GetSize(); idu_HRU_ndx++)
+            {
+               int idu_poly_ndx = pHRU->m_polyIndexArray[idu_HRU_ndx];
+               SetAtt(idu_poly_ndx, SNOW_SWE, 0.);
+               SetAtt(idu_poly_ndx, H2O_MELT, 0.);
+
+               int lulc_a = AttInt(idu_poly_ndx, LULC_A);
+               bool is_wetland = lulc_a == LULCA_WETLAND;
+               SetAtt(idu_poly_ndx, WETNESS, is_wetland ? 0. : NON_WETLAND_WETNESS_TOKEN);
+
+               SetAttInt(idu_poly_ndx, IRRIGATION, 0);
+               SetAttFloat(idu_poly_ndx, SM_DAY, (float)nat_soil_h2o_mm);
+            }
+
+         } // end of if (use_attribute_values) ... else 
+x*/
          for (int l = 0; l < hruLayerCount; l++)
          {
             HRULayer* pBox = pHRU->GetLayer(l);
@@ -7506,6 +7589,7 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
       && close_enough(snow_swe_accum_m3, hru_snowpack_m3swe + hru_surface_h2o_m3, 0.0001, 0.01)
       && close_enough(surface_h2o_accum_m3, hru_surface_h2o_m3, 0.0001, 0.01)
       && close_enough(sm_day_accum_m3, hru_topsoil_h2o_m3, 0.0001, 0.01);
+   ASSERT(rtnval);
    rtnval = rtnval && CheckSurfaceH2O(pHRU);
 
    if (!rtnval)
@@ -12591,9 +12675,15 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
 
    HRULayer* pBOX_SNOW = pHRU->GetLayer(BOX_SNOW);
    double box_snow_m3 = pBOX_SNOW->m_volumeWater;
+   double flux_box_snow_m3 = pBOX_SNOW->m_globalHandlerFluxValue;
 
    HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
    double box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_volumeWater;
+   double flux_box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
+
+   HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
+   double box_nat_soil_m3 = pBOX_NAT_SOIL->m_volumeWater;
+   double flux_box_nat_soil_m3 = pBOX_NAT_SOIL->m_globalHandlerFluxValue;
 
    double idu_melt_h2o_accum_m3 = 0.;
    double idu_standing_h2o_accum_m3 = 0.;
@@ -15153,7 +15243,7 @@ bool FlowModel::RestoreStateVariables(bool spinupFlag)
    if (!hru_h2o_balance_flag)
    {
       CString msg;
-      msg.Format("RetoreStateVariables() HRU water balance failed.");
+      msg.Format("ReStoreStateVariables() HRU water balance failed.");
       Report::FatalMsg(msg);
    }
 

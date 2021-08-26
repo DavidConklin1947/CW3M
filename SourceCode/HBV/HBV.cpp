@@ -432,7 +432,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 
    if (pFlowContext->timing & 1) // Init()
       return HBV::InitHBV_Global(pFlowContext, NULL);
-   // check other timings!!!!
+   ASSERT(pFlowContext->timing == 16); // GMT_CATCHMENT
 
    MapLayer *pIDULayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
    bool readOnlyFlag = pIDULayer->m_readOnly;

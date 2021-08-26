@@ -403,7 +403,8 @@ public:
 // a FluxContainer is a object (e.g. HRU, Reach) that can contain fluxes. 
 class FluxContainer
 {
-   friend class Flow; 
+//x   friend class Flow; 
+   friend class FlowModel;
 
 protected:
    FluxContainer() : m_globalHandlerFluxValue(0.0f), m_nanOccurred(false) { }
