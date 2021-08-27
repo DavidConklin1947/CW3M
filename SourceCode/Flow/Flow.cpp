@@ -5557,9 +5557,9 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                hru_standing_h2o_m3 += idu_standing_h2o_m3;
                hru_standing_h2o_area_m2 += idu_area_m2;
             }
-            ASSERT(hru_standing_h2o_area_m2 == pHRU->m_wetlandArea_m2);
+            ASSERT(hru_standing_h2o_area_m2 > 0.);
          } // end of if (pHRU->m_standingH2Oflag)
-         double hru_h2o_melt_m3 = surface_h2o_m3 - pHRU->m_wetlandArea_m2;
+         double hru_h2o_melt_m3 = surface_h2o_m3 - hru_standing_h2o_m3;
          if (hru_h2o_melt_m3 < 0.)
          {
             ASSERT(close_enough(surface_h2o_m3, hru_standing_h2o_m3, 1e-6, 1));
@@ -5569,8 +5569,9 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          pHRU->SetAtt(HruH2OSTNDGM3, hru_standing_h2o_m3);
 
          // Update IDU attributes SM_DAY, H2O_MELT, and SNOW_SWE
-         double hru_h2o_melt_area_m2 = pHRU->m_HRUtotArea_m2 - hru_standing_h2o_area_m2;
+         double hru_h2o_melt_area_m2 = pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2;
          ASSERT(hru_h2o_melt_area_m2 == pHRU->m_snowpackArea_m2);
+         ASSERT(hru_h2o_melt_area_m2 > 0.);
          double hru_h2o_melt_mm = (hru_h2o_melt_area_m2 > 0.) ? (1000. * (hru_h2o_melt_m3 / hru_h2o_melt_area_m2)) : 0.;
          double frozen_snow_for_non_wetland_idus_mm = (box_snow_m3 / hru_h2o_melt_area_m2) * 1000.;
          double snow_swe_for_non_wetland_idus_mm = frozen_snow_for_non_wetland_idus_mm + hru_h2o_melt_mm;
@@ -6261,11 +6262,17 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
       } // end of loop thru compartments
 
       double wetland_area_accum_m2 = 0.;
+      pHRU->m_standingH2Oflag = false;
       int num_idus = (int)pHRU->m_polyIndexArray.GetSize();
       for (int idu_in_hru = 0; idu_in_hru < num_idus; idu_in_hru++)
       {
          int idu_poly_ndx = pHRU->m_polyIndexArray[idu_in_hru];
-         if (AttInt(idu_poly_ndx, LULC_A) == LULCA_WETLAND) wetland_area_accum_m2 += AttFloat(idu_poly_ndx, AREA);
+         bool is_wetland = AttInt(idu_poly_ndx, LULC_A) == LULCA_WETLAND;
+         if (is_wetland)
+         {
+            wetland_area_accum_m2 += AttFloat(idu_poly_ndx, AREA);
+            pHRU->m_standingH2Oflag = pHRU->m_standingH2Oflag || (Att(idu_poly_ndx, WETNESS) > 0);
+         }
       } // end of loop thru IDUs in this HRU
       pHRU->m_wetlandArea_m2 = wetland_area_accum_m2;
       pHRU->m_snowpackArea_m2 = pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2;

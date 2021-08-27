@@ -691,7 +691,7 @@ public:
    bool m_standingH2Oflag; // true => there exists an IDU in this HRU which has standing water (can only happen for wetland IDUs)
    bool m_snowpackFlag; // true => there exists an IDU in this HRU which has snow on the ground
    double m_wetlandArea_m2; // Update each year in FlowModel::StartYear()
-   double m_snowpackArea_m2; // = m_HRUtotArea_m2 - m_wetlandArea_m2
+   double m_snowpackArea_m2; // = m_HRUtotArea_m2 - m_wetlandArea_m2 i.e. the part of the HRU that may have snow and meltwater on it, always > 0
    double m_infiltrationFromStandingH2O_m3; // Calculate in HBV daily process. Use to reduce WETNESS in Wetland daily process.
 
    float m_HRUtotArea_m2;  // total area of the HRU
