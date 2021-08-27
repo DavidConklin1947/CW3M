@@ -14,21 +14,21 @@ so tests of equality on the tokens are insufficient.
 // Water Right use bitwise codes http://www.oregon.gov/owrd/pages/wr/wrisuse.aspx
 enum WR_USE 
    { 
-   WRU_NULL = 0,
+   // WRU_NULL = 0,
    WRU_UNKNOWN=1, 
-   WRU_MINING=2, 
-   WRU_AG=4,
-   WRU_DOMESTIC=8, 
+   // WRU_MINING=2, 
+   // WRU_AG=4,
+   // WRU_DOMESTIC=8, 
    WRU_IRRIGATION=16,
-   WRU_COMMERCIAL=32,
-   WRU_RECREATION=64,
-   WRU_POWER=128, 
-   WRU_FISH=256,
-   WRU_LIVESTOCK=512,
+   // WRU_COMMERCIAL=32,
+   // WRU_RECREATION=64,
+   // WRU_POWER=128, 
+   // WRU_FISH=256,
+   // WRU_LIVESTOCK=512,
    WRU_MUNICIPAL=1024,
    WRU_INSTREAM=2048,
-   WRU_MISC=4096,
-   WRU_WILDLIFE=8192
+   // WRU_MISC=4096,
+   // WRU_WILDLIFE=8192
    }; 
 
 // Water Right permit bitwise codes http://www.oregon.gov/owrd/pages/wr/wrisuse.aspx
@@ -52,19 +52,7 @@ inline __int32 SetUse(__int32 wrexists_arg, unsigned __int16 use_flags_arg) { re
 inline __int32 SetMuni(__int32 wrexists_arg, int muni_arg)                  { return (wrexists_arg & 0x00FFFFFF) | (muni_arg << 24); }
 
 //methods for decoding WREXIST
-inline bool IsUnknownUse(unsigned __int16 flags) { return ((flags & WRU_UNKNOWN) > 0) ? true : false; }
-inline bool IsMining(unsigned __int16  flags)    { return ((flags & WRU_MINING ) > 0) ? true : false; }
-inline bool IsAgriculture(unsigned __int16 flags){ return ((flags & WRU_AG) > 0) ? true : false; }
-inline bool IsDomestic(unsigned __int16 flags)   { return ((flags & WRU_DOMESTIC) > 0) ? true : false; }
-inline bool IsCommercial(unsigned __int16 flags) { return ((flags & WRU_COMMERCIAL) > 0) ? true : false; }
-inline bool IsRecreation(unsigned __int16 flags) { return ((flags & WRU_RECREATION) > 0) ? true : false; }
-inline bool IsPower(unsigned __int16 flags)      { return ((flags & WRU_POWER) > 0) ? true : false; }
-inline bool IsFish(unsigned __int16 flags)       { return ((flags & WRU_FISH) > 0) ? true : false; }
-inline bool IsLivestock(unsigned __int16 flags)  { return ((flags & WRU_LIVESTOCK) > 0) ? true : false; }
 inline bool IsMunicipal(unsigned __int16 flags)  { return ((flags & WRU_MUNICIPAL) > 0) ? true : false; }
-inline bool IsInstream(unsigned __int16 flags)   { return ((flags & WRU_INSTREAM) > 0) ? true : false; }
-inline bool IsMisc(unsigned __int16 flags)       { return ((flags & WRU_MISC) > 0) ? true : false; }
-inline bool IsWildlife(unsigned __int16 flags)   { return ((flags & WRU_WILDLIFE) > 0) ? true : false; }
 inline bool IsIrrigation(unsigned __int16 flags) { return ((flags & WRU_IRRIGATION) > 0) ? true : false; }
 
 //for use with WREXISTS PERMITS)

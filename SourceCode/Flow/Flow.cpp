@@ -5084,7 +5084,7 @@ bool FlowModel::ReadState()
    if (!water_balance_flag)
    {
       CString msg;
-      msg.Format("ReadState() HRU water balance failed.");
+      msg.Format("ReadState() HRU water balance failed. You may need to do a spinup and create a new initial conditions file.");
       Report::WarningMsg(msg);
    }
 
@@ -5557,9 +5557,9 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                hru_standing_h2o_m3 += idu_standing_h2o_m3;
                hru_standing_h2o_area_m2 += idu_area_m2;
             }
+            ASSERT(hru_standing_h2o_area_m2 == pHRU->m_wetlandArea_m2);
          } // end of if (pHRU->m_standingH2Oflag)
-         ASSERT(hru_standing_h2o_area_m2 == pHRU->m_wetlandArea_m2);
-         double hru_h2o_melt_m3 = surface_h2o_m3 - hru_standing_h2o_m3;
+         double hru_h2o_melt_m3 = surface_h2o_m3 - pHRU->m_wetlandArea_m2;
          if (hru_h2o_melt_m3 < 0.)
          {
             ASSERT(close_enough(surface_h2o_m3, hru_standing_h2o_m3, 1e-6, 1));
