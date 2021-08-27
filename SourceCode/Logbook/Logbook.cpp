@@ -277,7 +277,7 @@ CString CLogbook::GetStringType(LOGBOOK_TEXTTYPES nTextType)
   if (nTextType == LOGBOOK_INFO   ) return "INFO";
   if (nTextType == LOGBOOK_WARNING) return "WARNING";
   if (nTextType == LOGBOOK_ERROR  ) return "ERROR";
-  if (nTextType == LOGBOOK_FATAL  ) return "FATAL";
+  if (nTextType == LOGBOOK_FATAL  ) return "FATAL ERROR";
   if (nTextType == LOGBOOK_SYSTEM ) return "SYSTEM";
   if (nTextType == LOGBOOK_DEBUG1 ) return "DEBUG1";
   if (nTextType == LOGBOOK_DEBUG2 ) return "DEBUG2";
@@ -422,7 +422,7 @@ void CLogbook::FillTextTypeComboBox(CComboBox *pComboBox, LOGBOOK_TEXTTYPES nTyp
   nIndex = pComboBox->AddString("INFO"); pComboBox->SetItemData(nIndex, LOGBOOK_INFO);
   nIndex = pComboBox->AddString("WARNING"); pComboBox->SetItemData(nIndex, LOGBOOK_WARNING);
   nIndex = pComboBox->AddString("ERROR"); pComboBox->SetItemData(nIndex, LOGBOOK_ERROR);
-  nIndex = pComboBox->AddString("FATAL"); pComboBox->SetItemData(nIndex, LOGBOOK_FATAL);
+  nIndex = pComboBox->AddString("FATAL ERROR"); pComboBox->SetItemData(nIndex, LOGBOOK_FATAL);
   nIndex = pComboBox->AddString("SYSTEM"); pComboBox->SetItemData(nIndex, LOGBOOK_SYSTEM);
   nIndex = pComboBox->AddString("DEBUG1"); pComboBox->SetItemData(nIndex, LOGBOOK_DEBUG1);
   nIndex = pComboBox->AddString("DEBUG2"); pComboBox->SetItemData(nIndex, LOGBOOK_DEBUG2);

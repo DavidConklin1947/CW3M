@@ -85,7 +85,7 @@ CString CLogbookFile::GetStringType(LOGBOOK_TEXTTYPES nType)
     case LOGBOOK_INFO       : str = "INFO"; break;
     case LOGBOOK_WARNING    : str = "WARNING"; break;
     case LOGBOOK_ERROR      : str = "ERROR"; break;
-    case LOGBOOK_FATAL      : str = "FATAL"; break;
+    case LOGBOOK_FATAL      : str = "FATAL ERROR"; break;
     case LOGBOOK_SYSTEM     : str = "SYSTEM"; break;
     case LOGBOOK_DEBUG1     : str = "DEBUG1"; break;
     case LOGBOOK_DEBUG2     : str = "DEBUG2"; break;

@@ -403,7 +403,6 @@ public:
 // a FluxContainer is a object (e.g. HRU, Reach) that can contain fluxes. 
 class FluxContainer
 {
-//x   friend class Flow; 
    friend class FlowModel;
 
 protected:
@@ -1489,7 +1488,6 @@ class Wetland
 public:
    Wetland(int wetlID);
    ~Wetland() {  };
-//x   bool H2OtoWetland(double H2OtoWetl_m3);
    double ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3); // Returns volume of water remaining when wetland is at its capacity.
 
 public:
@@ -1561,7 +1559,6 @@ public:
    static double VegDensity(double lai);
    Reach* GetReachFromCOMID(int comid);
    Reach *GetReachFromStreamIndex( int index ) { return (Reach*) m_reachTree.GetReachNodeFromPolyIndex( index ); }
-//x   Reach *GetReachFromNode( ReachNode *pNode );
    Reach *GetReach( int i )  // from internal array
       {
       if (i >= 0 && i < m_reachArray.GetSize()) return(m_reachArray[i]);
@@ -2551,7 +2548,6 @@ bool FlowModel::SetCatchmentData( Catchment *pCatchment, int col, float value )
 
 
 inline 
-//x Reach* FlowModel::GetReachFromNode(ReachNode* pNode)
 Reach* GetReachFromNode(ReachNode* pNode)
 {
    if ( pNode == NULL ) 
