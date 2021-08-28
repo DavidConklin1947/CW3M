@@ -231,7 +231,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       if (pHRU->m_standingH2Oflag)
       {
         int idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize();
-/        bool standing_H2O_flag = false;
+        bool standing_H2O_flag = false;
 
          // How much room is there in the topsoil for more water to infiltrate from standing water?
 
