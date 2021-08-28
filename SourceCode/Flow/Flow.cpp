@@ -5211,10 +5211,13 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
 // always be <= SNOW_SWE.
 // Note also that HRU attribute HruSNOW_BOX has units of mmSWE and represents just the frozen water in the snowpack,
 // expressed as a depth of liquid water over the entire area of the HRU, not just the non-wetland fraction.
-// Note that m_snowpackArea_m2 is the area of the non-wetland part of the HRU where there is frozen snow or melt water.
-// This routine spreads the amount of frozen snow evenly over all the non-wetland IDUs, so when there is any
-// water in BOX_SNOW, pHRU->m_snowpackArea_m2 is the same as the non-wetland area. When there isn't any frozen snow, 
-// pHRU->m_snowpackArea_m2 is zero. Theoretically, the frozen snow may melt on IDUs with low LAIs faster in the spring than
+//x Note that m_snowpackArea_m2 is the area of the non-wetland part of the HRU where there is frozen snow or melt water.
+// Note that m_snowpackArea_m2 is the area of the non-wetland part of the HRU where there could be frozen snow or melt water.
+// By definition, m_snowpackArea_m2 + m_wetlandArea_m2 = the total HRU area, even when there isn't currently any snow or meltwater.
+//x This routine spreads the amount of frozen snow evenly over all the non-wetland IDUs, so when there is any
+//x water in BOX_SNOW, pHRU->m_snowpackArea_m2 is the same as the non-wetland area. When there isn't any frozen snow, 
+//x pHRU->m_snowpackArea_m2 is zero. Theoretically, the frozen snow may melt on IDUs with low LAIs faster in the spring than
+// Theoretically, the frozen snow may melt on IDUs with low LAIs faster in the spring than
 // it melts on IDUs with higher LAIs. As of August 2021, the model is not representing that level of spatial detail.
 { 
    // Variable names beginning with "box_" generally represent the volumes of water in the
@@ -5260,9 +5263,10 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
    } // end of first loop thru IDUs
    ASSERT(close_enough(pHRU->m_HRUtotArea_m2, idu_area_accum_m2, 1e-6, 1));
    pHRU->m_wetlandArea_m2 = wetland_area_accum_m2;
-   pHRU->m_snowpackArea_m2 = ((box_snow_m3SWE > 0) || (box_surface_h2o_m3 > 0)) ? pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2 : 0;
+   pHRU->m_snowpackArea_m2 = pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2;
+   ASSERT(pHRU->m_snowpackArea_m2 > 0);
    double wetland_frac = wetland_area_accum_m2 / pHRU->m_HRUtotArea_m2;
-   pHRU->m_snowpackFlag = pHRU->m_snowpackArea_m2 > 0.;
+   pHRU->m_snowpackFlag = (box_snow_m3SWE > 0) || (box_surface_h2o_m3 > 0);
    pHRU->m_standingH2Oflag = (pHRU->m_wetlandArea_m2 > 0.) && (uniform_surface_h2o_depth_mm > 0.);
 
    // Check for anomalous situations.
@@ -7303,6 +7307,7 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
    double idu_area_accum_m2 = 0.;
    double snow_swe_accum_m3 = 0.;
    double surface_h2o_accum_m3 = 0.;
+   double melt_h2o_accum_m3 = 0.;
    double sm_day_accum_m3 = 0.;
    for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
    {
@@ -7318,6 +7323,7 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
       double idu_standing_h2o_m3 = (idu_wetness_mm > 0.) ? ((idu_wetness_mm / 1000)* idu_area_m2) : 0.;
       double idu_melt_h2o_mm = Att(idu_poly_ndx, H2O_MELT);
       double idu_melt_h2o_m3 = (idu_melt_h2o_mm / 1000.) * idu_area_m2;
+      melt_h2o_accum_m3 += idu_melt_h2o_m3;
       surface_h2o_accum_m3 += (idu_standing_h2o_m3 + idu_melt_h2o_m3);
       ASSERT(!(idu_standing_h2o_m3 > 0. && idu_melt_h2o_m3 > 0.));
       
@@ -7338,7 +7344,7 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
 
    
    bool rtnval = close_enough(hru_area_m2, idu_area_accum_m2, 0.0001, 0.01)
-      && close_enough(snow_swe_accum_m3, hru_snowpack_m3swe + hru_surface_h2o_m3, 0.0001, 0.01)
+      && close_enough(snow_swe_accum_m3, hru_snowpack_m3swe + melt_h2o_accum_m3, 0.0001, 0.01)
       && close_enough(surface_h2o_accum_m3, hru_surface_h2o_m3, 0.0001, 0.01)
       && close_enough(sm_day_accum_m3, hru_topsoil_h2o_m3, 0.0001, 0.01);
    ASSERT(rtnval);
