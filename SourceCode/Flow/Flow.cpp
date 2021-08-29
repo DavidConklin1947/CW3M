@@ -5080,8 +5080,12 @@ bool FlowModel::ReadState()
          tot_HRU_other_vol_m3 += other_water_vol_m3;
          hru_water_m3 += pLayer->m_volumeWater;
       } // end of loop on HRU layers
-      FixHRUwaterBalance(pHRU);
-      water_balance_flag &= CheckHRUwaterBalance(pHRU);
+
+      if (!CheckHRUwaterBalance(pHRU))
+      {
+         FixHRUwaterBalance(pHRU);
+         water_balance_flag &= CheckHRUwaterBalance(pHRU);
+      }
    } // end of loop on HRUs
    if (!water_balance_flag)
    {
@@ -5409,8 +5413,6 @@ bool FlowModel::Run( EnvContext *pEnvContext )
    m_flowContext.timing = GMT_START_YEAR;
 
    m_pIDUlayer->SetColDataU(m_colET_DAY, 0);
-
-//x   if (pEnvContext->yearOfRun == 0) RestoreStateVariables(pEnvContext->spinupFlag);
 
    CString msg;
 
