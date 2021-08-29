@@ -4244,6 +4244,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
    } // end of if (pSAL->m_valid)
 
+   RestoreStateVariables(pEnvContext->spinupFlag);
+
    return TRUE;
    } // end of InitRun()
 
@@ -5408,7 +5410,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
    m_pIDUlayer->SetColDataU(m_colET_DAY, 0);
 
-   if (pEnvContext->yearOfRun == 0) RestoreStateVariables(pEnvContext->spinupFlag);
+//x   if (pEnvContext->yearOfRun == 0) RestoreStateVariables(pEnvContext->spinupFlag);
 
    CString msg;
 
@@ -6211,10 +6213,11 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
             double targetIrrigatedArea = 0.0;
             for (int m = 0; m < pHRU->m_polyIndexArray.GetSize(); m++)
                {
+               int idu_poly_ndx = pHRU->m_polyIndexArray[m];
                double area = 0.0;
                int irrigated = 0;
-               pFlowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[m], pFlowContext->pFlowModel->m_colIrrigation, irrigated);
-               pFlowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[m], pFlowContext->pFlowModel->m_colCatchmentArea, area);
+               pFlowContext->pEnvContext->pMapLayer->GetData(idu_poly_ndx, pFlowContext->pFlowModel->m_colIrrigation, irrigated);
+               pFlowContext->pEnvContext->pMapLayer->GetData(idu_poly_ndx, pFlowContext->pFlowModel->m_colCatchmentArea, area);
                if (irrigated != 0)
                   targetIrrigatedArea += area * pHRU->m_frc_naturl;
                }
