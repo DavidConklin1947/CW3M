@@ -12476,7 +12476,6 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-5, 1);
    is_close_enough = is_close_enough && (pHRU->m_snowpackFlag == (box_snow_m3 > 0));
    is_close_enough = is_close_enough && (pHRU->m_standingH2Oflag == (hru_h2o_stndg_m3 > 0));
-//x   ASSERT(is_close_enough);
    return(is_close_enough);
 } // end of CheckSurfaceH2O()
 
@@ -13984,7 +13983,6 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
 
             if (first_interval)
             {
-//x               ModelOutputGroup* pGroup = new ModelOutputGroup;
                pGroup->m_moInterval = interval;
                pGroup->m_name = group_name_with_interval;
 
@@ -14175,9 +14173,6 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
             } // end of if (first_interval)
             else
             { // Replicate the output group with a different interval.
-//x               int previous_group_ndx = (int)gpModel->m_modelOutputGroupArray.GetSize() - 1;
-//x               ModelOutputGroup* pPreviousGroup = gpModel->m_modelOutputGroupArray[previous_group_ndx];
-//x               int size_of_previous_group = (int)pPreviousGroup->GetSize();
                int size_of_previous_group = (int)pGroup->GetSize();
 
                ModelOutputGroup* pReplicated_group = new ModelOutputGroup;
@@ -14192,13 +14187,14 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                   ModelOutput* pOriginal_output = pGroup->GetAt(output_ndx);
                   ModelOutput* pReplicated_output = new ModelOutput;
                   *(pReplicated_output) = *(pGroup->GetAt(output_ndx));
-//                  *(pReplicated_output) = *((*pGroup)[output_ndx]);
 
                   if (pOriginal_output->m_pDataObjObs != NULL )
                   {
                      pReplicated_output->m_pDataObjObs = new FDataObj;
+                     pReplicated_output->m_nameObs = pOriginal_output->m_nameObs;
+                     bool path_ok = (PathManager::FindPath(pReplicated_output->m_nameObs, observations_path) >= 0); ASSERT(path_ok);
                      int rows = pReplicated_output->m_pDataObjObs->ReadAscii(observations_path);
-                     CString msg; msg.Format("rows = %d");
+                     ASSERT(rows > 0);
                   }
 
                   pReplicated_output->InitModelOutput(pIDULayer);
