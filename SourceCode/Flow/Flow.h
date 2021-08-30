@@ -1304,10 +1304,13 @@ public:
 
    ModelOutput( ModelOutput &mo ) { *this = mo; }
 
-   ModelOutput &operator = ( ModelOutput &mo ) { m_name = mo.m_name; m_queryStr = mo.m_queryStr;
+   ModelOutput& operator = (ModelOutput& mo) {
+      m_name = mo.m_name; m_queryStr = mo.m_queryStr;
       m_exprStr = mo.m_exprStr; m_pQuery = NULL, m_pMapExpr = NULL; m_modelType = mo.m_modelType;
       m_modelDomain = mo.m_modelDomain; m_inUse = mo.m_inUse; m_pDataObj = NULL; m_pDataObjObs = NULL;
-      m_value = 0; m_totalQueryArea = 0; m_number = 0; m_esvNumber=0; m_pLinkLayer = mo.m_pLinkLayer; return *this; }
+      m_value = 0; m_totalQueryArea = 0; m_number = 0; m_esvNumber = 0;
+      m_dayNumberOfObsFor1900Jan1 = mo.m_dayNumberOfObsFor1900Jan1;  m_pLinkLayer = mo.m_pLinkLayer; return *this;
+   }
    
    CString m_name;
    CString m_nameObs;

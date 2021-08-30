@@ -5609,7 +5609,13 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             }
          } // end of loop thru the IDUs contained in this HRU
 
-         CheckSurfaceH2O(pHRU);
+         if (!CheckSurfaceH2O(pHRU))
+         {
+            CString msg;
+            msg.Format("FlowModel::Run() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
+            Report::ErrorMsg(msg);
+         }
+         
       } // end of loop thru HRUs
 
       finish = clock();
@@ -12470,7 +12476,7 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-5, 1);
    is_close_enough = is_close_enough && (pHRU->m_snowpackFlag == (box_snow_m3 > 0));
    is_close_enough = is_close_enough && (pHRU->m_standingH2Oflag == (hru_h2o_stndg_m3 > 0));
-   ASSERT(is_close_enough);
+//x   ASSERT(is_close_enough);
    return(is_close_enough);
 } // end of CheckSurfaceH2O()
 
@@ -13956,6 +13962,8 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
 
          bool first_interval = true;
          int bit_num = 0;
+         ModelOutputGroup* pGroup = new ModelOutputGroup;
+         CString observations_path;
          while (multiple_intervals != 0)
          {
             bit_num++;
@@ -13976,9 +13984,9 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
 
             if (first_interval)
             {
-               ModelOutputGroup* pGroup = new ModelOutputGroup;
+//x               ModelOutputGroup* pGroup = new ModelOutputGroup;
                pGroup->m_moInterval = interval;
-               pGroup->m_name = group_name_with_interval;;
+               pGroup->m_name = group_name_with_interval;
 
                TiXmlElement* pXmlModelOutput = pXmlGroup->FirstChildElement("output");
                while (output_groups_ok && pXmlModelOutput != NULL)
@@ -14022,8 +14030,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                      if (obs != NULL)
                      {
                         pOutput->m_nameObs = obs;
-                        CString fullPath;
-                        if (PathManager::FindPath(obs, fullPath) < 0)
+                        if (PathManager::FindPath(obs, observations_path) < 0)
                         {
                            CString msg;
                            msg.Format("Flow: Unable to find observation file '%s' specified for Model Output '%s'", obs, name);
@@ -14055,7 +14062,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                                     }
                                     pOutput->m_dayNumberOfObsFor1900Jan1 = atoi(format + 1);
                                  }
-                                 rows = pOutput->m_pDataObjObs->ReadAscii(fullPath);
+                                 rows = pOutput->m_pDataObjObs->ReadAscii(observations_path);
                                  break;
                               default:
                               {
@@ -14072,7 +14079,7 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                            if (rows <= 0)
                            {
                               CString msg;
-                              msg.Format("Flow: Unable to load observation file '%s' specified for Model Output '%s'", (LPCTSTR)fullPath, name);
+                              msg.Format("Flow: Unable to load observation file '%s' specified for Model Output '%s'", (LPCTSTR)observations_path, name);
                               Report::WarningMsg(msg);
 
                               delete pOutput->m_pDataObjObs;
@@ -14168,22 +14175,55 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
             } // end of if (first_interval)
             else
             { // Replicate the output group with a different interval.
-               int previous_group_ndx = (int)gpModel->m_modelOutputGroupArray.GetSize() - 1;
-               ModelOutputGroup* pPreviousGroup = gpModel->m_modelOutputGroupArray[previous_group_ndx];
-               int size_of_previous_group = (int)pPreviousGroup->GetSize();
+//x               int previous_group_ndx = (int)gpModel->m_modelOutputGroupArray.GetSize() - 1;
+//x               ModelOutputGroup* pPreviousGroup = gpModel->m_modelOutputGroupArray[previous_group_ndx];
+//x               int size_of_previous_group = (int)pPreviousGroup->GetSize();
+               int size_of_previous_group = (int)pGroup->GetSize();
 
-               ModelOutputGroup* pReplicatedGroup = new ModelOutputGroup;
-               pReplicatedGroup->m_name = group_name_with_interval;
-               pReplicatedGroup->m_moInterval = interval;
-               pReplicatedGroup->m_pDataObj = NULL;
-               pReplicatedGroup->m_moCountIdu = pPreviousGroup->m_moCountIdu;
-               pReplicatedGroup->m_moCountHru = pPreviousGroup->m_moCountHru;
-               pReplicatedGroup->m_moCountHruLayer = pPreviousGroup->m_moCountHruLayer;
-               pReplicatedGroup->m_moCountReach = pPreviousGroup->m_moCountReach;
+               ModelOutputGroup* pReplicated_group = new ModelOutputGroup;
+               pReplicated_group->m_name = group_name_with_interval;
+               pReplicated_group->m_moInterval = interval;
+               pReplicated_group->m_moCountIdu = pGroup->m_moCountIdu;
+               pReplicated_group->m_moCountHru = pGroup->m_moCountHru;
+               pReplicated_group->m_moCountHruLayer = pGroup->m_moCountHruLayer;
+               pReplicated_group->m_moCountReach = pGroup->m_moCountReach;
                for (int output_ndx = 0; output_ndx < size_of_previous_group; output_ndx++)
-                  pReplicatedGroup->Add(pPreviousGroup->GetAt(output_ndx));
+               {
+                  ModelOutput* pOriginal_output = pGroup->GetAt(output_ndx);
+                  ModelOutput* pReplicated_output = new ModelOutput;
+                  *(pReplicated_output) = *(pGroup->GetAt(output_ndx));
+//                  *(pReplicated_output) = *((*pGroup)[output_ndx]);
 
-               gpModel->m_modelOutputGroupArray.Add(pReplicatedGroup);
+                  if (pOriginal_output->m_pDataObjObs != NULL )
+                  {
+                     pReplicated_output->m_pDataObjObs = new FDataObj;
+                     int rows = pReplicated_output->m_pDataObjObs->ReadAscii(observations_path);
+                     CString msg; msg.Format("rows = %d");
+                  }
+
+                  pReplicated_output->InitModelOutput(pIDULayer);
+                  bool pass = true;
+                  switch (pReplicated_output->m_modelDomain)
+                  {
+                     default:
+                     case MOD_IDU:
+                        pass = pIDULayer != NULL && pReplicated_output->InitIDUdomain(pIDULayer);
+                        break;
+                     case MOD_REACH:
+                        pass = pReachLayer != NULL && pReplicated_output->InitReachDomain(pReachLayer);
+                        break;
+                     case MOD_HRU:
+                        pass = pHRUlayer != NULL && pReplicated_output->InitHRUdomain(pHRUlayer);
+                        break;
+                  } // end of (pReplicated_output->m_modelDomain)
+
+                  if (pReplicated_output->m_inUse && pass)
+                     pReplicated_group->Add(pReplicated_output);
+                  else
+                     delete pReplicated_output;
+               } // end of loop through outputs in the output group
+
+               gpModel->m_modelOutputGroupArray.Add(pReplicated_group);
             } // end of if (first_interval) ... else
 
          } // end of while (multiple_intervals != 0)
@@ -14684,7 +14724,15 @@ void FlowModel::UpdateHRULevelVariables(EnvContext *pEnvContext)
 
       HRULayer * pMeltBox = pHRU->GetLayer(BOX_MELT);
       m_pHRUlayer->SetDataU(hru_ndx, m_colHruBOXSURF_M3, pMeltBox->m_volumeWater);
+
       CheckSurfaceH2O(pHRU);
+      if (!CheckSurfaceH2O(pHRU))
+      {
+         CString msg;
+         msg.Format("UpdateHRULevelVariables() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
+         Report::ErrorMsg(msg);
+      }
+
       HRULayer * pNatSoilBox = pHRU->GetLayer(BOX_NAT_SOIL);
       m_pHRUlayer->SetDataU(hru_ndx, m_colHruNAT_SOIL, unirrigated_area_m2 > 0.f ? ((pNatSoilBox->m_volumeWater / unirrigated_area_m2) * 1000.f) : 0.f);
       HRULayer * pIrrigSoilBox = pHRU->GetLayer(BOX_IRRIG_SOIL);
