@@ -530,7 +530,7 @@
     <output name="Available water on Pudding at IDU 140000 (minimum frac)" query="IDU_INDEX=140000" value="MIN_Q_WRQ" type="SUM" />
   </output_group>
 -->
-  <!-- downstream end -->
+  <!-- downstream end --
   <output_group name="REP Instream Water Right Available Water Metric (frac of regulatory demand of most junior WR)">
     <output name="Available water on Coast Fork Willamette at IDU 28621 (minimum frac)" query="IDU_INDEX=28621" value="MIN_Q_WRQ" type="SUM" />
     <output name="Available water on Middle Fork Willamette at IDU 29023 (minimum frac)" query="IDU_INDEX=29023" value="MIN_Q_WRQ" type="SUM" />
@@ -548,7 +548,7 @@
 
     <output name="Available water on Pudding at IDU 140000 (minimum frac)" query="IDU_INDEX=140000" value="MIN_Q_WRQ" type="SUM" />
   </output_group>
-
+-->
   <output name="REP subbasin tot ac of ag land" query="(LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0)" stratify_by="SUB_AREA" value="AREA*ac_per_m2" type="sum" />
    <output name="REP subbasin tot ac of irrigable ag land SW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 2 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="AREA*ac_per_m2" type="sum" />
    <output name="REP subbasin tot ac of irrigable ag land GW" query="WREXISTS &amp; 4096 and WREXISTS &amp; 4 and ((LULC_A=2) or (LULC_A=1 and PROB_DEV<0 and PROB_DEV>-1) or (LULC_A=4 and PROBUSECHG<0))" stratify_by="SUB_AREA" value="AREA*ac_per_m2" type="sum" />
@@ -634,7 +634,7 @@
     <output name="SNOWEVAP_Y (mm H2O)" query="IDU_INDEX=90470" value="SNOWEVAP_Y" type="areaWtMean" />
     <output name="TET (mm H2O)" query="IDU_INDEX=90470" value="ET_yr + RAINEVAP_Y + SNOWEVAP_Y" type="areaWtMean" />
   </output_group>
--->
+--
      <output_group name="REP Irrigation Marys (63911)">
        <output name="Planting Date (DOY)" query="IDU_INDEX=63911" value="PLANTDATE" type="sum" />
        <output name="WR shutoff day (DOY)" query="IDU_INDEX=63911" value="WR_SH_DAY" type="sum"  />
@@ -735,7 +735,7 @@
        <output name="WR shutoff" query="IDU_INDEX=107345" value="WR_SHUTOFF" type="sum"  />
        <output name="WR shutoff index" query="IDU_INDEX=107345" value="WR_SH_NDX" type="sum"  />
      </output_group>
-
+-->
      <output_group name="Land Areas by Crop (acres)">
        <output name="Total Ag (ac)" query="LULC_A=2" value="AREA*ac_per_m2" type="sum" />
        <output name="Total Forest (ac)" query="LULC_A=4" value="AREA*ac_per_m2" type="sum" />
@@ -845,8 +845,8 @@
         <output name='Hyslop Farm IDU_ID 75947 PRECIP_YR (mm)' query='IDU_ID=75947' value='PRECIP_YR' type='AREAWTMEAN' />
         <output name='Hyslop Farm IDU_ID 75947 PRECIP_YR (in)' query='IDU_ID=75947' value='PRECIP_YR*inches_per_mm' type='AREAWTMEAN' />
       </output_group>
-
-     <!-- SNOTEL site snowpack-->
+<!--
+     <!-- SNOTEL site snowpack--
      <output_group name="REP SNOTEL site Apr 1 SWE (mm)">
        <output name="SNOTEL Clackamas Lake idu 125100" query="IDU_INDEX=125100" value="SNOW_APR" type="AREAWTMEAN" />
        <output name="SNOTEL Daly Lake idu 65965" query="IDU_INDEX=65965" value="SNOW_APR" type="AREAWTMEAN" />
@@ -856,7 +856,7 @@
        <output name="SNOTEL Roaring River idu 21368" query="IDU_INDEX=21368" value="SNOW_APR" type="AREAWTMEAN" />
        <output name="SNOTEL Santiam Jct idu 60196" query="IDU_INDEX=60196" value="SNOW_APR" type="AREAWTMEAN" />
      </output_group>
-     <!-- SNOTEL site HRU hypsometric mean elevation -->
+     <!-- SNOTEL site HRU hypsometric mean elevation --
      <output_group name="REP Hypsometric mean elev of HRUs with SNOTEL sites (ft)">
        <output name="SNOTEL Clackamas Lake HRU 6955" query="HRU_ID=6955" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
        <output name="SNOTEL Daly Lake HRU 3576" query="HRU_ID=3576" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
@@ -874,7 +874,7 @@
        <output name="elev of ECOREGIONs 8 9 and 10" query="ECOREGION=8 or ECOREGION=9 or ECOREGION=10" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
        <output name="elev of ECOREGIONs 11 and 12" query="ECOREGION=11 or ECOREGION=12" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
      </output_group>
-
+-->
      <output_group name="REP ET and area by LULC_A">
        <output name ="ET over LULC_A=1 Developed (mm)" query="LULC_A=1" value="ET_YR" type="AREAWTMEAN" />
        <output name ="ET over LULC_A=2 Ag (mm)" query="LULC_A=2" value="ET_YR" type="AREAWTMEAN" />

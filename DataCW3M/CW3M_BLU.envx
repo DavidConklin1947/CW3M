@@ -36,6 +36,7 @@
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
     useWaterYears              ='0'
+    spinup='0'
   />
 
   <layers >

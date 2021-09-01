@@ -214,26 +214,8 @@
        <output name="IRP loss due to WR shutoffs for McKenzie basin ($)" query="SUB_AREA=1 and LULC_A=2 and (WR_IRRIG_S=1 or WR_IRRIG_G=1) and WR_SHUTOFF!=0" value="IRP*(AREA/m2perAcre)" type="SUM" />
      </output_group>
      <!-- Metrics for irrigation analysis -->
-<!--
-    <output_group name="REP IDU 90470 Irrigation requested and allocated (ac-ft)">
-      <output name="IDU 90470 irrigation requested from surface water (ac-ft)" query="LULC_A=2 and WR_IRRIG_S=1 and IDU_INDEX=90470" value="IRRRQST_Y" type="SUM" />
-      <output name="IDU 90470 irrigation requested from ground water (ac-ft)" query="LULC_A=2 and WR_IRRIG_G=1 and IDU_INDEX=90470" value="IRRRQST_Y" type="SUM" />
-      <output name="IDU 90470 irrigation allocated from surface water (ac-ft)" query="LULC_A=2 and WR_IRRIG_S=1 and IDU_INDEX=90470" value="IRRRQST_Y" type="SUM" />
-      <output name="IDU 90470 irrigation allocated from ground water (ac-ft)" query="LULC_A=2 and WR_IRRIG_G=1 and IDU_INDEX=90470" value="IRRRQST_Y" type="SUM" />
-    </output_group>
-  <output_group name="REP IDU 90470 ET and Precip (mm H2O)">
-    <output name="AET (mm)" query="IDU_INDEX=90470" value="ET_yr" type="AREAWTMEAN" />
-    <output name="Maximum ET (mm)" query="IDU_INDEX=90470" value="MAX_ET_yr" type="AREAWTMEAN" />
-    <output name="Precip (mm)" query="IDU_INDEX=90470" value="Precip_yr" type="AREAWTMEAN" />
-    <output name="RAINTHRU_Y (mm H2O)" query="IDU_INDEX=90470" value="RAINTHRU_Y" type="areaWtMean" />
-    <output name="RAINEVAP_Y (mm H2O)" query="IDU_INDEX=90470" value="RAINEVAP_Y" type="areaWtMean" />
-    <output name="SNOWTHRU_Y (mm H2O)" query="IDU_INDEX=90470" value="SNOWTHRU_Y" type="areaWtMean" />
-    <output name="SNOWEVAP_Y (mm H2O)" query="IDU_INDEX=90470" value="SNOWEVAP_Y" type="areaWtMean" />
-    <output name="TET (mm H2O)" query="IDU_INDEX=90470" value="ET_yr + RAINEVAP_Y + SNOWEVAP_Y" type="areaWtMean" />
-  </output_group>
--->
 
-     <output_group name="Land Areas by Crop (acres)">
+  <output_group name="Land Areas by Crop (acres)">
        <output name="Total Ag (ac)" query="LULC_A=2" value="AREA*ac_per_m2" type="sum" />
        <output name="Total Forest (ac)" query="LULC_A=4" value="AREA*ac_per_m2" type="sum" />
        <output name="Corn (ac)" query="LULC_B=26" value="AREA*ac_per_m2" type="sum" />
@@ -330,35 +312,6 @@
      </output_group>
 
      <!-- end of metrics for irrigation analysis -->
-
-     <!-- SNOTEL site snowpack-->
-     <output_group name="REP SNOTEL site Apr 1 SWE (mm)">
-       <output name="SNOTEL Clackamas Lake idu 125100" query="IDU_INDEX=125100" value="SNOW_APR" type="AREAWTMEAN" />
-       <output name="SNOTEL Daly Lake idu 65965" query="IDU_INDEX=65965" value="SNOW_APR" type="AREAWTMEAN" />
-       <output name="SNOTEL Hogg Pass idu 58776" query="IDU_INDEX=58776" value="SNOW_APR" type="AREAWTMEAN" />
-       <output name="SNOTEL Jump Off Joe idu 50203" query="IDU_INDEX=50203" value="SNOW_APR" type="AREAWTMEAN" />
-       <output name="SNOTEL McKenzie idu 45154" query="IDU_INDEX=45154" value="SNOW_APR" type="AREAWTMEAN" />
-       <output name="SNOTEL Roaring River idu 21368" query="IDU_INDEX=21368" value="SNOW_APR" type="AREAWTMEAN" />
-       <output name="SNOTEL Santiam Jct idu 60196" query="IDU_INDEX=60196" value="SNOW_APR" type="AREAWTMEAN" />
-     </output_group>
-     <!-- SNOTEL site HRU hypsometric mean elevation -->
-     <output_group name="REP Hypsometric mean elev of HRUs with SNOTEL sites (ft)">
-       <output name="SNOTEL Clackamas Lake HRU 6955" query="HRU_ID=6955" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Daly Lake HRU 3576" query="HRU_ID=3576" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Hogg Pass and Santiam Jct HRU 3251" query="HRU_ID=3251" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Jump Off Joe HRU 2904" query="HRU_ID=2904" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL McKenzie HRU 2511" query="HRU_ID=2511" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Roaring River HRU 1317" query="HRU_ID=1317" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Clackamas Lake idu 125100" query="IDU_INDEX=125100" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Daly Lake idu 65965" query="IDU_INDEX=65965" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Hogg Pass idu 58776" query="IDU_INDEX=58776" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Jump Off Joe idu 50203" query="IDU_INDEX=50203" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL McKenzie idu 45154" query="IDU_INDEX=45154" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Roaring River idu 21368" query="IDU_INDEX=21368" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="SNOTEL Santiam Jct idu 60196" query="IDU_INDEX=60196" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="elev of ECOREGIONs 8 9 and 10" query="ECOREGION=8 or ECOREGION=9 or ECOREGION=10" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-       <output name="elev of ECOREGIONs 11 and 12" query="ECOREGION=11 or ECOREGION=12" value="ELEV_MEAN*ft_per_m" type="AREAWTMEAN" />
-     </output_group>
 
      <output_group name="REP ET and area by LULC_A">
        <output name ="ET over LULC_A=1 Developed (mm)" query="LULC_A=1" value="ET_YR" type="AREAWTMEAN" />

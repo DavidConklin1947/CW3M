@@ -57,7 +57,7 @@ using namespace std;
 #define BOX_SLOW_GW 5
 
 #define NON_WETLAND_WETNESS_TOKEN -1000.
-#define NON_WETLAND_TOKEN -1
+#define NON_WETLAND_TOKEN 0
 #define NOMINAL_LOW_FLOW_CMS 0.010 /* 10 liters of water per sec */
 #define NOMINAL_LOW_WATER_LITERS_PER_METER 1 /* one liter of water per meter of stream length*/
 #define NOMINAL_MINIMUM_SOIL_WATER_CONTENT 0.001 /* 1 mm of water content per meter of soil depth*/
@@ -92,6 +92,7 @@ using namespace std;
 #define HRU_ID gpFlowModel->m_colHRU_ID
 #define HRU_NDX gpFlowModel->m_colHRU_NDX
 #define H2O_MELT gpFlowModel->m_colH2O_MELT
+#define IDU_ID gpFlowModel->m_colIDU_ID
 #define IRRIGATION gpFlowModel->m_colIRRIGATION
 #define LAI gpFlowModel->m_colLAI
 #define LULC_A gpFlowModel->m_colLulcA

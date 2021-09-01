@@ -5789,14 +5789,15 @@ bool FlowModel::ApplyQ2WETL()
       // Within a given wetland, move water from reaches into wetland
       // IDUs in order by lowest elevation IDU to highest elevation IDU.
       Wetland* pWetl = m_wetlArray[wetl_ndx];
-      int num_idus_in_wetl = (int)pWetl->m_wetlIDUndxArray.GetSize();
+      int num_idus_in_wetl = (int)pWetl->m_wetlIDUndxArray.GetCount();
       CArray <double, double> remaining_cms_array;
       for (int idu_ndx_in_wetl = 0; idu_ndx_in_wetl < num_idus_in_wetl; idu_ndx_in_wetl++)
       { // Since more than one IDU may drain to a given reach, this logic may be traversed more than once for a given reach.
          int reach_ndx = pWetl->m_wetlReachNdxArray[idu_ndx_in_wetl];
          int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl];
          Reach* pReach = m_reachArray[reach_ndx];
-         ASSERT(gpFlowModel->AttInt(idu_poly_ndx, COMID) == pReach->m_reachID);
+         int comid = pReach->m_reachID;
+         ASSERT(gpFlowModel->AttInt(idu_poly_ndx, COMID) == comid);
          double reach_remaining_cms = pReach->m_q2wetl_cms;
          double reach_remaining_m3 = reach_remaining_cms * SEC_PER_DAY;
          if (pReach->m_q2wetl_cms > 0.)
@@ -5814,7 +5815,7 @@ bool FlowModel::ApplyQ2WETL()
                }
             }
             reach_remaining_m3 = reach_remaining_cms * SEC_PER_DAY;
-            if (reach_remaining_m3 > 0.) reach_remaining_m3 = pWetl->ReachH2OtoWetland(reach_ndx, reach_remaining_m3);
+            if (reach_remaining_m3 > 0.) reach_remaining_m3 = pWetl->ReachH2OtoWetland(comid, reach_remaining_m3);
          } // end of if (pReach->m_q2wetl_cms > 0.)
 
          reach_remaining_cms = reach_remaining_m3 / SEC_PER_DAY;
@@ -5847,7 +5848,7 @@ bool FlowModel::ApplyQ2WETL()
       ASSERT(H2OtoWetl_m3 > 0.);
       if (H2OtoWetl_m3 <= 0.) return(0.);
 
-      int num_wetl_idus = (int)m_wetlIDUndxArray.GetSize();
+      int num_wetl_idus = (int)m_wetlIDUndxArray.GetCount();
       double remaining_m3 = H2OtoWetl_m3;
       for (int i = 0; remaining_m3 > 0. && i < num_wetl_idus; i++)
       {
@@ -8435,7 +8436,7 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
 {
    if (WETL_ID < 0) return(0);
 
-   int reach_count = (int)m_reachArray.GetSize();
+   int reach_count = (int)m_reachArray.GetCount();
    int reach_array_ndx;
    for (reach_array_ndx = 0; reach_array_ndx < reach_count; reach_array_ndx++)
    {
@@ -8448,7 +8449,9 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
    for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu != m_pIDUlayer->End(); idu++)
    {
       int wetl_id = AttInt(idu, WETL_ID);
-      if (wetl_id <= 0) continue;
+      bool is_wetland = AttInt(idu, LULC_A) == LULCA_WETLAND;
+      if (!is_wetland) continue;
+
       Wetland* pWetl = NULL;
       double idu_area_m2 = Att(idu, AREA);
       int wetl_ndx = 0; while (wetl_ndx < num_wetlands && m_wetlArray[wetl_ndx]->m_wetlID != wetl_id) wetl_ndx++;
@@ -8467,6 +8470,37 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
 
    } // end of loop through IDUs
 
+   // A single wetland may extend across more than one HRU.
+   // But a single HRU may contain IDUs from no more than one wetland.
+   int num_HRUs = m_hruArray.GetCount();
+   for (int hru_ndx = 0; hru_ndx < num_HRUs; hru_ndx++)
+   {
+      int wetl_id = NON_WETLAND_TOKEN;
+      HRU* pHRU = GetHRU(hru_ndx);
+      int num_idus_in_hru = pHRU->m_polyIndexArray.GetCount();
+      bool hru_ok = true;
+      for (int idu_ndx_in_hru = 0; hru_ok && idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
+      {
+         int idu_poly_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
+         bool is_wetland = AttInt(idu_poly_ndx, LULC_A) == LULCA_WETLAND;
+         if (!is_wetland) continue;
+
+         int idu_wetl_id = AttInt(idu_poly_ndx, WETL_ID);
+         if ((idu_wetl_id != NON_WETLAND_TOKEN) && (idu_wetl_id != wetl_id))
+         {
+            if (wetl_id == NON_WETLAND_TOKEN) wetl_id = idu_wetl_id;
+            else
+            {
+               CString msg;
+               msg.Format("InitWetlands() HRU %d contains more than one wetland. IDU %d is in wetland %d, whereas another IDU is in wetland %d.",
+                  pHRU->m_id, AttInt(idu_poly_ndx, IDU_ID), idu_wetl_id, wetl_id);
+               Report::ErrorMsg(msg);
+               hru_ok = false;
+            } // end of if (wetl_id == NON_WETLAND_TOKEN) ... else
+         } // end of if (idu_wetl_id != NON_WETLAND_TOKEN)
+      } // end of loop thru IDUs in this HRU
+   } // end of loop thru HRUs
+
    // Now, for each wetland, rearrange the entries in m_wetlIDUndxArray into an order 
    // representing the order in which the wetland IDUs will be inundated,
    // i.e. from the IDU at the lowest elevation to the one at the highest elevation.
@@ -8474,7 +8508,7 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
    for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
    {
       Wetland* pWetl = m_wetlArray[wetl_ndx];
-      int num_idus = (int)pWetl->m_wetlIDUndxArray.GetSize();
+      int num_idus = (int)pWetl->m_wetlIDUndxArray.GetCount();
       CArray <int, int> idus; idus.SetSize(num_idus);
       CArray <float, float> elevations; elevations.SetSize(num_idus);
       for (int i = 0; i < num_idus; i++)
@@ -8518,12 +8552,13 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
          pWetl->m_wetlHRUndxArray[i] = hru_ndx;
          HRU* pHRU = GetHRU(hru_ndx);
          int comid = pHRU->AttInt(HruCOMID);
+// ??? This isn't necessarily the reach associated with the IDU, since a single HRU can be associated with more than one reach.
          Reach* pReach = GetReachFromCOMID(comid);
          pWetl->m_wetlReachNdxArray[i] = pReach->m_reachArrayNdx;
          // By convention, a reach may only be associated with a single wetland.
          if (pReach->m_wetlNdx != wetl_ndx)
          {
-            ASSERT(pReach->m_wetlNdx = NON_WETLAND_TOKEN);
+            ASSERT(pReach->m_wetlNdx == NON_WETLAND_TOKEN);
             pReach->m_wetlNdx = wetl_ndx;
          }
       } // end of loop through m_wetlIDUndxArray
