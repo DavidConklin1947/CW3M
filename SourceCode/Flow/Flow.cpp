@@ -698,7 +698,7 @@ HRU::HRU( void )
    , m_currentGWRecharge(0.0f)
    , m_currentGWFlowOut(0.0f)
    , m_runoff_yr(0.0f)
-   , m_percentIrrigated(0.0f)
+   , m_fracIrrigated(0.0)
    , m_meanLAI(0.0f)
    , m_currentMaxET(0.0f)
    , m_currentSediment(0.0f)
@@ -2661,13 +2661,11 @@ FlowModel::FlowModel()
  , m_colMAXSNOW(-1 )
  , m_colHruApr1SWE10Yr( -1 )
  , m_colHruApr1SWE( -1 )
- , m_colHRUPercentIrrigated(-1)
  , m_colHRUMeanLAI(-1)
  , m_colMaxET_yr(-1)
  , m_colIrrigation_yr(-1)
  , m_colIrrigation(-1)
  , m_colRunoff_yr(-1)
-//x , m_colSTORAGE_YR(-1)
  , m_colLulcB(-1)
  , m_colLulcA(-1)
  , m_colPVT(-1)
@@ -3314,7 +3312,6 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colIrrigation, "IRRIGATION", TYPE_INT, CC_AUTOADD); 
 
-   EnvExtension::CheckCol(m_pCatchmentLayer, m_colHRUPercentIrrigated, "HRU_IRR_P", TYPE_FLOAT, CC_AUTOADD); 
    EnvExtension::CheckCol(m_pCatchmentLayer, m_colHRUMeanLAI, "HRU_LAI", TYPE_FLOAT, CC_AUTOADD); 
 
    // <streams>
@@ -3885,7 +3882,6 @@ void FlowModel::SummarizeIDULULC()
          {
          HRU *pHRU = pCatchment->GetHRUfromCatchment(j);
          float meanLAI = 0.0f;
-         float areaIrrigated = 0.0f;
          float totalArea = 0.0f;
          
          for (int k = 0; k < pHRU->m_polyIndexArray.GetSize(); k++)
@@ -3906,17 +3902,13 @@ void FlowModel::SummarizeIDULULC()
 
             int irrigation = 0; m_flowContext.pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[k], m_colIrrigation, irrigation);
             
-            if (irrigation == 1 )    // it is irrigated
-               areaIrrigated += area;
             }
 
-         pHRU->m_percentIrrigated = areaIrrigated / totalArea;
          pHRU->m_meanLAI = meanLAI / totalArea;
          if (!m_estimateParameters)
             {
             for (int k = 0; k < pHRU->m_polyIndexArray.GetSize(); k++)
                {
-               gpFlow->UpdateIDU(m_flowContext.pEnvContext, pHRU->m_polyIndexArray[k], m_colHRUPercentIrrigated, pHRU->m_percentIrrigated, true);
                gpFlow->UpdateIDU(m_flowContext.pEnvContext, pHRU->m_polyIndexArray[k], m_colHRUMeanLAI, pHRU->m_meanLAI, false);
                }
             }
@@ -3983,6 +3975,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
   // ReadState();//read file including initial values for the state variables. This avoids model spin up issues
 
    InitRunFluxes();
+   ResetHRUfluxes();
+   ResetReachFluxes();
    InitRunPlugins();
 
    InitReservoirControlPoints();   //initialize reservoir control points
@@ -5436,8 +5430,6 @@ bool FlowModel::Run( EnvContext *pEnvContext )
    
    m_flowContext.Reset();   
 
-   ResetFluxValuesForStep( pEnvContext );
-
    omp_set_num_threads(gpFlow->m_processorsUsed); 
 
    m_volumeMaxSWE = 0.0f;
@@ -5533,17 +5525,21 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          
          pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pBox_snow->m_volumeWater / pHRU->m_HRUtotArea_m2)); 
          pHRU->SetAtt(HruBOXSURF_M3, pBox_surface_h2o->m_volumeWater); 
-         pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pBox_nat_soil->m_volumeWater / pHRU->m_HRUtotArea_m2)); 
+
+         float hru_irrigated_area_m2 = (float)pHRU->m_areaIrrigated;
+         float hru_natural_area_m2 = pHRU->m_HRUeffArea_m2 - hru_irrigated_area_m2;
+         ASSERT(hru_natural_area_m2 >= 0);
+         double nat_soil_h2o_mm = 1000. * pBox_nat_soil->m_volumeWater / hru_natural_area_m2;
+         pHRU->SetAttFloat(HruNAT_SOIL, (float)nat_soil_h2o_mm);
+
+         double irrig_soil_h2o_mm = hru_irrigated_area_m2 > 0 ? (1000. * pBox_irrig_soil->m_volumeWater / hru_irrigated_area_m2) : 0.;
          pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pBox_irrig_soil->m_volumeWater / pHRU->m_HRUtotArea_m2));
+
          pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pBox_fast_gw->m_volumeWater / pHRU->m_HRUtotArea_m2));
          pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pBox_slow_gw->m_volumeWater / pHRU->m_HRUtotArea_m2));
 
          double box_snow_m3 = pBox_snow->m_volumeWater;
          double surface_h2o_m3 = pBox_surface_h2o->m_volumeWater;
-
-          float hru_irrigated_area_m2 = pHRU->m_areaIrrigated;
-         float hru_natural_area_m2 = pHRU->m_HRUeffArea_m2 - hru_irrigated_area_m2;
-         ASSERT(hru_natural_area_m2 >= 0);
 
          // How much of the surface water is meltwater in the snowpack, and how much is standing water in wetlands?
          double hru_standing_h2o_m3 = 0.;
@@ -5598,9 +5594,9 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             bool is_wetland = lulc_a == LULCA_WETLAND;
             if (is_wetland)
             { // WETNESS was set earlier this day in HBV
+               double wetness = Att(idu_ndx, WETNESS); // for debugging
                SetAtt(idu_ndx, SNOW_SWE, 0);
                SetAtt(idu_ndx, H2O_MELT, 0);
-               double wetness = Att(idu_ndx, WETNESS);
             }
             else
             { // Not a wetland, may have a snowpack.
@@ -5691,7 +5687,6 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          SaveDetailedOutputReach(m_reachDailyFilePtrArray);
          
 
-      ResetFluxValuesForStep( pEnvContext );
       CollectData( dayOfYear );
 
       finish = clock();
@@ -6248,7 +6243,8 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
             pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater = pHRU->GetLayer(BOX_IRRIG_SOIL)->m_HRUareaFraction * totWater;
             pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
 
-            pHRU->m_areaIrrigated = (float)targetIrrigatedArea;
+            pHRU->m_areaIrrigated = targetIrrigatedArea;
+            pHRU->m_fracIrrigated = targetIrrigatedArea / pHRU->m_HRUtotArea_m2;
             m_pHRUlayer->SetDataU(h, m_colHruAREA_IRRIG, pHRU->m_areaIrrigated);
             } // end of loop thru HRUs
          } // end of if (label[0] == name[0])
@@ -8237,44 +8233,50 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
 } // end of WriteDataToMap()
 
 
-bool FlowModel::ResetFluxValuesForStep(  EnvContext *pEnvContext  )
+void FlowModel::ResetReachFluxes()
+{
+   for (int i = 0; i < m_reachArray.GetSize(); i++)
    {
-   for (int i=0; i < m_catchmentArray.GetSize(); i++)
-      {
-      ASSERT( m_catchmentArray[ i ] != NULL );
-      m_catchmentArray[ i ]->m_contributionToReach=0.0f;
-      }
-
-   for ( int i=0; i < m_reachArray.GetSize(); i++ )
-      {
-      Reach *pReach = m_reachArray.GetAt(i);
+      Reach* pReach = m_reachArray.GetAt(i);
       pReach->ResetFluxValue(); pReach->m_additionsWP = WaterParcel(0, 0); // pReach->m_withdrawals_m3 = 0.;
 
-      ReachSubnode *subnode = pReach->GetReachSubnode(0);
-      for (int k=0;k<m_hruSvCount-1;k++)
+      ReachSubnode* subnode = pReach->GetReachSubnode(0);
+      for (int k = 0; k < m_hruSvCount - 1; k++)
          subnode->ResetExtraSvFluxValue(k);
-      }
+   }
+   
+   return;
+} // end of ResetReachFluxes()
 
-   for ( int i=0; i < m_hruArray.GetSize(); i++ )
+
+void FlowModel::ResetHRUfluxes() // Also resets catchment fluxes
+{
+   for (int i = 0; i < m_hruArray.GetSize(); i++)
+   {
+      HRU* pHRU = m_hruArray.GetAt(i);
+      int neighborCount = (int)pHRU->m_neighborArray.GetSize();
+
+      for (int j = 0; j < pHRU->m_layerArray.GetSize(); j++)
       {
-      HRU *pHRU = m_hruArray.GetAt(i);
-      int neighborCount = (int) pHRU->m_neighborArray.GetSize();
-
-      for (int j=0;j<pHRU->m_layerArray.GetSize();j++)
-         {
-         HRULayer *pLayer = pHRU->m_layerArray.GetAt(j);
+         HRULayer* pLayer = pHRU->m_layerArray.GetAt(j);
          pLayer->ResetFluxValue();
 
-         for (int k=0; k < (int) pLayer->m_waterFluxArray.GetSize(); k++) //kbv 4/27/15   why would these two lines be commented out?
-            pLayer->m_waterFluxArray[k]=0.0f;
+         for (int k = 0; k < (int)pLayer->m_waterFluxArray.GetSize(); k++) //kbv 4/27/15   why would these two lines be commented out?
+            pLayer->m_waterFluxArray[k] = 0.0f;
 
-         for (int l=0;l<m_hruSvCount-1;l++)
-            pLayer->ResetExtraSvFluxValue(l);     
-         }
-      }
+         for (int l = 0; l < m_hruSvCount - 1; l++)
+            pLayer->ResetExtraSvFluxValue(l);
+      } // end of loop thru HRULayers in this HRU
+   } // end of loop thru HRUs
 
-   return true;
-   }
+   for (int i = 0; i < m_catchmentArray.GetSize(); i++)
+   {
+      ASSERT(m_catchmentArray[i] != NULL);
+      m_catchmentArray[i]->m_contributionToReach = 0.0f;
+   } // end of loop through catchments
+
+   return;
+} // end of ResetHRUfluxes()
 
 
 bool FlowModel::ResetCumulativeYearlyValues( )
@@ -8472,12 +8474,12 @@ int FlowModel::InitWetlands() // Returns the number of wetlands.
 
    // A single wetland may extend across more than one HRU.
    // But a single HRU may contain IDUs from no more than one wetland.
-   int num_HRUs = m_hruArray.GetCount();
+   int num_HRUs = (int)m_hruArray.GetCount();
    for (int hru_ndx = 0; hru_ndx < num_HRUs; hru_ndx++)
    {
       int wetl_id = NON_WETLAND_TOKEN;
       HRU* pHRU = GetHRU(hru_ndx);
-      int num_idus_in_hru = pHRU->m_polyIndexArray.GetCount();
+      int num_idus_in_hru = (int)pHRU->m_polyIndexArray.GetCount();
       bool hru_ok = true;
       for (int idu_ndx_in_hru = 0; hru_ok && idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
       {
@@ -12356,7 +12358,6 @@ void FlowModel::GetCatchmentDerivatives( double time, double timeStep, int svCou
    pFlowContext->time = (float) time;
    
    FlowModel *pModel = pFlowContext->pFlowModel;
-   pModel->ResetFluxValuesForStep( pFlowContext->pEnvContext );
 
    //pModel->m_pLateralExchange->Run( pFlowContext ); // SetGlobalHruToReachExchanges(); 
    //pModel->m_pHruVertExchange->Run( pFlowContext ); // SetGlobalHruVertFluxes();
@@ -12437,6 +12438,7 @@ void FlowModel::GetCatchmentDerivatives( double time, double timeStep, int svCou
             }
          } // end of loop thru HRULayers of this HRU
       } // end of loop thru HRUs
+   gpFlowModel->ResetHRUfluxes();
 
    if (pModel->m_pReachRouting->GetMethod() == GM_RKF)
       {
@@ -12468,6 +12470,8 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
    double box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_volumeWater;
    double flux_box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
+   double adjusted_box_surface_h2o_m3 = box_surface_h2o_m3 + (-flux_box_surface_h2o_m3); // negative fluxes go INTO the HRULayer
+   double adjusted_hru_box_surf_m3 = hru_box_surf_m3 + (-flux_box_surface_h2o_m3);
 
    HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
    double box_nat_soil_m3 = pBOX_NAT_SOIL->m_volumeWater;
@@ -12504,10 +12508,13 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
       }
    } // end of loop thru IDUs in this HRU
 
-   bool is_close_enough = close_enough(hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-5, 1);
-   is_close_enough = is_close_enough && close_enough(hru_box_surf_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-5, 1.);
+   double box_snow_flux_m3 = pBOX_SNOW->m_globalHandlerFluxValue;
+   double box_surface_h2o_flux_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
+
+   bool is_close_enough = close_enough(adjusted_hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-5, 1);
+   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-5, 1.);
    is_close_enough = is_close_enough && close_enough(hru_snow_box_m3, box_snow_m3, 1e-6, 1);
-   is_close_enough = is_close_enough && close_enough(hru_box_surf_m3, box_surface_h2o_m3, 1e-6, 1);
+   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, adjusted_box_surface_h2o_m3, 1e-6, 1);
    is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-5, 1);
    is_close_enough = is_close_enough && (pHRU->m_snowpackFlag == (box_snow_m3 > 0));
    is_close_enough = is_close_enough && (pHRU->m_standingH2Oflag == (hru_h2o_stndg_m3 > 0));

@@ -767,7 +767,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
    double duration = (float)(finish - start) / CLOCKS_PER_SEC;
    gpModel->m_reachFluxFnRunTime += (float)duration;
 
-   return true;
+   gpFlowModel->ResetReachFluxes();
+   return(true);
 } // end of SolveReachKinematicWave()
 
 
@@ -810,6 +811,7 @@ WaterParcel ReachRouting::GetAdditionsToReach(Reach* pReach)
 } // end of GetAdditionsToReach()
 
 
+/*
 double ReachRouting::GetLateralInflow( Reach *pReach )
    {
    float inflow = 0;
@@ -832,6 +834,7 @@ double ReachRouting::GetLateralInflow( Reach *pReach )
 
    return inflow;
    } // end of GetLateralInflow()
+*/
 
 
 void ReachRouting::MoveWP(double volume_m3, WaterParcel* pFromWP, WaterParcel* pToWP)

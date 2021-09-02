@@ -403,6 +403,8 @@ public:
 
 // a FluxContainer is a object (e.g. HRU, Reach) that can contain fluxes. 
 class FluxContainer
+   // Somewhat counterintuitively, negative fluxes represent quantities going into the flux container,
+   // and positive fluxes represent fluxes coming out of the flux container.
 {
    friend class FlowModel;
 
@@ -417,7 +419,10 @@ public:
    bool m_nanOccurred; // true when a not-a-number has occurred
 
    float GetFluxValue( ) { return m_globalHandlerFluxValue; } 
-   void  ResetFluxValue( ) { m_globalHandlerFluxValue=0.0f;} 
+   void  ResetFluxValue( ) 
+   { 
+      m_globalHandlerFluxValue=0.0f;
+   } 
 
    // array of attached fluxes
    PtrArray< Flux > m_fluxArray;    // memory managed by this object)
@@ -710,7 +715,8 @@ public:
 
    float m_rainfall_yr;       // mm/year, accumulate throughout the year
    float m_snowfall_yr;       // mm/year, accumulate throughout the year
-   float m_areaIrrigated;
+   double m_areaIrrigated;
+   double m_fracIrrigated;
 
    float m_temp_yr;           // C, average over year
    MovingAvg m_temp_10yr;     // C, 20 year mov avg
@@ -762,7 +768,6 @@ public:
    float m_elws;                //elevation (map units) of the water surface
    float m_et_yr;             // mm/year      
    float m_runoff_yr;         // mm/year
-   float m_percentIrrigated;  // fraction of area (0-1)
    float m_meanLAI;           // dimensionless
 
    int m_climateIndex;  //the index of the climate grid cell representing the HRU
@@ -1647,7 +1652,6 @@ protected:
    int  ApplyAreaConstraints( ReachNode *pNode );
    int  SaveState(int calendar_year);
    bool ReadState();
-//x   bool ReadState(bool spinupFlag);
    bool InitializeSpinup(void);
    bool IsICfileAvailable();
 
@@ -1725,7 +1729,8 @@ protected:
    void GetMaxSnowPack(EnvContext*);
    void UpdateYearlyDeltas( EnvContext*  );
    bool RedrawMap( EnvContext* );
-   bool ResetFluxValuesForStep( EnvContext* );
+   void ResetHRUfluxes();
+   void ResetReachFluxes();
    bool ResetCumulativeYearlyValues();
    bool ResetCumulativeWaterYearValues();
 

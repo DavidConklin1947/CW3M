@@ -206,7 +206,7 @@ protected:
    void MoveWP(double volume_m3, WaterParcel* pFromWP, WaterParcel* pToWP);
    bool  SolveReachKinematicWave( FlowContext* );
 
-   double GetLateralInflow( Reach *pReach );
+//   double GetLateralInflow( Reach *pReach );
    WaterParcel GetAdditionsToReach(Reach* pReach);
 
    double GetReachFluxes( FlowContext*, Reach *pReach );
