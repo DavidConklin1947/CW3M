@@ -78,7 +78,7 @@ float HBV::InitHBV_Global(FlowContext *pFlowContext, LPCTSTR inti)
 
 float HBV::HBVdailyProcess(FlowContext *pFlowContext)
    {
-   int hru_of_interest = 1816;  
+//x   int hru_of_interest = 1816;  
 
    ASSERT(pFlowContext->timing == 1 || pFlowContext->timing == 16); // GMT_INIT or GMT_CATCHMENT
    if (pFlowContext->timing & 1) // GMT_INIT
@@ -128,7 +128,9 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       HRU *pHRU = pFlowContext->pFlowModel->GetHRU(h);
 
       int hruLayerCount = pHRU->GetLayerCount();
-      double natural_area_m2 = pHRU->m_HRUeffArea_m2;
+//x      double natural_area_m2 = pHRU->m_HRUeffArea_m2;
+      double hru_area_m2 = pHRU->m_HRUtotArea_m2; ASSERT(hru_area_m2 > 0.);
+      double non_wetl_area_m2 = pHRU->m_snowpackArea_m2;
       float CFMAX = 0.f, CFR = 0.f, Beta = 0.f, kPerc = 0.0f;
       float k0 = 0.f, k1 = 0.f, UZL = 0.f, k2 = 0.0f;
       float fc = 0.0f;
@@ -162,7 +164,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       ok &= pLULC_Table->Lookup(hbvcalib, m_col_k2, k2) && k2>0;                           // Recession coefficient (day-1)
       if (!ok)
          {
-         CString msg; msg.Format("*** HBVdailyProcess()1 ok = %d, h = %d, hbvcalib = %f Error getting parameter value", ok, h, hbvcalib);
+         CString msg; msg.Format("*** HBVdailyProcess()1 ok = %d, h = %d, hbvcalib = %d Error getting parameter value", ok, h, hbvcalib);
          Report::ErrorMsg(msg);
          }
       // Get the current Day/HRU weather data and calculate terms which depend only on weather data
@@ -184,10 +186,10 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       // Here total snowpack SWE = water_in_snowpack_mm + snow_in_snowpack_mmSWE
       HRULayer *pHRULayer1 = pHRU->GetLayer(BOX_MELT);
       float water_in_snowpack_m3 = (float)pHRULayer1->m_volumeWater;
-      float water_in_snowpack_mm = (float)(((water_in_snowpack_m3 / natural_area_m2)*1000.f > 0.0f) ? (water_in_snowpack_m3 / natural_area_m2)*1000.f : 0.0f); // mm
+      float water_in_snowpack_mm = (float)(((water_in_snowpack_m3 / non_wetl_area_m2)*1000.f > 0.0f) ? (water_in_snowpack_m3 / non_wetl_area_m2)*1000.f : 0.0f); // mm
       HRULayer *pHRULayer0 = pHRU->GetLayer(BOX_SNOWPACK);
       float snow_in_snowpack_m3SWE = (float)pHRULayer0->m_volumeWater;
-      float snow_in_snowpack_mmSWE = (float)(((snow_in_snowpack_m3SWE/natural_area_m2)*1000.f > 0.0f) ? (snow_in_snowpack_m3SWE / natural_area_m2)*1000.f : 0.0f); 
+      float snow_in_snowpack_mmSWE = (float)(((snow_in_snowpack_m3SWE/ non_wetl_area_m2)*1000.f > 0.0f) ? (snow_in_snowpack_m3SWE / non_wetl_area_m2)*1000.f : 0.0f);
 
       float hruIrrigatedArea = 0.0f;
       double hru_wetland_area_m2 = 0.;
@@ -213,19 +215,27 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       hru_wetland_area_m2 *= pHRU->m_frc_naturl;
 
       float irrigatedFracOfArea = 0.0f;
-      if ( natural_area_m2 > 0.0f ) irrigatedFracOfArea = (float)(hruIrrigatedArea / natural_area_m2);
+      irrigatedFracOfArea = (float)(hruIrrigatedArea / hru_area_m2);
 
       float nonIrrigatedSoilWater_mm =  0.0f;
-      if ( natural_area_m2 - hruIrrigatedArea > 0.0f ) nonIrrigatedSoilWater_mm = float(pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater / (natural_area_m2 - hruIrrigatedArea)*1000.0f); // convert from m3 to mm
+      if (hru_area_m2 - hruIrrigatedArea > 0.0f ) nonIrrigatedSoilWater_mm = float(pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater / (hru_area_m2 - hruIrrigatedArea)*1000.0f); // convert from m3 to mm
         
       float irrigatedSoilWater_mm = 0.0f;
       if (hruIrrigatedArea > 0.0f) irrigatedSoilWater_mm = float(pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater / hruIrrigatedArea*1000.0f); // convert from m3 to mm
         
       float upperGroundWater_mm = 0.0f;
-      if (natural_area_m2 > 0.0f) upperGroundWater_mm = float(pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / natural_area_m2*1000.0f);//convert from m to mm
+      if (hru_area_m2 > 0.0f) upperGroundWater_mm = float(pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / hru_area_m2*1000.0f);//convert from m to mm
 
       //Calculate rates
-/*x*/
+
+      double to_wetl_surf_h2o_m3 = 0.;
+      double wetl_to_topsoil_m3 = 0.;
+      double wetl_to_subsoil_m3 = 0.;
+      double wetl_to_reach_m3 = 0.;
+      if (pHRU->m_wetlandArea_m2 > 0.)
+         pHRU->WetlSurfH2Ofluxes(precip, fc, Beta, &to_wetl_surf_h2o_m3, &wetl_to_topsoil_m3, &wetl_to_subsoil_m3, &wetl_to_reach_m3);
+
+/*x
       double infiltration_from_standing_H2O_m3 = 0.;
       double hru_wetl2q_m3 = 0.;
       if (pHRU->m_standingH2Oflag)
@@ -285,7 +295,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 
          pHRU->m_standingH2Oflag = standing_H2O_flag;
       } // end of if (pHRU->m_standingH2Oflag)
-
+x*/
       // gwIrrigated is the proportion of rain/snowmelt that bypasses the irrigated soil bucket, and is added directly to GW
       float gwIrrigated = GroundWaterRechargeFraction(irrigatedSoilWater_mm, fc, Beta); 
 
@@ -296,7 +306,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       float gwNonIrrigated = GroundWaterRechargeFraction((float)nonIrrigatedSoilWater_mm, fc, Beta);
 
       float potentialPercolation_mm = Percolation(upperGroundWater_mm, kPerc); // filling the deepest reservoir
-      float potentialPercolation_m3 = (float)(potentialPercolation_mm * natural_area_m2 / 1000.f);
+      float potentialPercolation_m3 = (float)(potentialPercolation_mm * non_wetl_area_m2 / 1000.f);
 
       // Partition precipitation into snow/rain and melt/refreeze.
       float hruRainThrufall_liters = 0.0f; // Accumulates IDU rain volumes to get the value for the HRU.
@@ -370,22 +380,22 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          } // end polyIndexArray
 
       // Mass balance check
-      float precip_liters = (float)(precip * natural_area_m2);
+      float precip_liters = (float)(precip * hru_area_m2);
       float massBalDiscrepancyFrac = precip != 0.f ? (hruSnowThrufall_liters + hruSnowEvap_liters + hruRainThrufall_liters + hruRainEvap_liters - precip_liters)/precip_liters : 1.e-10f;
       // if (h == hru_of_interest) 
          if (abs(massBalDiscrepancyFrac) > 1.e-5f)
          {
          CString msg; 
          msg.Format("HBVdailyProcess()3 h = %d, precip = %f, natural_area_m2 = %f, pHRU->m_HRUtotArea_m2 = %f, pHRU->m_frc_naturl = %f",
-               h, precip, natural_area_m2, pHRU->m_HRUtotArea_m2, pHRU->m_frc_naturl);
+               h, precip, hru_area_m2, pHRU->m_HRUtotArea_m2, pHRU->m_frc_naturl);
          Report::LogMsg(msg);
          msg.Format("*** HBVdailyProcess()4 h = %d, massBalDiscrepancyFrac = %f, precip_liters = %f, hruSnowThrufall_liters = %f, hruSnowEvap_liters = %f, hruRainThrufall_liters = %f,"
             " hruRainEvap_liters = %f", h, massBalDiscrepancyFrac, precip_liters, hruSnowThrufall_liters, hruSnowEvap_liters, hruRainThrufall_liters, hruRainEvap_liters);
-         Report::LogMsg(msg);
+         Report::WarningMsg(msg);
          }
-      float hruMelt_mm = (float)(hruMelt_liters / natural_area_m2);
-      float hruSnowThrufall_mm = (float)(hruSnowThrufall_liters / natural_area_m2);
-      float hruRainThrufall_mm = (float)(hruRainThrufall_liters / natural_area_m2);
+      float hruMelt_mm = (float)(hruMelt_liters / non_wetl_area_m2);
+      float hruSnowThrufall_mm = (float)(hruSnowThrufall_liters / non_wetl_area_m2);
+      float hruRainThrufall_mm = (float)(hruRainThrufall_liters / non_wetl_area_m2);
 
       // Snowpack at the beginning of the timestep is water_in_snowpack_mm + snow_in_snowpack_mmSWE.
       // Precip is added during the timestep.
@@ -409,12 +419,14 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       if (airTemp > tt)
          { // Some melt from snowpack.
          float available_to_melt_mm = snow_in_snowpack_mmSWE; 
+/*x
          if (h == hru_of_interest) 
             if (hruMelt_mm > (available_to_melt_mm + 5.e-4))
             {
             CString msg; msg.Format("*** HBVdailyProcess()5: h = %d, hruMelt_mm = %f is greater than available_to_melt_mm = %f", h, hruMelt_mm, available_to_melt_mm);
             Report::LogMsg(msg);
             }
+x*/
          if (hruMelt_mm > available_to_melt_mm) hruMelt_mm = available_to_melt_mm;
          } // end of if (airTemp > tt)
       else hruMelt_mm = hruMelt_liters = 0.f;
@@ -428,7 +440,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          if (updated_water_in_snowpack_mm > max_water_in_updated_snowpack_mm)
             {
             rain_and_melt_to_soil_mm = updated_water_in_snowpack_mm - max_water_in_updated_snowpack_mm;
-            rain_and_melt_to_soil_m3 = (float)(rain_and_melt_to_soil_mm * natural_area_m2 / 1000.f);
+            rain_and_melt_to_soil_m3 = (float)(rain_and_melt_to_soil_mm * non_wetl_area_m2 / 1000.f);
             }
          rechargeToIrrigatedSoil_m3 = (irrigatedFracOfArea * rain_and_melt_to_soil_m3) * (1 - gwIrrigated); // Recharge into the irrigated soil bucket, from rain/melt
          rechargeToNonIrrigatedSoil_m3 = ((1.f - irrigatedFracOfArea) * rain_and_melt_to_soil_m3) * (1 - gwNonIrrigated); // Recharge into the nonirrigated soil bucket, from rain/melt
@@ -441,28 +453,28 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          float potentialRefreezing_mm = CFR*CFMAX*(tt - airTemp);
          refreezing_mm = min(potentialRefreezing_mm, water_in_snowpack_mm);
          if (refreezing_mm < 0.f) refreezing_mm = 0.f;
-         refreezing_m3 = (float)(refreezing_mm * natural_area_m2 / 1000.f);
+         refreezing_m3 = (float)(refreezing_mm * non_wetl_area_m2 / 1000.f);
          }
 
-      rain_and_melt_to_soil_m3 = (float)(rain_and_melt_to_soil_mm * natural_area_m2 / 1000.f);
-      double total_infiltration_m3 = rain_and_melt_to_soil_m3 + infiltration_from_standing_H2O_m3;
+      rain_and_melt_to_soil_m3 = (float)(rain_and_melt_to_soil_mm * non_wetl_area_m2 / 1000.f);
+      double infiltration_m3 = rain_and_melt_to_soil_m3;
       rechargeToIrrigatedSoil_m3 = (irrigatedFracOfArea * rain_and_melt_to_soil_m3) * (1 - gwIrrigated); // Recharge into the irrigated soil bucket, from rain/melt
-      rechargeToNonIrrigatedSoil_m3 = (float)(((1.f - irrigatedFracOfArea) * total_infiltration_m3) * (1 - gwNonIrrigated)); // Recharge into the nonirrigated soil bucket, from rain/melt/standing water
-      rechargeToUpperGW_m3 = (float)(total_infiltration_m3 - rechargeToIrrigatedSoil_m3 - rechargeToNonIrrigatedSoil_m3);
+      rechargeToNonIrrigatedSoil_m3 = (float)(((1.f - irrigatedFracOfArea) * infiltration_m3) * (1 - (double)gwNonIrrigated)); // Recharge into the nonirrigated soil bucket, from rain/melt/standing water
+      rechargeToUpperGW_m3 = (float)(infiltration_m3 - rechargeToIrrigatedSoil_m3 - rechargeToNonIrrigatedSoil_m3);
       if (rechargeToUpperGW_m3 < 0.f) rechargeToUpperGW_m3 = 0.f;
 
       pHRU->m_rainThrufall_mm = hruRainThrufall_mm; //mm/d
-      pHRU->m_rainEvap_mm = (float)(hruRainEvap_liters/natural_area_m2); // mm
+      pHRU->m_rainEvap_mm = (float)(hruRainEvap_liters/non_wetl_area_m2); // mm
       pHRU->m_snowThrufall_mm = hruSnowThrufall_mm; //mm/d
-      pHRU->m_snowEvap_mm = (float)(hruSnowEvap_liters/natural_area_m2); // mm SWE
+      pHRU->m_snowEvap_mm = (float)(hruSnowEvap_liters/non_wetl_area_m2); // mm SWE
       pHRU->m_melt_mm = hruMelt_mm;
       pHRU->m_refreezing_mm =  refreezing_mm;
-      pHRU->m_infiltration_mm = (float)((total_infiltration_m3 / natural_area_m2) * 1000.);
-      pHRU->m_infiltrationFromStandingH2O_m3 = infiltration_from_standing_H2O_m3;
-      pHRU->m_rechargeToIrrigatedSoil_mm = (float)((rechargeToIrrigatedSoil_m3 / natural_area_m2) * 1000.f);
-      pHRU->m_rechargeToNonIrrigatedSoil_mm = (float)((rechargeToNonIrrigatedSoil_m3 / natural_area_m2) * 1000.f);
-      pHRU->m_rechargeTopSoil_mm = (float)((((double)rechargeToIrrigatedSoil_m3 + (double)rechargeToNonIrrigatedSoil_m3) / natural_area_m2) * 1000.f);
-      pHRU->m_rechargeToUpperGW_mm = (float)((rechargeToUpperGW_m3 / natural_area_m2) * 1000.f);
+      pHRU->m_infiltration_mm = (float)((infiltration_m3 / non_wetl_area_m2) * 1000.);
+//x      pHRU->m_infiltrationFromStandingH2O_m3 = infiltration_from_standing_H2O_m3;
+      pHRU->m_rechargeToIrrigatedSoil_mm = (float)((rechargeToIrrigatedSoil_m3 / non_wetl_area_m2) * 1000.f);
+      pHRU->m_rechargeToNonIrrigatedSoil_mm = (float)((rechargeToNonIrrigatedSoil_m3 / non_wetl_area_m2) * 1000.f);
+      pHRU->m_rechargeTopSoil_mm = (float)((((double)rechargeToIrrigatedSoil_m3 + (double)rechargeToNonIrrigatedSoil_m3) / non_wetl_area_m2) * 1000.f);
+      pHRU->m_rechargeToUpperGW_mm = (float)((rechargeToUpperGW_m3 / non_wetl_area_m2) * 1000.f);
 
       //Calculate the source/sink term for each HRULayer
       float q0_mm = 0.0f; float q0_m3 = 0.f; 
@@ -476,7 +488,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          {
          HRULayer *pHRULayer = pHRU->GetLayer(l);
          starting_water_m3 += (float)pHRULayer->m_volumeWater; 
-         float waterDepth = float((pHRULayer->m_volumeWater / natural_area_m2)*1000.0f);//mm
+         float waterDepth = float((pHRULayer->m_volumeWater / hru_area_m2)*1000.0f);//mm
          float ss = 0.0f;
          float starting_layer_flux_m3 = pHRULayer->GetFluxValue();
          starting_total_flux_m3 += starting_layer_flux_m3;
@@ -492,13 +504,14 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
                break;
 
             case 1: // Melt or wetland standing water
-               pHRULayer->AddFluxFromGlobalHandler(hruRainThrufall_liters / 1000.0f, FL_TOP_SOURCE);     //m3/d
-               if (pHRU->m_standingH2Oflag)
-               { // This compartment has wetland standing water.
-                  pHRULayer->AddFluxFromGlobalHandler((float)infiltration_from_standing_H2O_m3, FL_BOTTOM_SINK);     //m3/d
-                  if (hru_wetl2q_m3 > 0.)
-                     pHRULayer->AddFluxFromGlobalHandler((float)hru_wetl2q_m3, FL_STREAM_SINK);
+               if (pHRU->m_wetlandArea_m2 > 0)
+               {
+                  pHRULayer->AddFluxFromGlobalHandler((float)to_wetl_surf_h2o_m3, FL_TOP_SOURCE);
+                  pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_topsoil_m3, FL_BOTTOM_SINK);
+                  pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_subsoil_m3, FL_BOTTOM_SINK);
+                  pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_reach_m3, FL_STREAM_SINK);
                }
+               pHRULayer->AddFluxFromGlobalHandler(hruRainThrufall_liters / 1000.0f, FL_TOP_SOURCE);     //m3/d
                if (pHRU->m_snowpackFlag)
                { // This compartment has water in the snowpack.
                   pHRULayer->AddFluxFromGlobalHandler(hruMelt_liters / 1000.0f, FL_TOP_SOURCE);     //m3/d
@@ -508,6 +521,10 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
                break;
 
             case 2: // UnirrigatedSoil
+               if (pHRU->m_wetlandArea_m2 > 0)
+               {
+                  pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_topsoil_m3, FL_TOP_SOURCE);
+               }
                pHRULayer->m_wc = nonIrrigatedSoilWater_mm; // This stmt is needed because non-irrigated area is not necessarily the same as the area of HRU.
                pHRULayer->AddFluxFromGlobalHandler(rechargeToNonIrrigatedSoil_m3, FL_TOP_SOURCE);     //m3/d
                // EvapTrans will add a transpiration flux out of this layer later in this timestep.
@@ -521,32 +538,40 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 
             case 4: // Upper Groundwater: ss = meltToSoil*(gw) - percolation - q0
                //                              + outdoor use of urban water + rural residential water - evapotranspiration from outdoor use of municipal and rural residential water
+               if (pHRU->m_wetlandArea_m2 > 0)
+               {
+                  pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_subsoil_m3, FL_TOP_SOURCE);
+               }
                pHRULayer->AddFluxFromGlobalHandler(-rechargeToUpperGW_m3, FL_SINK); //m3/d   
                q0_mm = Q0(waterDepth, k0, k1, UZL);
-               q0_m3 = (float)(q0_mm*natural_area_m2 / 1000.0f);
+               q0_m3 = (float)(q0_mm * hru_area_m2 / 1000.0f);
                adjusted_percolation_m3 = min(potentialPercolation_m3, (float)pHRULayer->m_volumeWater + rechargeToUpperGW_m3 - q0_m3);
                if (adjusted_percolation_m3 > 0.f) pHRULayer->AddFluxFromGlobalHandler(adjusted_percolation_m3, FL_BOTTOM_SINK);     //m3/d 
                pHRULayer->AddFluxFromGlobalHandler(q0_m3, FL_STREAM_SINK);     //m3/d
+/*x
                if (h == hru_of_interest)
                {
                   CString msg; msg.Format("HBVdailyProcess()6 waterDepth = %f, k0 = %f, k1 = %f, UZL = %f, q0_mm = %f, q0_m3 = %f, adjusted_percolation_m3 = %f", 
                         waterDepth, k0, k1, UZL, q0_mm, q0_m3, adjusted_percolation_m3);
                   Report::LogMsg(msg);
                }
+x*/
                // AltWaterMaster::FateOfUGA_UrbanWater() and FateOfIDU_RuralResidentialWater() will add fluxes in and out of this layer later in this timestep.
                break;
 
             case 5: // Lower Groundwater
                q2_mm = Q2(waterDepth, k2);
-               q2_m3 = (float)(q2_mm*natural_area_m2 / 1000.f);
+               q2_m3 = (float)(q2_mm * hru_area_m2 / 1000.f);
                //ss = percolation - q2; //filling the deepest reservoir
                pHRULayer->AddFluxFromGlobalHandler(adjusted_percolation_m3, FL_TOP_SOURCE);     //m3/d 
                pHRULayer->AddFluxFromGlobalHandler(q2_m3, FL_STREAM_SINK);     //m3/d
+/*x
                if (h == hru_of_interest)
                   {
                   CString msg; msg.Format("HBVdailyProcess()7 waterDepth = %f, k2 = %f, q2_mm = %f, q2_m3 = %f", waterDepth, k2, q2_mm, q2_m3);
                   Report::LogMsg(msg);
                   }
+x*/
                if (ecoregion == HC_ECOREGION) pHRU->m_aquifer_recharge_mm = q2_mm;
                break;
 
@@ -554,32 +579,12 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             } // end of switch on soil layer
 
          float trial_ending_layer_m3 = (float)(pHRULayer->m_volumeWater + pHRULayer->GetFluxValue());
-         if (trial_ending_layer_m3 < 0.f)
-            { // Deal with a negative water volume in the layer.
-            if (h == hru_of_interest) // bottom end of HJA
-               if (trial_ending_layer_m3 < -1.f)
-               {
-               CString msg; msg.Format("*** HBVdailyProcess()8: h = %d, l = %d, pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f, pHRULayer->m_volumeWater = %f, pHRULayer->GetFluxValue() = %f"
-                  ", hruSnowThrufall_mm*natural_area_m2 / 1000.0f = %f, hruMelt_mm*natural_area_m2 / 1000.0f = %f, refreezing_mm*natural_area_m2 / 1000.0f = %f, hruRainThrufall_mm*natural_area_m2 / 1000.0f = %f, "
-                  "rain_and_melt_to_soil_m3 = %f", 
-                  h, l, pHRULayer->m_layer, trial_ending_layer_m3, pHRULayer->m_volumeWater, pHRULayer->GetFluxValue(),
-                  hruSnowThrufall_mm*natural_area_m2 / 1000.0f, hruMelt_mm*natural_area_m2 / 1000.0f, refreezing_mm*natural_area_m2 / 1000.0f,
-                  hruRainThrufall_mm*natural_area_m2 / 1000.0f, rain_and_melt_to_soil_m3);
-               Report::LogMsg(msg);
-               if (pHRULayer->m_layer == 4)
-                  {
-                  msg.Format("rechargeToUpperGW_m3 = %f, potentialPercolation_m3 = %f, adjusted_percolation_m3 = %f, q0_m3 = %f", rechargeToUpperGW_m3, potentialPercolation_m3, adjusted_percolation_m3, q0_m3);
-                  Report::LogMsg(msg);
-                  }
-               }
-            // pHRULayer->AddFluxFromGlobalHandler(-trial_ending_layer_m3, FL_USER_DEFINED); // This contributes to a mass balance discrepancy.
-            }
-         float ending_layer_m3 = (float)(pHRULayer->m_volumeWater + pHRULayer->GetFluxValue());
-         ending_water_m3 += ending_layer_m3;
+         ASSERT(trial_ending_layer_m3 >= 0.f);
+
          } // end of loop thru the soil layers
 
-      pHRU->m_snowpackFlag = (snow_in_snowpack_m3SWE + pHRULayer0->GetFluxValue()) > 0.;
-
+      pHRU->m_snowpackFlag = ((double)snow_in_snowpack_m3SWE + pHRULayer0->GetFluxValue()) > 0.;
+/*x
       if (h == hru_of_interest) // bottom end of HJA
          if ((snow_in_snowpack_m3SWE + water_in_snowpack_m3 + pHRULayer0->GetFluxValue() + pHRULayer1->GetFluxValue()) < -0.1f)
          {
@@ -588,7 +593,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             snow_in_snowpack_m3SWE, water_in_snowpack_m3, pHRULayer0->GetFluxValue(), pHRULayer1->GetFluxValue(), starting_total_flux_m3);
          Report::LogMsg(msg);
          }
-
+x*/
       pHRU->m_currentRunoff = q0_mm + q2_mm;
       pHRU->DistributeToReaches(q0_m3 + q2_m3);
       if (pHRU->m_HRUeffArea_m2 > 0)
@@ -618,7 +623,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       // = starting_water + snowThrufall + rainThrufall - q0 - q2
       //       + rain_and_melt_to_soil * ((1.f - irrigatedFracOfArea)  +  irrigatedFracOfArea - 1)
       // = starting_water + snowThrufall + rainThrufall - q0 - q2
-
+/*x
       float tot_water_m3 = starting_water_m3 + hruRainThrufall_liters / 1000.f + hruSnowThrufall_liters / 1000.f;
       float mass_balance_discrep = (float)((ending_water_m3 + pHRU->m_currentRunoff*natural_area_m2/1000.f) - tot_water_m3);
       if (h == hru_of_interest) // bottom end of HJA
@@ -641,6 +646,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             hruRainThrufall_liters / 1000.f, rain_and_melt_to_soil_m3); 
          Report::LogMsg(msg);
          }
+x*/
       } // end of loop thru HRUs
 
    if (hbvcalib_error_flag && pFlowContext->dayOfYear==0)
@@ -685,7 +691,7 @@ float HBV::GroundWaterRecharge(float precip, float waterDepth, float FC,  float 
 
    }
 
-float HBV::GroundWaterRechargeFraction(float waterDepth, float FC,  float Beta )
+float GroundWaterRechargeFraction(float waterDepth, float FC,  float Beta )
    {
    float value=0.0f;
    float lossFraction = (pow((waterDepth/FC),Beta));

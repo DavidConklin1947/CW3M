@@ -150,6 +150,7 @@ using namespace std;
 #define ReachWIDTHGIVEN gpFlowModel->m_colReachWIDTHGIVEN
 #define ReachWIDTHREACH gpFlowModel->m_colReachWIDTHREACH
 
+extern float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta);
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *
@@ -837,7 +838,8 @@ public:
    void SetAtt(int col, double attValue);
    void SetAttInt(int col, int attValue);
    void SetAttFloat(int col, float attValue);
-   };
+   bool WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta, double* pPrecip2WetlSurfH2O_m3, double* pWetl2TopSoil_m3, double* pWetl2SubSoil_m3, double* pWetl2Reach_m3);
+ }; // end of class HRU
 
 
 

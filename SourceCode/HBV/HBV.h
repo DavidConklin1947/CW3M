@@ -4,6 +4,7 @@
 class FlowContext;
 class Reach;
 
+float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta);
 
 class HBV
 {
