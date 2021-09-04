@@ -12517,6 +12517,25 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-5, 1);
    is_close_enough = is_close_enough && (pHRU->m_snowpackFlag == (box_snow_m3 > 0));
    is_close_enough = is_close_enough && (pHRU->m_standingH2Oflag == (hru_h2o_stndg_m3 > 0));
+
+   if (!is_close_enough)
+   {
+      CString msg; 
+      msg.Format("CheckSurfaceH2O() HRU id = %d. is_close_enough is false", pHRU->m_id); Report::LogWarning(msg);
+      msg.Format("adjusted_hru_box_surf_m3 = %f", adjusted_hru_box_surf_m3); Report::LogMsg(msg);
+      msg.Format("hru_h2o_melt_m3 = %f", hru_h2o_melt_m3); Report::LogMsg(msg);
+      msg.Format("hru_h2o_stndg_m3 = %f", hru_h2o_stndg_m3); Report::LogMsg(msg);
+      msg.Format("idu_melt_h2o_accum_m3 = %f", idu_melt_h2o_accum_m3); Report::LogMsg(msg);
+      msg.Format("idu_standing_h2o_accum_m3 = %f", idu_standing_h2o_accum_m3); Report::LogMsg(msg);
+      msg.Format("hru_snow_box_m3 = %f", hru_snow_box_m3); Report::LogMsg(msg);
+      msg.Format("box_snow_m3 = %f", box_snow_m3); Report::LogMsg(msg);
+      msg.Format("adjusted_box_surface_h2o_m3 = %f", adjusted_box_surface_h2o_m3); Report::LogMsg(msg);
+      msg.Format("idu_snow_swe_accum_m3 = %f", idu_snow_swe_accum_m3); Report::LogMsg(msg);
+      msg.Format("idu_melt_h2o_accum_m3 = %f", idu_melt_h2o_accum_m3); Report::LogMsg(msg);
+      msg.Format("m_snowpackFlag = %s", pHRU->m_snowpackFlag ? "true" : "false"); Report::LogMsg(msg);
+      msg.Format("m_standingH2Oflag = %s", pHRU->m_standingH2Oflag ? "true" : "false"); Report::LogMsg(msg);
+   }
+
    return(is_close_enough);
 } // end of CheckSurfaceH2O()
 
