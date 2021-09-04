@@ -4,7 +4,7 @@
 class FlowContext;
 class Reach;
 
-float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta);
+extern float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta);
 
 class HBV
 {
@@ -92,7 +92,6 @@ public:
    float Snow(float waterDepth, float precip, float temp, float CFMAX, float CFR, float TT );
    float Melt(float waterDepth, float precip, float temp, float CFMAX, float CFR, float TT );
    float GroundWaterRecharge(float precip,float waterDepth, float FC,  float Beta); 
-   float GroundWaterRechargeFraction(float waterDepth, float FC,  float Beta); 
    float Percolation(float waterDepth, float kPerc);
 
    //HBV Horizontal

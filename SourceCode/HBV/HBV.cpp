@@ -235,67 +235,6 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       if (pHRU->m_wetlandArea_m2 > 0.)
          pHRU->WetlSurfH2Ofluxes(precip, fc, Beta, &to_wetl_surf_h2o_m3, &wetl_to_topsoil_m3, &wetl_to_subsoil_m3, &wetl_to_reach_m3);
 
-/*x
-      double infiltration_from_standing_H2O_m3 = 0.;
-      double hru_wetl2q_m3 = 0.;
-      if (pHRU->m_standingH2Oflag)
-      {
-        int idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize();
-        bool standing_H2O_flag = false;
-
-         // How much room is there in the topsoil for more water to infiltrate from standing water?
-
-         for (int i = 0; i < idus_in_hru; i++)
-         {
-            int idu_poly_ndx = pHRU->m_polyIndexArray[i];
-            int lulc_a = gpFlowModel->AttInt(idu_poly_ndx, LULC_A);
-            bool is_wetland = lulc_a == LULCA_WETLAND;
-            if (!is_wetland) continue;
-
-            double wetness_mm = gpFlowModel->Att(idu_poly_ndx, WETNESS);
-            if (wetness_mm <= 0.) continue; // There is no standing water in this IDU.
-
-            float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
-            double idu_standing_H2O_m3 = (wetness_mm / 1000.) * idu_area_m2;
-
-            double idu_SM_DAY_mm = gpFlowModel->AttFloat(idu_poly_ndx, SM_DAY);
-            double idu_room_mm = fc - idu_SM_DAY_mm; if (idu_room_mm < 0.) idu_room_mm = 0.;
-
-            if (idu_room_mm > wetness_mm)
-            { // Drain all the standing water out of this IDU into the soil.
-               infiltration_from_standing_H2O_m3 += idu_standing_H2O_m3;
-               wetness_mm = 0.;
-            } // end of if (room_mm > wetness_mm)
-            else if (idu_room_mm > 0.)
-            { // Drain enough standing water out of this IDU to saturate the soil.
-               double idu_room_m3 = (idu_room_mm / 1000.) * idu_area_m2;
-               infiltration_from_standing_H2O_m3 += idu_room_m3;
-               double wetness_m3 = (wetness_mm / 1000.) * idu_area_m2;
-               wetness_m3 -= idu_room_m3;
-               wetness_mm = (wetness_m3 / idu_area_m2) * 1000.;
-            } // end of if (room_mm > wetness_mm) ... else
-
-            // Is there enough standing water in the IDU to overflow back into the reach?
-            double idu_wetl2q_cms = 0., idu_wetl2q_m3 = 0.; // Assume that there is not.
-            double wetl_cap_mm = gpFlowModel->Att(idu_poly_ndx, WETL_CAP);
-            if (wetness_mm > wetl_cap_mm)
-            { // Yes, there is enough standing water to overflow back into the reach.
-               double idu_wetl2q_mm = wetness_mm - wetl_cap_mm;
-               idu_wetl2q_m3 = (idu_wetl2q_mm / 1000.) * idu_area_m2;
-               idu_wetl2q_cms = idu_wetl2q_m3 / SEC_PER_DAY;
-               wetness_mm -= idu_wetl2q_mm;
-            } // end of if (wetness_mm > wetl_cap_mm)
-
-            pIDULayer->SetDataU(idu_poly_ndx, WETNESS, wetness_mm);
-            gpFlowModel->SetAtt(idu_poly_ndx, WETL2Q, idu_wetl2q_cms);
-
-            hru_wetl2q_m3 += idu_wetl2q_m3;
-            standing_H2O_flag = standing_H2O_flag || wetness_mm > 0.;
-         } // end of loop through IDUs
-
-         pHRU->m_standingH2Oflag = standing_H2O_flag;
-      } // end of if (pHRU->m_standingH2Oflag)
-x*/
       // gwIrrigated is the proportion of rain/snowmelt that bypasses the irrigated soil bucket, and is added directly to GW
       float gwIrrigated = GroundWaterRechargeFraction(irrigatedSoilWater_mm, fc, Beta); 
 
@@ -316,15 +255,19 @@ x*/
       float hruSnowEvap_liters = 0.f; 
       for (int idu = 0; idu <pHRU->m_polyIndexArray.GetSize(); idu++)
          { // Here precip_total = rain_thrufall + rain_evap + snow_thrufall + snow_evap.
+         int idu_poly_ndx = pHRU->m_polyIndexArray[idu];
+         int lulc_a = gpFlowModel->AttInt(idu_poly_ndx, LULC_A);
+         bool is_wetland = lulc_a == LULCA_WETLAND;
+         if (is_wetland) continue;
+
          float rain_thrufall_mm = 0.0f;
          float snow_thrufall_mm = 0.0f; // snow water equivalent
 
-         float iduArea = 0.0f; pFlowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[idu], pFlowContext->pFlowModel->m_colCatchmentArea, iduArea);
+         float iduArea = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
          double idu_natural_area = iduArea * pHRU->m_frc_naturl;
 
          float lai = 0.0f; 
-         int lulc_a = 0; pFlowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[idu], pFlowContext->pFlowModel->m_colLulcA, lulc_a);
-         if (lulc_a == 4)
+         if (lulc_a == LULCA_FOREST)
             {
             int pvt = 0; pFlowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[idu], pFlowContext->pFlowModel->m_colPVT, pvt);
             if (pvt > 0) pFlowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[idu], pFlowContext->pFlowModel->m_colLai, lai);
@@ -379,8 +322,8 @@ x*/
          hruRainEvap_liters = (float)(hruRainEvap_liters + rain_evap_mm * idu_natural_area);
          } // end polyIndexArray
 
-      // Mass balance check
-      float precip_liters = (float)(precip * hru_area_m2);
+      // Mass balance check non-wetland area
+      float precip_liters = (float)(precip * non_wetl_area_m2);
       float massBalDiscrepancyFrac = precip != 0.f ? (hruSnowThrufall_liters + hruSnowEvap_liters + hruRainThrufall_liters + hruRainEvap_liters - precip_liters)/precip_liters : 1.e-10f;
       // if (h == hru_of_interest) 
          if (abs(massBalDiscrepancyFrac) > 1.e-5f)
@@ -565,13 +508,6 @@ x*/
                //ss = percolation - q2; //filling the deepest reservoir
                pHRULayer->AddFluxFromGlobalHandler(adjusted_percolation_m3, FL_TOP_SOURCE);     //m3/d 
                pHRULayer->AddFluxFromGlobalHandler(q2_m3, FL_STREAM_SINK);     //m3/d
-/*x
-               if (h == hru_of_interest)
-                  {
-                  CString msg; msg.Format("HBVdailyProcess()7 waterDepth = %f, k2 = %f, q2_mm = %f, q2_m3 = %f", waterDepth, k2, q2_mm, q2_m3);
-                  Report::LogMsg(msg);
-                  }
-x*/
                if (ecoregion == HC_ECOREGION) pHRU->m_aquifer_recharge_mm = q2_mm;
                break;
 
@@ -579,22 +515,15 @@ x*/
             } // end of switch on soil layer
 
          float trial_ending_layer_m3 = (float)(pHRULayer->m_volumeWater + pHRULayer->GetFluxValue());
-         ASSERT(trial_ending_layer_m3 >= 0.f);
+         if (trial_ending_layer_m3 < 0.f)
+         {
+            ASSERT(close_enough(trial_ending_layer_m3, 0., 1e-4, 1.));
+         }
 
          } // end of loop thru the soil layers
 
       pHRU->m_snowpackFlag = ((double)snow_in_snowpack_m3SWE + pHRULayer0->GetFluxValue()) > 0.;
-/*x
-      if (h == hru_of_interest) // bottom end of HJA
-         if ((snow_in_snowpack_m3SWE + water_in_snowpack_m3 + pHRULayer0->GetFluxValue() + pHRULayer1->GetFluxValue()) < -0.1f)
-         {
-         CString msg; msg.Format("*** HBVdailyProcess()9: SWE < -0.1 m3SWE snow_in_snowpack_m3SWE = %f, water_in_snowpack_m3 = %f, pHRULayer0->GetFluxValue() = %f, pHRULayer1->GetFluxValue() = %f"
-            ", starting_total_flux_m3 = %f",
-            snow_in_snowpack_m3SWE, water_in_snowpack_m3, pHRULayer0->GetFluxValue(), pHRULayer1->GetFluxValue(), starting_total_flux_m3);
-         Report::LogMsg(msg);
-         }
-x*/
-      pHRU->m_currentRunoff = q0_mm + q2_mm;
+/      pHRU->m_currentRunoff = q0_mm + q2_mm;
       pHRU->DistributeToReaches(q0_m3 + q2_m3);
       if (pHRU->m_HRUeffArea_m2 > 0)
          { 

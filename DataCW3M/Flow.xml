@@ -69,7 +69,6 @@
                    This is generally the IDU layer. (optional, defaults to first layer)
         query:     Subset of the layer used to create catchments.  If empty or not present,
                    the entire layer is used. (optional)
-        area_col:  column name containing the area of the polygon. (optional, defaults to "AREA")
         catchmentID_col:  column name containing the catchmentID identifying unique catchments, generated
                    during the aggregation process. This column will be added to the layer if it doesn't
                    already exist.  (optional - defaults to CATCH_ID)
@@ -99,7 +98,6 @@
 
   <catchments layer="IDU"
             query=""
-            area_col="AREA"
             catchmentID_col="CATCHID"
             hruID_col="HRU_ID"
             catchment_agg_cols="COMID"

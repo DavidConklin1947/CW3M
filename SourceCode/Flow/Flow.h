@@ -150,8 +150,6 @@ using namespace std;
 #define ReachWIDTHGIVEN gpFlowModel->m_colReachWIDTHGIVEN
 #define ReachWIDTHREACH gpFlowModel->m_colReachWIDTHREACH
 
-extern float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta);
-
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *
  * \section intro_sec Introduction
@@ -1794,8 +1792,6 @@ protected:
    CString m_catchmentQuery;
    CString m_projectionWKT;
 
-   CString m_areaCol;      // polygon area
-   CString m_catchmentAreaCol; //catchment area
    CString m_elevCol;
    
    CString m_catchIDCol;

@@ -3187,7 +3187,6 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    }
 
    // columns in IDU layer and similar columns in other layers
-   EnvExtension::CheckCol( m_pCatchmentLayer, m_colCatchmentArea,        m_areaCol,          TYPE_FLOAT, CC_MUST_EXIST );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colElev,                 m_elevCol,          TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colLai,                  _T("LAI"),          TYPE_FLOAT, CC_AUTOADD );
    EnvExtension::CheckCol( m_pCatchmentLayer, m_colAgeClass,             _T("AGECLASS"),     TYPE_INT, CC_AUTOADD );
@@ -5774,8 +5773,8 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
 
 bool FlowModel::ApplyQ2WETL()
-{ // Move water from stream reaches to the standing water soil compartment.
-   // Calls H2OtoWetland(), which sets pHRU->m_standingH2Oflag to true and 
+{ // Move water from stream reaches to the surface water compartment.
+   // Calls H2OtoWetland(), which calculates pHRU->m_standingH2Oflag and 
    // updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attribute WETNESS. 
    // Do it wetland by wetland.
    int num_wetlands = (int)m_wetlArray.GetSize();
@@ -12973,7 +12972,6 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
       // attr                 type          address                           isReq  checkCol
       { "layer",              TYPE_CSTRING,  &(pModel->m_catchmentLayer),     false,   0 },
       { "query",              TYPE_CSTRING,  &(pModel->m_catchmentQuery),     false,   0 },
-      { "area_col",           TYPE_CSTRING,  &(pModel->m_areaCol),            false,   0 },
       { "elev_col",           TYPE_CSTRING,  &(pModel->m_elevCol),            false,   0 },
       //{ "join_col",           TYPE_CSTRING,  &(pModel->m_catchmentJoinCol),   true,    0 },  // typically "COMID"
       { "catchment_agg_cols", TYPE_CSTRING,  &(pModel->m_catchmentAggCols),   true,   0 },
@@ -13010,13 +13008,10 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
    if ( pModel->m_catchIDCol.IsEmpty() )
       pModel->m_catchIDCol = _T( "CATCH_ID" );
       
-   if ( pModel->m_areaCol.IsEmpty() )
-      pModel->m_areaCol = _T( "AREA" );
-
    if ( pModel->m_elevCol.IsEmpty() )
       pModel->m_elevCol = _T( "ELEV_MEAN" );
 
-   pModel->m_colCatchmentArea = pModel->m_pCatchmentLayer->GetFieldCol(pModel->m_areaCol);
+   pModel->m_colCatchmentArea = pModel->m_pCatchmentLayer->GetFieldCol(_T("AREA"));
    if (pModel->m_colCatchmentArea < 0)
       {
       CString msg; 
@@ -17573,6 +17568,16 @@ Reach * FlowModel::GetReachFromCOMID(int comid)
 } // end of GetReachFromCOMID()
 
 
+float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta)
+{
+   float value = 0.0f;
+   float lossFraction = (pow((waterDepth / FC), Beta));
+   if (lossFraction > 1.0f)
+      lossFraction = 1.0f;
+   return lossFraction;
+}
+
+
 bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta, 
    double * pPrecip2WetlSurfH2O_m3, double* pWetl2TopSoil_m3, double * pWetl2SubSoil_m3, double* pWetl2Reach_m3) 
 {
@@ -17589,7 +17594,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
    double hru_to_subsoil_m3 = 0.;
    double hru_to_reach_m3 = 0.;
    int idus_in_hru = (int)m_polyIndexArray.GetSize();
-   bool standing_H2O_flag = false;
+   m_standingH2Oflag = false;
 
    for (int i = 0; i < idus_in_hru; i++)
    {
@@ -17643,6 +17648,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       gpFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
       wetness_mm = idu_surf_h2o_mm >= 0. ? idu_surf_h2o_mm : -sm_day_mm;
       gpFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
+      if (wetness_mm > 0.) m_standingH2Oflag = true;
 
       // Convert water depths to water volumes, and add to the HRU non-wetland accumulators.
       float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
@@ -17662,3 +17668,5 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
  
    return(ret_val);
 } // end of WetlSurfaceH2Ofluxes()
+
+
