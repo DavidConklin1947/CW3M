@@ -184,16 +184,44 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 
       // Get state variables from layers, these will be used to calculate some of the rates.
       // Here total snowpack SWE = water_in_snowpack_mm + snow_in_snowpack_mmSWE
-      HRULayer *pHRULayer1 = pHRU->GetLayer(BOX_MELT);
-      float water_in_snowpack_m3 = (float)pHRULayer1->m_volumeWater;
-      float water_in_snowpack_mm = (float)(((water_in_snowpack_m3 / non_wetl_area_m2)*1000.f > 0.0f) ? (water_in_snowpack_m3 / non_wetl_area_m2)*1000.f : 0.0f); // mm
-      HRULayer *pHRULayer0 = pHRU->GetLayer(BOX_SNOWPACK);
+      HRULayer* pHRULayer0 = pHRU->GetLayer(BOX_SNOWPACK);
       float snow_in_snowpack_m3SWE = (float)pHRULayer0->m_volumeWater;
-      float snow_in_snowpack_mmSWE = (float)(((snow_in_snowpack_m3SWE/ non_wetl_area_m2)*1000.f > 0.0f) ? (snow_in_snowpack_m3SWE / non_wetl_area_m2)*1000.f : 0.0f);
+      float snow_in_snowpack_mmSWE = (float)(((snow_in_snowpack_m3SWE / non_wetl_area_m2) * 1000.f > 0.0f) ? (snow_in_snowpack_m3SWE / non_wetl_area_m2) * 1000.f : 0.0f);
+      HRULayer *pHRULayer1 = pHRU->GetLayer(BOX_SURFACE_H2O);
+      int num_idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize();
+
+      // Divide the surface water into melt water and standing water.
+      double hru_standing_h2o_m3 = 0.; // Assume no standing water.
+      double water_in_snowpack_m3 = pHRULayer1->m_volumeWater + pHRULayer1->GetFluxValue();
+      if (pHRU->m_wetlandArea_m2 > 0)
+      { // There is wetland, so there might be standing water.
+         for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
+         {
+            int idu_poly_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
+            int lulc_a = gpFlowModel->AttInt(idu_poly_ndx, LULC_A);
+            bool is_wetland = lulc_a == LULCA_WETLAND;
+            if (!is_wetland) continue;
+
+            double wetness_mm = gpFlowModel->Att(idu_poly_ndx, WETNESS);
+            if (wetness_mm <= 0.) continue;
+
+            float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
+            double idu_standing_h2o_m3 = (wetness_mm / 1000.) * idu_area_m2;
+            hru_standing_h2o_m3 += idu_standing_h2o_m3;
+         } // end of loop thru the IDUs in this HRU
+
+         water_in_snowpack_m3 -= hru_standing_h2o_m3;
+         if (water_in_snowpack_m3 < 0.)
+         {
+            ASSERT(close_enough(water_in_snowpack_m3, 0., 1e-6, 1));
+            water_in_snowpack_m3 = 0.;
+         }
+      } // end of if (pHRU->m_wetlandArea_m2 > 0)
+      double water_in_snowpack_mm = (water_in_snowpack_m3 / non_wetl_area_m2) * 1000.; 
 
       float hruIrrigatedArea = 0.0f;
       double hru_wetland_area_m2 = 0.;
-      for (int idu = 0; idu < pHRU->m_polyIndexArray.GetSize(); idu++)
+      for (int idu = 0; idu < num_idus_in_hru; idu++)
       {
          float area = 0.0f;
          pFlowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[idu], pFlowContext->pFlowModel->m_colCatchmentArea, area);
@@ -307,8 +335,6 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          pIDULayer->SetData(pHRU->m_polyIndexArray[idu], m_colSFCF, sfcf);
 
          pIDULayer->SetData(pHRU->m_polyIndexArray[idu], m_colRAINTHRU_D, rain_thrufall_mm);
-         float rain_thrufall_yr_mm = 0.f; pIDULayer->GetData(pHRU->m_polyIndexArray[idu], m_colRAINTHRU_Y, rain_thrufall_yr_mm);
-         float rain_evap_yr_mm = 0.f; //pIDULayer->GetData(pHRU->m_polyIndexArray[idu], m_colRAINEVAP_Y, rain_evap_yr_mm);
 
          float swtrans = (1 - swalb)*rn*exp(lai*-k); //shorwave transmitted through canopy (kJ/m2/d)
          float radiative_melt_mm = (airTemp > tt) ? swtrans / lh_fus : 0.f; // units = (kJ/m2/d) / (kJ/kgH2O) = kgH2O/(m2*d) = mmH2O/d
@@ -362,14 +388,6 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       if (airTemp > tt)
          { // Some melt from snowpack.
          float available_to_melt_mm = snow_in_snowpack_mmSWE; 
-/*x
-         if (h == hru_of_interest) 
-            if (hruMelt_mm > (available_to_melt_mm + 5.e-4))
-            {
-            CString msg; msg.Format("*** HBVdailyProcess()5: h = %d, hruMelt_mm = %f is greater than available_to_melt_mm = %f", h, hruMelt_mm, available_to_melt_mm);
-            Report::LogMsg(msg);
-            }
-x*/
          if (hruMelt_mm > available_to_melt_mm) hruMelt_mm = available_to_melt_mm;
          } // end of if (airTemp > tt)
       else hruMelt_mm = hruMelt_liters = 0.f;
@@ -379,7 +397,7 @@ x*/
          // meltwater and rainwater transfers to soil, when beyond a threshold (CWH, usually 0.1) of the snowpack
          float updated_snow_in_snowpack_mm = hruSnowThrufall_mm + snow_in_snowpack_mmSWE;
          float max_water_in_updated_snowpack_mm = cwh*updated_snow_in_snowpack_mm;
-         float updated_water_in_snowpack_mm = hruRainThrufall_mm + water_in_snowpack_mm;
+         double updated_water_in_snowpack_mm = hruRainThrufall_mm + water_in_snowpack_mm;
          if (updated_water_in_snowpack_mm > max_water_in_updated_snowpack_mm)
             {
             rain_and_melt_to_soil_mm = updated_water_in_snowpack_mm - max_water_in_updated_snowpack_mm;
@@ -523,7 +541,7 @@ x*/
          } // end of loop thru the soil layers
 
       pHRU->m_snowpackFlag = ((double)snow_in_snowpack_m3SWE + pHRULayer0->GetFluxValue()) > 0.;
-/      pHRU->m_currentRunoff = q0_mm + q2_mm;
+      pHRU->m_currentRunoff = q0_mm + q2_mm;
       pHRU->DistributeToReaches(q0_m3 + q2_m3);
       if (pHRU->m_HRUeffArea_m2 > 0)
          { 
