@@ -5608,7 +5608,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          {
             CString msg;
             msg.Format("FlowModel::Run() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
-            Report::ErrorMsg(msg);
+            Report::LogMsg(msg);
          }
          
       } // end of loop thru HRUs
@@ -12510,11 +12510,11 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    double box_snow_flux_m3 = pBOX_SNOW->m_globalHandlerFluxValue;
    double box_surface_h2o_flux_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
 
-   bool is_close_enough = close_enough(adjusted_hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-5, 1);
-   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-5, 1.);
-   is_close_enough = is_close_enough && close_enough(hru_snow_box_m3, box_snow_m3, 1e-6, 1);
-   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, adjusted_box_surface_h2o_m3, 1e-6, 1);
-   is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-5, 1);
+   bool is_close_enough = close_enough(adjusted_hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-4, 1);
+   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-4, 1.);
+   is_close_enough = is_close_enough && close_enough(hru_snow_box_m3, box_snow_m3, 1e-4, 1);
+   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, adjusted_box_surface_h2o_m3, 1e-4, 1);
+   is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-4, 1);
    is_close_enough = is_close_enough && (pHRU->m_snowpackFlag == (box_snow_m3 > 0));
    is_close_enough = is_close_enough && (pHRU->m_standingH2Oflag == (hru_h2o_stndg_m3 > 0));
 
@@ -14782,7 +14782,7 @@ void FlowModel::UpdateHRULevelVariables(EnvContext *pEnvContext)
       {
          CString msg;
          msg.Format("UpdateHRULevelVariables() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
-         Report::ErrorMsg(msg);
+         Report::LogMsg(msg);
       }
 
       HRULayer * pNatSoilBox = pHRU->GetLayer(BOX_NAT_SOIL);
