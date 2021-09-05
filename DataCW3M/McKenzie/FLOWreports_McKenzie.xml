@@ -30,6 +30,7 @@
       <output name="idu 33803 LULC_C" query="IDU_ID=33803" value="VEGCLASS" type="areaWtMean" domain="idu" />
       <output name="idu 33803 LAI" query="IDU_ID=33803" value="LAI" type="areaWtMean" domain="idu" />
       <output name="hru 1946 LAI" query="HRU_ID=1946" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="hru 1946 PRECIP (mm)" query="HRU_ID=1946" value="PRECIP" type="sum" domain="hru" />
       <output name="idu 33803 WETNESS (mm)" query="IDU_ID=33803" value="WETNESS" type="areaWtMean" domain="idu" />
       <output name="hru 1946 MELT_BOX (mm)" query="HRU_ID=1946" value="MELT_BOX" type="areaWtMean" domain="hru" />
       <output name="hru 1946 NAT_SOIL (mm)" query="HRU_ID=1946" value="NAT_SOIL" type="areaWtMean" domain="hru" />
@@ -50,9 +51,10 @@
     <output_group name="FLOW Wetland 17 analysis" interval="daily" >
       <output name="idu 31325 LULC_A" query="IDU_ID=31325" value="LULC_A" type="areaWtMean" domain="idu" />
       <output name="idu 31325 LULC_B" query="IDU_ID=31325" value="LULC_B" type="areaWtMean" domain="idu" />
-      <output name="idu 31325 VEGCLASS" query="IDU_ID=31325" value="VEGCLASS" type="areaWtMean" domain="idu" />
+      <output name="idu 31325 LULC_C" query="IDU_ID=31325" value="VEGCLASS" type="areaWtMean" domain="idu" />
       <output name="idu 31325 LAI" query="IDU_ID=31325" value="LAI" type="areaWtMean" domain="idu" />
       <output name="hru 1816 LAI" query="HRU_ID=1816" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="hru 1816 PRECIP (mm)" query="HRU_ID=1816" value="PRECIP" type="sum" domain="hru" />
       <output name="idu 31325 WETNESS (mm)" query="IDU_ID=31325" value="WETNESS" type="areaWtMean" domain="idu" />
       <output name="hru 1816 MELT_BOX (mm)" query="HRU_ID=1816" value="MELT_BOX" type="areaWtMean" domain="hru" />
       <output name="hru 1816 NAT_SOIL (mm)" query="HRU_ID=1816" value="NAT_SOIL" type="areaWtMean" domain="hru" />

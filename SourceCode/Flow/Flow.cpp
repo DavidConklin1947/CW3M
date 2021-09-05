@@ -5545,17 +5545,18 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          double hru_standing_h2o_area_m2 = 0.;
          int hru_wetl_id = NON_WETLAND_TOKEN; 
          int count = (int)pHRU->m_polyIndexArray.GetSize();
-         if (pHRU->m_standingH2Oflag)
+         double wetl2q_accum_m3 = 0.;
+         for (int i = 0; i < count; i++)
          {
-            double wetl2q_accum_m3 = 0.;
-            for (int i = 0; i < count; i++)
+            int idu_poly_ndx = pHRU->m_polyIndexArray[i];
+            int lulc_a = AttInt(idu_poly_ndx, LULC_A);
+            if (lulc_a != LULCA_WETLAND) continue;
+
+            // Update the IDU attribute WETL2Q.
+            double idu_wetl2q_cms = 0.;
+            double wetness_mm = Att(idu_poly_ndx, WETNESS);
+            if (wetness_mm > 0.)
             {
-               int idu_poly_ndx = pHRU->m_polyIndexArray[i];
-               int lulc_a = AttInt(idu_poly_ndx, LULC_A);
-               if (lulc_a != LULCA_WETLAND) continue;
-               double wetness_mm = Att(idu_poly_ndx, WETNESS);
-               if (wetness_mm <= 0.) continue;
-               
                float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
                double wetl_cap_mm = Att(idu_poly_ndx, WETL_CAP);
                if (wetness_mm > wetl_cap_mm)
@@ -5563,8 +5564,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                   double idu_wetl2q_mm = wetness_mm - wetl_cap_mm;
                   double idu_wetl2q_m3 = (idu_wetl2q_mm / 1000.) * idu_area_m2;
                   wetl2q_accum_m3 += idu_wetl2q_m3;
-                  double idu_wetl2q_cms = idu_wetl2q_m3 / SEC_PER_DAY;
-                  SetAtt(idu_poly_ndx, WETL2Q, idu_wetl2q_cms);
+                  idu_wetl2q_cms = idu_wetl2q_m3 / SEC_PER_DAY;
                   wetness_mm = wetl_cap_mm;
                   SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
 
@@ -5572,33 +5572,33 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                   int idu_wetl_id = AttInt(idu_poly_ndx, WETL_ID);
                   if (hru_wetl_id == NON_WETLAND_TOKEN) hru_wetl_id = idu_wetl_id;
                   else ASSERT(hru_wetl_id == idu_wetl_id);
-               }
+               } // end of if (wetness_mm > wetl_cap_mm)
 
                double idu_standing_h2o_m3 = (wetness_mm / 1000.) * idu_area_m2;
                hru_standing_h2o_m3 += idu_standing_h2o_m3;
                hru_standing_h2o_area_m2 += idu_area_m2;
-            } // end of loop thru IDUs for this HRU
-            ASSERT(hru_standing_h2o_area_m2 > 0.);
+            } // end of if (wetness_mm > 0.)
 
-            if (wetl2q_accum_m3 > 0.)
-            {
-               pBox_surface_h2o->AddFluxFromGlobalHandler((float)wetl2q_accum_m3, FL_STREAM_SINK);
+            SetAtt(idu_poly_ndx, WETL2Q, idu_wetl2q_cms);
+         } // end of loop thru IDUs for this HRU
+         ASSERT(!pHRU->m_standingH2Oflag || hru_standing_h2o_area_m2 > 0.);
 
-//x               double wetl2q_accum_cms = wetl2q_accum_m3 / SEC_PER_DAY;
-               int num_wetl = (int)m_wetlArray.GetSize();
-               int wetl_ndx = 0;
-               while (wetl_ndx < num_wetl && m_wetlArray[wetl_ndx]->m_wetlID != hru_wetl_id) wetl_ndx++;
-               ASSERT(wetl_ndx < num_wetl);
-               Wetland* pWetl = m_wetlArray[wetl_ndx];
-               int reach_ndx = pWetl->m_wetlReachNdxArray[0];
-               Reach* pReach = m_reachArray[reach_ndx];
-//x               pReach->AddFluxFromGlobalHandler(-wetl2q_accum_cms);
-               WaterParcel dischargeWP = pReach->GetReachDischargeWP();
-               double reach_degC = dischargeWP.WaterTemperature(); // This neglects the effect on the water temperature of flowing through the wetland.
-               WaterParcel wetl2qWP(wetl2q_accum_m3, reach_degC);
-               pReach->AccumAdditions(wetl2qWP);
-            }
-         } // end of if (pHRU->m_standingH2Oflag)
+         if (wetl2q_accum_m3 > 0.)
+         {
+            pBox_surface_h2o->AddFluxFromGlobalHandler((float)wetl2q_accum_m3, FL_STREAM_SINK);
+
+            int num_wetl = (int)m_wetlArray.GetSize();
+            int wetl_ndx = 0;
+            while (wetl_ndx < num_wetl && m_wetlArray[wetl_ndx]->m_wetlID != hru_wetl_id) wetl_ndx++;
+            ASSERT(wetl_ndx < num_wetl);
+            Wetland* pWetl = m_wetlArray[wetl_ndx];
+            int reach_ndx = pWetl->m_wetlReachNdxArray[0];
+            Reach* pReach = m_reachArray[reach_ndx];
+            WaterParcel dischargeWP = pReach->GetReachDischargeWP();
+            double reach_degC = dischargeWP.WaterTemperature(); // This neglects the effect on the water temperature of flowing through the wetland.
+            WaterParcel wetl2qWP(wetl2q_accum_m3, reach_degC);
+            pReach->AccumAdditions(wetl2qWP);
+         }
          double hru_h2o_melt_m3 = surface_h2o_m3 - hru_standing_h2o_m3;
          if (hru_h2o_melt_m3 < 0.)
          {
