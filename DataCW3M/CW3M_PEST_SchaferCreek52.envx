@@ -12,7 +12,7 @@
     logMsgLevel                ='0'
     noBuffering                ='0'
     multiRunDecadalMapsModulus ='10'
-    defaultPeriod              ='10'
+    defaultPeriod              ='1'
     dynamicUpdate              ='15'
     spatialIndexDistance       ='0'
     areaCutoff                 ='0'
@@ -37,7 +37,7 @@
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
     useWaterYears              ='0'
-    spinup                     ='0'
+    spinup                     ='1'
   />
 
   <layers >
@@ -384,7 +384,7 @@ initRunOnStartup ='0'
   dependencies =''
   initRunOnStartup ='0'
    />
-
+<!--
 <autonomous_process
 name         ='YearlyReports'
 path         ='Reporter.dll'
@@ -398,7 +398,7 @@ initInfo     ='Reporter.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
-
+-->
 </autonomous_processes>
 
 

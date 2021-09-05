@@ -17668,7 +17668,18 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       // In this IDU, how much potential surface water is there?
       double wetness_mm = gpFlowModel->Att(idu_poly_ndx, WETNESS);
       double idu_surf_h2o_mm = precip_mm + (wetness_mm > 0. ? wetness_mm : 0.);
-      if (idu_surf_h2o_mm <= 0.) continue; // There isn't any water available in this IDU to infiltrate into the soil.
+      if (idu_surf_h2o_mm <= 0.)
+      { // There isn't any water available in this IDU to infiltrate into the soil.
+         float sm_day_mm = gpFlowModel->AttFloat(idu_poly_ndx, SM_DAY);
+         wetness_mm = -(fc - sm_day_mm);
+         if (wetness_mm > 0.)
+         {
+            ASSERT(close_enough(0, wetness_mm, 1e-4, 1));
+            wetness_mm = 0.;
+         }
+         gpFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
+         continue; 
+      }
 
       // How will the water that drains from the surface into the soil be
       // divided between the topsoil and the subsoil?
@@ -17682,33 +17693,32 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       double idu_total_soil_room_mm = idu_topsoil_room_mm / (1. - frac_to_subsoil);
 
       if (idu_total_soil_room_mm > idu_surf_h2o_mm)
-      { // Drain all the surface water out of this IDU into the soil.
-         idu_to_topsoil_mm += idu_surf_h2o_mm;
+      { // There is more room in the soil than there is standing water.
+         // Drain all the surface water out of this IDU into the soil.
+         idu_to_topsoil_mm = idu_surf_h2o_mm * (1. - frac_to_subsoil);
+         idu_to_subsoil_mm = idu_surf_h2o_mm - idu_to_topsoil_mm;
          idu_surf_h2o_mm = 0.;
-      } // end of if (idu_room_mm > idu_surf_h2o_mm)
+         idu_topsoil_room_mm -= idu_to_topsoil_mm;
+         wetness_mm = -idu_topsoil_room_mm;
+         ASSERT(wetness_mm < 0.);
+      } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm)
       else
-      { // Drain enough surface water out of this IDU to saturate the soil.
-         idu_to_topsoil_mm += idu_topsoil_room_mm;
-         idu_to_subsoil_mm += idu_total_soil_room_mm - idu_topsoil_room_mm;
+      { // There is enough standing water to fill up the room in the soil.
+         // Drain enough surface water out of this IDU to saturate the soil.
+         idu_to_topsoil_mm = idu_topsoil_room_mm;
+         idu_to_subsoil_mm = idu_total_soil_room_mm - idu_topsoil_room_mm;
          idu_surf_h2o_mm -= idu_total_soil_room_mm;
-      } // end of if (idu_room_mm > idu_surf_h2o_mm) ... else
-/*
-      // Is there enough surface water in the IDU to overflow back into the reach?
-      double idu_wetl_cap_mm = gpFlowModel->Att(idu_poly_ndx, WETL_CAP);
-      if (idu_surf_h2o_mm > idu_wetl_cap_mm)
-      { // Yes. Move the excess water back to the reach, and set the idu at its wetland capacity.
-         idu_to_reach_mm = idu_surf_h2o_mm - idu_wetl_cap_mm;
-         idu_surf_h2o_mm = idu_wetl_cap_mm;
-      }
-*/
+         wetness_mm = idu_surf_h2o_mm;
+         ASSERT(wetness_mm >= 0.);
+      } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm) ... else
+
       // Update the IDU attributes WETNESS and SM_DAY.
-      sm_day_mm += idu_to_topsoil_mm;
-      gpFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
-      wetness_mm = idu_surf_h2o_mm >= 0. ? idu_surf_h2o_mm : -sm_day_mm;
       gpFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
       if (wetness_mm > 0.) m_standingH2Oflag = true;
+      sm_day_mm += idu_to_topsoil_mm;
+      gpFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
 
-      // Convert water depths to water volumes, and add to the HRU non-wetland accumulators.
+      // Convert water depths to water volumes, and add to the HRU accumulators.
       float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
       double idu_surf_h2o_m3 = (idu_surf_h2o_mm / 1000.) * idu_area_m2;
       double idu_to_topsoil_m3 = (idu_to_topsoil_mm / 1000.) * idu_area_m2;
