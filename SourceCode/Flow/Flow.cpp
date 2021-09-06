@@ -3989,6 +3989,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
    m_pIDUlayer->SetColDataU(m_colSNOWCANOPY, 0.f);
    m_pIDUlayer->SetColDataU(m_colSM2ATM, 0);
+   m_pIDUlayer->SetColDataU(m_colWETL2Q, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOF_C, 0);
    m_pReachLayer->SetColDataU(m_colReachQ_UPSTREAM, 0);
@@ -12508,8 +12509,6 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
    double box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_volumeWater;
    double flux_box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
-   double adjusted_box_surface_h2o_m3 = box_surface_h2o_m3 + flux_box_surface_h2o_m3; 
-   double adjusted_hru_box_surf_m3 = hru_box_surf_m3 + flux_box_surface_h2o_m3;
 
    HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
    double box_nat_soil_m3 = pBOX_NAT_SOIL->m_volumeWater;
@@ -12518,26 +12517,31 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    double idu_melt_h2o_accum_m3 = 0.;
    double idu_standing_h2o_accum_m3 = 0.;
    double idu_snow_swe_accum_m3 = 0.;
+   double idu_wetl2q_accum_cms = 0.;
    int num_idus = (int)pHRU->m_polyIndexArray.GetSize();
    for (int i = 0; i < num_idus; i++)
    {
-      int idu_ndx = pHRU->m_polyIndexArray[i];
-      int lulc_a = gpFlowModel->AttInt(idu_ndx, LULC_A);
-      if (lulc_a == LULCA_WETLAND)
+      int idu_poly_ndx = pHRU->m_polyIndexArray[i];
+      int lulc_a = gpFlowModel->AttInt(idu_poly_ndx, LULC_A);
+      bool is_wetland = lulc_a == LULCA_WETLAND;
+      if (is_wetland)
       {
-         double idu_wetness_mm = gpFlowModel->Att(idu_ndx, WETNESS);
-         float idu_area_m2 = gpFlowModel->AttFloat(idu_ndx, AREA);
+         double idu_wetness_mm = gpFlowModel->Att(idu_poly_ndx, WETNESS);
+         float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
          double idu_standing_h2o_m3 = idu_wetness_mm > 0. ? ((idu_wetness_mm / 1000.) * idu_area_m2) : 0.;
          idu_standing_h2o_accum_m3 += idu_standing_h2o_m3;
+        
+         double idu_wetl2q_cms = gpFlowModel->Att(idu_poly_ndx, WETL2Q);
+         idu_wetl2q_accum_cms += idu_wetl2q_cms;
       }
       else
       {
-         double idu_snow_swe_mm = gpFlowModel->Att(idu_ndx, SNOW_SWE);
-         double idu_melt_h2o_mm = gpFlowModel->Att(idu_ndx, H2O_MELT);
+         double idu_snow_swe_mm = gpFlowModel->Att(idu_poly_ndx, SNOW_SWE);
+         double idu_melt_h2o_mm = gpFlowModel->Att(idu_poly_ndx, H2O_MELT);
          ASSERT(idu_melt_h2o_mm >= 0.);
          if ((idu_melt_h2o_mm > 0.) || (idu_snow_swe_mm > 0.))
          {
-            float idu_area_m2 = gpFlowModel->AttFloat(idu_ndx, AREA);
+            float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
             double idu_melt_h2o_m3 = (idu_melt_h2o_mm / 1000.) * idu_area_m2;
             idu_melt_h2o_accum_m3 += idu_melt_h2o_m3;
             double idu_snow_swe_m3 = (idu_snow_swe_mm / 1000.) * idu_area_m2;
@@ -12548,9 +12552,13 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
 
    double box_snow_flux_m3 = pBOX_SNOW->m_globalHandlerFluxValue;
    double box_surface_h2o_flux_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
+   double idu_wetl2q_accum_m3 = idu_wetl2q_accum_cms * SEC_PER_DAY;
+
+   double adjusted_box_surface_h2o_m3 = box_surface_h2o_m3 + flux_box_surface_h2o_m3;
+   double adjusted_hru_box_surf_m3 = hru_box_surf_m3 + flux_box_surface_h2o_m3;
 
    bool is_close_enough = close_enough(adjusted_hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-4, 1);
-   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-4, 1.);
+   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3 - idu_wetl2q_accum_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-4, 1.);
    is_close_enough = is_close_enough && close_enough(hru_snow_box_m3, box_snow_m3, 1e-4, 1);
    is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, adjusted_box_surface_h2o_m3, 1e-4, 1);
    is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-4, 1);
@@ -14812,9 +14820,6 @@ void FlowModel::UpdateHRULevelVariables(EnvContext *pEnvContext)
       float sm2atm = 0.f; m_pHRUlayer->GetData(hru_ndx, m_colHruSM2ATM, sm2atm);
       m_pHRUlayer->SetDataU(hru_ndx, m_colHruET_DAY, sm2atm + pHRU->m_currentET);
       pHRU->m_et_yr += sm2atm;
-
-      HRULayer * pMeltBox = pHRU->GetLayer(BOX_MELT);
-      m_pHRUlayer->SetDataU(hru_ndx, m_colHruBOXSURF_M3, pMeltBox->m_volumeWater);
 
       CheckSurfaceH2O(pHRU);
       if (!CheckSurfaceH2O(pHRU))
