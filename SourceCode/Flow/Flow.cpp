@@ -5896,10 +5896,11 @@ bool FlowModel::ApplyQ2WETL()
          double wetness_mm = gpFlowModel->Att(idu_ndx, WETNESS);
          if (wetness_mm > 0)
             ASSERT(pHRU->m_standingH2Oflag);
-         if (wetness_mm >= (2. * wetl_cap_mm)) continue; // There is no room to absorb any more water.
+// ???         if (wetness_mm >= (2. * wetl_cap_mm)) continue; // There is no room to absorb any more water.
 
          double idu_area_m2 = gpFlowModel->Att(idu_ndx, AREA);
-         double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
+// ???         double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
+         double idu_room_m3 = (((2000. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
          double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
          if (idu_room_m3 >= remaining_m3) remaining_m3 = 0.;
          else remaining_m3 -= to_this_idu_m3;
