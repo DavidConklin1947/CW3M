@@ -5648,7 +5648,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          {
             CString msg;
             msg.Format("FlowModel::Run() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
-            Report::LogMsg(msg);
+// ???            Report::LogMsg(msg);
          }
          
       } // end of loop thru HRUs
@@ -14826,7 +14826,7 @@ void FlowModel::UpdateHRULevelVariables(EnvContext *pEnvContext)
       {
          CString msg;
          msg.Format("UpdateHRULevelVariables() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
-         Report::LogMsg(msg);
+// ???         Report::LogMsg(msg);
       }
 
       HRULayer * pNatSoilBox = pHRU->GetLayer(BOX_NAT_SOIL);
