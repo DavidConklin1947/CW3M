@@ -99,7 +99,6 @@
 
   <catchments layer="IDU"
             query=""
-            area_col="AREA"
             catchmentID_col="CATCHID"
             hruID_col="HRU_ID"
             catchment_agg_cols="COMID"
