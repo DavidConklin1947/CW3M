@@ -5644,11 +5644,11 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             }
          } // end of loop thru the IDUs contained in this HRU
 
-         if (!CheckSurfaceH2O(pHRU))
+         if (!CheckSurfaceH2O(pHRU, 0.))
          {
             CString msg;
             msg.Format("FlowModel::Run() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
-            Report::LogMsg(msg);
+            Report::LogWarning(msg);
          }
          
       } // end of loop thru HRUs
@@ -5902,22 +5902,48 @@ bool FlowModel::ApplyQ2WETL()
 // ???         double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
          double idu_room_m3 = (((2000. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
          double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
+         double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
+
          if (idu_room_m3 >= remaining_m3) remaining_m3 = 0.;
          else remaining_m3 -= to_this_idu_m3;
 
-         double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
-         wetness_mm += to_this_idu_mm;
-         gpFlowModel->SetAtt(idu_ndx, WETNESS, wetness_mm);
-         HRULayer* pHruLayer = pHRU->GetLayer(BOX_STANDING_H2O); // Layer 1 is used for both standing water and meltwater in the snowpack.
-         pHruLayer->AddFluxFromGlobalHandler((float)(-to_this_idu_m3), FL_SINK);
-         pHRU->m_standingH2Oflag = true;
+         // If the soil is not yet saturated (i.e. wetness < 0), it can absorb some or all of the 
+         // water coming from the reach.
+         double to_this_idu_soil_m3 = 0.;
+         double new_wetness_mm = wetness_mm;
+         if (wetness_mm < 0.)
+         { // The soil can absorb more water.
+            double idu_room_in_soil_mm = -wetness_mm;
+            double idu_room_in_soil_m3 = (idu_room_in_soil_mm / 1000.) * idu_area_m2;
+            to_this_idu_soil_m3 = min(idu_room_in_soil_m3, to_this_idu_m3);
+            double to_this_idu_soil_mm = (to_this_idu_soil_m3 / idu_area_m2) * 1000.;
+            HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
+            pBOX_NAT_SOIL->AddFluxFromGlobalHandler((float)(-to_this_idu_soil_m3), FL_SINK);
+            double hru_NAT_SOIL_mm = pHRU->AttFloat(HruNAT_SOIL);
+            hru_NAT_SOIL_mm += to_this_idu_soil_mm;
+            pHRU->SetAttFloat(HruNAT_SOIL, (float)hru_NAT_SOIL_mm);
 
-         double hru_H2OSTNDGM3 = pHRU->Att(HruH2OSTNDGM3);
-         hru_H2OSTNDGM3 += to_this_idu_m3;
-         pHRU->SetAtt(HruH2OSTNDGM3, hru_H2OSTNDGM3);
-         double hru_BOXSURF_M3 = pHRU->Att(HruBOXSURF_M3);
-         hru_BOXSURF_M3 += to_this_idu_m3;
-         pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
+            if (idu_room_in_soil_m3 >= to_this_idu_soil_m3)
+               new_wetness_mm = -(-wetness_mm - to_this_idu_soil_mm);
+         } // end of if (wetness_mm < 0.)
+         // When the soil is saturated, then any additional water becomes standing water.
+         double to_this_idu_standing_h2o_m3 = to_this_idu_m3 - to_this_idu_soil_m3;
+         if (to_this_idu_standing_h2o_m3 > 0)
+         {
+            HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
+            pBOX_SURFACE_H2O->AddFluxFromGlobalHandler((float)(-to_this_idu_standing_h2o_m3), FL_SINK);
+            double to_this_idu_standing_h2o_mm = (to_this_idu_standing_h2o_m3 / idu_area_m2) * 1000.;
+            new_wetness_mm += to_this_idu_standing_h2o_mm;
+            pHRU->m_standingH2Oflag = true;
+            double hru_H2OSTNDGM3 = pHRU->Att(HruH2OSTNDGM3);
+            hru_H2OSTNDGM3 += to_this_idu_standing_h2o_m3;
+            pHRU->SetAtt(HruH2OSTNDGM3, hru_H2OSTNDGM3);
+            double hru_BOXSURF_M3 = pHRU->Att(HruBOXSURF_M3);
+            hru_BOXSURF_M3 += to_this_idu_standing_h2o_m3;
+            pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
+         }
+         gpFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm);
+
       } // end of loop through IDUs in this wetland
 
       return(remaining_m3);
@@ -7398,7 +7424,7 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
       && close_enough(surface_h2o_accum_m3, hru_surface_h2o_m3, 0.0001, 0.01)
       && close_enough(sm_day_accum_m3, hru_topsoil_h2o_m3, 0.0001, 0.01);
    ASSERT(rtnval);
-   rtnval = rtnval && CheckSurfaceH2O(pHRU);
+   rtnval = rtnval && CheckSurfaceH2O(pHRU, 0.);
 
    if (!rtnval)
    {
@@ -12493,7 +12519,7 @@ void FlowModel::GetCatchmentDerivatives( double time, double timeStep, int svCou
    } // end of GetCatchmentDerivatives()
 
 
-bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
+bool FlowModel::CheckSurfaceH2O(HRU * pHRU, double boxSurfaceH2Oadjustment_m3)
 // Confirm that HruBOXSURF_M3 is consistent with HruH2OMELT_M3 and HruH2OSTNDGM3, with IDU attributes H2O_MELT and WETNESS,
 // and with m_standingH2Oflag, m_snowpackFlag, and m_waterVolume in the snowpack and surface water HRU compartments.
 {
@@ -12509,16 +12535,16 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
 
    HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
    double box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_volumeWater;
-   double flux_box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
+   double flux_box_surface_h2o_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue; // ???
 
    HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
    double box_nat_soil_m3 = pBOX_NAT_SOIL->m_volumeWater;
-   double flux_box_nat_soil_m3 = pBOX_NAT_SOIL->m_globalHandlerFluxValue;
+   double flux_box_nat_soil_m3 = pBOX_NAT_SOIL->m_globalHandlerFluxValue; // ???
 
    double idu_melt_h2o_accum_m3 = 0.;
    double idu_standing_h2o_accum_m3 = 0.;
    double idu_snow_swe_accum_m3 = 0.;
-   double idu_wetl2q_accum_cms = 0.;
+   double idu_wetl2q_accum_cms = 0.; // ???
    int num_idus = (int)pHRU->m_polyIndexArray.GetSize();
    for (int i = 0; i < num_idus; i++)
    {
@@ -12532,8 +12558,8 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
          double idu_standing_h2o_m3 = idu_wetness_mm > 0. ? ((idu_wetness_mm / 1000.) * idu_area_m2) : 0.;
          idu_standing_h2o_accum_m3 += idu_standing_h2o_m3;
         
-         double idu_wetl2q_cms = gpFlowModel->Att(idu_poly_ndx, WETL2Q);
-         idu_wetl2q_accum_cms += idu_wetl2q_cms;
+         double idu_wetl2q_cms = gpFlowModel->Att(idu_poly_ndx, WETL2Q); // ???
+         idu_wetl2q_accum_cms += idu_wetl2q_cms; // ???
       }
       else
       {
@@ -12553,32 +12579,32 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
 
    double box_snow_flux_m3 = pBOX_SNOW->m_globalHandlerFluxValue;
    double box_surface_h2o_flux_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
-   double idu_wetl2q_accum_m3 = idu_wetl2q_accum_cms * SEC_PER_DAY;
+   double idu_wetl2q_accum_m3 = idu_wetl2q_accum_cms * SEC_PER_DAY; // ???
 
-   double adjusted_box_surface_h2o_m3 = box_surface_h2o_m3 + flux_box_surface_h2o_m3;
-   double adjusted_hru_box_surf_m3 = hru_box_surf_m3 + flux_box_surface_h2o_m3;
+   double adjusted_box_surface_h2o_m3 = box_surface_h2o_m3 + boxSurfaceH2Oadjustment_m3;
 
-//x   bool is_close_enough = close_enough(adjusted_hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-4, 1);
    bool is_close_enough = close_enough(hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-4, 1);
-   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3 - idu_wetl2q_accum_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-4, 1.);
+   is_close_enough = is_close_enough && close_enough(hru_box_surf_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-4, 1.);
    is_close_enough = is_close_enough && close_enough(hru_snow_box_m3, box_snow_m3, 1e-4, 1);
-   is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, adjusted_box_surface_h2o_m3, 1e-4, 1);
+// ???  is_close_enough = is_close_enough && close_enough(hru_box_surf_m3, adjusted_box_surface_h2o_m3, 1e-4, 1);
    is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-4, 1);
    is_close_enough = is_close_enough && (pHRU->m_snowpackFlag == (box_snow_m3 > 0));
    is_close_enough = is_close_enough && (pHRU->m_standingH2Oflag == (hru_h2o_stndg_m3 > 0));
 
-   if (false && !is_close_enough)
+   if (!is_close_enough)
    {
       CString msg; 
-      msg.Format("CheckSurfaceH2O() HRU id = %d. is_close_enough is false", pHRU->m_id); Report::LogWarning(msg);
-      msg.Format("adjusted_hru_box_surf_m3 = %f", adjusted_hru_box_surf_m3); Report::LogMsg(msg);
+      msg.Format("CheckSurfaceH2O() HRU id = %d. boxSurfaceH2Oadjustment = %f. is_close_enough is false", 
+         pHRU->m_id, boxSurfaceH2Oadjustment_m3); 
+      Report::LogWarning(msg);
+      msg.Format("hru_box_surf_m3 = %f", hru_box_surf_m3); Report::LogMsg(msg);
       msg.Format("hru_h2o_melt_m3 = %f", hru_h2o_melt_m3); Report::LogMsg(msg);
       msg.Format("hru_h2o_stndg_m3 = %f", hru_h2o_stndg_m3); Report::LogMsg(msg);
       msg.Format("idu_melt_h2o_accum_m3 = %f", idu_melt_h2o_accum_m3); Report::LogMsg(msg);
       msg.Format("idu_standing_h2o_accum_m3 = %f", idu_standing_h2o_accum_m3); Report::LogMsg(msg);
       msg.Format("hru_snow_box_m3 = %f", hru_snow_box_m3); Report::LogMsg(msg);
       msg.Format("box_snow_m3 = %f", box_snow_m3); Report::LogMsg(msg);
-      msg.Format("adjusted_box_surface_h2o_m3 = %f", adjusted_box_surface_h2o_m3); Report::LogMsg(msg);
+      msg.Format("box_surface_h2o_m3 = %f", box_surface_h2o_m3); Report::LogMsg(msg);
       msg.Format("idu_snow_swe_accum_m3 = %f", idu_snow_swe_accum_m3); Report::LogMsg(msg);
       msg.Format("idu_melt_h2o_accum_m3 = %f", idu_melt_h2o_accum_m3); Report::LogMsg(msg);
       msg.Format("m_snowpackFlag = %s", pHRU->m_snowpackFlag ? "true" : "false"); Report::LogMsg(msg);
@@ -14823,12 +14849,16 @@ void FlowModel::UpdateHRULevelVariables(EnvContext *pEnvContext)
       m_pHRUlayer->SetDataU(hru_ndx, m_colHruET_DAY, sm2atm + pHRU->m_currentET);
       pHRU->m_et_yr += sm2atm;
 
-      CheckSurfaceH2O(pHRU);
-      if (!CheckSurfaceH2O(pHRU))
+      HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
+      double box_surface_h2o_flux_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
+      HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
+      double box_nat_soil_flux_m3 = pBOX_NAT_SOIL->m_globalHandlerFluxValue;
+      double box_surface_h2o_adjustment_m3;
+      if (!CheckSurfaceH2O(pHRU, box_surface_h2o_adjustment_m3))
       {
          CString msg;
          msg.Format("UpdateHRULevelVariables() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
-// ???         Report::LogMsg(msg);
+         Report::LogWarning(msg);
       }
 
       HRULayer * pNatSoilBox = pHRU->GetLayer(BOX_NAT_SOIL);

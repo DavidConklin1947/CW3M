@@ -2237,7 +2237,7 @@ protected:
    //static void GetReachDerivatives( float time, float timestep, int svCount, double *derivatives, void *extra );
    static void GetTotalDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra ) ;
 
-   bool CheckSurfaceH2O(HRU* pHRU); // Confirm that HruBOXSURF_M3 is consistent with HruH2OMELT_M3 and HruH2OSTNDGM3.
+   bool CheckSurfaceH2O(HRU* pHRU, double boxSurfaceH2Oadjustment_m3);
 
    
 protected:
