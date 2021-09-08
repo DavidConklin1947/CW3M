@@ -5648,7 +5648,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          {
             CString msg;
             msg.Format("FlowModel::Run() For pHRU->m_id = %d, CheckSurfaceH2O() returned false.", pHRU->m_id);
-// ???            Report::LogMsg(msg);
+            Report::LogMsg(msg);
          }
          
       } // end of loop thru HRUs
@@ -12558,7 +12558,8 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    double adjusted_box_surface_h2o_m3 = box_surface_h2o_m3 + flux_box_surface_h2o_m3;
    double adjusted_hru_box_surf_m3 = hru_box_surf_m3 + flux_box_surface_h2o_m3;
 
-   bool is_close_enough = close_enough(adjusted_hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-4, 1);
+//x   bool is_close_enough = close_enough(adjusted_hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-4, 1);
+   bool is_close_enough = close_enough(hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-4, 1);
    is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3 - idu_wetl2q_accum_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-4, 1.);
    is_close_enough = is_close_enough && close_enough(hru_snow_box_m3, box_snow_m3, 1e-4, 1);
    is_close_enough = is_close_enough && close_enough(adjusted_hru_box_surf_m3, adjusted_box_surface_h2o_m3, 1e-4, 1);
@@ -12566,7 +12567,7 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU)
    is_close_enough = is_close_enough && (pHRU->m_snowpackFlag == (box_snow_m3 > 0));
    is_close_enough = is_close_enough && (pHRU->m_standingH2Oflag == (hru_h2o_stndg_m3 > 0));
 
-   if (!is_close_enough)
+   if (false && !is_close_enough)
    {
       CString msg; 
       msg.Format("CheckSurfaceH2O() HRU id = %d. is_close_enough is false", pHRU->m_id); Report::LogWarning(msg);
