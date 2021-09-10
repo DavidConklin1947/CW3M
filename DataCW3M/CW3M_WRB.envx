@@ -12,7 +12,7 @@
     logMsgLevel                ='0'
     noBuffering                ='0'
     multiRunDecadalMapsModulus ='10'
-    defaultPeriod              ='9'
+    defaultPeriod              ='1'
     dynamicUpdate              ='15'
     spatialIndexDistance       ='0'
     areaCutoff                 ='0'
@@ -304,7 +304,7 @@ initRunOnStartup  ='0'
    />
    
 <autonomous_process
-name         ='VegSTMengine'
+name         ='UplandSTM'
 path         ='VegSTM.dll'
 id           ='130'
 use          ='1'
@@ -312,10 +312,25 @@ timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='VegSTM.xml'
+initInfo     ='UplandSTM.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
+
+<autonomous_process
+name         ='WetlandSTM'
+path         ='VegSTM.dll'
+id           ='131'
+use          ='1'
+timing       ='1'
+freq         ='1'
+sandbox      ='0'
+fieldName    =''
+initInfo     ='WetlandSTM.xml'
+dependencies =''
+initRunOnStartup  ='0'
+   />
+    
 <!--
 <autonomous_process
 name         ='UpdateDGVMvegtype'

@@ -56,8 +56,8 @@ for all time steps.
   <vegtransfiles>
 
     <vegtransfile
-      probability_filename="probability_transition_lookup.csv"     
-      deterministic_filename="deterministic_transition_lookup.csv"
+      probability_filename="upland_probabilistic_transition_lookup.csv"     
+      deterministic_filename="upland_deterministic_transition_lookup.csv"
       />
 
   </vegtransfiles>

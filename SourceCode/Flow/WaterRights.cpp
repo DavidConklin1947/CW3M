@@ -293,26 +293,26 @@ delete[] m_myGeo;
 double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
 { // These entries should be ordered so that upstream points in a drainage come before downstream points.
 // Coast Fork Willamette basin
-   { 0, 0, 23759312, 6 }, //", 6, Cottage Grove, ,
-   { 0, 0, 23759588, 5 }, //", 5, Dorena, ,
-   { 503899, 4868172, 23759226, 39 }, // 39 Coast Fork near Goshen GOSO
-   { 0, 0, 23759222, 17 }, // 17 Coast Fork outlet
+   { 0, 0, 23759312, 6 }, //", 6, Cottage Grove, uses gage USGS 14153500_flow_COAST FORK WILLAMETTE R BLW COTTAGE GROVE DAM, OR_23759308,
+   { 0, 0, 23759588, 5 }, //", 5, Dorena, uses gage USGS 14154500_flow_ROW RIVER ABOVE PITCHER CREEK, NEAR DORENA, OR_23759452,
+   { 503899, 4868172, 23759226, 39 }, // 39 Coast Fork near Goshen GOSO, uses gage USGS 14157500_flow_COAST FORK WILLAMETTE RIVER NEAR GOSHEN, OR_23759228
+   { 0, 0, 23759222, 17 }, // 17 Coast Fork outlet, gage?
 // Middle Fork Willamette basin
    { 0, 0, 23751946, 1 }, //", 1, Hills Creek, ,
    { 0, 0, 23752598, 4 }, //", 4, Fall Creek, ,
    { 507544, 4871675, 23751778, 38 }, // 38 Middle Fork near Jasper
    { 0, 0, 23751752, 18 }, // 18 Middle Fork outlet
 // McKenzie basin
-   { 0, 0, 23773411, 49 }, // Lookout49 - Lookout Cr.; gage 14161500. 
-   { 0, 0, 23773405, 9 }, // 9, BLU9, USGS gage 14162200 on Blue R below Quartz Cr. and the dam and above Simmonds Cr.
+   { 559471, 4895434, 23773411, 49 }, // Lookout49 - Lookout Cr.; gage 14161500. 
+   { 553418, 4890139, 23773405, 9 }, // BLU9, USGS gage 14162200 on Blue R below Quartz Cr. and the dam and above Simmonds Cr.
    { 0, 0, 0, 14 }, // now spare14 { 553414.7513, 4890138.574, 23773405, 14 }, //", 14, Blue River, 44.162500, -122.331940
-   { 0, 0, 23773373, 46 }, // Clear Lake
-   { 0, 0, 23773393, 47 }, // Smith47 - Smith R above Smith R reservoir; gage 14158790. 
-   { 0, 0, 23773037, 48 }, // SFork48 - S Fork McKenzie R above Cougar; gage 14159200. 
-   { 0, 0, 23773011, 8 }, //", 8, Cougar, ,
+   { 500446, 4911981, 23773373, 46 }, // ClearLake46
+   { 576071, 4909491, 23773393, 47 }, // Smith47 - Smith R above Smith R reservoir; gage 14158790. 
+   { 562751, 4877413, 23773037, 48 }, // SFork48 - S Fork McKenzie R above Cougar; gage 14159200. 
+   { 560217, 4887265, 23773011, 8 }, // CGR8, Cougar 8, 
    { 518418, 4879673, 23772801, 34 }, //", 34, Walterville, 44.070000, -122.770000
-   { 0, 0, 23773513, 25 }, // Mohawk at gage 14165000
-   { 0, 0, 23765583, 16 }, // McKenzie outlet
+   { 503514, 4882214, 23773513, 25 }, // Mohawk at gage 14165000
+   { 502939, 4879804, 23765583, 16 }, // McKenzieOutlet16
 // Upper Willamette basin
    { 0, 0, 23763395, 15 }, // upper Willamette mainstem at the confluence with the McKenzie
 // Long Tom basin
@@ -336,9 +336,9 @@ double HBVcalibPts[NUM_HBV_CALIB_PTS][4] =
    { 518306, 4951008, 23786251, 56 }, // 56 Thomas Creek near Scio
    { 0, 0, 23785607, 43}, // 43 lower S. Santiam
 // North Santiam basin
-   { 0, 0, 23780557, 51 }, // 51 Blowout Cr.
-   { 0, 0, 23780511, 12 }, // 12, Detroit, 
-   { 0, 0, 23780805, 50 }, // 50 Little N Santiam
+   { 569005, 4944783, 23780557, 51 }, // 51 Blowout Cr.
+   { 555612, 4955841, 23780511, 12 }, // 12 Detroit, closest gage to Detroit: NORTH SANTIAM RIVER AT NIAGARA, OR
+   { 533396, 4959898, 23780805, 50 }, // 50 Little N Santiam
    { 530169, 4959583, 23780481, 37 }, // 37 Mehama MEHO
    { 0, 0, 23780877, 44 }, // 44 lower N Santiam
 // Lower Santiam
