@@ -135,7 +135,7 @@
 		  <lulc id='247' parentID='29' name='Turnips' />
     <lulc id='299' parentID='20' name='crop not yet selected' />
 
-<!-- children of 621 PUB Unconsolidated bottom wetland />
+<!-- children of 621 PUB Unconsolidated bottom wetland -->
     <lulc id='6211' parentID='621' name='PUBH permanently flooded wetland' />
       <!-- Floodplain-based open water pond that's inundated all the time -->
     <lulc id='6212' parentID='621' name='PUBF semi-permanently flooded wetland' />
