@@ -31,9 +31,23 @@ using namespace std;
 #define FLOWAPI __declspec( dllimport )
 #endif
 
-/* reservoir ID numbers and USGS three letter codes */
+/* reservoir ID numbers and USACE three letter codes
+1 HCR Hills Creek Reservoir
+2 LOP Lookout Point Reservoir
+3 DEX Dexter Reservoir
+4 FAL Fall Creek Reservoir
+5 DOR Dorena Reservoir
+6 COT Cottage Grove Reservoir
+7 FRN Fern Ridge Reservoir
+8 CGR Cougar Reservoir
+9 BLU Blue River Reservoir
+10 GPR Green Peter Reservoir
+11 FOS Foster Reservoir
+12 DET Detroit Reservoir
+13 BCL Big Cliff Reservoir
+*/
 #define HCR 1
-#define LOP 1
+#define LOP 2
 #define DEX 3
 #define FAL 4
 #define DOR 5

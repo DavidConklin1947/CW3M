@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<!-- CW3M_McKenzie.envx -->
+<!-- CW3M_PEST_Blowout51.envx -->
 
 <Envision ver='5.0'>
 
@@ -39,6 +39,8 @@
     useWaterYears              ='0'
     spinup='0'
   />
+  <!-- for debugging, to run for just 1 day in each year    maxDaysInYear ='1'
+-->
 
   <layers >
 
@@ -301,7 +303,7 @@ initRunOnStartup  ='0'
    />
    
 <autonomous_process
-name         ='VegSTMengine'
+name         ='UplandSTM'
 path         ='VegSTM.dll'
 id           ='130'
 use          ='1'
@@ -309,25 +311,25 @@ timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='VegSTM.xml'
+initInfo     ='UplandSTM.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
-<!--
+
 <autonomous_process
-name         ='UpdateDGVMvegtype'
-path         ='APs.dll'
-id           ='140'
+name         ='WetlandSTM'
+path         ='VegSTM.dll'
+id           ='131'
 use          ='1'
 timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='APs.xml'
+initInfo     ='WetlandSTM.xml'
 dependencies =''
 initRunOnStartup ='0'
    />
--->  
+    
 <autonomous_process
 name         ='FarmlandRent'
 path         ='APs.dll'
