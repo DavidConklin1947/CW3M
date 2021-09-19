@@ -35,6 +35,8 @@
 
 using namespace std;
 
+IDUlayer * gIDUs = NULL;
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -135,6 +137,9 @@ STMengine::STMengine()
 , m_colProbTSDMAX(-1)
 , m_colProbRELTSD(-1)
 , m_colProbPVTto(-1)
+
+, m_pIDUlayer(NULL)
+//x , m_unseenCCtrans(0)
    {
    };
 
@@ -144,7 +149,13 @@ STMengine::~STMengine()
 
 BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    {
-   m_pIDUlayer = (MapLayer *)pEnvContext->pMapLayer;
+   gIDUs = (IDUlayer *)pEnvContext->pMapLayer;
+//x   gM = pEnvContext;
+//x   m_pIDUlayer = (MapLayer*)gM->pMapLayer;
+
+   int idu_poly_ndx = 15;
+   double area = Att(idu_poly_ndx, AREA);
+//x   m_IDUs = (MapLayer *)pEnvContext->pMapLayer;
 
    // get input file names and input variables   
    if (m_staticsInitialized)
@@ -213,7 +224,7 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
       || m_colProbPROPORTION < 0 || m_colProbTSDMAX < 0 || m_colProbRELTSD < 0 || m_colProbPVTto < 0)
    {
       CString msg;
-      msg.Format("STMengine::::Init() Missing column in probabilistic transition file %s", m_vegtransfile.probability_filename);
+      msg.Format("STMengine::::Init() Missing column in probabilistic transition file %s", m_vegtransfile.probability_filename.GetString());
       Report::ErrorMsg(msg);
       return(false);
    }
@@ -237,7 +248,7 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    {
       CString msg;
       msg.Format("STMengine::::Init() Missing column in deterministic transition file %s: m_colDetSTARTAGE = %d, m_colDetENDAGE = %d, m_colDetLAI = %d",
-         m_vegtransfile.deterministic_filename, m_colDetSTARTAGE, m_colDetENDAGE, m_colDetLAI);
+         m_vegtransfile.deterministic_filename.GetString(), m_colDetSTARTAGE, m_colDetENDAGE, m_colDetLAI);
       Report::ErrorMsg(msg);
       return(false);
    }
@@ -262,30 +273,22 @@ BOOL STMengine::InitRun(EnvContext *pEnvContext, bool useInitSeed)
    }
 
 
-// VEGTRNTYPE gets reset to TRANS_NONE (0) near the beginning of the annual step by a Modeler autonomous process.
-BOOL STMengine::Run(EnvContext *pEnvContext)
-   {
-   bool err_flag = false;
-   m_probMultiplierPVTLookupKey.timestep = 
-      m_probMultiplierVegClassLookupKey.timestep = pEnvContext->currentYear;
 
+BOOL STMengine::Run(EnvContext *pEnvContext)
+{
    for (MapLayer::Iterator idu = pEnvContext->pMapLayer->Begin(); idu != pEnvContext->pMapLayer->End(); idu++)
-      {
+   {
+//x      int current_state = m_IDUs->GetAttInt(idu, VEGCLASS);
+      int current_state = AttInt(idu, VEGCLASS);
+      if (current_state < STM_CLASS_MIN || STM_CLASS_MAX < current_state) continue;
+
       int idu_int = (int)idu; 
       int vegclass = -1; m_pIDUlayer->GetData(idu, m_colVEGCLASS, vegclass);
-      if (vegclass < STM_VEGCLASS_MINIMUM) continue;
-
-      int disturb = 0; m_pIDUlayer->GetData(idu, m_colDisturb, disturb);
-      int pvt = 0; m_pIDUlayer->GetData(idu, m_colPVT, pvt);
-      int tsd = 0; m_pIDUlayer->GetData(idu, m_colTSD, tsd);
+      if (vegclass < STM_CLASS_MIN || STM_CLASS_MAX) continue;
       int ageclass = 0; m_pIDUlayer->GetData(idu, m_colAGECLASS, ageclass);
 
-      //int cover_type = (int)floor(vegclass / 10000.0); //first three digits of VEGCLASS starting from left
-      //int structural_stage = (int)floor(abs(((10000.0*cover_type) - vegclass) / 10.0)); //second three digits of VEGCLASS starting from left
-      //int year_index = pEnvContext->yearOfRun;
-
       int selected_to_trans = -1;
-      int selected_pvtto_trans = -1;
+//x      int selected_pvtto_trans = -1;
       float selected_probability = 0.f;
 
       // A disturbance (DISTURB > 0) will be handled in the logic for a probabilistic transition.
@@ -298,16 +301,20 @@ BOOL STMengine::Run(EnvContext *pEnvContext)
       int new_stand_age = 0;
       int new_tsd = 0;
 
-      if (ProbabilisticTransition(pEnvContext, idu, vegclass, pvt, disturb, ageclass, tsd, selected_to_trans, selected_pvtto_trans, selected_probability))
-         { // Transition to the new state.
+//x      if (ProbabilisticTransition(pEnvContext, idu, vegclass, pvt, disturb, ageclass, tsd, selected_to_trans, selected_pvtto_trans, selected_probability))
+      if (ConditionalTransition(pEnvContext, idu, vegclass, ageclass, selected_probability))
+      //   int ConditionalTransition(EnvContext * pEnvContext, int idu, int vegclass, int ageclass, float& selected_probability); // Returns index of selected conditional transition.
+      { // Transition to the new state.
          m_probIndexLookupKey.si = 0;
-         m_probIndexLookupKey.pvt = pvt;
+//x         m_probIndexLookupKey.pvt = pvt;
+         m_probIndexLookupKey.pvt = 1;
          m_probIndexLookupKey.from = vegclass; //transition "from" veg class
          m_probIndexLookupKey.to = selected_to_trans;
          m_probIndexLookupKey.regen = 0;
          m_probIndexLookupKey.prob = 0;
          m_probIndexLookupKey.region = 1;
-         m_probIndexLookupKey.disturb = disturb;
+//x        m_probIndexLookupKey.disturb = disturb;
+         m_probIndexLookupKey.disturb = 0;
          vector<int> *probmapindex = NULL;
          probmapindex = &m_probIndexMap[m_probIndexLookupKey]; //getting index into prob file for the line that transition was select from, for age info etc..	
 
@@ -345,8 +352,9 @@ BOOL STMengine::Run(EnvContext *pEnvContext)
          int endage = 0; m_deterministic_inputtable.Get(m_colDetENDAGE, row, endage);
          m_deterministic_inputtable.Get(m_colDetLAI, row, new_lai);
 
-         if (keepRelativeAge == 1 || (selected_to_trans == vegclass && selected_pvtto_trans == pvt))
-            // "keepRelativeAge" flag is set or transitions back to the same state => preserve relative age within the state
+//x         if (keepRelativeAge == 1 || (selected_to_trans == vegclass && selected_pvtto_trans == pvt))
+            if (keepRelativeAge == 1 || (selected_to_trans == vegclass))
+              // "keepRelativeAge" flag is set or transitions back to the same state => preserve relative age within the state
             new_stand_age = ageclass + relativeAge;
          else
             new_stand_age = startage + relativeAge; //relative age can be negative, holding a VEGCLASS longer in said class with respect to deterministic transitions.	
@@ -468,18 +476,53 @@ BOOL STMengine::EndRun(EnvContext*)
    }
 
 
-bool STMengine::ProbabilisticTransition(EnvContext * pEnvContext, int idu, int vegclass, int pvt, int disturb, int stand_age, int tsd, int & selected_to_trans, int & selected_pvtto_trans, float & selected_probability)
-{
+//x bool STMengine::ProbabilisticTransition(EnvContext* pEnvContext, int idu, int vegclass, int pvt, int disturb, int stand_age, int tsd, int& selected_to_trans, int& selected_pvtto_trans, float& selected_probability)
+int STMengine::ConditionalTransition(EnvContext* pEnvContext, int idu, int tgtSourceClass, int ageclass, float& selected_probability)
+{ // Returns index of selected conditional transition, or -1 if no conditional transition is selected.
+   // 1. Find the entries in the conditional transition table for the source state.  If none, return -1.
+   // 2. In the order the transitions appear in the table, choose whether or not to use the transition.
+   //    Evaluate the likelihood of the transition.pick a random number from a uniform distribution 
+   //    on the unit interval.  If the random number is <= the likelihood of the conditional transition,
+   //    return the index of the transition.
+   // 3. If no transition is selected, return -1.
+
+
+   CArray<int> sourceIndices;
+   int source_ndx = 0;
+   int found_count = 0;
+   int last_found = -1;
+   while (source_ndx < m_condTransSourceStates.GetCount())
+   {
+      if (m_condTransSourceStates[source_ndx] == tgtSourceClass)
+      {
+         m_condTransSourceStates.Add(source_ndx);
+         found_count++;
+         last_found = source_ndx;
+      }
+      source_ndx++;
+   }
+
+   int ndx_to_possible_transitions = 0;
+   while (ndx_to_possible_transitions < found_count)
+   {
+
+      ndx_to_possible_transitions++;
+   }
+   
+   return(-1); // No transition was selected.
+} // end of ConditionalTransition()
+
    m_probLookupKey.si = 0;
-   m_probLookupKey.pvt = pvt;
+//x   m_probLookupKey.pvt = pvt;
    m_probLookupKey.from = vegclass;
    m_probLookupKey.regen = 0;
-   m_probLookupKey.region = 1;
-   m_probLookupKey.disturb = disturb;
+//x   m_probLookupKey.region = 1;
+//x   m_probLookupKey.disturb = disturb;
    std::vector< std::pair<int, float> > * final_probs = NULL;
    final_probs = &probmap[m_probLookupKey]; // Returns the proper probabilities from the lookup table
 
-   if (final_probs->size() == 0)
+   if (final_probs->size() == 0) return(false);
+/*x
    {
       if (disturb == 0 || (CC_DISTURB_LB <= disturb && disturb <= CC_DISTURB_UB)) 
          return(false);
@@ -501,6 +544,7 @@ bool STMengine::ProbabilisticTransition(EnvContext * pEnvContext, int idu, int v
       if (!alreadySeen && list_length < max_list_length) m_badVegTransClasses.Add(msg);
       return(false);
    } // end of if ( m_final_probs->size() == 0 )
+x*/
 
    std::vector< std::pair<int, float> > * original_probs;
    original_probs = &probmap2[m_probLookupKey]; // Get a second copy of the probabilities from the lookup table
@@ -509,12 +553,14 @@ bool STMengine::ProbabilisticTransition(EnvContext * pEnvContext, int idu, int v
    for (vector<pair<int, float>>::iterator it = final_probs->begin(); it != final_probs->end(); ++it)
       probability_sum += it->second;
 
+   /*x
    if (disturb != 0)
    { // Normalize probability list if disturbance. This means a disturbance transition will be selected.  
       for (vector<pair<int, float>>::iterator it = final_probs->begin(); it != final_probs->end(); ++it)
          it->second = probability_sum > 0.0 ? it->second / probability_sum : 1.0f / final_probs->size();
       probability_sum = 1.f;
    }
+   x*/
 
    double rand_num = (double)m_rn.RandValue(0., 1.);  //randum number between 0 and 1, uniform distribution                                                     //normalize probability list if disturbance. this means a disturbance transition will be selected. 
    if (rand_num > probability_sum) return(false);
@@ -579,7 +625,7 @@ bool STMengine::ProbabilisticTransition(EnvContext * pEnvContext, int idu, int v
    }
    else return(false);
 
-} // end of ProbabilisticTransition()
+} // end of ConditionalTransition()
 
 
 int STMengine::ChooseProbTrans(double rand_num, float probability_sum, vector<pair<int, float> > *m_final_probs, std::vector< std::pair<int, float> > *m_original_final_probs, float & orig_probability)
@@ -1146,3 +1192,22 @@ bool STMengine::LoadXml(LPCTSTR _filename)
 
    return true;
    }
+
+
+   inline double STMengine::Att(int iduPolyNdx, int col)
+   {
+      return(gIDUs->Att(iduPolyNdx, col));
+   } // end of STMengine::Att()
+
+
+   inline float STMengine::AttFloat(int iduPolyNdx, int col)
+   {
+      return(gIDUs->AttFloat(iduPolyNdx, col));
+   } // end of STMengine::AttFloat()
+
+
+   inline int STMengine::AttInt(int iduPolyNdx, int col)
+   {
+      return(gIDUs->AttInt(iduPolyNdx, col));
+   } // end of STMengine::AttInt()
+

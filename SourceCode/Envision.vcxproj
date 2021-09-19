@@ -165,6 +165,7 @@
     <ClCompile Include="ChangeTypeDlg.cpp" />
     <ClCompile Include="ConstraintsDlg.cpp" />
     <ClCompile Include="ConvertDlg.cpp" />
+    <ClCompile Include="CW3Mglobals.cpp" />
     <ClCompile Include="DeltaExportDlg.cpp" />
     <ClCompile Include="DeltaViewer.cpp" />
     <ClCompile Include="EnvEngine\Actor.cpp" />
@@ -309,6 +310,7 @@
     <ClInclude Include="ChangeTypeDlg.h" />
     <ClInclude Include="ConstraintsDlg.h" />
     <ClInclude Include="ConvertDlg.h" />
+    <ClInclude Include="CW3Mglobals.h" />
     <ClInclude Include="DeltaExportDlg.h" />
     <ClInclude Include="DeltaViewerEx.h" />
     <ClInclude Include="EnvEngine\Actor.h" />

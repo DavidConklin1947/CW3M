@@ -10,12 +10,15 @@
 #include "Flow.h"
 #include "AlgLib\AlgLib.h"
 #include <ScienceFcns.h>
+#include <EnvEngine\EnvContext.h>
+
 
 #define MJPERHR_PER_W 0.0036              // Watts -> MegaJoules per hour
 #define MJPERD_PER_W  0.0864              // Watts/m^2 -> MegaJoules/m^2*day
 #define KMPERDAY_PER_MPERSEC 86.4         // m/sec -> km/day
 #define KMD_PER_MMHR 0.000024;            // mm/h -> km/day
 
+extern IDUlayer* gIDUs; 
 extern FlowModel * gpFlowModel;
 
 double ETEquation::NOVAL;
@@ -914,7 +917,7 @@ float ETEquation::Fao56()
 
 void ETEquation::WetlandET(int idu, float soilH2O_mm, float fc_mm, float wp_mm, double * pPET_mm, double * pAET_mm)
 {
-   double idu_area_m2 = gpFlowModel->Att(idu, AREA);
+   double idu_area_m2 = gIDUs->Att(idu, AREA);
    float lai = gpFlowModel->AttFloat(idu, LAI);
    double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
    double evap_m3 = 0., vpd = 0., ea = 0.;
@@ -926,7 +929,7 @@ void ETEquation::WetlandET(int idu, float soilH2O_mm, float fc_mm, float wp_mm, 
    double pet_mm = 0., aet_mm = 0.;
 
    // Is there standing water?
-   double wetness_mm = gpFlowModel->Att(idu, WETNESS);
+   double wetness_mm = gIDUs->Att(idu, WETNESS);
    if (wetness_mm > 0)
    { // Calculate evaporation from standing water.
       double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
@@ -987,23 +990,23 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
    const static double Gsc = 4.92;                                                     // Solar Constant : MJ/(h m^2)   
    const static double albedo = 0.15;                                                  // Albedo (canopy reflection coefficient) : dimensionless
 
-   double elev_mean_m = gpFlowModel->Att(iduNdx, ELEV_MEAN);
+   double elev_mean_m = gIDUs->Att(iduNdx, ELEV_MEAN);
    double P = 101.3 * pow(((293.0 - 0.0065 * elev_mean_m) / 293.0), 5.26); // Atmospheric Pressure : kPa
    double gamma = 0.000665 * P;                                                        // Psychrometic Constant : kPa/deg C
    double cp = 1.006E-3;                                                              // specific heat of dry air : MJ/kg C
-   double temp_C = gpFlowModel->Att(iduNdx, TEMP);            
+   double temp_C = gIDUs->Att(iduNdx, TEMP);            
    double lambda = 2.501 - 2.361E-3 * temp_C; // Latent Heat of Vaporization; MJ/kg
    double slopeDelta = 4098.0 * (0.6108 * exp((17.27 * temp_C) / (temp_C + 237.3))) / pow(temp_C + 237.3, 2.0); // Slope of Saturation VaporPressure-Temperature Curve: kPa/deg C
 
    // Actual Water Vapor Pressure : kPa
    double ea = 0.0, vpd = 0.0;
-   double sphumidity_kg_kg = gpFlowModel->Att(iduNdx, SPHUMIDITY);
-   double tmax_C = gpFlowModel->Att(iduNdx, TMAX);
+   double sphumidity_kg_kg = gIDUs->Att(iduNdx, SPHUMIDITY);
+   double tmax_C = gIDUs->Att(iduNdx, TMAX);
    CalculateRelHumidity((float)sphumidity_kg_kg, (float)temp_C, (float)tmax_C, (float)elev_mean_m, ea, vpd);
 
    double rho = (float)1000.0 * P / (287.058 * (273.0 + temp_C));      // density of air : C (kg/m3) Shuttleworth 4.2.4. 
 
-   double rad_sw_W_m2 = gpFlowModel->Att(iduNdx, RAD_SW);
+   double rad_sw_W_m2 = gIDUs->Att(iduNdx, RAD_SW);
    double solarRadiation = (double)(rad_sw_W_m2 * MJPERD_PER_W);			// incoming radiation MJ/(m^2 d)	           
    double netShortWaveRad = (1.0 - albedo) * solarRadiation; // Net Short-Wave Radiation : MJ/(m^2 d)
  
@@ -1023,7 +1026,7 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
 
    double fcd = 1.35 * relativeSolarRad - 0.35; //cloudiness function
 
-   double tmin_C = gpFlowModel->Att(iduNdx, TMIN);
+   double tmin_C = gIDUs->Att(iduNdx, TMIN);
    double tMinKelvin = ScienceFcns::degC_to_degK((float)tmin_C);
    double tMaxKelvin = ScienceFcns::degC_to_degK((float)tmax_C);
    double netLongWaveRad = sigma * fcd * (0.34 - 0.14 * sqrt(ea)) * ((pow(tMinKelvin, 4.0) + pow(tMaxKelvin, 4.0)) / 2.0);
@@ -1052,7 +1055,7 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
    float zm = height + 2;                             // height of wind measurement
    float zh = height + 2;                             // height of humidity measurement
    float ra = 1.0f;
-   double windspeed_m_s = gpFlowModel->Att(iduNdx, WINDSPEED);
+   double windspeed_m_s = gIDUs->Att(iduNdx, WINDSPEED);
    if (windspeed_m_s > 0 && zm > d) ra = (float)(log((zm - d) / zom) * log((zh - d) / zoh) / 0.41 * 0.41 * windspeed_m_s);
    else ra = 1.0f;
 

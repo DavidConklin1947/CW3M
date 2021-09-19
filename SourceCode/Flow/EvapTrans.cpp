@@ -23,6 +23,8 @@ typedef twoDarray::index twoDindex;
 
 using namespace std;
 
+extern IDUlayer* gIDUs;
+//x extern EnvContext* gM;
 extern FlowProcess *gpFlow;
 extern FlowModel* gpFlowModel;
 

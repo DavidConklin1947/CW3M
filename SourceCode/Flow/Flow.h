@@ -96,6 +96,7 @@ using namespace std;
 
 #define BEERS_LAW_K 0.5
 
+/*x
 #define AREA gpFlowModel->m_colAREA
 #define COMID gpFlowModel->m_colCOMID
 #define ECOREGION gpFlowModel->m_colECOREGION
@@ -126,6 +127,7 @@ using namespace std;
 #define WETL2Q gpFlowModel->m_colWETL2Q
 #define WETNESS gpFlowModel->m_colWETNESS
 #define WINDSPEED gpFlowModel->m_colWINDSPEED
+x*/
 
 #define HruCOMID gpFlowModel->m_colHruCOMID
 #define HruFIELD_CAP gpFlowModel->m_colHruFIELD_CAP

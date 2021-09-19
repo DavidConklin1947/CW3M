@@ -927,6 +927,12 @@ class  LIBSAPI  MapLayer
       bool GetData(int rec, int col, CString &value) const;
       bool GetData(int rec, int col, bool &value) const;
 
+      // Att(), AttFloat(), AttInt() correspond to overloads of GetData()
+      inline double Att(int idu_poly_ndx, int col) { double ret_val; GetData(idu_poly_ndx, col, ret_val); return(ret_val); }
+      inline float AttFloat(int idu_poly_ndx, int col) { float ret_val; GetData(idu_poly_ndx, col, ret_val); return(ret_val); }
+      inline int AttInt(int idu_poly_ndx, int col) { int ret_val; GetData(idu_poly_ndx, col, ret_val); return(ret_val); }
+
+
       bool GetDataMinMax(int col, float *pMin, float *pMax) const;  // note: col=-1 gets min/max for ALL columns
       bool GetGridDataMinMax(float *pMin, float *pMax) const;      // specially for grids
 
@@ -1144,6 +1150,124 @@ class  LIBSAPI  MapLayer
 #endif
       void ExtendGridPoly(Poly *pPoly, int row, int col, int value);
    };
+
+
+class LIBSAPI IDUlayer : public MapLayer
+{
+
+   // IDU attribute stuff
+public:
+   double Att(int IDUpolyNdx, int col);
+   inline float AttFloat(int IDUpolyNdx, int col);
+   inline int AttInt(int IDUpolyNdx, int col);
+
+   // Some IDU attributes, in alphabetic order.
+   int m_colAREA;
+#define AREA gIDUs->m_colAREA
+   int m_colCOMID;
+#define COMID gIDUs->m_colCOMID
+   int m_colECOREGION;
+#define ECOREGION gIDUs->m_colECOREGION
+   int m_colELEV_MEAN;
+#define ELEV_MEAN gIDUs->m_colELEV_MEAN
+   int m_colF_THETA;
+#define F_THETA gIDUs->m_colF_THETA
+   int m_colFIELD_CAP;
+#define FIELD_CAP gIDUs->m_colFIELD_CAP
+   int m_colHBVCALIB;
+#define HBVCALIB gIDUs->m_colHBVCALIB
+   int m_colHRU_ID;
+#define HRU_ID gIDUs->m_colHRU_ID
+   int m_colHRU_NDX;
+#define HRU_NDX gIDUs->m_colHRU_NDX
+   int m_colH2O_MELT;
+#define H2O_MELT gIDUs->m_colH2O_MELT
+   int m_colIDU_ID;
+#define IDU_ID gIDUs->m_colIDU_ID
+   int m_colIRRIGATION;
+#define IRRIGATION gIDUs->m_colIRRIGATION
+   int m_colLAI;
+#define LAI gIDUs->m_colLAI
+   int m_colLULC_A;
+#define LULC_A gIDUs->m_colLULC_A
+   int m_colMAXSNOW;
+#define MAXSNOW gIDUs->m_colMAXSNOW
+   int m_colPVT;
+#define PVT gIDUs->m_colPVT
+   int m_colRAD_SW;
+#define RAD_SW gIDUs->m_colRAD_SW
+   int m_colSM_DAY;
+#define SM_DAY gIDUs->m_colSM_DAY
+   int m_colSNOW_SWE;
+#define SNOW_SWE gIDUs->m_colSNOW_SWE
+   int m_colSPHUMIDITY;
+#define SPHUMIDITY gIDUs->m_colSPHUMIDITY
+   int m_colTEMP;
+#define TEMP gIDUs->m_colTEMP
+   int m_colTMAX;
+#define TMAX gIDUs->m_colTMAX
+   int m_colTMIN;
+#define TMIN gIDUs->m_colTMIN
+   int m_colTREE_HT;
+#define TREE_HT gIDUs->m_colTREE_HT
+   int m_colVEGCLASS;
+#define VEGCLASS gIDUs->m_colVEGCLASS
+   int m_colVPD_SCALAR;
+#define VPD_SCALAR gIDUs->m_colVPD_SCALAR
+   int m_colWETL_CAP;
+#define WETL_CAP gIDUs->m_colWETL_CAP
+   int m_colWETL_ID;
+#define WETL_ID gIDUs->m_colWETL_ID
+   int m_colWETL2Q;
+#define WETL2Q gIDUs->m_colWETL2Q
+   int m_colWETNESS;
+#define WETNESS gIDUs->m_colWETNESS
+   int m_colWINDSPEED;
+#define WINDSPEED gIDUs->m_colWINDSPEED
+
+   bool FindIDUattributeCols();
+/*x
+   {
+      MapLayer* pIDUlayer = (MapLayer*)pMapLayer;
+      bool ok = true;
+
+      // Some IDU attributes, in alphabetic order.
+      ok = ok && pIDUlayer->CheckCol(AREA, "AREA", TYPE_INT, CC_MUST_EXIST);
+      ok = ok && pIDUlayer->CheckCol(COMID, "COMID", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(ECOREGION, "ECOREGION", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(ELEV_MEAN, "ELEV_MEAN", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(F_THETA, "F_THETA", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(FIELD_CAP, "FIELD_CAP", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(HBVCALIB, "HBVCALIB", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(HRU_ID, "HRU_ID", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(HRU_NDX, "HRU_NDX", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(H2O_MELT, "H2O_MELT", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(IDU_ID, "IDU_ID", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(IRRIGATION, "IRRIGATION", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(LAI, "LAI", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(LULC_A, "LULC_A", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(MAXSNOW, "MAXSNOW", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(PVT, "PVT", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(RAD_SW, "RAD_SW", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(SM_DAY, "SM_DAY", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(SNOW_SWE, "SNOW_SWE", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(SPHUMIDITY, "SPHUMIDITY", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(TEMP, "TEMP", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(TMAX, "TMAX", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(TMIN, "TMIN", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(TREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(VPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(WETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(WETL_ID, "WETL_ID", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(WETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(WETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && pIDUlayer->CheckCol(WINDSPEED, "WINDSPEED", TYPE_FLOAT, CC_AUTOADD);
+
+      return(ok);
+   } // end of FindIDUattributeCols()
+x*/
+
+};
 
 
 //////--------- inline functions ---------------------------

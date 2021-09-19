@@ -15,6 +15,7 @@ class ActorManager;
 class PolicyManager;
 class DeltaArray;
 class MapLayer;
+class IDUlayer;
 class LulcTree;
 class MapExprEngine;
 class QueryEngine;
@@ -417,7 +418,7 @@ public:
    int             scenarioIndex;         // 0-based scenario index 
    bool            showMessages;
    int             logMsgLevel;           // see flags in envmodel.h
-   const MapLayer *pMapLayer;             // pointer to the IDU layer.  This is const because extensions generally shouldn't write to this.
+   const IDUlayer *pMapLayer;             // pointer to the IDU layer.  This is const because extensions generally shouldn't write to this.
    const MapLayer * pReachLayer;
    const MapLayer * pHRUlayer;
    const MapLayer *pSubcatchmentLayer;
@@ -451,7 +452,7 @@ public:
    INT_PTR         extra;                 // extra data - depends on type
    int             reserved[32];
 
-	EnvContext( MapLayer *_pMapLayer )
+	EnvContext( IDUlayer *_pMapLayer )
 		: ptrAddDelta( NULL )
       , startYear( 0 )
       , endYear( 0 )
@@ -495,6 +496,7 @@ public:
       , daysInCurrentYear(365)
       , m_useWaterYears(0)
       { }
+
 };
 
 

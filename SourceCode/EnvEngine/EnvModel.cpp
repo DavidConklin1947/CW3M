@@ -31,7 +31,7 @@ extern PolicyManager   *gpPolicyManager;
 extern EnvModel        *gpModel;
 extern ScenarioManager *gpScenarioManager;
 
-MapLayer *EnvModel::m_pIDULayer = NULL;
+IDUlayer *EnvModel::m_pIDULayer = NULL;
 
 //not sure why the cdecl is here. for now, preserve it for windows
 #ifndef NO_MFC
@@ -4982,7 +4982,7 @@ void EnvModel::ExportDeltaArray( int run )
 
 
 
-void EnvModel::SetIDULayer( MapLayer *pLayer )
+void EnvModel::SetIDULayer( IDUlayer *pLayer )
    {
    m_pIDULayer = pLayer;
 

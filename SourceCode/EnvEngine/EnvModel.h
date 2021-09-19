@@ -381,11 +381,11 @@ class /*ENV_EXPORT*/ EnvModel
       bool m_areModelsInitialized;
 
 
-      void SetIDULayer( MapLayer *pLayer );
+      void SetIDULayer( IDUlayer *pLayer );
 
   // Application Variable stuff
   public:
-      static MapLayer *m_pIDULayer;
+      static IDUlayer *m_pIDULayer;
       FlowModel * m_pFlowModel;
 
    protected:

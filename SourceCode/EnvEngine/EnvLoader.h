@@ -32,7 +32,7 @@ class EnvLoader
   
    protected:
       Map             *m_pMap;      
-      MapLayer        *m_pIDULayer;          // set during loading of project file
+      IDUlayer        *m_pIDULayer;          // set during loading of project file
       EnvModel        *m_pModel;
       PolicyManager   *m_pPolicyManager;
       ActorManager    *m_pActorManager;

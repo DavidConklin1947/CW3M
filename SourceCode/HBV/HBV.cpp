@@ -11,16 +11,23 @@
 #include <omp.h>
 #include <math.h>
 #include <UNITCONV.H>
+#include <CW3Mglobals.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 EnvModel* gpEnvModel = NULL; 
-FlowModel* gpFlowModel = NULL;
+//x extern FlowModel* gpFlowModel = NULL;
+IDUlayer* gIDUs = NULL;
 
 float HBV::InitHBV_Global(FlowContext *pFlowContext, LPCTSTR inti)
    {
-   gpFlowModel = pFlowContext->pFlowModel;
+   gIDUs = (IDUlayer *)pFlowContext->pEnvContext->pMapLayer;
+
+//x   gFM = pFlowContext->pFlowModel;
+
+//x   gpFlowModel = pFlowContext->pFlowModel;
    gpEnvModel = pFlowContext->pEnvContext->pEnvModel;
    m_pIDUlayer = pFlowContext->pFlowModel->m_pIDUlayer;
    m_pReachLayer = pFlowContext->pFlowModel->m_pStreamLayer;
@@ -86,7 +93,8 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
    if (pFlowContext->timing != 16) return(false);
 
    // GMT_CATCHMENT
-   MapLayer *pIDULayer = (MapLayer*)pFlowContext->pEnvContext->pMapLayer;
+   IDUlayer *pIDULayer = (IDUlayer *)pFlowContext->pEnvContext->pMapLayer;
+   IDUlayer* pIDUs = pIDULayer;
    bool readOnlyFlag = pIDULayer->m_readOnly;
    pIDULayer->m_readOnly = false;
    pIDULayer->SetColData(m_colSNOWTHRU_D, VData(0), true);
@@ -198,14 +206,14 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
          {
             int idu_poly_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
-            int lulc_a = gpFlowModel->AttInt(idu_poly_ndx, LULC_A);
+            int lulc_a = AttInt(idu_poly_ndx, LULC_A);
             bool is_wetland = lulc_a == LULCA_WETLAND;
             if (!is_wetland) continue;
 
-            double wetness_mm = gpFlowModel->Att(idu_poly_ndx, WETNESS);
+            double wetness_mm = Att(idu_poly_ndx, WETNESS);
             if (wetness_mm <= 0.) continue;
 
-            float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
+            float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
             double idu_standing_h2o_m3 = (wetness_mm / 1000.) * idu_area_m2;
             hru_standing_h2o_m3 += idu_standing_h2o_m3;
          } // end of loop thru the IDUs in this HRU
@@ -284,14 +292,14 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       for (int idu = 0; idu <pHRU->m_polyIndexArray.GetSize(); idu++)
          { // Here precip_total = rain_thrufall + rain_evap + snow_thrufall + snow_evap.
          int idu_poly_ndx = pHRU->m_polyIndexArray[idu];
-         int lulc_a = gpFlowModel->AttInt(idu_poly_ndx, LULC_A);
+         int lulc_a = AttInt(idu_poly_ndx, LULC_A);
          bool is_wetland = lulc_a == LULCA_WETLAND;
          if (is_wetland) continue;
 
          float rain_thrufall_mm = 0.0f;
          float snow_thrufall_mm = 0.0f; // snow water equivalent
 
-         float iduArea = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
+         float iduArea = AttFloat(idu_poly_ndx, AREA);
          double idu_natural_area = iduArea * pHRU->m_frc_naturl;
 
          float lai = 0.0f; 
@@ -400,7 +408,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          double updated_water_in_snowpack_mm = hruRainThrufall_mm + water_in_snowpack_mm;
          if (updated_water_in_snowpack_mm > max_water_in_updated_snowpack_mm)
             {
-            rain_and_melt_to_soil_mm = updated_water_in_snowpack_mm - max_water_in_updated_snowpack_mm;
+            rain_and_melt_to_soil_mm = (float)updated_water_in_snowpack_mm - max_water_in_updated_snowpack_mm;
             rain_and_melt_to_soil_m3 = (float)(rain_and_melt_to_soil_mm * non_wetl_area_m2 / 1000.f);
             }
          rechargeToIrrigatedSoil_m3 = (irrigatedFracOfArea * rain_and_melt_to_soil_m3) * (1 - gwIrrigated); // Recharge into the irrigated soil bucket, from rain/melt
@@ -412,7 +420,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       else if (airTemp < tt)
          { // refreezing of water in the snowpack
          float potentialRefreezing_mm = CFR*CFMAX*(tt - airTemp);
-         refreezing_mm = min(potentialRefreezing_mm, water_in_snowpack_mm);
+         refreezing_mm = (float)min(potentialRefreezing_mm, water_in_snowpack_mm);
          if (refreezing_mm < 0.f) refreezing_mm = 0.f;
          refreezing_m3 = (float)(refreezing_mm * non_wetl_area_m2 / 1000.f);
          }
@@ -748,3 +756,22 @@ BOOL HBV::CalcDailyUrbanWaterRun(FlowContext *pFlowContext)
 
 	return TRUE;
    }
+
+
+inline double HBV::Att(int iduPolyNdx, int col)
+{
+   return(gIDUs->Att(iduPolyNdx, col));
+} // end of HBV::Att()
+
+
+inline float HBV::AttFloat(int iduPolyNdx, int col)
+{
+   return(gIDUs->AttFloat(iduPolyNdx, col));
+} // end of HBV::AttFloat()
+
+
+inline int HBV::AttInt(int iduPolyNdx, int col)
+{
+   return(gIDUs->AttInt(iduPolyNdx, col));
+} // end of HBV::AttInt()
+

@@ -17,7 +17,18 @@
 
 using namespace std;
 
-#define STM_VEGCLASS_MINIMUM 2000000
+#define gm gM->
+
+#define STM_CLASS_MIN 1000
+#define STM_CLASS_MAX 999999
+
+/* Columns in the conditional transitions table
+* WET_FRACatLeast,WET_FRAClessThan,WETLONGESTatLeast,WETLONGESTlessThan,WETAVGDPTHatLeast,WETAVGDPTHlessThan,VEGCLASSfrom,VEGCLASSto,ABBREVfrom,ABBREVto,FUTSI,PVT,PVTto,REGEN,p,pxPropor,REGION,DISTURB,VDDTProbType,MINAGE,MAXAGE,TSD,RELATIVEAGE,KEEPRELAGE,PROPORTION,TSDMAX,RELTSD,RNDAGE
+IDU attributes containing values to be compared to thresholds are: 
+WET_FRAC - The fraction of the year in which WETNESS is >= 0 (i.e. soil is saturated or inundated)
+WETLONGEST - Longest sequence of consecutive days in the year in which WETNESS >= 0
+WETAVGDPTH - Average value of WETNESS over the days on which WETNESS >= 0
+*/
 
 // Values for the VEGTRANSTYPE attribute
 #define TRANS_NONE 0
@@ -436,6 +447,22 @@ struct PVTstruct
 	int dynamic_update;
 	};
 
+
+class CondTrans
+{
+	~CondTrans() {};
+
+	int m_sourceState;
+	int m_destState;
+
+	// WET_FRACatLeast, WET_FRAClessThan, WETLONGESTatLeast, WETLONGESTlessThan, WETAVGDPTHatLeast, WETAVGDPTHlessThan
+	double WET_FRACatLeast, WET_FRAClessThan; // days with WETNESS >= 0 as a fraction of days in year
+	int WETLONGESTatLeast, WETLONGESTlessThan; // length of longest consecutive run of days this year in which WETNESS >= 0
+	double WETAVGDPTHatLeast, WETAVGDPTlessThan; // average value of WETNESS on days on which WETNESS >= 0
+
+};
+
+
 class STMengine : public EnvAutoProcess
    {
    public:
@@ -452,11 +479,17 @@ class STMengine : public EnvAutoProcess
       bool LoadProbCSV( CString probfilename, EnvContext *pEnvContext);
       bool LoadFireTransCSV( CString firefilename, EnvContext *pEnvContext);
 	   bool LoadDeterministicTransCSV( CString firefilename, EnvContext *pEnvContext);
-      bool ProbabilisticTransition(EnvContext * pEnvContext, int idu, int vegclass, int pvt, int disturb, int stand_age, int tsd, int & selected_to_trans, int & selected_pvtto_trans, float & selected_probability);
       bool DeterministicTransition(EnvContext *pEnvContext, int idu, int vegclass, int pvt, int ageclass, int & selected_to_trans, int & selected_pvtto_trans);
-      int ChooseProbTrans(double rand_num, float probability_sum, vector<pair<int,float> > *m_permute_prob_vec,std::vector< std::pair<int,float> > *m_original_final_probs, float & orig_probability);
+//x      bool ProbabilisticTransition(EnvContext * pEnvContext, int idu, int vegclass, int pvt, int disturb, int stand_age, int tsd, int & selected_to_trans, int & selected_pvtto_trans, float & selected_probability);
+		int ConditionalTransition(EnvContext* pEnvContext, int idu, int vegclass, int ageclass, float & selected_probability); // Returns index of selected conditional transition.
+		int ChooseProbTrans(double rand_num, float probability_sum, vector<pair<int, float> >* m_permute_prob_vec, std::vector< std::pair<int, float> >* m_original_final_probs, float& orig_probability);
+		double Att(int iduPolyNdx, int col);
+		float AttFloat(int iduPolyNdx, int col);
+		int AttInt(int iduPolyNdx, int col);
 
    MapLayer * m_pIDUlayer;
+
+	CArray<CondTrans *, CondTrans *> m_condTransSourceStates;
 
    int m_colDetSTARTAGE;
    int m_colDetENDAGE;

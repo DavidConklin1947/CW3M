@@ -26,13 +26,15 @@
 
 //#include <EnvView.h>
 #include <omp.h>
-
+#include <CW3Mglobals.h>
 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+EnvContext* gM = NULL;
+IDUlayer* gIDUs = NULL;
 extern FlowProcess *gpFlow;
 
 FlowModel *gpModel = NULL; // ??? shouldn't gpModel be an EnvModel instead of a FlowModel?
@@ -2818,6 +2820,7 @@ FlowModel::FlowModel()
    {
    gpModel = this;
    gpFlowModel = this;
+//x   gFM = this;
 
    m_scenarioArray.RemoveAll();
 
@@ -3130,6 +3133,7 @@ bool FlowModel::DailyUpdateToSingleYearWeatherAverages(int doy, int daysInYear, 
 
 bool FlowModel::Init( EnvContext *pEnvContext )
    {
+   gM = pEnvContext;
    m_id = pEnvContext->id;
 
    ASSERT( pEnvContext->pMapLayer != NULL );
@@ -8449,30 +8453,6 @@ inline void Reach::SetAttInt(int col, int attValue)
 {
    pLayer->SetDataU(this->m_polyIndex, col, attValue);
 } // end of Reach::SetAttInt()
-
-
-inline double FlowModel::Att(int IDUindex, int col)
-{
-   double attribute;
-   m_pIDUlayer->GetData(IDUindex, col, attribute);
-   return(attribute);
-} // end of FlowModel:Att()
-
-
-inline int FlowModel::AttInt(int IDUindex, int col)
-{
-   int attribute;
-   m_pIDUlayer->GetData(IDUindex, col, attribute);
-   return(attribute);
-} // end of FlowModel:AttInt()
-
-
-inline float FlowModel::AttFloat(int IDUindex, int col)
-{
-   float attribute;
-   m_pIDUlayer->GetData(IDUindex, col, attribute);
-   return(attribute);
-} // end of FlowModel::AttFloat()
 
 
 inline void FlowModel::SetAtt(int IDUindex, int col, double attValue)
@@ -14853,7 +14833,7 @@ void FlowModel::UpdateHRULevelVariables(EnvContext *pEnvContext)
       double box_surface_h2o_flux_m3 = pBOX_SURFACE_H2O->m_globalHandlerFluxValue;
       HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
       double box_nat_soil_flux_m3 = pBOX_NAT_SOIL->m_globalHandlerFluxValue;
-      double box_surface_h2o_adjustment_m3;
+      double box_surface_h2o_adjustment_m3 = 0.;
       if (!CheckSurfaceH2O(pHRU, box_surface_h2o_adjustment_m3))
       {
          CString msg;
@@ -17774,4 +17754,21 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
    return(ret_val);
 } // end of WetlSurfaceH2Ofluxes()
 
+
+inline double FlowModel::Att(int iduPolyNdx, int col)
+{
+   return(gIDUs->Att(iduPolyNdx, col));
+} // end of FlowModel::Att()
+
+
+inline float FlowModel::AttFloat(int iduPolyNdx, int col)
+{
+   return(gIDUs->AttFloat(iduPolyNdx, col));
+} // end of FlowModel::AttFloat()
+
+
+inline int FlowModel::AttInt(int iduPolyNdx, int col)
+{
+   return(gIDUs->AttInt(iduPolyNdx, col));
+} // end of FlowModel::AttInt()
 

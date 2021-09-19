@@ -120,7 +120,7 @@ class ETEquation
       void SetAgrimentStationCoeff( vector<double> agrimetStationCoeffs );
 
       // use for method Penman_Monteith
-      void SetLAI(double LAI);                           // param LAI The Leaf Area Index.
+      void SetLAI(double LeafAreaIndex);                           // param LAI The Leaf Area Index.
       void SetTreeHeight(double height);                 // param The provided TreeHeight.
                                                             
       void SetYear( unsigned int y );                    // param y the desired year \sa GetYear()

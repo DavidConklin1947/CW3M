@@ -52,6 +52,10 @@ public:
    { }
    ~HBV( void ) { if ( m_pClimateData ) delete m_pClimateData; }
 
+   double Att(int iduPolyNdx, int col);
+   float AttFloat(int iduPolyNdx, int col);
+   int AttInt(int iduPolyNdx, int col);
+
    MapLayer * m_pIDUlayer;
    MapLayer * m_pReachLayer;
    MapLayer * m_pHRUlayer;

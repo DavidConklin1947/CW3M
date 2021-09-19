@@ -13608,4 +13608,66 @@ BOOL PourPointDlg::OnInitDialog()
    }
 #endif //NO_MFC
 
-//#pragma warning( pop )
+bool IDUlayer::FindIDUattributeCols()
+{
+   bool ok = true;
+   IDUlayer* gIDUs = this;
+
+   // Some IDU attributes, in alphabetic order.
+   ok = ok && CheckCol(AREA, "AREA", TYPE_INT, CC_MUST_EXIST);
+   ok = ok && CheckCol(COMID, "COMID", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(ECOREGION, "ECOREGION", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(ELEV_MEAN, "ELEV_MEAN", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(F_THETA, "F_THETA", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(FIELD_CAP, "FIELD_CAP", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(HBVCALIB, "HBVCALIB", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(HRU_ID, "HRU_ID", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(HRU_NDX, "HRU_NDX", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(H2O_MELT, "H2O_MELT", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(IDU_ID, "IDU_ID", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(IRRIGATION, "IRRIGATION", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(LAI, "LAI", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(LULC_A, "LULC_A", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(MAXSNOW, "MAXSNOW", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(PVT, "PVT", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(RAD_SW, "RAD_SW", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(SM_DAY, "SM_DAY", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(SNOW_SWE, "SNOW_SWE", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(SPHUMIDITY, "SPHUMIDITY", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(TEMP, "TEMP", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(TMAX, "TMAX", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(TMIN, "TMIN", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(TREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(VPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(WETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(WETL_ID, "WETL_ID", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(WETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(WETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
+   ok = ok && CheckCol(WINDSPEED, "WINDSPEED", TYPE_FLOAT, CC_AUTOADD);
+
+   return(ok);
+} // end of FindIDUattributeCols()
+
+
+inline double IDUlayer::Att(int IDUpolyNdx, int col)
+{
+   double attribute;
+   GetData(IDUpolyNdx, col, attribute);
+   return(attribute);
+} // end of IDUlayer::Att()
+
+
+inline int IDUlayer::AttInt(int IDUindex, int col)
+{
+   int attribute;
+   GetData(IDUindex, col, attribute);
+   return(attribute);
+} // end of IDUlayer:AttInt()
+
+
+inline float IDUlayer::AttFloat(int IDUindex, int col)
+{
+   float attribute;
+   GetData(IDUindex, col, attribute);
+   return(attribute);
+} // end of IDUlayer::AttFloat()
