@@ -112,7 +112,7 @@ void Sandbox::InitRunModels()
    int apCount = (int) m_apInfoArray.GetSize();
 
    // initilize envContext
-   m_envContext.pMapLayer     = gpCellLayer;
+   m_envContext.pMapLayer     = (IDUlayer*)gpCellLayer;
    m_envContext.run           = m_currentRun;
    m_envContext.startYear     = m_startYear;
    m_envContext.endYear       = m_endYear;
@@ -253,7 +253,7 @@ void Sandbox::CalculateGoalScores( Policy *pPolicy,  bool *useMetagoalArray /*=N
    m_currentYear = 0;
 
    // set up env extra data for models/ALPS/POP
-   m_envContext.pMapLayer     = gpCellLayer;
+   m_envContext.pMapLayer     = (IDUlayer*)gpCellLayer;
    m_envContext.run           = m_currentRun;
    m_envContext.currentYear   = m_currentYear;
    m_envContext.yearOfRun     = m_currentYear - m_startYear;
@@ -384,7 +384,7 @@ void Sandbox::CalculateGoalScores( Policy *pPolicy,  bool *useMetagoalArray /*=N
       int actor = -1;
 
       // set up env extra data for models/ALPS/POP
-      m_envContext.pMapLayer      = gpCellLayer;
+      m_envContext.pMapLayer      = (IDUlayer*)gpCellLayer;
       m_envContext.run            = m_currentRun;
       m_envContext.currentYear = m_currentYear;
       m_envContext.weatherYear = m_currentYear;

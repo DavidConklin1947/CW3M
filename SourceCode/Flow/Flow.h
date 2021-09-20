@@ -96,39 +96,6 @@ using namespace std;
 
 #define BEERS_LAW_K 0.5
 
-/*x
-#define AREA gpFlowModel->m_colAREA
-#define COMID gpFlowModel->m_colCOMID
-#define ECOREGION gpFlowModel->m_colECOREGION
-#define ELEV_MEAN gpFlowModel->m_colELEV_MEAN
-#define F_THETA gpFlowModel->m_colF_THETA
-#define FIELD_CAP gpFlowModel->m_colFIELD_CAP
-#define HBVCALIB gpFlowModel->m_colHBVCALIB
-#define HRU_ID gpFlowModel->m_colHRU_ID
-#define HRU_NDX gpFlowModel->m_colHRU_NDX
-#define H2O_MELT gpFlowModel->m_colH2O_MELT
-#define IDU_ID gpFlowModel->m_colIDU_ID
-#define IRRIGATION gpFlowModel->m_colIRRIGATION
-#define LAI gpFlowModel->m_colLAI
-#define LULC_A gpFlowModel->m_colLulcA
-#define MAXSNOW gpFlowModel->m_colMAXSNOW
-#define PVT gpFlowModel->m_colPVT
-#define RAD_SW gpFlowModel->m_colRAD_SW
-#define SM_DAY gpFlowModel->m_colSM_DAY
-#define SNOW_SWE gpFlowModel->m_colSNOW_SWE
-#define SPHUMIDITY gpFlowModel->m_colSPHUMIDITY
-#define TEMP gpFlowModel->m_colTEMP
-#define TMAX gpFlowModel->m_colTMAX
-#define TMIN gpFlowModel->m_colTMIN
-#define TREE_HT gpFlowModel->m_colTREE_HT
-#define VPD_SCALAR gpFlowModel->m_colVPD_SCALAR
-#define WETL_CAP gpFlowModel->m_colWETL_CAP
-#define WETL_ID gpFlowModel->m_colWETL_ID
-#define WETL2Q gpFlowModel->m_colWETL2Q
-#define WETNESS gpFlowModel->m_colWETNESS
-#define WINDSPEED gpFlowModel->m_colWINDSPEED
-x*/
-
 #define HruCOMID gpFlowModel->m_colHruCOMID
 #define HruFIELD_CAP gpFlowModel->m_colHruFIELD_CAP
 #define HruGW_FASTBOX gpFlowModel->m_colHruGW_FASTBOX
@@ -2090,7 +2057,7 @@ public:
    Map *m_pMap;
    MapLayer *m_pCatchmentLayer;
    MapLayer *m_pStreamLayer;
-   MapLayer * m_pIDUlayer;
+   IDUlayer * m_pIDUlayer;
    MapLayer * m_pReachLayer;
    MapLayer * m_pHRUlayer;
    MapLayer * m_pLinkLayer;

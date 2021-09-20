@@ -33,7 +33,6 @@
 #define new DEBUG_NEW
 #endif
 
-EnvContext* gM = NULL;
 IDUlayer* gIDUs = NULL;
 extern FlowProcess *gpFlow;
 
@@ -3133,7 +3132,6 @@ bool FlowModel::DailyUpdateToSingleYearWeatherAverages(int doy, int daysInYear, 
 
 bool FlowModel::Init( EnvContext *pEnvContext )
    {
-   gM = pEnvContext;
    m_id = pEnvContext->id;
 
    ASSERT( pEnvContext->pMapLayer != NULL );
@@ -3147,7 +3145,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    pEnvContext->pEnvModel->m_pFlowModel = this;
 
-   m_pIDUlayer = (MapLayer*)pEnvContext->pMapLayer;
+   gIDUs = m_pIDUlayer = (IDUlayer*)pEnvContext->pMapLayer;
    m_pReachLayer = (MapLayer*)pEnvContext->pReachLayer;
    m_pHRUlayer = (MapLayer*)pEnvContext->pHRUlayer;
    m_pLinkLayer = (MapLayer*)pEnvContext->pLinkLayer;
@@ -4881,7 +4879,7 @@ bool FlowModel::InitializeSpinup() // Initialize all the state variables from de
       for (int idu_in_hru = 0; idu_in_hru < num_idus; idu_in_hru++)
       {
          int idu_poly_ndx = pHRU->m_polyIndexArray[idu_in_hru];
-         if (AttInt(idu_poly_ndx, LULC_A) == LULCA_WETLAND) wetland_area_accum_m2 += AttFloat(idu_poly_ndx, AREA);
+         if (AttInt(idu_poly_ndx, LULC_A) == LULCA_WETLAND) wetland_area_accum_m2 += Att(idu_poly_ndx, AREA);
       } // end of loop thru IDUs in this HRU
       pHRU->m_wetlandArea_m2 = wetland_area_accum_m2;
       pHRU->m_snowpackArea_m2 = pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2;
@@ -7391,7 +7389,7 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
       int idu_poly_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
       float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
       int lulc_a = AttInt(idu_poly_ndx, LULC_A);
-      float idu_snow_swe_mmSWE = AttFloat(idu_poly_ndx, SNOW_SWE);
+      double idu_snow_swe_mmSWE = Att(idu_poly_ndx, SNOW_SWE);
       double idu_melt_h2o_mm = Att(idu_poly_ndx, H2O_MELT);
       double idu_wetness_mm = Att(idu_poly_ndx, WETNESS);
       float sm_day_mm = AttFloat(idu_poly_ndx, SM_DAY);
@@ -17753,22 +17751,4 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
  
    return(ret_val);
 } // end of WetlSurfaceH2Ofluxes()
-
-
-inline double FlowModel::Att(int iduPolyNdx, int col)
-{
-   return(gIDUs->Att(iduPolyNdx, col));
-} // end of FlowModel::Att()
-
-
-inline float FlowModel::AttFloat(int iduPolyNdx, int col)
-{
-   return(gIDUs->AttFloat(iduPolyNdx, col));
-} // end of FlowModel::AttFloat()
-
-
-inline int FlowModel::AttInt(int iduPolyNdx, int col)
-{
-   return(gIDUs->AttInt(iduPolyNdx, col));
-} // end of FlowModel::AttInt()
 

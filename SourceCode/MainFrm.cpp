@@ -1171,7 +1171,7 @@ void CMainFrame::OnCommandAP(UINT id)
    
    EnvContext *pContext = &(gpDoc->m_model.m_envContext);
    pContext->id = pInfo->id;
-   pContext->pMapLayer = gpCellLayer;
+   pContext->pMapLayer = (IDUlayer *)gpCellLayer;
    
    pInfo->setupFn( pContext, gpView->GetSafeHwnd() ); 
    }
@@ -1184,7 +1184,7 @@ void CMainFrame::OnCommandEM(UINT id)
 
    EnvContext *pContext = &(gpDoc->m_model.m_envContext);
    pContext->id = pInfo->id;
-   pContext->pMapLayer = gpCellLayer;
+   pContext->pMapLayer = (IDUlayer*)gpCellLayer;
    
    pInfo->setupFn( pContext, gpView->GetSafeHwnd() ); 
    }

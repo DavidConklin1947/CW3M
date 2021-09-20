@@ -10,7 +10,6 @@
 #include "Flow.h"
 #include "AlgLib\AlgLib.h"
 #include <ScienceFcns.h>
-#include <EnvEngine\EnvContext.h>
 
 
 #define MJPERHR_PER_W 0.0036              // Watts -> MegaJoules per hour

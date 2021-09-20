@@ -93,7 +93,7 @@ using namespace std;
 #endif
 
 CEnvDoc      *gpDoc       = NULL;
-IDUlayer     *gpCellLayer = NULL;
+MapLayer     *gpCellLayer = NULL;
 EnvModel     *gpModel     = NULL;
 
 extern InputPanel   *gpInputPanel;

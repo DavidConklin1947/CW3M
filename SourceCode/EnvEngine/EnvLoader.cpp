@@ -449,7 +449,7 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          // if IDU, add path for shape file to the PathManager
          if ( layerIndex == 0 )
             {
-            m_pIDULayer = m_pMap->GetLayer( 0 );
+            m_pIDULayer = (IDUlayer *)m_pMap->GetLayer( 0 );
 
             //if ( m_pQueryEngine != NULL )
             //   delete m_pQueryEngine;
@@ -485,7 +485,13 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
 
             PathManager::AddPath( _fullPath );
 
-            m_pIDULayer = m_pMap->GetLayer( 0 );
+            m_pIDULayer = (IDUlayer *)m_pMap->GetLayer( 0 );
+            bool found_columns = m_pIDULayer->FindIDUattributeCols();
+            if (!found_columns)
+               {
+               CString msg = "LoadProject(): FindIDUattributeCols() returned false.";
+               Report::ErrorMsg(msg);
+               }
             }
 
          CString layerName = name;

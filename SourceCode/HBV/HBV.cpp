@@ -11,23 +11,17 @@
 #include <omp.h>
 #include <math.h>
 #include <UNITCONV.H>
-#include <CW3Mglobals.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 EnvModel* gpEnvModel = NULL; 
-//x extern FlowModel* gpFlowModel = NULL;
 IDUlayer* gIDUs = NULL;
 
 float HBV::InitHBV_Global(FlowContext *pFlowContext, LPCTSTR inti)
    {
    gIDUs = (IDUlayer *)pFlowContext->pEnvContext->pMapLayer;
-
-//x   gFM = pFlowContext->pFlowModel;
-
-//x   gpFlowModel = pFlowContext->pFlowModel;
    gpEnvModel = pFlowContext->pEnvContext->pEnvModel;
    m_pIDUlayer = pFlowContext->pFlowModel->m_pIDUlayer;
    m_pReachLayer = pFlowContext->pFlowModel->m_pStreamLayer;

@@ -30,7 +30,7 @@ IMPLEMENT_DYNAMIC(VisualizerWnd, CWnd)
 
 VisualizerWnd::VisualizerWnd( ENV_VISUALIZER *pViz, int run )
  : m_pVizInfo( pViz )
- , m_envContext( gpCellLayer )
+ , m_envContext((IDUlayer*)gpCellLayer )
    {
    ASSERT( pViz != NULL );
    m_envContext.currentYear = 0;
@@ -97,7 +97,7 @@ int VisualizerWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
    m_envContext.pEnvModel = gpModel;
    m_envContext.pExtensionInfo = (ENV_EXTENSION*) m_pVizInfo;
    m_envContext.pLulcTree = &(EnvModel::m_lulcTree);
-   m_envContext.pMapLayer = gpCellLayer;
+   m_envContext.pMapLayer = (IDUlayer*)gpCellLayer;
    m_envContext.pPolicyManager = gpPolicyManager;
    m_envContext.ptrAddDelta = NULL;  // not allowed for Visualizers
    m_envContext.showMessages = gpModel->m_showMessages;
