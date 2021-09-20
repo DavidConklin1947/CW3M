@@ -1542,9 +1542,9 @@ public:
    //void RunGlobalMethods( void );          
 
    bool ApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
-   double Att(int IDUindex, int col); // value of IDU attribute
-   int AttInt(int IDUindex, int col); // value of IDU attribute
-   float AttFloat(int IDUindex, int col); // value of IDU attribute
+   inline double Att(int IDUindex, int col);
+   inline int AttInt(int IDUindex, int col);
+   inline float AttFloat(int IDUindex, int col);
    void SetAtt(int IDUindex, int col, double attValue);
    void SetAttInt(int IDUindex, int col, int attValue);
    void SetAttFloat(int IDUindex, int col, float attValue);

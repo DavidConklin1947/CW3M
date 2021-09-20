@@ -1091,8 +1091,8 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
       float aet = 0.0f; // mm/day
 
       ASSERT(m_pSoilTable != NULL);
-      int hbvcalib = gpFlowModel->AttInt(idu, HBVCALIB);
-      int ecoregion = gpFlowModel->AttInt(idu, ECOREGION);
+      int hbvcalib = gIDUs->AttInt(idu, HBVCALIB);
+      int ecoregion = gIDUs->AttInt(idu, ECOREGION);
       ASSERT(!((hbvcalib == 16 || hbvcalib == 25) && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)));
       if (hbvcalib != 46 && hbvcalib != 9 && hbvcalib != 8 && (ecoregion == 8 || ecoregion == 9 || ecoregion == 10)) hbvcalib = 28; // HBVCALIB==28 is ClackamasAboveRiverMill.
 

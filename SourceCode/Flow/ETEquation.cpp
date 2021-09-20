@@ -917,13 +917,13 @@ float ETEquation::Fao56()
 void ETEquation::WetlandET(int idu, float soilH2O_mm, float fc_mm, float wp_mm, double * pPET_mm, double * pAET_mm)
 {
    double idu_area_m2 = gIDUs->Att(idu, AREA);
-   float lai = gpFlowModel->AttFloat(idu, LAI);
+   float lai = gIDUs->AttFloat(idu, LAI);
    double net_SW_W_m2 = m_solarRadiation * (1. - FlowModel::VegDensity(lai));
    double evap_m3 = 0., vpd = 0., ea = 0.;
-   float elev_mean_m = gpFlowModel->AttFloat(idu, ELEV_MEAN);
-   float sphumidity_kg_kg = gpFlowModel->AttFloat(idu, SPHUMIDITY);
-   float temp_C = gpFlowModel->AttFloat(idu, TEMP);
-   float tmax_C = gpFlowModel->AttFloat(idu, TMAX);
+   float elev_mean_m = gIDUs->AttFloat(idu, ELEV_MEAN);
+   float sphumidity_kg_kg = gIDUs->AttFloat(idu, SPHUMIDITY);
+   float temp_C = gIDUs->AttFloat(idu, TEMP);
+   float tmax_C = gIDUs->AttFloat(idu, TMAX);
    double rh_pct = 100 * CalculateRelHumidity((float)sphumidity_kg_kg, (float)temp_C, (float)tmax_C, elev_mean_m, ea, vpd);
    double pet_mm = 0., aet_mm = 0.;
 
@@ -1035,11 +1035,11 @@ double ETEquation::PenmanMonteith(int iduNdx, double rh_pct, float lai)
    double G = 0.0; //Soil Heat Flux Density : MJ/(d m^2)
 
    float height = 10.f;
-   int lulc_a = gpFlowModel->AttInt(iduNdx, LULC_A); // 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLULC_A, lulc_a);
+   int lulc_a = gIDUs->AttInt(iduNdx, LULC_A); // 0;  m_pEvapTrans->m_flowContext->pEnvContext->pMapLayer->GetData(pHRU->m_polyIndexArray[i], m_pEvapTrans->m_colLULC_A, lulc_a);
    if (lulc_a == LULCA_FOREST)
    {
-      int pvt = gpFlowModel->AttInt(iduNdx, PVT);
-      if (pvt > 0) height = gpFlowModel->AttFloat(iduNdx, TREE_HT);
+      int pvt = gIDUs->AttInt(iduNdx, PVT);
+      if (pvt > 0) height = gIDUs->AttFloat(iduNdx, TREE_HT);
    }
 
    lai /= 2;     // Active leaf area ???

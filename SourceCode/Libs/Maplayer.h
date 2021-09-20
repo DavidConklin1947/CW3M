@@ -926,12 +926,6 @@ class  LIBSAPI  MapLayer
       bool GetData(int rec, int col, short &value) const;
       bool GetData(int rec, int col, CString &value) const;
       bool GetData(int rec, int col, bool &value) const;
-/*x
-      // Att(), AttFloat(), AttInt() correspond to overloads of GetData()
-      inline double Att(int idu_poly_ndx, int col) { double ret_val; GetData(idu_poly_ndx, col, ret_val); return(ret_val); }
-      inline float AttFloat(int idu_poly_ndx, int col) { float ret_val; GetData(idu_poly_ndx, col, ret_val); return(ret_val); }
-      inline int AttInt(int idu_poly_ndx, int col) { int ret_val; GetData(idu_poly_ndx, col, ret_val); return(ret_val); }
-x*/
 
       bool GetDataMinMax(int col, float *pMin, float *pMax) const;  // note: col=-1 gets min/max for ALL columns
       bool GetGridDataMinMax(float *pMin, float *pMax) const;      // specially for grids

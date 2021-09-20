@@ -1196,7 +1196,7 @@ void CMainFrame::OnCommandExtModule(UINT id)
    ASSERT( pInfo != NULL );
    ASSERT( pInfo->runFn != NULL );
 
-   EnvContext e( gpCellLayer );
+   EnvContext e( (IDUlayer *)gpCellLayer );
    e.pActorManager  = gpActorManager;
    e.pExtensionInfo = pInfo;
    e.pLulcTree      = &EnvModel::m_lulcTree;

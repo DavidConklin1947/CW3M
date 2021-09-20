@@ -26,7 +26,6 @@
 
 //#include <EnvView.h>
 #include <omp.h>
-#include <CW3Mglobals.h>
 
 
 #ifdef _DEBUG
@@ -5833,7 +5832,7 @@ bool FlowModel::ApplyQ2WETL()
          int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl];
          Reach* pReach = m_reachArray[reach_ndx];
          int comid = pReach->m_reachID;
-         ASSERT(gpFlowModel->AttInt(idu_poly_ndx, COMID) == comid);
+         ASSERT(AttInt(idu_poly_ndx, COMID) == comid);
          double reach_remaining_cms = pReach->m_q2wetl_cms;
          double reach_remaining_m3 = reach_remaining_cms * SEC_PER_DAY;
          if (pReach->m_q2wetl_cms > 0.)
@@ -5889,7 +5888,7 @@ bool FlowModel::ApplyQ2WETL()
       for (int i = 0; remaining_m3 > 0. && i < num_wetl_idus; i++)
       {
          int idu_ndx = m_wetlIDUndxArray[i];
-         int idu_comid = gpFlowModel->AttInt(idu_ndx, COMID);
+         int idu_comid = gIDUs->AttInt(idu_ndx, COMID);
          if (idu_comid != reachComid) continue;
 
          int hru_ndx = m_wetlHRUndxArray[i];
@@ -8451,6 +8450,11 @@ inline void Reach::SetAttInt(int col, int attValue)
 {
    pLayer->SetDataU(this->m_polyIndex, col, attValue);
 } // end of Reach::SetAttInt()
+
+
+inline double FlowModel::Att(int IDUindex, int col) { return(gIDUs->Att(IDUindex, col)); }
+inline float FlowModel::AttFloat(int IDUindex, int col) { return(gIDUs->AttFloat(IDUindex, col)); }
+inline int FlowModel::AttInt(int IDUindex, int col) { return(gIDUs->AttInt(IDUindex, col)); }
 
 
 inline void FlowModel::SetAtt(int IDUindex, int col, double attValue)
@@ -12527,7 +12531,7 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU, double boxSurfaceH2Oadjustment_m3)
    for (int i = 0; i < num_idus; i++)
    {
       int idu_poly_ndx = pHRU->m_polyIndexArray[i];
-      int lulc_a = gpFlowModel->AttInt(idu_poly_ndx, LULC_A);
+      int lulc_a = AttInt(idu_poly_ndx, LULC_A);
       bool is_wetland = lulc_a == LULCA_WETLAND;
       if (is_wetland)
       {
@@ -17672,7 +17676,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
    for (int i = 0; i < idus_in_hru; i++)
    {
       int idu_poly_ndx = m_polyIndexArray[i];
-      int lulc_a = gpFlowModel->AttInt(idu_poly_ndx, LULC_A);
+      int lulc_a = gIDUs->AttInt(idu_poly_ndx, LULC_A);
       bool is_wetland = lulc_a == LULCA_WETLAND;
       if (!is_wetland) continue;
 
@@ -17681,11 +17685,11 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       double idu_to_reach_mm = 0.;
 
       // In this IDU, how much potential surface water is there?
-      double wetness_mm = gpFlowModel->Att(idu_poly_ndx, WETNESS);
+      double wetness_mm = gIDUs->Att(idu_poly_ndx, WETNESS);
       double idu_surf_h2o_mm = precip_mm + (wetness_mm > 0. ? wetness_mm : 0.);
       if (idu_surf_h2o_mm <= 0.)
       { // There isn't any water available in this IDU to infiltrate into the soil.
-         float sm_day_mm = gpFlowModel->AttFloat(idu_poly_ndx, SM_DAY);
+         float sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY);
          wetness_mm = -(fc - sm_day_mm);
          if (wetness_mm > 0.)
          {
@@ -17699,7 +17703,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       // How will the water that drains from the surface into the soil be
       // divided between the topsoil and the subsoil?
       // frac_to_subsoil is the proportion of surface water that bypasses the topsoil bucket, and is added directly to the subsoil
-      double sm_day_mm = gpFlowModel->AttFloat(idu_poly_ndx, SM_DAY);
+      double sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY);
       double frac_to_subsoil = GroundWaterRechargeFraction((float)sm_day_mm, (float)fc, (float)Beta);
       ASSERT(0. <= frac_to_subsoil && frac_to_subsoil <= 1.);
 
@@ -17734,7 +17738,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       gpFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
 
       // Convert water depths to water volumes, and add to the HRU accumulators.
-      float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
+      float idu_area_m2 = gIDUs->AttFloat(idu_poly_ndx, AREA);
       double idu_surf_h2o_m3 = (idu_surf_h2o_mm / 1000.) * idu_area_m2;
       double idu_to_topsoil_m3 = (idu_to_topsoil_mm / 1000.) * idu_area_m2;
       double idu_to_subsoil_m3 = (idu_to_subsoil_mm / 1000.) * idu_area_m2;
