@@ -151,6 +151,8 @@
     <lulc id='6222' parentID='622' name='PABF semi-permanently flooded wetland' />
       <!-- Floodplain-based open water pond with submerged or floating vegetation that's inundated most of the time, but may draw down by the end of some growing seasons
       e.g. Shallow pond with submerged or floating vegetation, including algae -->
+    <lulc id='62221' parentID='622' name='PABFdrying' />
+      <!-- PABF with consecutive years of drying; if dry conditions persist, will transition to a dryer type -->
     <lulc id='6223' parentID='622' name='PABG intermittently exposed wetland' />
     <lulc id='6224' parentID='622' name='PABK artificially flooded wetland' />
 
