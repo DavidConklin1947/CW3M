@@ -120,7 +120,12 @@ void Map::Clear( void )
 
 MapLayer *Map::AddLayer( LAYER_TYPE type )
    {
-   MapLayer *pLayer = new MapLayer( this );
+   MapLayer* pLayer = NULL;
+   if (m_mapLayerArray.GetSize() >= 1) 
+      pLayer = new MapLayer(this);
+   else
+      pLayer = new IDUlayer(this);
+
    pLayer->m_layerType = type;
 
    MAP_LAYER_INFO mapInfo( pLayer, true );

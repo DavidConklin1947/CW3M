@@ -1148,8 +1148,11 @@ class  LIBSAPI  MapLayer
 
 class LIBSAPI IDUlayer : public MapLayer
 {
-//x   IDUlayer() {}
-//x   ~IDUlayer() {}
+   friend class Map;
+
+protected:
+   IDUlayer(Map * pMap): MapLayer(pMap) {}
+   ~IDUlayer() {}
 
    // IDU attribute stuff
 public:

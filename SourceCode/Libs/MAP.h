@@ -108,6 +108,7 @@ class MapLayerArray : public CArray< MAP_LAYER_INFO, MAP_LAYER_INFO& >
 class LIBSAPI Map
    {
    friend class MapLayer;
+   friend class IDUlayer;
    
 #ifdef _WINDOWS
    friend class MapWindow;
