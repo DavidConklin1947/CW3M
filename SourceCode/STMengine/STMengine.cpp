@@ -41,84 +41,6 @@ IDUlayer * gIDUs = NULL;
 #define new DEBUG_NEW
 #endif
 
-PtrArray< OUTPUT > STMengine::m_outputArray;
-VEGTRANSFILE STMengine::m_vegtransfile;
-
-INITIALIZER STMengine::m_initializer;
-
-PVTstruct STMengine::m_dynamic_update;
-
-RandUniform   STMengine::m_rn;
-
-bool STMengine::m_staticsInitialized = false;
-
-VDataObj STMengine::m_inputtable;
-VDataObj STMengine::m_deterministic_inputtable;
-int STMengine::m_colVEGCLASS = -1;
-int STMengine::m_colDisturb = -1;
-int STMengine::m_colAGECLASS = -1;
-int STMengine::m_colPVT = -1;
-int STMengine::m_colLAI = -1;
-int STMengine::m_colCarbon = -1;
-int STMengine::m_colTSD = -1;
-int STMengine::m_colManage = -1;
-int STMengine::m_colRegion = -1;
-int STMengine::m_colCalcStandAge = -1;
-int STMengine::m_mc1_output = -1;
-int STMengine::m_cursi = -1;
-int STMengine::m_futsi = -1;
-int STMengine::m_regen = 0;
-int STMengine::m_variant = -1;
-int STMengine::m_mc1row = -1;
-int STMengine::m_mc1col = -1;
-int STMengine::m_mc1pvt = -1;
-int STMengine::m_mc1Cell = -1;
-int STMengine::m_manage = -1;
-
-float STMengine::m_carbon_conversion_factor = 8.89563e-5f;
-bool STMengine::m_validFlag = false;
-bool STMengine::m_useProbMultiplier = false;
-bool STMengine::m_flagDeterministicFile = false;
-bool STMengine::m_pvtProbMultiplier = false;
-bool STMengine::m_vegClassProbMultipier = false;
-
-vector<vector<vector<int> > > STMengine::m_vpvt;  //3d vector to hold MC1 pvt data [year,row,column]
-
-vector<vector<vector<float> > > STMengine::m_vsi;  //3d vector to hold MC1 si data [year,row,column]
-
-map<ProbKeyclass, std::vector< std::pair<int, float> >, probclasscomp> STMengine::probmap;
-
-map<ProbKeyclass, std::vector< std::pair<int, float> >, probclasscomp> STMengine::probmap2;
-
-map<ProbMultiplierPVTKeyclass, std::vector<float>, ProbMultiplierPVTClassComp> STMengine::m_probMultiplierPVTMap;
-
-map<ProbMultiplierVegClassKeyclass, std::vector<float>, ProbMultiplierVegClassClassComp> STMengine::m_probMultiplierVegClassMap;
-
-map<ProbIndexKeyclass, std::vector<int>, ProbIndexClassComp> STMengine::m_probIndexMap;
-
-map<TSDIndexKeyclass, std::vector<int>, TSDIndexClassComp> STMengine::m_TSDIndexMap;
-
-map<DeterminIndexKeyClass, std::vector<int>, DeterminIndexClassComp> STMengine::m_determinIndexMap;
-
-map<DeterministicKeyclass, std::vector< std::pair<int, int> >, deterministicclasscomp> STMengine::m_deterministic_trans;
-
-ProbKeyclass STMengine::m_probInsertKey, STMengine::m_probLookupKey;
-
-DeterministicKeyclass STMengine::m_deterministicInsertKey, STMengine::m_deterministicLookupKey;
-
-ProbIndexKeyclass STMengine::m_probIndexInsertKey, STMengine::m_probIndexLookupKey;
-
-TSDIndexKeyclass STMengine::m_TSDIndexInsertKey, STMengine::m_TSDIndexLookupKey;
-
-DeterminIndexKeyClass STMengine::m_determinIndexInsertKey, STMengine::m_determinIndexLookupKey;
-
-ProbMultiplierPVTKeyclass STMengine::m_probMultiplierPVTInsertKey, STMengine::m_probMultiplierPVTLookupKey;
-
-ProbMultiplierVegClassKeyclass  STMengine::m_probMultiplierVegClassInsertKey, STMengine::m_probMultiplierVegClassLookupKey;
-
-CArray< CString, CString > STMengine::m_badVegTransClasses;
-
-CArray< CString, CString > STMengine::m_badDeterminVegTransClasses;
 
 STMengine::STMengine()
    : EnvAutoProcess()
@@ -137,25 +59,16 @@ STMengine::STMengine()
 , m_colProbTSDMAX(-1)
 , m_colProbRELTSD(-1)
 , m_colProbPVTto(-1)
-
-, m_pIDUlayer(NULL)
-//x , m_unseenCCtrans(0)
-   {
-   };
+   ;
 
 STMengine::~STMengine()
    {
    }
 
 BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
-   {
+{
+   m_pEnvContext = pEnvContext;
    gIDUs = (IDUlayer *)pEnvContext->pMapLayer;
-//x   gM = pEnvContext;
-//x   m_pIDUlayer = (MapLayer*)gM->pMapLayer;
-
-   int idu_poly_ndx = 15;
-   double area = Att(idu_poly_ndx, AREA);
-//x   m_IDUs = (MapLayer *)pEnvContext->pMapLayer;
 
    // get input file names and input variables   
    if (m_staticsInitialized)
@@ -169,19 +82,14 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
 
    clock_t finish = clock();
    double duration = (float)(finish - start) / CLOCKS_PER_SEC;
-   CString msg;
-   //msg.Format( "STMengine: Loaded inputs file (%.2f seconds)", (float) duration );
-   //Report::LogMsg( msg );
-
    if (!ok)
       {
+      CString msg;
       msg = ("STMengine: Unable to find STMengine's .xml init file");
 
       Report::ErrorMsg(msg);
       return FALSE;
       }
-
-   CheckCol(m_pIDUlayer, m_colVEGTRNTYPE, "VEGTRNTYPE", TYPE_INT, CC_AUTOADD);
 
    for (int i = 0; i < (int)m_outputArray.GetSize(); i++)
       {
@@ -195,33 +103,15 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
 
 
    // choose which climate change files to use if necessary
-
-   // check and store relevant columns
-   CheckCol(m_pIDUlayer, m_colVEGCLASS, "VEGCLASS", TYPE_INT, CC_MUST_EXIST);
-   CheckCol(m_pIDUlayer, m_colDisturb, "DISTURB", TYPE_INT, CC_MUST_EXIST);
-   CheckCol(m_pIDUlayer, m_colPVT, "PVT", TYPE_INT, CC_MUST_EXIST);
-   CheckCol(m_pIDUlayer, m_colTSD, "TSD", TYPE_INT, CC_MUST_EXIST);
-   CheckCol(m_pIDUlayer, m_colRegion, "REGION", TYPE_INT, CC_MUST_EXIST);
-   CheckCol(m_pIDUlayer, m_colAGECLASS, "AGECLASS", TYPE_INT, CC_MUST_EXIST);
-
-   m_colLAI = m_pIDUlayer->GetFieldCol("LAI");
-   m_colCarbon = m_pIDUlayer->GetFieldCol("FORESTC");
-
    // go to LoadProbCSV function for loading file into data object, filename set in .xml file
    start = clock();
 
    ok = LoadProbCSV(m_vegtransfile.probability_filename, pEnvContext);
+   m_colCondNEW_STATE = m_condTransTable.GetCol("NEW_STATE");
+
    m_colProbMINAGE = m_inputtable.GetCol("MINAGE");
    m_colProbMAXAGE = m_inputtable.GetCol("MAXAGE");
-   m_colProbTSD = m_inputtable.GetCol("TSD");
-   m_colProbRELATIVEAGE = m_inputtable.GetCol("RELATIVEAGE");
-   m_colProbKEEPRELAGE = m_inputtable.GetCol("KEEPRELAGE");
-   m_colProbPROPORTION = m_inputtable.GetCol("PROPORTION");
-   m_colProbTSDMAX = m_inputtable.GetCol("TSDMAX");
-   m_colProbRELTSD = m_inputtable.GetCol("RELTSD");
-   m_colProbPVTto = m_inputtable.GetCol("PVTto");
-   if (m_colProbMINAGE < 0 || m_colProbMAXAGE < 0 || m_colProbTSD < 0 || m_colProbRELATIVEAGE < 0 || m_colProbKEEPRELAGE < 0
-      || m_colProbPROPORTION < 0 || m_colProbTSDMAX < 0 || m_colProbRELTSD < 0 || m_colProbPVTto < 0)
+   if (m_colProbMINAGE < 0 || m_colProbMAXAGE < 0 )
    {
       CString msg;
       msg.Format("STMengine::::Init() Missing column in probabilistic transition file %s", m_vegtransfile.probability_filename.GetString());
@@ -231,6 +121,7 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
 
    finish = clock();
    duration = (float)(finish - start) / CLOCKS_PER_SEC;
+   CString msg;
    msg.Format("STMengine: Loaded Probability CSV file '%s' (%.2f seconds)", (LPCTSTR)m_vegtransfile.probability_filename, (float)duration);
    Report::LogMsg(msg);
 
@@ -241,14 +132,17 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    start = clock();
 
    m_flagDeterministicFile = LoadDeterministicTransCSV(m_vegtransfile.deterministic_filename, pEnvContext);
-   m_colDetSTARTAGE = m_deterministic_inputtable.GetCol("STARTAGE");
-   m_colDetENDAGE = m_deterministic_inputtable.GetCol("ENDAGE");
-   m_colDetLAI = m_deterministic_inputtable.GetCol("LAI");
-   if (m_colDetSTARTAGE < 0 || m_colDetENDAGE < 0 || m_colDetLAI < 0)
+   m_colDetCURR_STATE = m_detTransTable.GetCol("CURR_STATE");
+   m_colDetNEW_STATE = m_detTransTable.GetCol("NEW_STATE");
+   m_colDetSTARTAGE = m_detTransTable.GetCol("STARTAGE");
+   m_colDetENDAGE = m_detTransTable.GetCol("ENDAGE");
+   m_colDetLAI = m_detTransTable.GetCol("LAI");
+   if (m_colDetCURR_STATE < 0 || m_colDetNEW_STATE || m_colDetSTARTAGE < 0 || m_colDetENDAGE < 0 || m_colDetLAI < 0)
    {
       CString msg;
-      msg.Format("STMengine::::Init() Missing column in deterministic transition file %s: m_colDetSTARTAGE = %d, m_colDetENDAGE = %d, m_colDetLAI = %d",
-         m_vegtransfile.deterministic_filename.GetString(), m_colDetSTARTAGE, m_colDetENDAGE, m_colDetLAI);
+      msg.Format("STMengine::::Init() Missing column in deterministic transition file %s: "
+         "m_colDetCURR_STATE = %d, m_colDetNEW_STATE = %d, m_colDetSTARTAGE = %d, m_colDetENDAGE = %d, m_colDetLAI = %d",
+         m_vegtransfile.deterministic_filename.GetString(), m_colDetCURR_STATE, m_colDetNEW_STATE, m_colDetSTARTAGE, m_colDetENDAGE, m_colDetLAI);
       Report::ErrorMsg(msg);
       return(false);
    }
@@ -258,179 +152,66 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    msg.Format("STMengine: Loaded Deterministic Transition CSV file '%s' (%.2f seconds)", (LPCTSTR)m_vegtransfile.deterministic_filename, (float)duration);
    Report::LogMsg(msg);
 
-   return TRUE;
+   return(true);
    }
 
 
 BOOL STMengine::InitRun(EnvContext *pEnvContext, bool useInitSeed)
+{
+   for (MapLayer::Iterator idu = pEnvContext->pMapLayer->Begin(); idu != pEnvContext->pMapLayer->End(); idu++)
    {
-/*
-   CString msg;
-   msg.Format("STMengine::InitRun() pEnvContext->id = %d", pEnvContext->id);
-   Report::LogMsg(msg);
-*/
-   return(TRUE);
-   }
+      int curr_state = AttInt(idu, VEGCLASS);
+      if (curr_state < STM_CLASS_MIN || STM_CLASS_MAX < curr_state) continue;
 
+      int stm_index = m_detTransTable.Find(m_colDetCURR_STATE, (VData)curr_state, 0);
+      SetAttInt(idu, STM_INDEX, stm_index);
+   } // end of loop thru IDUs
+
+   return(true);
+} // end of STMengine::InitRun()
 
 
 BOOL STMengine::Run(EnvContext *pEnvContext)
 {
    for (MapLayer::Iterator idu = pEnvContext->pMapLayer->Begin(); idu != pEnvContext->pMapLayer->End(); idu++)
    {
-//x      int current_state = m_IDUs->GetAttInt(idu, VEGCLASS);
-      int current_state = AttInt(idu, VEGCLASS);
-      if (current_state < STM_CLASS_MIN || STM_CLASS_MAX < current_state) continue;
+      int curr_state = AttInt(idu, VEGCLASS);
+      if (curr_state < STM_CLASS_MIN || STM_CLASS_MAX < curr_state) continue;
 
-      int idu_int = (int)idu; 
-      int vegclass = -1; m_pIDUlayer->GetData(idu, m_colVEGCLASS, vegclass);
-      if (vegclass < STM_CLASS_MIN || STM_CLASS_MAX) continue;
-      int ageclass = 0; m_pIDUlayer->GetData(idu, m_colAGECLASS, ageclass);
-
-      int selected_to_trans = -1;
-//x      int selected_pvtto_trans = -1;
-      float selected_probability = 0.f;
-
-      // A disturbance (DISTURB > 0) will be handled in the logic for a probabilistic transition.
-      // Check first for disturbance and probabilistic transitions, and then for deterministic transitions (aging out of 
-      // one class into the next).  Finally, if no transitions occur, simply increment the stand age (AGECLASS).
+      // Check first for conditional transitions, and then for deterministic transitions (aging out of 
+      // one class into the next).  Finally, if no transitions occur, simply increment the age (AGECLASS).
       // VEGTRNTYPE records the outcome.  When a transition does occur, updated values are written to:
       // VEGCLASS, PVT, AGECLASS, LAI, ...
-      int vegtrntype = TRANS_NONE;
-      float new_lai = 0.f;
-      int new_stand_age = 0;
-      int new_tsd = 0;
+      int curr_stm_ndx = AttInt(idu, STM_INDEX);
+      int curr_age = AttInt(idu, AGECLASS);
+      int new_state = -1;
 
-//x      if (ProbabilisticTransition(pEnvContext, idu, vegclass, pvt, disturb, ageclass, tsd, selected_to_trans, selected_pvtto_trans, selected_probability))
-      if (ConditionalTransition(pEnvContext, idu, vegclass, ageclass, selected_probability))
-      //   int ConditionalTransition(EnvContext * pEnvContext, int idu, int vegclass, int ageclass, float& selected_probability); // Returns index of selected conditional transition.
-      { // Transition to the new state.
-         m_probIndexLookupKey.si = 0;
-//x         m_probIndexLookupKey.pvt = pvt;
-         m_probIndexLookupKey.pvt = 1;
-         m_probIndexLookupKey.from = vegclass; //transition "from" veg class
-         m_probIndexLookupKey.to = selected_to_trans;
-         m_probIndexLookupKey.regen = 0;
-         m_probIndexLookupKey.prob = 0;
-         m_probIndexLookupKey.region = 1;
-//x        m_probIndexLookupKey.disturb = disturb;
-         m_probIndexLookupKey.disturb = 0;
-         vector<int> *probmapindex = NULL;
-         probmapindex = &m_probIndexMap[m_probIndexLookupKey]; //getting index into prob file for the line that transition was select from, for age info etc..	
+      int new_stm_ndx = ConditionalTransition(idu, curr_stm_ndx, curr_age); 
+      if (new_stm_ndx == curr_stm_ndx) new_stm_ndx = DeterministicTransition(idu, curr_stm_ndx, curr_age);
 
-         // int minage = 0; 
-         // int maxage = 0; 
-         // int mintsd = 0; 
-         int relativeAge = 0;  
-         int keepRelativeAge = 0; 
-         // float proportion = 1.f; 
-         // int tsdMax = 9999; 
-         int relativeTsd = 0; 
+      if (new_stm_ndx != curr_stm_ndx)
+      { // Transition to a new state. Update STM_INDEX, VEGCLASS, AGECLASS, and LAI.
+         SetAttInt(idu, STM_INDEX, new_stm_ndx);
 
-         if (probmapindex->size() > 0)
-            { 
-            ASSERT(probmapindex->size() == 1);
-            // m_inputtable.Get(m_colProbMINAGE, probmapindex->at(0), minage);
-            // m_inputtable.Get(m_colProbMAXAGE, probmapindex->at(0), maxage);
-            // m_inputtable.Get(m_colProbTSD, probmapindex->at(0), mintsd);
-            m_inputtable.Get(m_colProbRELATIVEAGE, probmapindex->at(0), relativeAge); // used
-            m_inputtable.Get(m_colProbKEEPRELAGE, probmapindex->at(0), keepRelativeAge); // 1=true // used
-            // m_inputtable.Get(m_colProbPROPORTION, probmapindex->at(0), proportion);
-            // m_inputtable.Get(m_colProbTSDMAX, probmapindex->at(0), tsdMax);
-            m_inputtable.Get(m_colProbRELTSD, probmapindex->at(0), relativeTsd);
-            }
+         int new_state = m_detTransTable.GetAsInt(m_colDetCURR_STATE, new_stm_ndx);
+         UpdateIDU(pEnvContext, idu, VEGCLASS, new_state, true);
 
-         m_determinIndexLookupKey.region = 1;
-         m_determinIndexLookupKey.from = selected_to_trans; //spot in table where the to is now the from for new age class
-         m_determinIndexLookupKey.pvt = selected_pvtto_trans;
-         vector<int> *determmapindex = NULL;
-         determmapindex = &m_determinIndexMap[m_determinIndexLookupKey];
-         ASSERT(determmapindex != NULL && determmapindex->size() > 0);
+         int new_age = m_detTransTable.GetAsInt(m_colDetSTARTAGE, new_stm_ndx);
+         SetAttInt(idu, AGECLASS, new_age);
 
-         int row = determmapindex->at(0);
-         int startage = 0; m_deterministic_inputtable.Get(m_colDetSTARTAGE, row, startage);
-         int endage = 0; m_deterministic_inputtable.Get(m_colDetENDAGE, row, endage);
-         m_deterministic_inputtable.Get(m_colDetLAI, row, new_lai);
-
-//x         if (keepRelativeAge == 1 || (selected_to_trans == vegclass && selected_pvtto_trans == pvt))
-            if (keepRelativeAge == 1 || (selected_to_trans == vegclass))
-              // "keepRelativeAge" flag is set or transitions back to the same state => preserve relative age within the state
-            new_stand_age = ageclass + relativeAge;
-         else
-            new_stand_age = startage + relativeAge; //relative age can be negative, holding a VEGCLASS longer in said class with respect to deterministic transitions.	
-
-         if (new_stand_age > endage) new_stand_age = endage;
-         else if (new_stand_age < startage) new_stand_age = startage;
- 
-         new_tsd = (relativeTsd != -9999) ? tsd + relativeTsd : 0;
-
-         vegtrntype = disturb > 0 ? TRANS_DISTURBANCE : TRANS_PROBABILISTIC;
-         UpdateIDU(pEnvContext, idu, m_colVEGCLASS, selected_to_trans, true);
-         UpdateIDU(pEnvContext, idu, m_colPVT, selected_pvtto_trans, true);
-         UpdateIDU(pEnvContext, idu, m_colAGECLASS, new_stand_age, true);
-         UpdateIDU(pEnvContext, idu, m_colTSD, new_tsd, true);
-         UpdateIDU(pEnvContext, idu, m_colLAI, new_lai, true);
-         } // end of if (ProbabilisticTransition())
-
-      if (vegtrntype == TRANS_NONE && DeterministicTransition(pEnvContext, idu, vegclass, pvt, ageclass, selected_to_trans, selected_pvtto_trans))
-         {
-         //getting index into deterministic file for the line that was transitioned to (now the from). for new age value
-         m_determinIndexLookupKey.region = 1;
-         m_determinIndexLookupKey.from = selected_to_trans; //spot in table where the to is now the from for new age class
-         m_determinIndexLookupKey.pvt = selected_pvtto_trans;
-         vector<int> *determmapindex = NULL;
-         determmapindex = &m_determinIndexMap[m_determinIndexLookupKey];
-         if (determmapindex != NULL && determmapindex->size() > 0)
-            {
-            int row = determmapindex->at(0);
-            int startage = 0; m_deterministic_inputtable.Get(m_colDetSTARTAGE, row, startage);
-            float new_lai = 0.f; m_deterministic_inputtable.Get(m_colDetLAI, row, new_lai);
-
-            vegtrntype = TRANS_DETERMINISTIC;
-            UpdateIDU(pEnvContext, idu, m_colVEGCLASS, selected_to_trans, true);
-            UpdateIDU(pEnvContext, idu, m_colPVT, selected_pvtto_trans, true);
-            UpdateIDU(pEnvContext, idu, m_colAGECLASS, startage, true);
-            UpdateIDU(pEnvContext, idu, m_colLAI, new_lai, true);
-         }
-         else if (determmapindex == NULL)
-            {
-            bool alreadySeen = false;
-            CString det_err_msg;
-            det_err_msg.Format("%i %i %i\n", selected_to_trans, disturb, pvt);
-            int list_length = (int)m_badDeterminVegTransClasses.GetSize();
-            int max_list_length = 1000;
-            if (0 < list_length && list_length < max_list_length)
-               for (int i = 0; i < list_length; i++)
-               {
-                  if (m_badDeterminVegTransClasses[i] == det_err_msg)
-                  {
-                     alreadySeen = true;
-                     break;
-                  }
-               }
-            if (!alreadySeen && list_length < max_list_length) m_badDeterminVegTransClasses.Add(det_err_msg);
-            err_flag = true;
-            }
-         else 
-            { // determmapindex->size() == 0
-            CString msg;
-            msg.Format("STMengine::Run() missing STM in Deterministic lookup .csv file: vegclass=%i, disturb=%i, pvt=%i ", selected_to_trans, disturb, pvt);
-            Report::ErrorMsg(msg); err_flag = true;
-            }
-         } // end of if (vegtrntype == TRANS_NONE && DeterministicTransition())
-      
-      if (vegtrntype != TRANS_NONE) UpdateIDU(pEnvContext, idu, m_colVEGTRNTYPE, vegtrntype, true);
-      else 
-         { // No state transition this time.  Just increment the stand age and the time since disturbance.
-         UpdateIDU(pEnvContext, idu, m_colAGECLASS, ageclass + 1, true);
-         UpdateIDU(pEnvContext, idu, m_colTSD, tsd + 1, true);
-         }
-
+         float new_lai = m_detTransTable.GetAsFloat(m_colDetLAI, new_lai);
+         SetAttFloat(idu, LAI, new_lai);
+      }
+      else
+      { // No transitions. Just increment AGECLASS.
+         int new_age = curr_age + 1;
+         SetAttInt(idu, AGECLASS, new_age);
+      }
    } // end of IDU loop
        
-   return(!err_flag);
+   return(true);
 
-   } // end of STMengine::Run()
+} // end of STMengine::Run()
 
 
 BOOL STMengine::EndRun(EnvContext*)
@@ -1210,4 +991,19 @@ bool STMengine::LoadXml(LPCTSTR _filename)
    {
       return(gIDUs->AttInt(iduPolyNdx, col));
    } // end of STMengine::AttInt()
+
+   inline void STMengine::SetAtt(int IDUpolyNdx, int col, double attValue)
+   {
+      gIDUs->SetData(IDUpolyNdx, col, attValue);
+   } // end of STMengine::SetAtt()
+
+   inline void STMengine::SetAttFloat(int IDUpolyNdx, int col, float attValue)
+   {
+      gIDUs->SetData(IDUpolyNdx, col, attValue);
+   } // end of STMengine::SetAttFloat()
+
+   inline void STMengine::SetAttInt(int IDUpolyNdx, int col, int attValue)
+   {
+      gIDUs->SetData(IDUpolyNdx, col, attValue);
+   } // STMengine::SetAttInt()
 

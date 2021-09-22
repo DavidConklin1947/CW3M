@@ -1147,12 +1147,19 @@ class  LIBSAPI  MapLayer
 
 
 class LIBSAPI IDUlayer : public MapLayer
+// To add a new IDU attribute, add 4 lines:
+// m_colNEW_ATTRIB(-1),
+// intNEW_ATTRIB;
+// #define NEW_ATTRIB gIDUs->m_colNEW_ATTRIB
+// ok = ok && CheckCol(m_colNEW_ATTRIB, "NEW_ATTRIB", TYPE_<type>, CC_MUST_EXIST or CC_AUTOADD);
+// Please keep the attributes in alphabetical order.  Treat underscores like spaces when alphabetizing.
 {
    friend class Map;
 
 protected:
    IDUlayer(Map* pMap) :
       MapLayer(pMap),
+      m_colAGECLASS(-1),
       m_colAREA(-1),
       m_colCOMID(-1),
       m_colECOREGION(-1),
@@ -1173,6 +1180,7 @@ protected:
       m_colSM_DAY(-1),
       m_colSNOW_SWE(-1),
       m_colSPHUMIDITY(-1), 
+      m_colSTM_INDEX(-1),
       m_colTEMP(-1), 
       m_colTMAX(-1), 
       m_colTMIN(-1), 
@@ -1190,11 +1198,10 @@ protected:
 
    // IDU attribute stuff
 public:
-   double Att(int IDUpolyNdx, int col);
-   inline float AttFloat(int IDUpolyNdx, int col);
-   inline int AttInt(int IDUpolyNdx, int col);
 
    // Some IDU attributes, in alphabetic order.
+   int m_colAGECLASS;
+#define AGECLASS gIDUs->m_colAGECLASS
    int m_colAREA;
 #define AREA gIDUs->m_colAREA
    int m_colCOMID;
@@ -1235,6 +1242,8 @@ public:
 #define SNOW_SWE gIDUs->m_colSNOW_SWE
    int m_colSPHUMIDITY;
 #define SPHUMIDITY gIDUs->m_colSPHUMIDITY
+   int m_colSTM_INDEX;
+#define STM_INDEX gIDUs->m_colSTM_INDEX
    int m_colTEMP;
 #define TEMP gIDUs->m_colTEMP
    int m_colTMAX;
@@ -1258,7 +1267,90 @@ public:
    int m_colWINDSPEED;
 #define WINDSPEED gIDUs->m_colWINDSPEED
 
-   bool FindIDUattributeCols();
+   bool IDUlayer::FindIDUattributeCols()
+   {
+      bool ok = true;
+
+      // Some IDU attributes, in alphabetic order.
+      ok = ok && CheckCol(m_colAGECLASS, "AGECLASS", TYPE_INT, CC_MUST_EXIST);
+      ok = ok && CheckCol(m_colAREA, "AREA", TYPE_DOUBLE, CC_MUST_EXIST);
+      ok = ok && CheckCol(m_colCOMID, "COMID", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colECOREGION, "ECOREGION", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_MUST_EXIST);
+      ok = ok && CheckCol(m_colF_THETA, "F_THETA", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colFIELD_CAP, "FIELD_CAP", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colHBVCALIB, "HBVCALIB", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colHRU_ID, "HRU_ID", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colHRU_NDX, "HRU_NDX", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colH2O_MELT, "H2O_MELT", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colIDU_ID, "IDU_ID", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colIRRIGATION, "IRRIGATION", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colLAI, "LAI", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colLULC_A, "LULC_A", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colMAXSNOW, "MAXSNOW", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colPVT, "PVT", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colRAD_SW, "RAD_SW", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colSM_DAY, "SM_DAY", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colSNOW_SWE, "SNOW_SWE", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colSPHUMIDITY, "SPHUMIDITY", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colSTM_INDEX, "STM_INDEX", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colTEMP, "TEMP", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colTMAX, "TMAX", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colTMIN, "TMIN", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colTREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colVEGCLASS, "VEGCLASS", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colVPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWETL_ID, "WETL_ID", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWINDSPEED, "WINDSPEED", TYPE_FLOAT, CC_AUTOADD);
+
+      return(ok);
+   } // end of FindIDUattributeCols()
+
+   inline double Att(int IDUpolyNdx, int col)
+   {
+      double attribute;
+      ASSERT(col >= 0);
+      GetData(IDUpolyNdx, col, attribute);
+      return(attribute);
+   } // end of IDUlayer::Att()
+
+   inline int AttInt(int IDUindex, int col)
+   {
+      int attribute;
+      ASSERT(col >= 0);
+      GetData(IDUindex, col, attribute);
+      return(attribute);
+   } // end of IDUlayer:AttInt()
+
+   inline float AttFloat(int IDUindex, int col)
+   {
+      float attribute;
+      ASSERT(col >= 0);
+      GetData(IDUindex, col, attribute);
+      return(attribute);
+   } // end of IDUlayer::AttFloat()
+
+
+   inline void SetAtt(int IDUpolyNdx, int col, double attValue)
+   {
+      ASSERT(col >= 0);
+      SetDataU(IDUpolyNdx, col, attValue);
+   } // end of IDUlayer::SetAtt()
+
+   inline void SetAttFloat(int IDUpolyNdx, int col, float attValue)
+   {
+      ASSERT(col >= 0);
+      SetDataU(IDUpolyNdx, col, attValue);
+   } // end of IDUlayer::SetAttFloat()
+
+   inline void SetAttInt(int IDUpolyNdx, int col, int attValue)
+   {
+      ASSERT(col >= 0);
+      SetDataU(IDUpolyNdx, col, attValue);
+   } // end of IDUlayer::SetAttInt()
 
 }; // end of class IDUlayer
 
