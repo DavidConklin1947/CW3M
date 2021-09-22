@@ -1151,7 +1151,41 @@ class LIBSAPI IDUlayer : public MapLayer
    friend class Map;
 
 protected:
-   IDUlayer(Map * pMap): MapLayer(pMap) {}
+   IDUlayer(Map* pMap) :
+      MapLayer(pMap),
+      m_colAREA(-1),
+      m_colCOMID(-1),
+      m_colECOREGION(-1),
+      m_colELEV_MEAN(-1),
+      m_colF_THETA(-1),
+      m_colFIELD_CAP(-1),
+      m_colHBVCALIB(-1), 
+      m_colHRU_ID(-1),
+      m_colHRU_NDX(-1),
+      m_colH2O_MELT(-1),
+      m_colIDU_ID(-1), 
+      m_colIRRIGATION(-1), 
+      m_colLAI(-1), 
+      m_colLULC_A(-1), 
+      m_colMAXSNOW(-1), 
+      m_colPVT(-1), 
+      m_colRAD_SW(-1), 
+      m_colSM_DAY(-1),
+      m_colSNOW_SWE(-1),
+      m_colSPHUMIDITY(-1), 
+      m_colTEMP(-1), 
+      m_colTMAX(-1), 
+      m_colTMIN(-1), 
+      m_colTREE_HT(-1), 
+      m_colVEGCLASS(-1),
+      m_colVPD_SCALAR(-1), 
+      m_colWETL_CAP(-1), 
+      m_colWETL_ID(-1),
+      m_colWETL2Q(-1), 
+      m_colWETNESS(-1), 
+      m_colWINDSPEED(-1)
+   {}
+
    ~IDUlayer() {}
 
    // IDU attribute stuff
@@ -1225,48 +1259,8 @@ public:
 #define WINDSPEED gIDUs->m_colWINDSPEED
 
    bool FindIDUattributeCols();
-/*x
-   {
-      MapLayer* pIDUlayer = (MapLayer*)pMapLayer;
-      bool ok = true;
 
-      // Some IDU attributes, in alphabetic order.
-      ok = ok && pIDUlayer->CheckCol(AREA, "AREA", TYPE_INT, CC_MUST_EXIST);
-      ok = ok && pIDUlayer->CheckCol(COMID, "COMID", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(ECOREGION, "ECOREGION", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(ELEV_MEAN, "ELEV_MEAN", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(F_THETA, "F_THETA", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(FIELD_CAP, "FIELD_CAP", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(HBVCALIB, "HBVCALIB", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(HRU_ID, "HRU_ID", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(HRU_NDX, "HRU_NDX", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(H2O_MELT, "H2O_MELT", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(IDU_ID, "IDU_ID", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(IRRIGATION, "IRRIGATION", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(LAI, "LAI", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(LULC_A, "LULC_A", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(MAXSNOW, "MAXSNOW", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(PVT, "PVT", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(RAD_SW, "RAD_SW", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(SM_DAY, "SM_DAY", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(SNOW_SWE, "SNOW_SWE", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(SPHUMIDITY, "SPHUMIDITY", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(TEMP, "TEMP", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(TMAX, "TMAX", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(TMIN, "TMIN", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(TREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(VPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(WETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(WETL_ID, "WETL_ID", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(WETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(WETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && pIDUlayer->CheckCol(WINDSPEED, "WINDSPEED", TYPE_FLOAT, CC_AUTOADD);
-
-      return(ok);
-   } // end of FindIDUattributeCols()
-x*/
-
-};
+}; // end of class IDUlayer
 
 
 //////--------- inline functions ---------------------------

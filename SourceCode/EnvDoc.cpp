@@ -2661,7 +2661,8 @@ int CEnvDoc::OpenDocXml( LPCTSTR filename )
    InitDoc();
 
    EnvLoader loader;
-   loader.LoadProject( filename, gpMapPanel->m_pMap, &m_model, gpPolicyManager, gpActorManager, gpScenarioManager);
+   int result = loader.LoadProject( filename, gpMapPanel->m_pMap, &m_model, gpPolicyManager, gpActorManager, gpScenarioManager);
+   if (result < 1) return(result);
 
    gpMapPanel->m_pMap->m_pExtraPtr = gpMapPanel->m_pMapWnd;
    gpMapPanel->m_pMapWnd->LoadBkgrImage();

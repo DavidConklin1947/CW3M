@@ -201,7 +201,7 @@ BOOL CEnvApp::InitInstance()
             break;
 
          default:
-            AfxMessageBox( "An unspecified error was encountered during startup.  Envision is exiting...", MB_OK );
+            AfxMessageBox( "An unspecified error was encountered during startup. There may be clues in the log file. Envision is exiting...", MB_OK );
          }
       return FALSE;
       }

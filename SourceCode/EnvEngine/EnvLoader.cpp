@@ -450,7 +450,12 @@ int EnvLoader::LoadProject( LPCTSTR filename, Map *pMap, EnvModel *pModel, Polic
          if ( layerIndex == 0 )
             {
             m_pIDULayer = (IDUlayer *)m_pMap->GetLayer( 0 );
-
+            if (strcmp(m_pIDULayer->m_name, "IDU") != 0)
+            {
+               CString msg = "LoadProject(): Please make the IDU <layer> the first <layer> specified in your ENVX file.";
+               Report::ErrorMsg(msg);
+               return(-5);
+            }
             //if ( m_pQueryEngine != NULL )
             //   delete m_pQueryEngine;
             //
