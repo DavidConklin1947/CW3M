@@ -44,22 +44,15 @@ IDUlayer * gIDUs = NULL;
 
 STMengine::STMengine()
    : EnvAutoProcess()
-, m_colVEGTRNTYPE(-1)
+   , m_colVEGTRNTYPE(-1)
 
-, m_colDetSTARTAGE(-1)
-, m_colDetENDAGE(-1)
-, m_colDetLAI(-1)
+   , m_colDetSTARTAGE(-1)
+   , m_colDetENDAGE(-1)
+   , m_colDetLAI(-1)
 
-, m_colProbMINAGE(-1)
-, m_colProbMAXAGE(-1)
-, m_colProbTSD(-1)
-, m_colProbRELATIVEAGE(-1)
-, m_colProbKEEPRELAGE(-1)
-, m_colProbPROPORTION(-1)
-, m_colProbTSDMAX(-1)
-, m_colProbRELTSD(-1)
-, m_colProbPVTto(-1)
-   ;
+   , m_colProbMINAGE(-1)
+   , m_colProbMAXAGE(-1)
+{ }
 
 STMengine::~STMengine()
    {
@@ -107,10 +100,11 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    start = clock();
 
    ok = LoadProbCSV(m_vegtransfile.probability_filename, pEnvContext);
+   m_colCondCURR_STATE = m_condTransTable.GetCol("CURR_STATE");
    m_colCondNEW_STATE = m_condTransTable.GetCol("NEW_STATE");
 
-   m_colProbMINAGE = m_inputtable.GetCol("MINAGE");
-   m_colProbMAXAGE = m_inputtable.GetCol("MAXAGE");
+   m_colProbMINAGE = m_condTransTable.GetCol("MINAGE");
+   m_colProbMAXAGE = m_condTransTable.GetCol("MAXAGE");
    if (m_colProbMINAGE < 0 || m_colProbMAXAGE < 0 )
    {
       CString msg;
@@ -199,7 +193,7 @@ BOOL STMengine::Run(EnvContext *pEnvContext)
          int new_age = m_detTransTable.GetAsInt(m_colDetSTARTAGE, new_stm_ndx);
          SetAttInt(idu, AGECLASS, new_age);
 
-         float new_lai = m_detTransTable.GetAsFloat(m_colDetLAI, new_lai);
+         float new_lai = m_detTransTable.GetAsFloat(m_colDetLAI, new_stm_ndx);
          SetAttFloat(idu, LAI, new_lai);
       }
       else
@@ -253,21 +247,102 @@ BOOL STMengine::EndRun(EnvContext*)
    m_badDeterminVegTransClasses.RemoveAll();
 
    return TRUE;
+} // end of STMengine::EndRun()
 
+
+
+int STMengine::DeterministicTransition(int idu, int currSTMndx, int currAge) // Returns index of new state in the DetTransTable.
+{
+   int new_stm_ndx = currSTMndx;
+
+   int end_age = m_detTransTable.GetAsInt(m_colDetENDAGE, currSTMndx);
+   if (currAge >= end_age)
+   { // Transition to the next state.
+      new_stm_ndx = m_detTransTable.GetAsInt(m_colDetNEW_STATE, currSTMndx);
    }
 
+   return(new_stm_ndx);
+} // end of DeterministicTransition()
 
-//x bool STMengine::ProbabilisticTransition(EnvContext* pEnvContext, int idu, int vegclass, int pvt, int disturb, int stand_age, int tsd, int& selected_to_trans, int& selected_pvtto_trans, float& selected_probability)
-int STMengine::ConditionalTransition(EnvContext* pEnvContext, int idu, int tgtSourceClass, int ageclass, float& selected_probability)
-{ // Returns index of selected conditional transition, or -1 if no conditional transition is selected.
-   // 1. Find the entries in the conditional transition table for the source state.  If none, return -1.
+/*x
+   //build the key for the lookup table
+   m_determinIndexLookupKey.region = 1;
+   m_determinIndexLookupKey.from = vegclass;
+   m_determinIndexLookupKey.pvt = pvt;
+   vector<int> * determmapindex = &m_determinIndexMap[m_determinIndexLookupKey];
+
+   if ( determmapindex->size() > 1 )
+      {
+      CString msg;
+      msg.Format("STMengine: multiple entries for the same state in the deterministic transition table: vegclass_from=%i pvt=%i ",
+         vegclass, pvt);
+      Report::LogMsg(msg, RT_ERROR);
+      }
+
+   selected_to_trans = selected_pvtto_trans = -1;
+   if (determmapindex->size() >= 1)
+      {
+      int endage;
+      int endage_col = m_deterministic_inputtable.GetCol("ENDAGE");
+      m_deterministic_inputtable.Get(endage_col, determmapindex->at(0), endage);
+      if (ageclass >= endage)
+         {
+         if (ageclass > endage && errAgeClassCount < 10)
+            {
+            CString msg;
+            msg.Format("STMengine::: ageclass > endage.  year=%i idu=%i, ageclass=%i, endage=%i, vegclass=%i, pvt=%i",
+               pEnvContext->currentYear, idu, ageclass, endage, vegclass, pvt);
+            Report::LogMsg(msg, RT_WARNING);
+
+            errAgeClassCount++;
+            if (errAgeClassCount == 10)
+               {
+               msg.Format("Further 'ageclass > endage' messages will be suppressed.");
+               Report::LogMsg(msg, RT_WARNING);
+               }
+            }
+
+         int vto_col = m_deterministic_inputtable.GetCol("VEGCLASSto");
+         int pvtto_col = m_deterministic_inputtable.GetCol("PVTto");
+         m_deterministic_inputtable.Get(vto_col, determmapindex->at(0), selected_to_trans);
+         m_deterministic_inputtable.Get(pvtto_col, determmapindex->at(0), selected_pvtto_trans);
+         }
+      }
+
+   return(selected_to_trans >= 0);
+x*/
+
+
+int STMengine::ConditionalTransition(int idu, int currSTMndx, int currAge)
+{ // Returns index of new state in the DetTransTable, or -1 if no conditional transition is selected.
+   // 1. Find the entries in the conditional transition table for the current state.  If none, return -1.
    // 2. In the order the transitions appear in the table, choose whether or not to use the transition.
-   //    Evaluate the likelihood of the transition.pick a random number from a uniform distribution 
-   //    on the unit interval.  If the random number is <= the likelihood of the conditional transition,
-   //    return the index of the transition.
+   //    If the conditions aren't satisfied, don't use the transition.
+   //    If the conditions are satisfied, evaluate the likelihood of the transition.
+   //    Pick a random number from a uniform distribution on the unit interval.  
+   //    If the random number is <= the likelihood of the conditional transition,
+   //    return the index of the new state in the deterministic transition table..
    // 3. If no transition is selected, return -1.
 
+   int new_stm_ndx = -1;
+   int curr_state = m_detTransTable.GetAsInt(m_colDetCURR_STATE, currSTMndx);
 
+   int num_entries = m_condTransTable.GetRowCount();
+   int cond_trans_ndx = 0;
+   while (new_stm_ndx < 0 && cond_trans_ndx < num_entries)
+   {
+      int source_state = m_condTransTable.GetAsInt(m_colCondCURR_STATE, cond_trans_ndx);
+
+      if (source_state == curr_state && ConditionsAreMet(cond_trans_ndx, idu))
+      {
+      }
+      else cond_trans_ndx++;
+   } // end of while (new_stm_ndx < 0 && cond_trans_ndx < num_entries)
+
+   return(new_stm_ndx);
+} // end of ConditionalTransition()
+
+/*x
    CArray<int> sourceIndices;
    int source_ndx = 0;
    int found_count = 0;
@@ -303,7 +378,7 @@ int STMengine::ConditionalTransition(EnvContext* pEnvContext, int idu, int tgtSo
    final_probs = &probmap[m_probLookupKey]; // Returns the proper probabilities from the lookup table
 
    if (final_probs->size() == 0) return(false);
-/*x
+
    {
       if (disturb == 0 || (CC_DISTURB_LB <= disturb && disturb <= CC_DISTURB_UB)) 
          return(false);
@@ -325,7 +400,7 @@ int STMengine::ConditionalTransition(EnvContext* pEnvContext, int idu, int tgtSo
       if (!alreadySeen && list_length < max_list_length) m_badVegTransClasses.Add(msg);
       return(false);
    } // end of if ( m_final_probs->size() == 0 )
-x*/
+
 
    std::vector< std::pair<int, float> > * original_probs;
    original_probs = &probmap2[m_probLookupKey]; // Get a second copy of the probabilities from the lookup table
@@ -334,14 +409,14 @@ x*/
    for (vector<pair<int, float>>::iterator it = final_probs->begin(); it != final_probs->end(); ++it)
       probability_sum += it->second;
 
-   /*x
+   
    if (disturb != 0)
    { // Normalize probability list if disturbance. This means a disturbance transition will be selected.  
       for (vector<pair<int, float>>::iterator it = final_probs->begin(); it != final_probs->end(); ++it)
          it->second = probability_sum > 0.0 ? it->second / probability_sum : 1.0f / final_probs->size();
       probability_sum = 1.f;
    }
-   x*/
+   
 
    double rand_num = (double)m_rn.RandValue(0., 1.);  //randum number between 0 and 1, uniform distribution                                                     //normalize probability list if disturbance. this means a disturbance transition will be selected. 
    if (rand_num > probability_sum) return(false);
@@ -405,8 +480,7 @@ x*/
       return(true);
    }
    else return(false);
-
-} // end of ConditionalTransition()
+x*/
 
 
 int STMengine::ChooseProbTrans(double rand_num, float probability_sum, vector<pair<int, float> > *m_final_probs, std::vector< std::pair<int, float> > *m_original_final_probs, float & orig_probability)
@@ -462,57 +536,6 @@ int STMengine::ChooseProbTrans(double rand_num, float probability_sum, vector<pa
 
    } // end of ChooseProbTrans()
 
-
-static int errAgeClassCount = 0;
-
-bool STMengine::DeterministicTransition(EnvContext *pEnvContext, int idu, int vegclass, int pvt, int ageclass, int & selected_to_trans, int & selected_pvtto_trans)
-   {
-   //build the key for the lookup table
-   m_determinIndexLookupKey.region = 1;
-   m_determinIndexLookupKey.from = vegclass;
-   m_determinIndexLookupKey.pvt = pvt;
-   vector<int> * determmapindex = &m_determinIndexMap[m_determinIndexLookupKey];
-
-   if ( determmapindex->size() > 1 )
-      {
-      CString msg;
-      msg.Format("STMengine: multiple entries for the same state in the deterministic transition table: vegclass_from=%i pvt=%i ",
-         vegclass, pvt);
-      Report::LogMsg(msg, RT_ERROR);
-      }
-
-   selected_to_trans = selected_pvtto_trans = -1;
-   if (determmapindex->size() >= 1)
-      {
-      int endage;
-      int endage_col = m_deterministic_inputtable.GetCol("ENDAGE");
-      m_deterministic_inputtable.Get(endage_col, determmapindex->at(0), endage);
-      if (ageclass >= endage)
-         {
-         if (ageclass > endage && errAgeClassCount < 10)
-            {
-            CString msg;
-            msg.Format("STMengine::: ageclass > endage.  year=%i idu=%i, ageclass=%i, endage=%i, vegclass=%i, pvt=%i",
-               pEnvContext->currentYear, idu, ageclass, endage, vegclass, pvt);
-            Report::LogMsg(msg, RT_WARNING);
-
-            errAgeClassCount++;
-            if (errAgeClassCount == 10)
-               {
-               msg.Format("Further 'ageclass > endage' messages will be suppressed.");
-               Report::LogMsg(msg, RT_WARNING);
-               }
-            }
-
-         int vto_col = m_deterministic_inputtable.GetCol("VEGCLASSto");
-         int pvtto_col = m_deterministic_inputtable.GetCol("PVTto");
-         m_deterministic_inputtable.Get(vto_col, determmapindex->at(0), selected_to_trans);
-         m_deterministic_inputtable.Get(pvtto_col, determmapindex->at(0), selected_pvtto_trans);
-         }
-      }
-
-   return(selected_to_trans >= 0);
-   } // end of DeterministicTransition()
 
 
 bool STMengine::LoadDeterministicTransCSV(CString deterministicfilename, EnvContext *pEnvContext)

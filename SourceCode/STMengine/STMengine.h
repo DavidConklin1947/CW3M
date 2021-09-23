@@ -112,7 +112,8 @@ protected:
 	int DeterministicTransition(int idu, int currSTMndx, int currAge); // Returns index of new state in the DetTransTable.
 	int ConditionalTransition(int iduPolyNdx, int currSTMndx, int currAge);  // Returns index of new state in the DetTransTable.
 
-	int ChooseProbTrans(double rand_num, float probability_sum, vector<pair<int, float> >* m_permute_prob_vec, std::vector< std::pair<int, float> >* m_original_final_probs, float& orig_probability);
+   bool ConditionsAreMet(int condTransNdx, int iduPolyNdx);
+   int ChooseProbTrans(double rand_num, float probability_sum, vector<pair<int, float> >* m_permute_prob_vec, std::vector< std::pair<int, float> >* m_original_final_probs, float& orig_probability);
 	inline double Att(int iduPolyNdx, int col);
 	inline float AttFloat(int iduPolyNdx, int col);
 	inline int AttInt(int iduPolyNdx, int col);
@@ -130,6 +131,7 @@ protected:
    int m_colDetENDAGE;
    int m_colDetLAI;
 
+   int m_colCondCURR_STATE;
    int m_colCondNEW_STATE;
    int m_colProbMINAGE;
    int m_colProbMAXAGE;
