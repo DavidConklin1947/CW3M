@@ -96,7 +96,7 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    m_colDetSTARTAGE = m_detTransTable.GetCol("STARTAGE");
    m_colDetENDAGE = m_detTransTable.GetCol("ENDAGE");
    m_colDetLAI = m_detTransTable.GetCol("LAI");
-   if (m_colDetCURR_STATE < 0 || m_colDetNEW_STATE || m_colDetSTARTAGE < 0 || m_colDetENDAGE < 0 || m_colDetLAI < 0)
+   if (m_colDetCURR_STATE < 0 || m_colDetNEW_STATE < 0 || m_colDetSTARTAGE < 0 || m_colDetENDAGE < 0 || m_colDetLAI < 0)
    {
       CString msg;
       msg.Format("STMengine::::Init() Missing column in deterministic transition file %s: "
@@ -144,14 +144,20 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
 
 
 BOOL STMengine::InitRun(EnvContext *pEnvContext, bool useInitSeed)
-{
+{ // Zero out WET_FRAC, WETLONGEST, WETAVGDPTH. Set STM_INDEX. 
+   gIDUs->SetColData(WET_FRAC, 0, true);
+   gIDUs->SetColData(WETLONGEST, 0, true);
+   gIDUs->SetColData(WETAVGDPTH, 0, true);
+
    for (MapLayer::Iterator idu = pEnvContext->pMapLayer->Begin(); idu != pEnvContext->pMapLayer->End(); idu++)
    {
       int curr_state = AttInt(idu, VEGCLASS);
-      if (curr_state < STM_CLASS_MIN || STM_CLASS_MAX < curr_state) continue;
-
-      int stm_index = m_detTransTable.Find(m_colDetCURR_STATE, (VData)curr_state, 0);
-      SetAttInt(idu, STM_INDEX, stm_index);
+      if (STM_CLASS_MIN <= curr_state && curr_state <= STM_CLASS_MAX)
+      {
+         int stm_index = m_detTransTable.Find(m_colDetCURR_STATE, (VData)curr_state, 0);
+         SetAttInt(idu, STM_INDEX, stm_index);
+      }
+      else SetAttInt(idu, STM_INDEX, -1);
    } // end of loop thru IDUs
 
    return(true);
@@ -890,169 +896,95 @@ bool STMengine::LoadProbCSV(CString probfilename, EnvContext *pEnvContext)
 x*/
 
 bool STMengine::LoadXml(LPCTSTR _filename)
-   {
+{
    CString filename;
    if ( PathManager::FindPath( _filename, filename ) < 0 ) //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
-      {
+   {
       CString msg;
-      msg.Format( "Dynamic Veg: Input file '%s' not found - this process will be disabled", _filename );
+      msg.Format( "STMengine::LoadXml(): Input file '%s' not found - this process will be disabled", _filename );
       Report::ErrorMsg( msg );
       return false;
-      }
+   }
 
    // start parsing input file
    TiXmlDocument doc;
    bool ok = doc.LoadFile(filename);
-
-   bool loadSuccess = true;
-
    if (!ok)
       {
       CString msg;
-      msg.Format("Error reading input file %s:  %s", filename, doc.ErrorDesc());
+      msg.Format("STMengine::LoadXml(): Error reading input file %s:  %s", filename, doc.ErrorDesc());
       Report::ErrorMsg(msg);
       return false;
       }
 
-   // start interating through the nodes
-   TiXmlElement *pXmlRoot = doc.RootElement();  // <integrator
-
-   XML_ATTR setAttrpvt[] = {
-         { "dynamic_update", TYPE_INT, &(m_dynamic_update.dynamic_update), true, 0 },
-         { NULL, TYPE_NULL, NULL, false, 0 } };
-
-   ok = TiXmlGetAttributes(pXmlRoot, setAttrpvt, filename, NULL);
-
-   // get vegtrans file info next  *****************************************************************************
-   TiXmlElement *pXmlVegtransfiles = pXmlRoot->FirstChildElement("vegtransfiles");
-
-   if (pXmlVegtransfiles == NULL)
-      {
-      CString msg("Unable to find <vegtransfiles> tag reading ");
-      msg += filename;
-      Report::ErrorMsg(msg);
-      return false;
-      }
-
-   TiXmlElement *pXmlVegtransfile = pXmlVegtransfiles->FirstChildElement("vegtransfile");
-
-   LPCTSTR probFilename=NULL, detFilename=NULL, probMultFilename=NULL;
-
+   TiXmlElement *pXmlRoot = doc.RootElement(); 
+   LPCTSTR condFileName=NULL, detFileName=NULL;
    XML_ATTR setAttrsveg[] = {
       // attr                      type           address              isReq  checkCol        
-         { "probability_filename",    TYPE_STRING, &probFilename,     true, 0 },
-         { "deterministic_filename",  TYPE_STRING, &detFilename,      true, 0 },
+         { "deterministic_transitions_file",  TYPE_STRING, &detFileName,      true, 0 },
+         { "conditional_transitions_file",    TYPE_STRING, &condFileName,     true, 0 },
          { NULL, TYPE_NULL, NULL, false, 0 } };
 
-   ok = TiXmlGetAttributes(pXmlVegtransfile, setAttrsveg, filename, NULL);
-
-   int retVal = PathManager::FindPath( probFilename, m_vegtransfile.probability_filename );  //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
-   if ( retVal < 0 )
-      {
+   ok = TiXmlGetAttributes(pXmlRoot, setAttrsveg, filename, NULL);
+   if (!ok)
+   {
       CString msg;
-      msg.Format( "STMengine: Probability Transition file '%s' not found - Dynamic Veg will be disabled...", probFilename );
-      Report::ErrorMsg( msg );
-      return false;
-      }
-
-   retVal = PathManager::FindPath( detFilename, m_vegtransfile.deterministic_filename );  //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
-   if ( retVal < 0 )
-      {
-      CString msg;
-      msg.Format( "STMengine: Deterministic Transition file '%s' not found - Dynamic Veg will be disabled...", detFilename );
-      Report::ErrorMsg( msg );
-      return false;
-      }
-   
-   // get initializer info next  *****************************************************************************
-   TiXmlElement *pXmlInitializers = pXmlRoot->FirstChildElement("initializers");
-
-   if (pXmlInitializers == NULL)
-      {
-      CString msg("Unable to find <initializers> tag reading ");
-      msg += filename;
+      msg.Format("STMengine::LoadXml(): Error interpreting input file %s", filename);
       Report::ErrorMsg(msg);
       return false;
-      }
-
-   TiXmlElement *pXmlInitializer = pXmlInitializers->FirstChildElement("initializer");
-
-   XML_ATTR setAttrsini[] = {
-      // attr                     type           address                            isReq  checkCol        
-         { "age_class_initializer", TYPE_INT, &(m_initializer.initAgeClass), true, 0 },
-         { "tsd_initializer", TYPE_INT, &(m_initializer.initTSD), true, 0 },
-         { NULL, TYPE_NULL, NULL, false, 0 } };
-
-   ok = TiXmlGetAttributes(pXmlInitializer, setAttrsini, filename, NULL);
-
-   // get Outputs next ******************************************************************************************
-   TiXmlElement *pXmlOutputs = pXmlRoot->FirstChildElement("outputs");
-
-   if ( pXmlOutputs != NULL)
-      {
-      TiXmlElement *pXmlOutput = pXmlOutputs->FirstChildElement("output");
-
-      while (pXmlOutput != NULL)
-         {
-         // you need some stucture to store these in
-         OUTPUT *pOutput = new OUTPUT;
-         XML_ATTR setAttrs[] = {
-            // attr                    type          address                 isReq  checkCol
-               { "name", TYPE_CSTRING, &(pOutput->name), true, 0 },
-               { "query", TYPE_CSTRING, &(pOutput->query), true, 0 },
-               { NULL, TYPE_NULL, NULL, false, 0 } };
-
-         ok = TiXmlGetAttributes(pXmlOutput, setAttrs, filename, NULL);
-
-         if (!ok)
-            {
-            CString msg;
-            msg.Format(_T("Misformed element reading <output> attributes in input file %s"), filename);
-            Report::ErrorMsg(msg);
-            delete pOutput;
-            }
-         else
-            {
-            m_outputArray.Add(pOutput);
-            }
-
-         pXmlOutput = pXmlOutput->NextSiblingElement("output");
-         }
-      }
-
-   return true;
    }
 
 
-   inline double STMengine::Att(int iduPolyNdx, int col)
+   int retVal = PathManager::FindPath(detFileName, m_detTransFileName);  //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
+   if (retVal < 0)
    {
-      return(gIDUs->Att(iduPolyNdx, col));
-   } // end of STMengine::Att()
-
-
-   inline float STMengine::AttFloat(int iduPolyNdx, int col)
+      CString msg;
+      msg.Format("STMengine: Deterministic Transition file '%s' not found.", detFileName);
+      Report::ErrorMsg(msg);
+      return false;
+   }
+   retVal = PathManager::FindPath( condFileName, m_condTransFileName);  //  return value: > 0 = success; < 0 = failure (file not found), 0 = path fully qualified and found 
+   if ( retVal < 0 )
    {
-      return(gIDUs->AttFloat(iduPolyNdx, col));
-   } // end of STMengine::AttFloat()
+      CString msg;
+      msg.Format( "STMengine::LoadXml() conditional transition file '%s' not found.", condFileName );
+      Report::ErrorMsg( msg );
+      return false;
+   }
+
+   return true;
+} // end of STMengine::LoadXml()
 
 
-   inline int STMengine::AttInt(int iduPolyNdx, int col)
-   {
-      return(gIDUs->AttInt(iduPolyNdx, col));
-   } // end of STMengine::AttInt()
+inline double STMengine::Att(int iduPolyNdx, int col)
+{
+   return(gIDUs->Att(iduPolyNdx, col));
+} // end of STMengine::Att()
 
-   inline void STMengine::SetAtt(int IDUpolyNdx, int col, double attValue)
-   {
-      gIDUs->SetData(IDUpolyNdx, col, attValue);
-   } // end of STMengine::SetAtt()
 
-   inline void STMengine::SetAttFloat(int IDUpolyNdx, int col, float attValue)
-   {
-      gIDUs->SetData(IDUpolyNdx, col, attValue);
-   } // end of STMengine::SetAttFloat()
+inline float STMengine::AttFloat(int iduPolyNdx, int col)
+{
+   return(gIDUs->AttFloat(iduPolyNdx, col));
+} // end of STMengine::AttFloat()
 
-   inline void STMengine::SetAttInt(int IDUpolyNdx, int col, int attValue)
-   {
-      gIDUs->SetData(IDUpolyNdx, col, attValue);
-   } // STMengine::SetAttInt()
+
+inline int STMengine::AttInt(int iduPolyNdx, int col)
+{
+   return(gIDUs->AttInt(iduPolyNdx, col));
+} // end of STMengine::AttInt()
+
+inline void STMengine::SetAtt(int IDUpolyNdx, int col, double attValue)
+{
+   gIDUs->SetData(IDUpolyNdx, col, attValue);
+} // end of STMengine::SetAtt()
+
+inline void STMengine::SetAttFloat(int IDUpolyNdx, int col, float attValue)
+{
+   gIDUs->SetData(IDUpolyNdx, col, attValue);
+} // end of STMengine::SetAttFloat()
+
+inline void STMengine::SetAttInt(int IDUpolyNdx, int col, int attValue)
+{
+   gIDUs->SetData(IDUpolyNdx, col, attValue);
+} // STMengine::SetAttInt()
 

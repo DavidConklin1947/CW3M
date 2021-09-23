@@ -1307,7 +1307,7 @@ public:
       ok = ok && CheckCol(m_colTMAX, "TMAX", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colTMIN, "TMIN", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colTREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && CheckCol(m_colVEGCLASS, "VEGCLASS", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colVEGCLASS, "VEGCLASS", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colVPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWET_FRAC, "WET_FRAC", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
