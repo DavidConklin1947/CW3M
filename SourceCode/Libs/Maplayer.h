@@ -1147,7 +1147,7 @@ class  LIBSAPI  MapLayer
 
 
 class LIBSAPI IDUlayer : public MapLayer
-// To add a new IDU attribute, add 4 lines:
+// To add a new IDU attribute, add 4 lines here and an entry in the data dictionary spreadsheet:
 // m_colNEW_ATTRIB(-1),
 // intNEW_ATTRIB;
 // #define NEW_ATTRIB gIDUs->m_colNEW_ATTRIB
@@ -1187,10 +1187,13 @@ protected:
       m_colTREE_HT(-1), 
       m_colVEGCLASS(-1),
       m_colVPD_SCALAR(-1), 
+      m_colWET_FRAC(-1),
+      m_colWETAVGDPTH(-1),
       m_colWETL_CAP(-1), 
       m_colWETL_ID(-1),
       m_colWETL2Q(-1), 
-      m_colWETNESS(-1), 
+      m_colWETLONGEST(-1),
+      m_colWETNESS(-1),
       m_colWINDSPEED(-1)
    {}
 
@@ -1256,12 +1259,18 @@ public:
 #define VEGCLASS gIDUs->m_colVEGCLASS
    int m_colVPD_SCALAR;
 #define VPD_SCALAR gIDUs->m_colVPD_SCALAR
+   int m_colWET_FRAC;
+#define WET_FRAC gIDUs->m_colWET_FRAC
+   int m_colWETAVGDPTH;
+#define WETAVGDPTH gIDUs->m_colWETAVGDPTH
    int m_colWETL_CAP;
 #define WETL_CAP gIDUs->m_colWETL_CAP
    int m_colWETL_ID;
 #define WETL_ID gIDUs->m_colWETL_ID
    int m_colWETL2Q;
 #define WETL2Q gIDUs->m_colWETL2Q
+   int m_colWETLONGEST;
+#define WETLONGEST gIDUs->m_colWETLONGEST
    int m_colWETNESS;
 #define WETNESS gIDUs->m_colWETNESS
    int m_colWINDSPEED;
@@ -1300,6 +1309,7 @@ public:
       ok = ok && CheckCol(m_colTREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colVEGCLASS, "VEGCLASS", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colVPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWET_FRAC, "WET_FRAC", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_ID, "WETL_ID", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);

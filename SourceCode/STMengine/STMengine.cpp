@@ -50,8 +50,8 @@ STMengine::STMengine()
    , m_colDetENDAGE(-1)
    , m_colDetLAI(-1)
 
-   , m_colProbMINAGE(-1)
-   , m_colProbMAXAGE(-1)
+//x   , m_colProbMINAGE(-1)
+//x   , m_colProbMAXAGE(-1)
 { }
 
 STMengine::~STMengine()
@@ -63,26 +63,13 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    m_pEnvContext = pEnvContext;
    gIDUs = (IDUlayer *)pEnvContext->pMapLayer;
 
-   // get input file names and input variables   
-   if (m_staticsInitialized)
-      return TRUE;
-
-   m_staticsInitialized = true;
-
-   clock_t start = clock();
-
    bool ok = LoadXml(initStr);
-
-   clock_t finish = clock();
-   double duration = (float)(finish - start) / CLOCKS_PER_SEC;
    if (!ok)
-      {
+   {
       CString msg;
-      msg = ("STMengine: Unable to find STMengine's .xml init file");
-
+      msg = ("STMengine::LoadXml(%s) returned false.", initStr);
       Report::ErrorMsg(msg);
-      return FALSE;
-      }
+      return(false);}
 
    for (int i = 0; i < (int)m_outputArray.GetSize(); i++)
       {
@@ -90,42 +77,20 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
       AddOutputVar(pOutput->name, pOutput->value, "");
       }
 
-   CString tempinistring;
-   CString inputString(initStr);
-   CString *pString = &inputString;
+//x   CString tempinistring;
+//x   CString inputString(initStr);
+//x   CString *pString = &inputString;
 
-
-   // choose which climate change files to use if necessary
-   // go to LoadProbCSV function for loading file into data object, filename set in .xml file
-   start = clock();
-
-   ok = LoadProbCSV(m_vegtransfile.probability_filename, pEnvContext);
-   m_colCondCURR_STATE = m_condTransTable.GetCol("CURR_STATE");
-   m_colCondNEW_STATE = m_condTransTable.GetCol("NEW_STATE");
-
-   m_colProbMINAGE = m_condTransTable.GetCol("MINAGE");
-   m_colProbMAXAGE = m_condTransTable.GetCol("MAXAGE");
-   if (m_colProbMINAGE < 0 || m_colProbMAXAGE < 0 )
+//x  m_flagDeterministicFile = LoadDeterministicTransCSV(m_vegtransfile.deterministic_filename, pEnvContext);
+   int records = m_detTransTable.ReadAscii(m_detTransFileName, ',');
+   if (records < 1)
    {
       CString msg;
-      msg.Format("STMengine::::Init() Missing column in probabilistic transition file %s", m_vegtransfile.probability_filename.GetString());
+      msg.Format("STMengine::Init() Unable to load deterministic transition file %s. ReadAscii() returns %d.",
+         m_detTransFileName.GetString(), records);
       Report::ErrorMsg(msg);
       return(false);
    }
-
-   finish = clock();
-   duration = (float)(finish - start) / CLOCKS_PER_SEC;
-   CString msg;
-   msg.Format("STMengine: Loaded Probability CSV file '%s' (%.2f seconds)", (LPCTSTR)m_vegtransfile.probability_filename, (float)duration);
-   Report::LogMsg(msg);
-
-   if (!ok)
-      return FALSE;
-
-   // go to LoadDeterministicTransCSV funtion for loading file into data object, filename set in .xml file
-   start = clock();
-
-   m_flagDeterministicFile = LoadDeterministicTransCSV(m_vegtransfile.deterministic_filename, pEnvContext);
    m_colDetCURR_STATE = m_detTransTable.GetCol("CURR_STATE");
    m_colDetNEW_STATE = m_detTransTable.GetCol("NEW_STATE");
    m_colDetSTARTAGE = m_detTransTable.GetCol("STARTAGE");
@@ -141,13 +106,41 @@ BOOL STMengine::Init(EnvContext *pEnvContext, LPCTSTR initStr)
       return(false);
    }
 
-   finish = clock();
-   duration = (float)(finish - start) / CLOCKS_PER_SEC;
-   msg.Format("STMengine: Loaded Deterministic Transition CSV file '%s' (%.2f seconds)", (LPCTSTR)m_vegtransfile.deterministic_filename, (float)duration);
-   Report::LogMsg(msg);
-
-   return(true);
+ //x  ok = LoadProbCSV(m_vegtransfile.probability_filename, pEnvContext);
+   records = m_condTransTable.ReadAscii(m_condTransFileName, ',');
+   if (records < 1)
+   {
+      CString msg;
+      msg.Format("STMengine::Init() Unable to load conditional transition file %s. ReadAscii() returns %d.",
+         m_condTransFileName.GetString(), records);
+      Report::ErrorMsg(msg);
+      return(false);
    }
+   m_colCondCURR_STATE = m_condTransTable.GetCol("CURR_STATE");
+   m_colCondWET_FRACatLeast = m_condTransTable.GetCol("WET_FRACatLeast");
+   m_colCondWET_FRAClessThan = m_condTransTable.GetCol("WET_FRAClessThan");
+   m_colCondWETLONGESTatLeast = m_condTransTable.GetCol("WETLONGESTatLeast");
+   m_colCondWETLONGESTlessThan = m_condTransTable.GetCol("WETLONGESTlessThan");
+   m_colCondWETAVGDPTHatLeast = m_condTransTable.GetCol("WETAVGDPTHatLeast");
+   m_colCondWETAVGDPTHlessThan = m_condTransTable.GetCol("WETAVGDPTHlessThan");
+   m_colCondNEW_STATE = m_condTransTable.GetCol("NEW_STATE");
+   m_colCondPROBABILITY = m_condTransTable.GetCol("PROBABILITY");
+
+//x   m_colProbMINAGE = m_condTransTable.GetCol("MINAGE");
+//x   m_colProbMAXAGE = m_condTransTable.GetCol("MAXAGE");
+   if (m_colCondCURR_STATE < 0 || m_colCondWET_FRACatLeast < 0 || m_colCondWET_FRAClessThan < 0 || m_colCondWETLONGESTatLeast < 0 ||
+      m_colCondWETLONGESTlessThan < 0 || m_colCondWETAVGDPTHatLeast < 0 || m_colCondWETAVGDPTHlessThan < 0 ||
+      m_colCondNEW_STATE < 0 || m_colCondPROBABILITY < 0)
+   {
+      CString msg;
+      msg.Format("STMengine::::Init() Missing column in conditional transition file %s", m_vegtransfile.probability_filename.GetString());
+      Report::ErrorMsg(msg);
+      return(false);
+   }
+
+   Report::LogMsg("STMengine::Init() was successful.");
+   return(true);
+} // end of STMengine::Init()
 
 
 BOOL STMengine::InitRun(EnvContext *pEnvContext, bool useInitSeed)
@@ -335,8 +328,16 @@ int STMengine::ConditionalTransition(int idu, int currSTMndx, int currAge)
 
       if (source_state == curr_state && ConditionsAreMet(cond_trans_ndx, idu))
       {
+         float probability = m_condTransTable.GetAsFloat(m_colCondPROBABILITY, cond_trans_ndx);
+         double rand_num = (double)m_rn.RandValue(0., 1.);  //randum number between 0 and 1, uniform distribution                                                     //normalize probability list if disturbance. this means a disturbance transition will be selected. 
+         if (rand_num <= probability)
+         {
+            int new_state = m_condTransTable.GetAsInt(m_colCondNEW_STATE, cond_trans_ndx);
+            new_stm_ndx = m_detTransTable.Find(m_colDetCURR_STATE, (VData)new_state, 0);
+         }
       }
-      else cond_trans_ndx++;
+      
+      cond_trans_ndx++;
    } // end of while (new_stm_ndx < 0 && cond_trans_ndx < num_entries)
 
    return(new_stm_ndx);
@@ -483,6 +484,30 @@ int STMengine::ConditionalTransition(int idu, int currSTMndx, int currAge)
 x*/
 
 
+bool STMengine::ConditionsAreMet(int condTransNdx, int idu)
+{
+   double wet_frac = Att(idu, WET_FRAC);
+   float wet_frac_at_least = m_condTransTable.GetAsFloat(m_colCondWET_FRACatLeast, condTransNdx);
+   if (wet_frac < wet_frac_at_least) return(false);
+   float wet_frac_less_than = m_condTransTable.GetAsFloat(m_colCondWET_FRAClessThan, condTransNdx);
+   if (wet_frac >= wet_frac_less_than) return(false);
+
+   double wet_longest = Att(idu, WETLONGEST);
+   float wet_longest_at_least = m_condTransTable.GetAsFloat(m_colCondWETLONGESTatLeast, condTransNdx);
+   if (wet_longest < wet_longest_at_least) return(false);
+   float wet_longest_less_than = m_condTransTable.GetAsFloat(m_colCondWETLONGESTlessThan, condTransNdx);
+   if (wet_longest >= wet_longest_less_than) return(false);
+
+   double wet_avg_dpth = Att(idu, WETAVGDPTH);
+   float wet_avg_dpth_at_least = m_condTransTable.GetAsFloat(m_colCondWETAVGDPTHatLeast, condTransNdx);
+   if (wet_avg_dpth < wet_avg_dpth_at_least) return(false);
+   float wet_avg_dpth_less_than = m_condTransTable.GetAsFloat(m_colCondWETAVGDPTHlessThan, condTransNdx);
+   if (wet_avg_dpth >= wet_avg_dpth_less_than) return(false);
+
+   return(true);
+} // end of ConditionsAreMet()
+
+/*x
 int STMengine::ChooseProbTrans(double rand_num, float probability_sum, vector<pair<int, float> > *m_final_probs, std::vector< std::pair<int, float> > *m_original_final_probs, float & orig_probability)
 // Returns the vegclass of the pair chosen.
    {
@@ -535,9 +560,9 @@ int STMengine::ChooseProbTrans(double rand_num, float probability_sum, vector<pa
    return (ir->first);
 
    } // end of ChooseProbTrans()
+x*/
 
-
-
+/*x
 bool STMengine::LoadDeterministicTransCSV(CString deterministicfilename, EnvContext *pEnvContext)
    {
 
@@ -753,8 +778,9 @@ bool STMengine::LoadDeterministicTransCSV(CString deterministicfilename, EnvCont
    return true;
 
    }
+x*/
 
-
+/*x
 bool STMengine::LoadProbCSV(CString probfilename, EnvContext *pEnvContext)
    {
    const MapLayer *pLayer = pEnvContext->pMapLayer;
@@ -861,7 +887,7 @@ bool STMengine::LoadProbCSV(CString probfilename, EnvContext *pEnvContext)
    return true;
 
    }
-
+x*/
 
 bool STMengine::LoadXml(LPCTSTR _filename)
    {

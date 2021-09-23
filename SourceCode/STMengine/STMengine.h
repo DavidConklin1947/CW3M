@@ -122,6 +122,8 @@ protected:
 	inline void SetAttInt(int IDUpolyNdx, int col, int attValue);
 
 	EnvContext* m_pEnvContext;
+   CString m_condTransFileName;
+   CString m_detTransFileName;
 
 	CArray<CondTrans *, CondTrans *> m_condTransSourceStates;
 
@@ -132,9 +134,16 @@ protected:
    int m_colDetLAI;
 
    int m_colCondCURR_STATE;
+   int m_colCondWET_FRACatLeast;
+   int m_colCondWET_FRAClessThan;
+   int m_colCondWETLONGESTatLeast;
+   int m_colCondWETLONGESTlessThan;
+   int m_colCondWETAVGDPTHatLeast;
+   int m_colCondWETAVGDPTHlessThan;
    int m_colCondNEW_STATE;
-   int m_colProbMINAGE;
-   int m_colProbMAXAGE;
+   int m_colCondPROBABILITY;
+//x   int m_colProbMINAGE;
+//x   int m_colProbMAXAGE;
 
    protected:
      // mc1_output stuff
