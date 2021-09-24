@@ -155,9 +155,16 @@ BOOL STMengine::InitRun(EnvContext *pEnvContext, bool useInitSeed)
       if (STM_CLASS_MIN <= curr_state && curr_state <= STM_CLASS_MAX)
       {
          int stm_index = m_detTransTable.Find(m_colDetCURR_STATE, (VData)curr_state, 0);
+         if (stm_index < 0)
+         {
+            CString msg;
+            msg.Format("STMengine::InitRun() stm_index = %d, idu = %d, curr_state = %d", stm_index, (int)idu, curr_state);
+            Report::ErrorMsg(msg);
+            return(false);
+         }
          SetAttInt(idu, STM_INDEX, stm_index);
       }
-      else SetAttInt(idu, STM_INDEX, -1);
+//X      else SetAttInt(idu, STM_INDEX, -1);
    } // end of loop thru IDUs
 
    return(true);
@@ -173,13 +180,29 @@ BOOL STMengine::Run(EnvContext *pEnvContext)
 
       // Check first for conditional transitions, and then for deterministic transitions (aging out of 
       // one class into the next).  Finally, if no transitions occur, simply increment the age (AGECLASS).
-      // VEGTRNTYPE records the outcome.  When a transition does occur, updated values are written to:
+      // When a transition does occur, updated values are written to:
       // VEGCLASS, PVT, AGECLASS, LAI, ...
       int curr_stm_ndx = AttInt(idu, STM_INDEX);
+      if (curr_stm_ndx < 0)
+      {
+         CString msg;
+         msg.Format("STMengine::Run() curr_stm_ndx = %d, idu = %d", curr_stm_ndx, (int)idu);
+         Report::ErrorMsg(msg);
+         continue;
+      }
+
       int curr_age = AttInt(idu, AGECLASS);
       int new_state = -1;
 
       int new_stm_ndx = ConditionalTransition(idu, curr_stm_ndx, curr_age); 
+      if (new_stm_ndx < 0)
+      {
+         CString msg;
+         msg.Format("STMengine::Run() new_stm_ndx = %d, idu = %d, curr_stm_ndx = %d", new_stm_ndx, (int)idu, curr_stm_ndx);
+         Report::ErrorMsg(msg);
+         continue;
+      }
+
       if (new_stm_ndx == curr_stm_ndx) new_stm_ndx = DeterministicTransition(idu, curr_stm_ndx, curr_age);
 
       if (new_stm_ndx != curr_stm_ndx)
@@ -252,12 +275,29 @@ BOOL STMengine::EndRun(EnvContext*)
 
 int STMengine::DeterministicTransition(int idu, int currSTMndx, int currAge) // Returns index of new state in the DetTransTable.
 {
+   if (currSTMndx < 0)
+   {
+      CString msg;
+      msg.Format("STMengine::DeterministicTransition() currSTMndx = %d, idu = %d", currSTMndx, idu);
+      Report::ErrorMsg(msg);
+      return(currSTMndx);
+   }
+
    int new_stm_ndx = currSTMndx;
 
    int end_age = m_detTransTable.GetAsInt(m_colDetENDAGE, currSTMndx);
    if (currAge >= end_age)
    { // Transition to the next state.
-      new_stm_ndx = m_detTransTable.GetAsInt(m_colDetNEW_STATE, currSTMndx);
+      int new_state = m_detTransTable.GetAsInt(m_colDetNEW_STATE, currSTMndx);
+      new_stm_ndx = m_detTransTable.Find(m_colDetCURR_STATE, (VData)new_state, 0);
+      if (new_stm_ndx < 0)
+      {
+         CString msg;
+         msg.Format("STMengine::DeterministicTransition() new_stm_ndx = %d, currSTMndx = %d, idu = %d", new_stm_ndx, currSTMndx, idu);
+         Report::ErrorMsg(msg);
+         return(currSTMndx);
+      }
+
    }
 
    return(new_stm_ndx);
@@ -313,7 +353,7 @@ x*/
 
 
 int STMengine::ConditionalTransition(int idu, int currSTMndx, int currAge)
-{ // Returns index of new state in the DetTransTable, or -1 if no conditional transition is selected.
+{ // Returns index of new state in the DetTransTable, or currSTMndx if no conditional transition is selected.
    // 1. Find the entries in the conditional transition table for the current state.  If none, return -1.
    // 2. In the order the transitions appear in the table, choose whether or not to use the transition.
    //    If the conditions aren't satisfied, don't use the transition.
@@ -346,7 +386,8 @@ int STMengine::ConditionalTransition(int idu, int currSTMndx, int currAge)
       cond_trans_ndx++;
    } // end of while (new_stm_ndx < 0 && cond_trans_ndx < num_entries)
 
-   return(new_stm_ndx);
+   if (new_stm_ndx >= 0) return(new_stm_ndx);
+   else return(currSTMndx);
 } // end of ConditionalTransition()
 
 /*x

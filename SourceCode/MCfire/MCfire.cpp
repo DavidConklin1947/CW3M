@@ -18,6 +18,7 @@
 
 #include "MCFire.h"
 
+IDUlayer* gIDUs = NULL;
 
 CW3Mfire::CW3Mfire() :
    m_colFIRE_BUI(-1)
@@ -53,6 +54,7 @@ bool CW3Mfire::CW3Mfire_DailyProcess(FlowContext * pFlowContext)
    m_pEnvContext = m_pFlowContext->pEnvContext;
    m_pFlowModel = m_pFlowContext->pFlowModel;
    m_pIDUlayer = (MapLayer *)m_pEnvContext->pMapLayer;
+   gIDUs = (IDUlayer*)m_pIDUlayer;;
 
    int timing = pFlowContext->timing;
 
@@ -114,43 +116,43 @@ bool CW3Mfire::CW3Mfire_Init()
    m_pIDUlayer->CheckCol(m_colTREE_HT, "TREE_HT", TYPE_FLOAT, CC_AUTOADD);
 
    CString deterministic_filename = PathManager::MakeAbsolutePath(m_pFlowContext->m_extFnInitInfo, PM_IDU_DIR);
-   CString msg; msg.Format("CW3Mfire_Init() deterministic_filename = %s", deterministic_filename); Report::LogMsg(msg);
-   int records = m_Fm.m_deterministic_inputtable.ReadAscii(deterministic_filename, ',', TRUE);
+   CString msg; msg.Format("CW3Mfire_Init() deterministic_filename = %s", deterministic_filename.GetString()); Report::LogMsg(msg);
+   int records = m_Fm.m_forestStatesTable.ReadAscii(deterministic_filename, ',', TRUE);
    if (records <= 0)
    {
       msg.Format("CW3Mfire_Init() could not load deterministic transition .csv file. records = %d", records);
       Report::ErrorMsg(msg);
       return(false);
    }
-   //int region_col = m_deterministic_inputtable.GetCol("REGION");
-   m_Fm.m_colDetVEGCLASSfrom = m_Fm.m_deterministic_inputtable.GetCol("VEGCLASS");
-   //int vto_col = m_deterministic_inputtable.GetCol("VEGCLASSto");
-   m_Fm.m_colDetABBREVfrom = m_Fm.m_deterministic_inputtable.GetCol("ABBREV");
-   //int abbvto_col = m_Fm.m_deterministic_inputtable.GetCol("ABBREVto");
-   m_Fm.m_colDetPVT = m_Fm.m_deterministic_inputtable.GetCol("PVT");
-   //int pvtto_col = m_Fm.m_deterministic_inputtable.GetCol("PVTto");
-   //int startage_col = m_Fm.m_deterministic_inputtable.GetCol("STARTAGE");
-   //int endage_col = m_Fm.m_deterministic_inputtable.GetCol("ENDAGE");
-   //int rndage_col = m_Fm.m_deterministic_inputtable.GetCol("RNDAGE");
-   m_Fm.m_colDetLAI = m_Fm.m_deterministic_inputtable.GetCol("LAI");
-   m_Fm.m_colDetGAP_FRAC = m_Fm.m_deterministic_inputtable.GetCol("GAP_FRAC");
-   m_Fm.m_colDetCARBON = m_Fm.m_deterministic_inputtable.GetCol("CARBON");
-   m_Fm.m_colDetDEAD_FUEL = m_Fm.m_deterministic_inputtable.GetCol("DEAD_FUEL");
-   m_Fm.m_colDetLIVE_FUEL = m_Fm.m_deterministic_inputtable.GetCol("LIVE_FUEL");
-   m_Fm.m_colDetHEIGHT_M = m_Fm.m_deterministic_inputtable.GetCol("HEIGHT_M");
-   m_Fm.m_colDetDBH = m_Fm.m_deterministic_inputtable.GetCol("DBH");
-   m_Fm.m_colDetFUEL_DEPTH = m_Fm.m_deterministic_inputtable.GetCol("FUEL_DEPTH");
-   m_Fm.m_colDetFINE_FUEL_FRAC = m_Fm.m_deterministic_inputtable.GetCol("FINE_FUEL_FRAC");
-   m_Fm.m_colDetFRAC_1HR_LIVE = m_Fm.m_deterministic_inputtable.GetCol("FRAC_1HR_LIVE");
-   m_Fm.m_colDetFRAC_100HR_LIVE = m_Fm.m_deterministic_inputtable.GetCol("FRAC_100HR_LIVE");
+   //int region_col = m_forestStatesTable.GetCol("REGION");
+   m_Fm.m_colDetVEGCLASS = m_Fm.m_forestStatesTable.GetCol("VEGCLASS");
+   //int vto_col = m_forestStatesTable.GetCol("VEGCLASSto");
+   m_Fm.m_colDetABBREV = m_Fm.m_forestStatesTable.GetCol("ABBREV");
+   //int abbvto_col = m_Fm.m_forestStatesTable.GetCol("ABBREVto");
+   m_Fm.m_colDetPVT = m_Fm.m_forestStatesTable.GetCol("PVT");
+   //int pvtto_col = m_Fm.m_forestStatesTable.GetCol("PVTto");
+   //int startage_col = m_Fm.m_forestStatesTable.GetCol("STARTAGE");
+   //int endage_col = m_Fm.m_forestStatesTable.GetCol("ENDAGE");
+   //int rndage_col = m_Fm.m_forestStatesTable.GetCol("RNDAGE");
+   m_Fm.m_colDetLAI = m_Fm.m_forestStatesTable.GetCol("LAI");
+   m_Fm.m_colDetGAP_FRAC = m_Fm.m_forestStatesTable.GetCol("GAP_FRAC");
+   m_Fm.m_colDetCARBON = m_Fm.m_forestStatesTable.GetCol("CARBON");
+   m_Fm.m_colDetDEAD_FUEL = m_Fm.m_forestStatesTable.GetCol("DEAD_FUEL");
+   m_Fm.m_colDetLIVE_FUEL = m_Fm.m_forestStatesTable.GetCol("LIVE_FUEL");
+   m_Fm.m_colDetHEIGHT_M = m_Fm.m_forestStatesTable.GetCol("HEIGHT_M");
+   m_Fm.m_colDetDBH = m_Fm.m_forestStatesTable.GetCol("DBH");
+   m_Fm.m_colDetFUEL_DEPTH = m_Fm.m_forestStatesTable.GetCol("FUEL_DEPTH");
+   m_Fm.m_colDetFINE_FUEL_FRAC = m_Fm.m_forestStatesTable.GetCol("FINE_FUEL_FRAC");
+   m_Fm.m_colDetFRAC_1HR_LIVE = m_Fm.m_forestStatesTable.GetCol("FRAC_1HR_LIVE");
+   m_Fm.m_colDetFRAC_100HR_LIVE = m_Fm.m_forestStatesTable.GetCol("FRAC_100HR_LIVE");
 
-   if (m_Fm.m_colDetVEGCLASSfrom < 0 || m_Fm.m_colDetABBREVfrom < 0 || m_Fm.m_colDetPVT < 0 || m_Fm.m_colDetLAI < 0 
+   if (m_Fm.m_colDetVEGCLASS < 0 || m_Fm.m_colDetABBREV < 0 || m_Fm.m_colDetPVT < 0 || m_Fm.m_colDetLAI < 0 
       || m_Fm.m_colDetGAP_FRAC < 0 || m_Fm.m_colDetCARBON < 0
       || m_Fm.m_colDetDEAD_FUEL < 0 || m_Fm.m_colDetLIVE_FUEL < 0 || m_Fm.m_colDetHEIGHT_M < 0 || m_Fm.m_colDetDBH < 0
       || m_Fm.m_colDetFUEL_DEPTH < 0 || m_Fm.m_colDetFINE_FUEL_FRAC < 0
       || m_Fm.m_colDetFRAC_1HR_LIVE < 0 || m_Fm.m_colDetFRAC_100HR_LIVE < 0)
    {
-      msg.Format("CW3Mfire_Init() One or more column headings are incorrect or missing in the deterministic lookup file");
+      msg.Format("CW3Mfire_Init() One or more column headings are incorrect or missing in the Forest States file");
       Report::ErrorMsg(msg);
       return(false);
    }
@@ -167,7 +169,16 @@ bool CW3Mfire::CW3Mfire_Init()
 
 bool CW3Mfire::CW3Mfire_InitRun()
 {
-   // Initialize the m_fire array.
+   for (MapLayer::Iterator idu = gIDUs->Begin(); idu != gIDUs->End(); idu++)
+   {
+      int vegclass = gIDUs->AttInt(idu, VEGCLASS);
+      if (vegclass < STM_VEGCLASS_MINIMUM) continue;
+
+      int stm_index = m_Fm.m_forestStatesTable.Find(m_Fm.m_colDetVEGCLASS, (VData)vegclass, 0);
+      gIDUs->SetAttInt(idu, STM_INDEX, stm_index);
+   } // end of loop thru IDUs
+
+   // Initialize the m_fire array and the FIRE_INDEX idu attribute.
    m_fire.RemoveAll();
    m_pIDUlayer->SetColDataU(m_colFIRE_INDEX, -1);
    int fire_index = 0;
@@ -265,7 +276,7 @@ bool CW3Mfire::CW3Mfire_StartYear()
          msg.Format("CW3Mfire_StartYear() Turning off CW3Mfire for idu_ndx = %d due to FuelLoad() failure", idu_ndx);
          Report::LogMsg(msg);
          msg.Format("pvt = %d, vegclass = %d, ageclass = %d, standStartYear = %d, stm_index = %d", pvt, vegclass, standStartYear, stm_index);
-         Report::LogMsg(msg);
+// ???         Report::LogMsg(msg);
          retval = false;
          pFS->idu_ndx = -idu_ndx - TOKEN_FOR_FUELLOAD_FAILED; 
          continue;
@@ -274,7 +285,7 @@ bool CW3Mfire::CW3Mfire_StartYear()
       m_fire[fire_ndx] = m_Fm.m_fire;
       m_pIDUlayer->SetDataU(idu_ndx, m_colTREE_HT, m_Fm.m_fire.fuel.tree_ht_m);
 
-      float gap_frac = m_Fm.m_deterministic_inputtable.GetAsFloat(m_Fm.m_colDetGAP_FRAC, stm_index);
+      float gap_frac = m_Fm.m_forestStatesTable.GetAsFloat(m_Fm.m_colDetGAP_FRAC, stm_index);
       m_pIDUlayer->SetDataU(idu_ndx, m_colGAP_FRAC, gap_frac);
    } // end of loop thru array of fire states
 
@@ -749,7 +760,7 @@ bool MCfire::FuelLoad(int pvt, int vegclass, int standage, int standStartYear, i
    DeadFuelLoad(pvt, standage, standStartYear, vveg2loadP);
    LiveFuelLoad(pvt, standage, standStartYear, stm_index, vveg2loadP);
 
-   // m_fire.fuel.fuel_depth = m_deterministic_inputtable.GetAsFloat(m_colDetFUEL_DEPTH, stm_index);
+   // m_fire.fuel.fuel_depth = m_forestStatesTable.GetAsFloat(m_colDetFUEL_DEPTH, stm_index);
    float depth_ratio = (float)*(vveg2loadP + 4); 
    float littr_gDM_per_m2 = GetLitterFromSLCB(pvt, standage, standStartYear);
    float dstnd = littr_gDM_per_m2 + m_fire.fuel.d1hr;
@@ -760,7 +771,7 @@ bool MCfire::FuelLoad(int pvt, int vegclass, int standage, int standStartYear, i
    float tot_fuel_bed_bio = lgras + dstnd + dwod1 + dwod100;
    m_fire.fuel.fuel_depth = ScienceFcns::bed_depth(tot_fuel_bed_bio, depth_ratio);
 
-   // m_fire.fuel.fine_fuel_frac = m_deterministic_inputtable.GetAsFloat(m_colDetFINE_FUEL_FRAC, stm_index);
+   // m_fire.fuel.fine_fuel_frac = m_forestStatesTable.GetAsFloat(m_colDetFINE_FUEL_FRAC, stm_index);
    m_fire.fuel.fine_fuel_frac = (lgras + dstnd) / (lgras + dstnd + dwod1);
 
    return(true);
@@ -776,7 +787,7 @@ bool MCfire::DeadFuelLoad(int pvt, int standAge, int standStartYear, const doubl
    float frac_1000hr = (float)*(vveg2loadP + 3);
    assert(sciFn.close_enough(frac_1hr + frac_10hr + frac_100hr + frac_1000hr, 1.0, .00001) || frac_1hr == 0.);
                                                                  //   m_fire.fuel.fine_fuel_frac = 0.1f;
-   //float dead_fuel = m_deterministic_inputtable.GetAsFloat(m_colDetDEAD_FUEL, stm_index);
+   //float dead_fuel = m_forestStatesTable.GetAsFloat(m_colDetDEAD_FUEL, stm_index);
    float dead_fuel = GetTotDeadFuelFromSLCB(pvt, standAge, standStartYear);
    m_fire.fuel.d1hr = frac_1hr * dead_fuel;
    m_fire.fuel.d10hr = frac_10hr * dead_fuel;
@@ -807,9 +818,9 @@ bool MCfire::LiveFuelLoad(int pvt, int standAge, int standStartYear, int stm_ind
    ASSERT(1 <= pvt && pvt <= 9);
    bool is_pvt_deciduous_broadleaf[9] = { false, false, false, true, false, false, false, false, false };
 
-   //float live_fuel = m_deterministic_inputtable.GetAsFloat(m_colDetLIVE_FUEL, stm_index);
-   //float frac_1hr_live = m_deterministic_inputtable.GetAsFloat(m_colDetFRAC_1HR_LIVE, stm_index);
-   //float frac_100hr_live = m_deterministic_inputtable.GetAsFloat(m_colDetFRAC_100HR_LIVE, stm_index);
+   //float live_fuel = m_forestStatesTable.GetAsFloat(m_colDetLIVE_FUEL, stm_index);
+   //float frac_1hr_live = m_forestStatesTable.GetAsFloat(m_colDetFRAC_1HR_LIVE, stm_index);
+   //float frac_100hr_live = m_forestStatesTable.GetAsFloat(m_colDetFRAC_100HR_LIVE, stm_index);
    float frac_1hr_live = 0.0f; // no estimate of the proportion of live herbaceous fuel to live woody fuel for ground fire is available
    float frac_100hr_live = 0.0f; // no estimate of the proportion of live herbaceous fuel to live woody fuel for ground fire is available
    float live_wood_fuel = 0.; // no estimate of live woody fuel for ground fire is available 
@@ -819,13 +830,13 @@ bool MCfire::LiveFuelLoad(int pvt, int standAge, int standStartYear, int stm_ind
    m_fire.fuel.lwod100 = frac_100hr_live * live_fuel; 
    m_fire.fuel.lgras = lgras;
 
-   //m_fire.fuel.tree_ht_m = m_deterministic_inputtable.GetAsFloat(m_colDetHEIGHT_M, stm_index);
-   //float dbh = m_deterministic_inputtable.GetAsFloat(m_colDetDBH, stm_index);
+   //m_fire.fuel.tree_ht_m = m_forestStatesTable.GetAsFloat(m_colDetHEIGHT_M, stm_index);
+   //float dbh = m_forestStatesTable.GetAsFloat(m_colDetDBH, stm_index);
    float dbh;
    float live_leaf_DM = GetLiveLeafDMfromSLCB(pvt, standAge, standStartYear);
    float live_stem_DM = GetLiveStemDMfromSLCB(pvt, standAge, standStartYear);
    float ltree = live_leaf_DM + live_stem_DM; // ??? maybe should include roots?
-   float lai_during_fire_season = m_deterministic_inputtable.GetAsFloat(m_colDetLAI, stm_index);
+   float lai_during_fire_season = m_forestStatesTable.GetAsFloat(m_colDetLAI, stm_index);
    bool db_flag = is_pvt_deciduous_broadleaf[pvt];
    ScienceFcns::tree_dim(lai_during_fire_season, ltree, db_flag, &(m_fire.fuel.tree_ht_m), &dbh);
 
@@ -1401,6 +1412,7 @@ int MCfire::MCvtypeOfForestVEGCLASS(int vegclass)
       case 6057110: mc_vtype = 7; break; //93,24,74)" label = "6057110 MH:Mo1" / > 7 maritime needleleaf forest
       case 6057320: mc_vtype = 7; break; //83,251,245)" label = "6057320 MH:Mc2" / > 7 maritime needleleaf forest
       case 6058110: mc_vtype = 7; break; //74,223,161)" label = "6058110 MH:Lo1" / > 7 maritime needleleaf forest
+      case 6058220: mc_vtype = 7; break; //(MH:Lm2) Mountain_hemlock Lgtree_med_multi' / >
       case 6058320: mc_vtype = 7; break; //74,223,161)" label = "6058320 MH:Lc2" / > 7 maritime needleleaf forest
       case 6059320: mc_vtype = 7; break; //65,195,77)" label = "6059320 MH:Gc2" / > 7 maritime needleleaf forest
       case 7052000: mc_vtype = 17; break; //55,167,248)" label = "7052000 LP:GF" / > 17 C3 grassland

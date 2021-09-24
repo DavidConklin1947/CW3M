@@ -1201,6 +1201,7 @@ protected:
 
    // IDU attribute stuff
 public:
+#define STM_VEGCLASS_MINIMUM 2000000
 
    // Some IDU attributes, in alphabetic order.
    int m_colAGECLASS;

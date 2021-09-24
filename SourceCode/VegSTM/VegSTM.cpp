@@ -36,6 +36,8 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
+IDUlayer* gIDUs = NULL;
+
 PtrArray< OUTPUT > VegSTM::m_outputArray;
 VEGTRANSFILE VegSTM::m_vegtransfile;
 
@@ -141,7 +143,8 @@ VegSTM::~VegSTM()
 
 BOOL VegSTM::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    {
-   m_pIDUlayer = (MapLayer *)pEnvContext->pMapLayer;
+   m_pIDUlayer = (MapLayer *)pEnvContext->pMapLayer; // ??? s/b IDUlayer * instead of MapLayer *
+   gIDUs = (IDUlayer*)pEnvContext->pMapLayer;
 
    // get input file names and input variables   
    if (m_staticsInitialized)
@@ -234,7 +237,7 @@ BOOL VegSTM::Init(EnvContext *pEnvContext, LPCTSTR initStr)
    {
       CString msg;
       msg.Format("VegSTM::::Init() Missing column in deterministic transition file %s: m_colDetSTARTAGE = %d, m_colDetENDAGE = %d, m_colDetLAI = %d",
-         m_vegtransfile.deterministic_filename, m_colDetSTARTAGE, m_colDetENDAGE, m_colDetLAI);
+         m_vegtransfile.deterministic_filename.GetString(), m_colDetSTARTAGE, m_colDetENDAGE, m_colDetLAI);
       Report::ErrorMsg(msg);
       return(false);
    }
@@ -249,14 +252,20 @@ BOOL VegSTM::Init(EnvContext *pEnvContext, LPCTSTR initStr)
 
 
 BOOL VegSTM::InitRun(EnvContext *pEnvContext, bool useInitSeed)
+{
+   int vfrom_col = m_deterministic_inputtable.GetCol("VEGCLASSfrom");
+
+   for (MapLayer::Iterator idu = pEnvContext->pMapLayer->Begin(); idu != pEnvContext->pMapLayer->End(); idu++)
    {
-/*
-   CString msg;
-   msg.Format("VegSTM::InitRun() pEnvContext->id = %d", pEnvContext->id);
-   Report::LogMsg(msg);
-*/
+      int vegclass = gIDUs->AttInt(idu, VEGCLASS);
+      if (vegclass < STM_VEGCLASS_MINIMUM) continue;
+
+      int stm_index = m_deterministic_inputtable.Find(vfrom_col, (VData)vegclass, 0);
+      gIDUs->SetAttInt(idu, STM_INDEX, stm_index);
+   } // end of loop thru IDUs
+
    return(TRUE);
-   }
+} // end of VegSTM::InitRun()
 
 
 // VEGTRNTYPE gets reset to TRANS_NONE (0) near the beginning of the annual step by a Modeler autonomous process.

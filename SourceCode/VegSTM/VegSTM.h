@@ -17,8 +17,6 @@
 
 using namespace std;
 
-#define STM_VEGCLASS_MINIMUM 2000000
-
 // Values for the VEGTRANSTYPE attribute
 #define TRANS_NONE 0
 #define TRANS_DETERMINISTIC 1
