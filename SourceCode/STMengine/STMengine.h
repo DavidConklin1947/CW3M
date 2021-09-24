@@ -142,10 +142,8 @@ protected:
    int m_colCondWETAVGDPTHlessThan;
    int m_colCondNEW_STATE;
    int m_colCondPROBABILITY;
-//x   int m_colProbMINAGE;
-//x   int m_colProbMAXAGE;
 
-   protected:
+protected:
      // mc1_output stuff
      //PtrArray< MC1_OUTPUT > m_mc1_outputArray;
      PtrArray< OUTPUT > m_outputArray;	 

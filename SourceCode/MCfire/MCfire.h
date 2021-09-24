@@ -160,7 +160,7 @@ class MCfire
       double m_wtmcd; // weighted moisture content of dead fuels, as a fraction
       double m_rh_corr_pct; // corrected daytime relative humidity (%)
 
-      VDataObj m_forestStatesTable; // deterministic transition table
+      VDataObj m_forestStatesTable; // forest states table
       int m_colDetVEGCLASS;
       int m_colDetABBREV;
       int m_colDetPVT;
