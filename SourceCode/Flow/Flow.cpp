@@ -5604,7 +5604,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          double hru_h2o_melt_m3 = surface_h2o_m3 - hru_standing_h2o_m3;
          if (hru_h2o_melt_m3 < 0.)
          {
-            ASSERT(close_enough(surface_h2o_m3, hru_standing_h2o_m3, 1e-6, 1));
+            ASSERT(close_enough(surface_h2o_m3, hru_standing_h2o_m3, 1e-5, 1));
             hru_h2o_melt_m3 = 0.;
          }
          pHRU->SetAtt(HruH2OMELT_M3, hru_h2o_melt_m3);

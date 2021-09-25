@@ -545,7 +545,13 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
    { // The water is gaining energy from the atmosphere.
       double thermal_energy_kJ = rtnWP.ThermalEnergy() + net_rad_kJ;
       rtnWP.m_temp_degC = WaterParcel::WaterTemperature(rtnWP.m_volume_m3, thermal_energy_kJ);
-      ASSERT(rtnWP.m_temp_degC < 50.);
+      if (rtnWP.m_temp_degC >= 50.)
+      {
+         ASSERT(rtnWP.m_temp_degC < 50.);
+         CString msg;
+         msg.Format("ReachRouting::ApplyEnergyFluxes() rtnWP.m_temp_degC = %f", rtnWP.m_temp_degC);
+         Report::LogWarning(msg);
+      }
    }
 
    ASSERT(rtnWP.m_temp_degC >= 0);
