@@ -36,6 +36,7 @@
 using namespace std;
 
 IDUlayer * gIDUs = NULL;
+FlowModel* gFM = NULL;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -355,6 +356,94 @@ bool STMengine::ConditionsAreMet(int condTransNdx, int idu)
 
    return(true);
 } // end of ConditionsAreMet()
+
+
+bool STMengine::CW3Mwetland_DailyProcess(FlowContext* pFlowContext)
+{
+   int timing = pFlowContext->timing;
+
+   if (timing & GMT_INIT)
+   {
+      m_pFlowContext = pFlowContext;
+      m_pEnvContext = m_pFlowContext->pEnvContext;
+      gIDUs = (IDUlayer*)m_pEnvContext->pMapLayer;
+      gFM = m_pFlowContext->pFlowModel;
+      gIDUs->SetColDataU(WET_FRAC, 0);
+      gIDUs->SetColDataU(WETLONGEST, 0);
+      gIDUs->SetColDataU(WET_LENGTH, 0);
+      gIDUs->SetColDataU(WETAVGDPTH, 0);
+
+      return(true);
+   } // end of if (timing & GMT_INIT)
+
+//   if (timing & GMT_INITRUN) return(CW3Mfire_InitRun());
+   if (timing & GMT_START_YEAR) return(CW3Mwetland_StartYear());
+   if (timing & GMT_END_STEP) return(CW3Mwetland_EndStep());
+
+   return(true);
+} // end of CW3Mwetland_daily_process()
+
+
+bool STMengine::CW3Mwetland_StartYear() 
+{ 
+   int num_wetlands = gFM->m_wetlArray.GetSize();
+   for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
+   {
+      Wetland* pWetl = gFM->m_wetlArray[wetl_ndx];
+      int num_idus_in_wetland = pWetl->m_wetlIDUndxArray.GetSize();
+      for (int idu_ndx_in_wetland = 0; idu_ndx_in_wetland < num_idus_in_wetland; idu_ndx_in_wetland++)
+      {
+         int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetland];
+         SetAtt(idu_poly_ndx, WET_FRAC, 0.);
+         SetAttInt(idu_poly_ndx, WETLONGEST, 0);
+         SetAttInt(idu_poly_ndx, WET_LENGTH, 0);
+         SetAtt(idu_poly_ndx, WETAVGDPTH, 0.);
+      } // end of loop thru the IDUs in this wetland
+   } // end of loop thru wetlands
+
+   return(true);
+} // end of CW3Mwetland_StartYear()
+
+
+bool STMengine::CW3Mwetland_EndStep() 
+{ 
+   int jday0 = m_pFlowContext->dayOfYear; // Jan 1 = 0
+   int jday1 = jday0 + 1; // Jan 1 = 1
+   int num_wetlands = gFM->m_wetlArray.GetSize();
+   for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
+   {
+      Wetland* pWetl = gFM->m_wetlArray[wetl_ndx];
+      int num_idus_in_wetland = pWetl->m_wetlIDUndxArray.GetSize();
+      for (int idu_ndx_in_wetland = 0; idu_ndx_in_wetland < num_idus_in_wetland; idu_ndx_in_wetland++) 
+      {
+         int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetland];
+         double wetness = Att(idu_poly_ndx, WETNESS);
+         double wet_frac = Att(idu_poly_ndx, WET_FRAC); // Fraction of days so far this year on which the IDU was inundated.
+         int num_days_inundated = round(wet_frac * jday0);
+         if (wetness <= 0.) SetAttInt(idu_poly_ndx, WET_LENGTH, 0); // The IDU is not inundated today.
+         else
+         { // The IDU is inundated today.
+            double wetavgdpth = Att(idu_poly_ndx, WETAVGDPTH); // Average inundation depth on days when the IDU is inundated.
+            double depth_sum = (wetavgdpth * num_days_inundated) + wetness;
+            num_days_inundated++;
+            wetavgdpth = depth_sum / num_days_inundated;
+            SetAtt(idu_poly_ndx, WETAVGDPTH, wetavgdpth);
+
+            int wet_length = Att(idu_poly_ndx, WET_LENGTH); // Number of days in a row that the IDU has been inundated.
+            wet_length++;
+            SetAttInt(idu_poly_ndx, WET_LENGTH, wet_length);
+
+            int wet_longest = Att(idu_poly_ndx, WETLONGEST); // Length of longest interval of continuous inundation.
+            if (wet_length > wet_longest) SetAttInt(idu_poly_ndx, WETLONGEST, wet_length);
+         } // end of if (wetness <= 0.) ... else
+
+         wet_frac = num_days_inundated / jday1;
+         SetAtt(idu_poly_ndx, WET_FRAC, wet_frac);
+      } // end of loop thru the IDUs in this wetland
+    } // end of loop thru wetlands
+
+   return(true);
+} // end of CW3Mwetland_EndStep()
 
 
 bool STMengine::LoadXml(LPCTSTR _filename)

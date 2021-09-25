@@ -25,6 +25,10 @@
 
   <outputs>
     <output_group name="FLOW Wetland 14 analysis" interval="daily" >
+      <output name="idu 33803 WET_FRAC" query="IDU_ID=33803" value="WET_FRAC" type="sum" domain="idu" />
+      <output name="idu 33803 WETLONGEST" query="IDU_ID=33803" value="WETLONGEST" type="sum" domain="idu" />
+      <output name="idu 33803 WET_LENGTH" query="IDU_ID=33803" value="WET_LENGTH" type="sum" domain="idu" />
+      <output name="idu 33803 WETAVGDPTH" query="IDU_ID=33803" value="WETAVGDPTH" type="sum" domain="idu" />
       <output name="idu 33803 LULC_A" query="IDU_ID=33803" value="LULC_A" type="areaWtMean" domain="idu" />
       <output name="idu 33803 LULC_B" query="IDU_ID=33803" value="LULC_B" type="areaWtMean" domain="idu" />
       <output name="idu 33803 LULC_C" query="IDU_ID=33803" value="VEGCLASS" type="areaWtMean" domain="idu" />
@@ -50,6 +54,10 @@
     </output_group>
     
     <output_group name="FLOW Wetland 17 analysis" interval="daily" >
+      <output name="idu 31325 WET_FRAC" query="IDU_ID=31325" value="WET_FRAC" type="sum" domain="idu" />
+      <output name="idu 31325 WETLONGEST" query="IDU_ID=31325" value="WETLONGEST" type="sum" domain="idu" />
+      <output name="idu 31325 WET_LENGTH" query="IDU_ID=31325" value="WET_LENGTH" type="sum" domain="idu" />
+      <output name="idu 31325 WETAVGDPTH" query="IDU_ID=31325" value="WETAVGDPTH" type="sum" domain="idu" />
       <output name="idu 31325 LULC_A" query="IDU_ID=31325" value="LULC_A" type="areaWtMean" domain="idu" />
       <output name="idu 31325 LULC_B" query="IDU_ID=31325" value="LULC_B" type="areaWtMean" domain="idu" />
       <output name="idu 31325 LULC_C" query="IDU_ID=31325" value="VEGCLASS" type="areaWtMean" domain="idu" />

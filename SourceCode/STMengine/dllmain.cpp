@@ -20,7 +20,7 @@
 STMengine * theProcess = NULL;
 
 /**** TODO: - indicate DLL Name (file search and replace)****/
-static AFX_EXTENSION_MODULE DynamicVegDLL = { NULL, NULL };
+static AFX_EXTENSION_MODULE STMengineDLL = { NULL, NULL };
 
 extern "C" int APIENTRY
 DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
@@ -35,7 +35,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 		
 		// Extension DLL one-time initialization
       /**** TODO: update AfxInitExtensionModule with module name ****/
-		if (!AfxInitExtensionModule(DynamicVegDLL, hInstance))
+		if (!AfxInitExtensionModule(STMengineDLL, hInstance))
 			return 0;
 
 		// Insert this DLL into the resource chain
@@ -51,7 +51,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 		//  result.
 
       /**** TODO: update CDynLinkLibrary constructor with module name ****/
-		new CDynLinkLibrary(DynamicVegDLL);
+		new CDynLinkLibrary(STMengineDLL);
      
       /*** TODO:  instantiate any models/processes ***/
       //ASSERT( theModel == NULL );
@@ -77,7 +77,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 
 		// Terminate the library before destructors are called
       /**** TODO: Update module name in AfxTermExtensionModule ****/
-		AfxTermExtensionModule(DynamicVegDLL);
+		AfxTermExtensionModule(STMengineDLL);
 	}
 	return 1;   // ok
 }
@@ -103,6 +103,9 @@ extern "C" BOOL PASCAL EXPORT APEndRun( EnvContext *pEnvContext );
 extern "C" int  PASCAL EXPORT APInputVar( int modelID, MODEL_VAR** modelVar );
 extern "C" int  PASCAL EXPORT APOutputVar( int modelID, MODEL_VAR** modelVar );
 
+// for daily processes
+extern "C" bool PASCAL EXPORT CW3Mwetland_DailyProcess(FlowContext * pFlowContext);
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 ///////////               E X T E N S I O N     I N F O                 /////////////
@@ -116,10 +119,7 @@ void PASCAL GetExtInfo( ENV_EXT_INFO *pInfo )
    }
 
 
-/////////////////////////////////////////////////////////////////////////////////////
-///////////               A U T O N O M O U S    P R O C E S S          /////////////
-/////////////////////////////////////////////////////////////////////////////////////
-
+// For autonomous processes
 BOOL PASCAL APInit( EnvContext *pEnvContext, LPCTSTR initStr )    { return theProcess->Init( pEnvContext, initStr ); }
 BOOL PASCAL APInitRun( EnvContext *pEnvContext, bool useInitSeed ){ return theProcess->InitRun( pEnvContext, useInitSeed ); }
 BOOL PASCAL APRun( EnvContext *pEnvContext )                      { return theProcess->Run( pEnvContext );  }
@@ -129,9 +129,11 @@ int  PASCAL APInputVar( int id, MODEL_VAR** modelVar )            { return thePr
 int  PASCAL APOutputVar( int id, MODEL_VAR** modelVar )           { return theProcess->OutputVar( id, modelVar ); }
 
 
-/////////////////////////////////////////////////////////////////////////////////////
-//////////////      E V A L     M O D E L            ////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
+// For daily processes
+bool PASCAL CW3Mwetland_DailyProcess(FlowContext* pFlowContext) { return theProcess->CW3Mwetland_DailyProcess(pFlowContext); }
+
+
+// For eval models
 //BOOL PASCAL EMInit( EnvContext *pEnvContext, LPCTSTR initStr )    { return theModel->Init( pEnvContext, initStr ); }
 //BOOL PASCAL EMInitRun( EnvContext *pEnvContext, bool useInitSeed ){ return theModel->InitRun( pEnvContext, useInitSeed ); }
 //BOOL PASCAL EMRun( EnvContext *pEnvContext )                      { return theModel->Run( pEnvContext );  }

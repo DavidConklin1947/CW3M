@@ -89,12 +89,27 @@
 
   <macros>
     <macro name="ScenarioName" default="">
-      <!--
+       <!--
       <scenario name="StressedResources" value="LateRefill\" />
       <scenario name="IntegratedWater" value="LateRefill\" />
       -->
     </macro>
   </macros>
+  <!--
+    enum // Global Method Timing flags
+    {
+    GMT_INIT = 1,       // called during Init();
+    GMT_INITRUN = 2,       // called during InitRun();
+    GMT_START_YEAR = 4,       // called at the beginning of a Envision timestep (beginning of each year of run)  (PreRun)
+    GMT_START_STEP = 8,       // called at the beginning of a Flow timestep PreRun)
+    GMT_CATCHMENT = 16,      // called during GetCatchmentDerivatives()
+    GMT_REACH = 32,      // called during GetReachDerivatives()
+    GMT_RESERVOIR = 64,      // called during GetReservoirDerivatives()
+    GMT_END_STEP = 128,     // called at the beginning of a Flow timestep PreRun)
+    GMT_END_YEAR = 256,     // called at the end of a Envision timestep (beginning of each year of run) (PostRun)
+    GMT_ENDRUN = 512,      // called during EndRun()
+    };
+-->
 
   <catchments layer="IDU"
             query=""
@@ -147,22 +162,6 @@
     <lateral_exchange name="Lateral Exchange" method="none" query=""/>
     <hru_vertical_exchange name="Vertical Exchange" method="none" query="" />
 
-    <!--
-    enum // Global Method Timing flags
-    {
-    GMT_INIT = 1,       // called during Init();
-    GMT_INITRUN = 2,       // called during InitRun();
-    GMT_START_YEAR = 4,       // called at the beginning of a Envision timestep (beginning of each year of run)  (PreRun)
-    GMT_START_STEP = 8,       // called at the beginning of a Flow timestep PreRun)
-    GMT_CATCHMENT = 16,      // called during GetCatchmentDerivatives()
-    GMT_REACH = 32,      // called during GetReachDerivatives()
-    GMT_RESERVOIR = 64,      // called during GetReservoirDerivatives()
-    GMT_END_STEP = 128,     // called at the beginning of a Flow timestep PreRun)
-    GMT_END_YEAR = 256,     // called at the end of a Envision timestep (beginning of each year of run) (PostRun)
-    GMT_ENDRUN = 512,      // called during EndRun()
-    };
--->
-    
     <external name="HBV"   method="fn=hbv.dll:HBVdailyProcess" use="1" timing="1+16"/> 
 
     <!--The layers tag will remove water from the layer distribution matching the query first and then remove the unmatched idus 
@@ -307,7 +306,30 @@ flow_cms="1.10"
             timing="1+2+4+16"
             initInfo="..\ForestStates.csv"
               />
-      </global_methods>
+
+  <!--
+    enum // Global Method Timing flags
+    {
+    GMT_INIT = 1,       // called during Init();
+    GMT_INITRUN = 2,       // called during InitRun();
+    GMT_START_YEAR = 4,       // called at the beginning of a Envision timestep (beginning of each year of run)  (PreRun)
+    GMT_START_STEP = 8,       // called at the beginning of a Flow timestep PreRun)
+    GMT_CATCHMENT = 16,      // called during GetCatchmentDerivatives()
+    GMT_REACH = 32,      // called during GetReachDerivatives()
+    GMT_RESERVOIR = 64,      // called during GetReservoirDerivatives()
+    GMT_END_STEP = 128,     // called at the beginning of a Flow timestep PreRun)
+    GMT_END_YEAR = 256,     // called at the end of a Envision timestep (beginning of each year of run) (PostRun)
+    GMT_ENDRUN = 512,      // called during EndRun()
+    };
+-->
+
+  <external name="WetlandSTM"
+          method="fn=STMengine.dll:CW3Mwetland_DailyProcess"
+          use="1"
+          timing="1+2+4+128+256"
+              />
+    
+  </global_methods>
 
   <controlPoints>
     <controlPoint id="1"      name="Min flow at Salem"                path="Reservoirs\ControlPoints\{ScenarioName}\"

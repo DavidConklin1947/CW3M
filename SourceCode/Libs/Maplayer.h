@@ -1188,6 +1188,7 @@ protected:
       m_colVEGCLASS(-1),
       m_colVPD_SCALAR(-1), 
       m_colWET_FRAC(-1),
+      m_colWET_LENGTH(-1),
       m_colWETAVGDPTH(-1),
       m_colWETL_CAP(-1), 
       m_colWETL_ID(-1),
@@ -1262,6 +1263,8 @@ public:
 #define VPD_SCALAR gIDUs->m_colVPD_SCALAR
    int m_colWET_FRAC;
 #define WET_FRAC gIDUs->m_colWET_FRAC
+   int m_colWET_LENGTH;
+#define WET_LENGTH gIDUs->m_colWET_LENGTH
    int m_colWETAVGDPTH;
 #define WETAVGDPTH gIDUs->m_colWETAVGDPTH
    int m_colWETL_CAP;
@@ -1311,9 +1314,12 @@ public:
       ok = ok && CheckCol(m_colVEGCLASS, "VEGCLASS", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colVPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWET_FRAC, "WET_FRAC", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWET_LENGTH, "WET_LENGTH", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWETAVGDPTH, "WETAVGDPTH", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_ID, "WETL_ID", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWETLONGEST, "WETLONGEST", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWINDSPEED, "WINDSPEED", TYPE_FLOAT, CC_AUTOADD);
 
