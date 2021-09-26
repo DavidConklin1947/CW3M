@@ -437,7 +437,7 @@ bool STMengine::CW3Mwetland_EndStep()
             if (wet_length > wet_longest) SetAttInt(idu_poly_ndx, WETLONGEST, wet_length);
          } // end of if (wetness <= 0.) ... else
 
-         wet_frac = num_days_inundated / jday1;
+         wet_frac = (double)num_days_inundated / (double)jday1;
          SetAtt(idu_poly_ndx, WET_FRAC, wet_frac);
       } // end of loop thru the IDUs in this wetland
     } // end of loop thru wetlands

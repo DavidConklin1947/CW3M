@@ -109,14 +109,10 @@ public:
    bool CW3Mwetland_EndStep();
 
 protected:
-//x	int LoadDeterministicTransCSV( CString firefilename, EnvContext *pEnvContext);
-//x	bool LoadProbCSV(CString probfilename, EnvContext* pEnvContext);
-
 	int DeterministicTransition(int idu, int currSTMndx, int currAge); // Returns index of new state in the DetTransTable.
 	int ConditionalTransition(int iduPolyNdx, int currSTMndx, int currAge);  // Returns index of new state in the DetTransTable.
 
    bool ConditionsAreMet(int condTransNdx, int iduPolyNdx);
-//x   int ChooseProbTrans(double rand_num, float probability_sum, vector<pair<int, float> >* m_permute_prob_vec, std::vector< std::pair<int, float> >* m_original_final_probs, float& orig_probability);
 	inline double Att(int iduPolyNdx, int col);
 	inline float AttFloat(int iduPolyNdx, int col);
 	inline int AttInt(int iduPolyNdx, int col);

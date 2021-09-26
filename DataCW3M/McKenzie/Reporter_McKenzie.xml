@@ -12,6 +12,20 @@
   <const name="inches_per_mm" value="0.039370" />
   <const name="ft_per_m" value="3.28084" />
 
+  <output_group name="REP Wetland 14 Report" >
+    <output name="idu 33803 LULC_C (VEGCLASS)" query="IDU_ID=33803" value="VEGCLASS" type="sum" />
+    <output name="WET_FRAC" query="WETL_ID=14" value="WET_FRAC" type="areaWtMean" />
+    <output name="WETLONGEST" query="WETL_ID=14" value="WETLONGEST" type="areaWtMean" />
+    <output name="WETAVGDPTH" query="WETL_ID=14" value="WETAVGDPTH" type="areaWtMean" />
+  </output_group>
+
+  <output_group name="REP Wetland 17 Report" >
+    <output name="idu 31325 LULC_C (VEGCLASS)" query="IDU_ID=31325" value="VEGCLASS" type="sum" />
+    <output name="WET_FRAC" query="WETL_ID=17" value="WET_FRAC" type="areaWtMean" />
+    <output name="WETLONGEST" query="WETL_ID=17" value="WETLONGEST" type="areaWtMean" />
+    <output name="WETAVGDPTH" query="WETL_ID=17" value="WETAVGDPTH" type="areaWtMean" />
+  </output_group>
+
   <output_group name="REP Forest Disturbance Report"  >
     <output name="Forest area (ha)" query="LULC_A=4" value="AREA/10000" type="sum"  />
     <output name="Forest area above 1000 m (ha)" query="LULC_A=4 and ELEV_MEAN>1000" value="AREA/10000" type="sum"  />
