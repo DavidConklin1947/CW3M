@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CW3M_McKenzie"
-#define MyAppVersion "McKenzie_1.0.0"
+#define MyAppVersion "McKenzie_1.1.0"
 ;#define MyAppVersion "x.x.x"
 #define MyAppPublisher "Oregon Freshwater Simulations, Inc."
 #define MyAppURL "http:/www.freshwatersim.com"
@@ -46,6 +46,7 @@ Source: "{#InputPath}\SourceCode\x64\Release\MCfire.dll"; DestDir: "{app}"; Flag
 Source: "{#InputPath}\SourceCode\x64\Release\Modeler.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#InputPath}\SourceCode\x64\Release\Reporter.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#InputPath}\SourceCode\x64\Release\SpatialAllocator.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#InputPath}\SourceCode\x64\Release\STMengine.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#InputPath}\SourceCode\x64\Release\UGMFC64.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#InputPath}\SourceCode\x64\Release\VegSTM.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#InputPath}\SourceCode\x64\Release\WinLibs.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -86,7 +87,6 @@ Source: "{#InputPath}\DataCW3M\ClimateScenarios.xml"; DestDir: "\CW3M_{#MyAppVer
 Source: "{#InputPath}\DataCW3M\cooling_cost.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\cropchoice.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Crops.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
-Source: "{#InputPath}\DataCW3M\deterministic_transition_lookup.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Flow.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Flow_PEST.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\ForestStates.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
@@ -98,13 +98,17 @@ Source: "{#InputPath}\DataCW3M\HRU.xml"; DestDir: "\CW3M_{#MyAppVersion}";
 Source: "{#InputPath}\DataCW3M\IDU.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\lulc.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Modeler.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
-Source: "{#InputPath}\DataCW3M\probability_transition_lookup.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Reach.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\Reporter.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\SimulationScenarios.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\SimulationScenarios_PEST.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\SpatialAllocator.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
-Source: "{#InputPath}\DataCW3M\VegSTM.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\upland_deterministic_transition_lookup.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\upland_probabilistic_transition_lookup.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\UplandSTM.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\wetland_deterministic_transition_lookup.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\wetland_probabilistic_transition_lookup.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
+Source: "{#InputPath}\DataCW3M\WetlandSTM.xml"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\wr_pods.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\wr_pous.csv"; DestDir: "\CW3M_{#MyAppVersion}"; 
 
