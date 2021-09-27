@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+  <outputs>
+
+    <output_group name="FLOW SSantiam Thermal Energy Budget for streams" daily="yes" monthly="y" yearly="y" >
+      <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="RES_H2O (m3 H2O)" query="1" value="RES_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (m3 H2O)" query="1" value="IN_RUNOFF*86400" type="sum" domain="reach" />
+      <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="runoff from land surface (m3 H2O)" query="1" value="(IN_RUNOFF-SPRING_CMS)*86400" type="sum" domain="reach" />
+      <output in_use="1" name="runoff from land surface (MJ)" query="1" value="(IN_RUNOF_C*IN_RUNOFF-SPRING_CMS*SPRINGTEMP)*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (m3 H2O)" query="1" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output in_use="1" name="water from springs (MJ)" query="1" value="SPRINGTEMP*SPRING_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="insolation of reaches (MJ)" query="1" value="AREA_H2O*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="insolation of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_VOL (m3 H2O)" query="1" value="ADDED_VOL" type="sum" domain="reach" />
+      <output in_use="1" name="added by model (MJ)" query="1" value="ADDEDVOL_C*ADDED_VOL*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="basin discharge (m3 H2O)" query="COMID=23780877" value="Q_DISCHARG*86400" type="sum" domain="reach" />
+      <output name="thermal energy in basin discharge (MJ)" query="COMID=23780877" value="TEMP_H2O*Q_DISCHARG*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_MUNI (m3 H2O)" query="1" value="OUT_MUNI*86400" type="sum" domain="reach" />
+      <output name="OUT_MUNI (MJ)" query="1" value="TEMP_H2O*OUT_MUNI*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (m3 H2O)" query="1" value="OUT_IRRIG*86400" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (MJ)" query="1" value="OUTIRRIG_C*OUT_IRRIG*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out of reaches (MJ)" query="1" value="AREA_H2O*RAD_LW_OUT*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reaches (m3 H2O)" query="1" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reaches (MJ)" query="1" value="((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O)" type="sum" domain="reach" />
+      <output in_use="1" name="longwave radiation out of reservoirs (MJ)" query="1" value="RESAREA_HA*10000*RES_LW_OUT*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (MJ)" query="1" value="(((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP)" type="sum" domain="reach" />
+      <output in_use="1" name="evaporation from reservoirs (m3 H2O)" query="1" value="RES_EVAPMM*RESAREA_HA*10000/1000" type="sum" domain="reach" />
+      <output in_use="1" name="ADDED_Q (cms)" query="1" value="ADDED_Q" type="sum" domain="reach" />
+      <output in_use="1" name="AREA_H2O (m2)" query="1" value="AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_SW_IN*AREA_H2O (W)" query="1" value="RAD_SW_IN*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RAD_LW_OUT*AREA_H2O (W)" query="1" value="RAD_LW_OUT*AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="RESAREA_HA (ha)" query="1" value="RESAREA_HA" type="sum" domain="reach" />
+      <output in_use="1" name="RES_SW_IN*RESAREA_HA (W)" query="1" value="RES_SW_IN*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="RES_LW_OUT*RESAREA_HA (W)" query="1" value="RES_LW_OUT*RESAREA_HA*10000" type="sum" domain="reach" />
+      <output in_use="1" name="total water surface area (m2)" query="1" value="RESAREA_HA*10000+AREA_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="total insolation (MJ)" query="1" value="((RESAREA_HA*10000)+AREA_H2O)*RAD_SW_IN*86400/1000000" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP (mm H2O) average daily precipitation" query="1" value="PRECIP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TEMP (degC) average daily temperature" query="1" value="TEMP" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="RAD_SW over entire basin (W per m2)" query="1" value="RAD_SW" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMAX (degC) average diurnal max temp" query="1" value="TMAX" type="areaWtMean" domain="idu" />
+      <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
+    </output_group>
+<!--    
+    <output_group name="FLOW NSantiam temperature skill assessment"  daily="y" monthly="y" yearly="n" >
+      <output in_use="1" name="USGS_14178000_temp_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591"
+            query="COMID=23780591" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14178000_temp_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591.csv" format="E0" />
+      <output in_use="1" name="Air temperature at reach_23780591 from climate dataset"
+           query="COMID=23780591" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="USGS_14179000_temp_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701"
+             query="COMID=23780701" value="TEMP_H2O" type="sum" domain="reach"
+            obs="..\Observations\NSantiam\USGS_14179000_temp_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701.csv" format="E0" />
+      <output in_use="1" name="Air temperature at reach_23780701 from climate dataset"
+           query="COMID=23780701" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="USGS_14180300_temp_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
+            query="COMID=23780557" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14180300_temp_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
+      <output in_use="1" name="Air temperature at reach_23780557 from climate dataset"
+           query="COMID=23780557" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="USGS_14181500_temp_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511"
+            query="COMID=23780511" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14181500_temp_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511.csv" format="E0" />
+      <output in_use="1" name="Air temperature at reach_23780511 from climate dataset"
+           query="COMID=23780511" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="USGS_14182500_temp_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805"
+            query="COMID=23780805" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14182500_temp_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
+      <output in_use="1" name="Air temperature at reach_23780805 from climate dataset"
+           query="COMID=23780805" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="USGS_14184100_temp_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883"
+            query="COMID=23780883" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\NSantiam\USGS_14184100_temp_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883.csv" format="E0" />
+      <output in_use="1" name="Air temperature at reach_23780883 from climate dataset"
+           query="COMID=23780883" value="TEMP_AIR" type="sum" domain="reach" />
+    </output_group>
+-->
+<!--
+    <output_group name="FLOW NSantiam flow skill assessment" daily="y" monthly="y" yearly="n" >
+      <output in_use="1" name="USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591"
+              query="COMID=23780591" value="Q_DISCHARG*35.3146667*1.003" type="sum" domain="reach"
+             obs="..\Observations\NSantiam\USGS_14178000_flow_NO SANTIAM R BLW BOULDER CRK, NR DETROIT, OR_23780591.csv" format="E0" />
+      <output in_use="1" name="USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_237807011"
+              query="COMID=23780701" value="Q_DISCHARG*35.3146667*1.024" type="sum" domain="reach"
+             obs="..\Observations\NSantiam\USGS_14179000_flow_BREITENBUSH R ABV FRENCH CR NR DETROIT, OR_23780701.csv" format="E0" />
+      <output in_use="1" name="USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557"
+              query="COMID=23780557" value="Q_DISCHARG*35.3146667*1.012" type="sum" domain="reach"
+             obs="..\Observations\NSantiam\USGS_14180300_flow_BLOWOUT CREEK NEAR DETROIT, OR_23780557.csv" format="E0" />
+      <output in_use="1" name="USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511"
+              query="COMID=23780511" value="Q_DISCHARG*35.3146667*1.034" type="sum" domain="reach"
+             obs="..\Observations\NSantiam\USGS_14181500_flow_NORTH SANTIAM RIVER AT NIAGARA, OR_23780511.csv" format="E0" />
+      <output in_use="1" name="USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805"
+              query="COMID=23780805" value="Q_DISCHARG*35.3146667*0.993" type="sum" domain="reach"
+             obs="..\Observations\NSantiam\USGS_14182500_flow_LITTLE NORTH SANTIAM RIVER NEAR MEHAMA, OR_23780805.csv" format="E0" />
+      <output in_use="1" name="USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481"
+              query="COMID=23780481" value="Q_DISCHARG*35.3146667*1.195" type="sum" domain="reach"
+             obs="..\Observations\NSantiam\USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481.csv" format="E0" />
+      <output in_use="1" name="USGS_14184100_flow_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883"
+              query="COMID=23780883" value="Q_DISCHARG*35.3146667*0.999" type="sum" domain="reach"
+             obs="..\Observations\NSantiam\USGS_14184100_flow_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883.csv" format="E0" />
+    </output_group>
+-->
+  </outputs>
