@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<outputs>
+  <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
+    <output in_use="1" name="ET from Quartzville53 avg mm/day" query="HBVCALIB=53" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="Q_DISCHARG (cms)" query="HBVCALIB=53" value="Q_DISCHARG" type="sum" domain="reach" />
+  </output_group>
+<!--
+  <output_group name="FLOW Q_DISCHARG at gage monthly" interval="monthly" >
+    <output in_use="1" name="adjusted Q_DISCHARG (cfs)" query="HBVCALIB=53" value="Q_DISCHARG*35.315*1.005" type="sum" domain="reach"
+    obs="..\Observations\Willamette Gages\Flow\USGS 14185900_flow_QUARTZVILLE CREEK NEAR CASCADIA, OR_23786019.csv" format="E0" />
+  </output_group>
+
+  <output_group name="FLOW ET Quartzville53 daily" interval="daily" >
+    <output in_use="1" name="ET from Quartzville53 avg mm/day" query="HBVCALIB=53" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="ET from Quartzville53 avg m3/day" query="HBVCALIB=53" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    <output in_use="1" name="ET from Quartzville53 avg cms" query="HBVCALIB=53" value="(ET_DAY*Area/1000)/86400" type="sum" domain="idu" />
+  </output_group>
+  
+  <output_group name="FLOW ET Quartzville53 yearly" interval="yearly" >
+    <output in_use="1" name="ET from Quartzville53 avg mm/day" query="HBVCALIB=53" value="ET_DAY" type="areaWtMean" domain="idu" />
+    <output in_use="1" name="ET from Quartzville53 avg m3/day" query="HBVCALIB=53" value="ET_DAY*Area/1000" type="sum" domain="idu" />
+    <output in_use="1" name="ET from Quartzville53 avg cms" query="HBVCALIB=53" value="(ET_DAY*Area/1000)/86400" type="sum" domain="idu" />
+  </output_group>
+-->
+</outputs>
