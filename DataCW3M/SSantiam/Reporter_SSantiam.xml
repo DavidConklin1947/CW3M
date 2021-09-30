@@ -291,7 +291,7 @@
     <output name="Middle Fork Willamette ag land unexercised groundwater rights (ac)" query="SUB_AREA=10 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
     <output name="Yamhill ag land unexercised groundwater rights (ac)" query="SUB_AREA=11 and LULC_A=2 and WR_IRRIG_G=1 and IRRIGATION=0" value="AREA*ac_per_m2" type="SUM" />
   </output_group>
-<!-- upstream  end
+ upstream  end
   <output_group name="REP Instream Water Right Available Water Metric (frac of regulatory demand of most junior WR)">
     <output name="Available water on Coast Fork Willamette at IDU 17319 (minimum frac)" query="IDU_INDEX=17319" value="MIN_Q_WRQ" type="SUM" />
     <output name="Available water on Middle Fork Willamette at IDU 29023 (minimum frac)" query="IDU_INDEX=29023" value="MIN_Q_WRQ" type="SUM" />
