@@ -519,10 +519,32 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
 //       double subreach_precip_vol_m3 = pSubreach->m_subreach_surf_area_m2 * reach_precip_mm / 1000;
 //       WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
 //       pSubreach->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
-   if (!rtnWP.Evaporate(evap_m3, evap_kJ))
-   { // Evaporation was unsuccessful because it would have resulted in negative thermal energy or negative volume.
-      Report::LogMsg("ReachRouting::ApplyEnergyFluxes() Evaporation unsuccessful due to low temperature or low volume.");
+
+   bool evaporate_rtn = true;
+   if (evap_kJ >= rtnWP.ThermalEnergy()) 
+   { // Skip evaporation due to low temperature.
+      // Our model for evaporation breaks down here because it assumes that all the energy required
+      // to evaporate the water comes from the water itself.  But the specific heat of water is only
+      // about 4 J per gram per deg C above 0 deg C, while the latent heat of vaporization for water
+      // is about 2500 J per gram of water.  In reality, some of the energy for vaporization is coming from
+      // the air moving across the surface of the water (hence, swamp coolers produce cool air) and some of
+      // the energy for vaporization is coming from the water (hence, water cools down as it evaporates).
+      // Moreover, the respective rates change as the temperature of the water changes (hot water cools down 
+      // faster, but doesn't cool the air as much). Our model calculates an evap rate as a depth of water lost 
+      // from the surface of a water body per second of time, and then applies that rate to the whole day.  The model
+      // oversimplifies, and doesn't work under some conditions.
+      // At cold temperatures, there won't be much evaporation anyway, so we'll just ignore it.
+      evaporate_rtn = false;
    }
+   else if (evap_m3 >= rtnWP.m_volume_m3)
+   { // Skip evaporation due to low volume.
+      CString msg;
+      msg.Format("ApplyEnergyFluxes() Skip evap due to low volume. evap_kJ = %f, rtnWP.ThermalEnergy() = %f rtnWP.m_temp_degC = %f, evap_m3 = %f, rtnWP.m_volume_m3 = %f",
+         evap_kJ, rtnWP.ThermalEnergy(), rtnWP.m_temp_degC, evap_m3, rtnWP.m_volume_m3);
+      Report::LogMsg(msg);
+      evaporate_rtn = false;
+   } // end of else if (evap_m3 >= rtnWP.m_volume_m3)
+   else evaporate_rtn = rtnWP.Evaporate(evap_m3, evap_kJ);
 
    // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
    double net_rad_kJ = sw_kJ - lw_kJ;

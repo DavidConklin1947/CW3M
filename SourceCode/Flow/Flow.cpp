@@ -14141,14 +14141,23 @@ bool FlowProcess::LoadXml( LPCTSTR filename, EnvContext *pEnvContext)
                      if (obs != NULL)
                      {
                         pOutput->m_nameObs = obs;
-                        if (PathManager::FindPath(obs, observations_path) < 0)
+                        int path_manager_rtn = PathManager::FindPath(obs, observations_path);
+                        if ((path_manager_rtn < 0) || (format == NULL))
                         {
                            CString msg;
-                           msg.Format("Flow: Unable to find observation file '%s' specified for Model Output '%s'", obs, name);
-                           Report::WarningMsg(msg);
+                           if (path_manager_rtn < 0)
+                           {
+                              msg.Format("Flow: Unable to find observation file '%s' specified for Model Output '%s'", obs, name);
+                              Report::WarningMsg(msg);
+                           }
+                           else if (format == NULL)
+                           {
+                              msg.Format("FlowProcess::LoadXml() missing format for observation %s", name);
+                              Report::WarningMsg(msg);
+                           }
                            pOutput->m_inUse = false;
-                        }
-                        else
+                        } // end of if ((path_manager_rtn < 0) || (format == NULL))
+                        else 
                         {
                            pOutput->m_pDataObjObs = new FDataObj;
                            //CString inFile;
