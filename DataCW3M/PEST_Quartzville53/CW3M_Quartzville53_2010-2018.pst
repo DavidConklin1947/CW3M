@@ -3317,8 +3317,8 @@ obs3285	749.718750	1	obsgroup
 obs3286	2251.250000	1	obsgroup
 obs3287	1272.916667	1	obsgroup
 * model command line
-\"Program Files (x86)"\CW3M_McKenzie\CW3M.exe  \CW3M_McKenzie_1.1.0\CW3M_PEST_Quartzville53.envx /r:0
+C:\CW3M.git\trunk\SourceCode\x64\Release\CW3M.exe C:\CW3M.git\trunk\DataCW3M\CW3M_PEST_Quartzville53.envx /r:0
 * model input/output
-\CW3M_McKenzie_1.1.0\Quartzville53_param.txt   \CW3M_McKenzie_1.1.0\HBV_PEST.csv
-\CW3M_McKenzie_1.1.0\instruction_file.txt   \CW3M_McKenzie_1.1.0\PEST_Quartzville53\Outputs\PEST\Flow_Q_at_gage_daily_PEST_Run0.csv
+C:\CW3M.git\trunk\DataCW3M\PEST_Quartzville53\Quartzville53_param.txt   C:\CW3M.git\trunk\DataCW3M\HBV_PEST.csv
+C:\CW3M.git\trunk\DataCW3M\PEST_Quartzville53\instruction_file.txt   C:\CW3M.git\trunk\DataCW3M\PEST_Quartzville53\Outputs\PEST\FLOW_Q_DISCHARG_at_gage_daily_PEST_Run0.csv
 * prior information

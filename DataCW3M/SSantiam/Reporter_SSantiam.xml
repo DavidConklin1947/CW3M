@@ -310,7 +310,7 @@
     <output name="Available water on Pudding at IDU 140000 (minimum frac)" query="IDU_INDEX=140000" value="MIN_Q_WRQ" type="SUM" />
   </output_group>
 
-  <!-- downstream end 
+   downstream end 
   <output_group name="REP Instream Water Right Available Water Metric (frac of regulatory demand of most junior WR)">
     <output name="Available water on Coast Fork Willamette at IDU 28621 (minimum frac)" query="IDU_INDEX=28621" value="MIN_Q_WRQ" type="SUM" />
     <output name="Available water on Middle Fork Willamette at IDU 29023 (minimum frac)" query="IDU_INDEX=29023" value="MIN_Q_WRQ" type="SUM" />
