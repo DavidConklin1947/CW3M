@@ -12,7 +12,7 @@
     logMsgLevel                ='0'
     noBuffering                ='0'
     multiRunDecadalMapsModulus ='10'
-    defaultPeriod              ='1'
+    defaultPeriod              ='9'
     dynamicUpdate              ='15'
     spatialIndexDistance       ='0'
     areaCutoff                 ='0'

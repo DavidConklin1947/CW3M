@@ -300,8 +300,8 @@ dependencies =''
 initRunOnStartup  ='0'
    />
    
-<autonomous_process
-name         ='VegSTMengine'
+<<autonomous_process
+name         ='UplandSTM'
 path         ='VegSTM.dll'
 id           ='130'
 use          ='1'
@@ -309,25 +309,25 @@ timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='VegSTM.xml'
+initInfo     ='UplandSTM.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
-<!--
+
 <autonomous_process
-name         ='UpdateDGVMvegtype'
-path         ='APs.dll'
-id           ='140'
+name         ='WetlandSTM'
+path         ='STMengine.dll'
+id           ='131'
 use          ='1'
 timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='APs.xml'
+initInfo     ='WetlandSTM.xml'
 dependencies =''
-initRunOnStartup ='0'
+initRunOnStartup  ='0'
    />
--->  
+ 
 <autonomous_process
 name         ='FarmlandRent'
 path         ='APs.dll'
