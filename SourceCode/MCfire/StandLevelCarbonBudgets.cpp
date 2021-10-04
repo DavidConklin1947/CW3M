@@ -1681,6 +1681,8 @@ SLCB GetSLCB(int pvt, int standStartYear, int standAge)
 {
    SLCB retval;
 
+   if (standAge == 0) standAge = 1;
+
    if (standAge < 0 || (standStartYear <= 1930 && standAge >= 350) || (standStartYear > 1930 && standAge >= 130))
    {
       int replacement_standAge = (standStartYear <= 1930) ? 350 : 130;
@@ -1723,7 +1725,7 @@ SLCB GetSLCB(int pvt, int standStartYear, int standAge)
       }
    }
 
-   array_addr += standAge * SLCB_RECORD_LENGTH;
+   array_addr += (standAge - 1) * SLCB_RECORD_LENGTH;
 
    retval.stem_kgC_per_m2 = (float)*(array_addr + 1);
    retval.leaf_kgC_per_m2 = (float)*(array_addr + 2);
