@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<outputs>
+  <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
+    <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23785793" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" 
+    obs="..\Observations\Willamette Gages\Flow\USGS 14185000_flow_SOUTH SANTIAM RIVER BELOW CASCADIA, OR_23785793.csv" format="E0" />
+  </output_group>
+</outputs>
