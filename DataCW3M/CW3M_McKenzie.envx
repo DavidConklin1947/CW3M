@@ -187,18 +187,32 @@ initRunOnStartup ='0'
     initRunOnStartup  ='0'
 	/>
 
-<autonomous_process
-name         ='GetWeather'
-path         ='APs.dll'
-id           ='20'
-use          ='1'
-timing       ='0'
-freq         ='1'
-sandbox      ='0'
-fieldName    =''
-initInfo     ='APs.xml'
-dependencies =''
-initRunOnStartup ='0'
+    <autonomous_process
+    name         ='GetWeather'
+    path         ='APs.dll'
+    id           ='20'
+    use          ='1'
+    timing       ='0'
+    freq         ='1'
+    sandbox      ='0'
+    fieldName    =''
+    initInfo     ='APs.xml'
+    dependencies =''
+    initRunOnStartup ='0'
+   />
+
+    <autonomous_process
+    name         ='PrescribedLULCs'
+    path         ='APs.dll'
+    id           ='25'
+    use          ='1'
+    timing       ='0'
+    freq         ='1'
+    sandbox      ='0'
+    fieldName    =''
+    initInfo     ='APs.xml'
+    dependencies =''
+    initRunOnStartup ='0'
    />
 
     <autonomous_process

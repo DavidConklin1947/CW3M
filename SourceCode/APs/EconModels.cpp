@@ -101,6 +101,16 @@ BOOL WW2100AP::InitRunPG(EnvContext *pContext)
    } // end of InitRunPG()
 
 
+BOOL WW2100AP::InitPrescribedLULCs(EnvContext* pContext)
+{
+   bool rtn_val = false;
+
+   CString path = ReplaceSubstring(m_LULCsFile, "SCENARIO_NAME", m_simulationScenario);
+
+   return(rtn_val);
+} // end of InitPrescribedLULCs()
+
+
 BOOL WW2100AP::InitRunLandTrans(EnvContext *pContext)
    {
 

@@ -558,6 +558,15 @@ protected:
 
 
    //--------------------------------------------
+   //---------- Prescribed LULCs ---------------
+   //--------------------------------------------
+   BOOL InitPrescribedLULCs(EnvContext* pContext);
+   int m_idPrescribedLULCs;
+   int m_PLtestMode;
+   CString m_LULCsFile;
+
+
+   //--------------------------------------------
    //---------- land use transitions model ---------------
    //--------------------------------------------
    bool InitLandTrans( EnvContext *pContext );
@@ -861,6 +870,7 @@ protected:
    COUNTYcolumn CountyColFromCountyID(int countyID);
 
    EnvContext * m_pEnvContext;
+   CString m_simulationScenario;
    int m_currentClimateScenarioIndex; // 0=Ref, 1=LowClim, 2=HiClim, 3=StationaryClim, 4=Historical, 5=Baseline
    char * m_climateScenarioName;
    int m_currentPopScenarioIndex;  // 0=Ref, 1=HiPop, 2=NoGrow, 3=Extreme, 4=NoPopGrowth, 5=NoIncGrowth, 6=Baseline

@@ -86,6 +86,10 @@
       <carbon id='-1' >
       </carbon>
 
+     
+     <prescribed_LULCs id='25' prescribed_LULCs_file='ScenarioData/SCENARIO_NAME/prescribedLULCs.csv' />
+
+     
       <!-- The land use transition model always signals which IDUs have transitioned by negating the value in the PROBUSECHG column.
 Test mode in the Land Use Transitions model works this way: 
 test_mode can be set to 0, 1, 2, or 3.  0 turns off test mode.

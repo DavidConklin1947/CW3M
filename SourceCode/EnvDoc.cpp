@@ -349,6 +349,7 @@ bool CEnvDoc::InitDoc( void )
 
    m_model.m_envContext.pActorManager  = gpActorManager;
    m_model.m_envContext.pPolicyManager = gpPolicyManager;
+   m_model.m_envContext.pScenarioManager = gpScenarioManager;
    gpModel = &m_model;
    gpModel->SetNotifyProc( NotifyProc, 0 );
 

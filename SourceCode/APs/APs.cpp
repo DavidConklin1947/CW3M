@@ -912,6 +912,10 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
       {
       CString msg;
 
+      int simulation_scenario_ndx = pContext->scenarioIndex;
+      Scenario* pSimulation_scenario = pContext->pScenarioManager->GetScenario(simulation_scenario_ndx);
+      m_simulationScenario = pSimulation_scenario->m_name;
+
       pLayer->SetColData(m_colXURBH2OPRC, 1.0f, true);
       pLayer->SetColData(m_colXIRP_MIN, 1.0f, true);
 
@@ -2768,8 +2772,20 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
    m_useCarbonModel = 0;
    pXmlCarbon->Attribute( "id", &m_useCarbonModel );
 
+   // Prescribed LULCs
+   TiXmlElement* pXmlSubProc = NULL;
+   if (StartXMLforSubprocess(pContext, filename, pXmlRoot, _T("prescribed_LULCs"), &m_idPrescribedLULCs, &pXmlSubProc, &m_PLtestMode))
+   {
+      if (m_idLandTrans > 0 && m_idLandTrans == pContext->id)
+      {
+         m_LULCsFile.Empty();
+         m_LULCsFile = pXmlSubProc->Attribute("prescribed_LULCs_file");
+      }
+   } // end of if (StartXMLforSubprocess(...)
+
+
    // next, land use transitions model nodes
-   TiXmlElement *pXmlSubProc = NULL;
+   pXmlSubProc = NULL;
    if (StartXMLforSubprocess(pContext, filename, pXmlRoot, _T("land_use_transitions" ), &m_idLandTrans, &pXmlSubProc, &m_LTtestMode))
       {
       if (m_idLandTrans>0 && m_idLandTrans==pContext->id)

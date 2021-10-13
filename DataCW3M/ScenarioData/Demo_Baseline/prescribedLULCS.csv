@@ -1,0 +1,5 @@
+;  Prescribed LULC changes,,,,
+";  LULC values are for the most detailed LULC category, i.e. LULC_C aka VEGCLASS for WW2100.",,,,
+; Entries should be in order from earliest year to latest year.,,,,
+YEAR,IDU_ID,LULC,UGB,DESCRIPTION
+2011,33827,122,22,One of 2 IDUs in wetland 10 goes to Developed Low Density.

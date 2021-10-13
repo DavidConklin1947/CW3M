@@ -13,6 +13,7 @@
 
 class ActorManager;
 class PolicyManager;
+class ScenarioManager;
 class DeltaArray;
 class MapLayer;
 class IDUlayer;
@@ -427,6 +428,8 @@ public:
    const MapLayer * pGWlayer;
    ActorManager   *pActorManager;         // pointer to the actor manager
 	PolicyManager  *pPolicyManager;        // pointer to the policy manager
+
+   ScenarioManager* pScenarioManager;
    DeltaArray     *pDeltaArray;           // pointer to the current delta array
    EnvModel       *pEnvModel;             // pointer to the current model
    LulcTree       *pLulcTree;             // pointer to the lulc tree used in the simulation
