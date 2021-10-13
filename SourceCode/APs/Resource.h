@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by WW2100AP.rc
+// Used by APs.rc
 //
 
 // Next default values for new objects

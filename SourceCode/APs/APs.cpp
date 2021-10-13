@@ -48,10 +48,10 @@ static char * PopScenarioNames[] =
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
-//  WW2100AP  - the AutoProcess...
+//  APs  - the AutoProcess...
 ///////////////////////////////////////////////////////////////////////////////////////
 
-WW2100AP::WW2100AP() 
+APs::APs() 
 : EnvAutoProcess( 12, 13 + MAX_FISH_GROUPS) // These need to be updated by hand as input and output vars are added?
 , m_paThreshold( 0.5f )
 , m_colTMax( -1 )
@@ -331,10 +331,10 @@ WW2100AP::WW2100AP()
       }
    m_FishOutVarCount = MAX_FISH_GROUPS;
 
-   } // end of WW2100AP default constructor
+   } // end of APs default constructor
 
 
-WW2100AP::~WW2100AP( void )
+APs::~APs( void )
    {
    if ( m_pUWmfgInc != NULL )
       delete m_pUWmfgInc;
@@ -350,7 +350,7 @@ WW2100AP::~WW2100AP( void )
    }
 
 
-int WW2100AP::InputVar( int id, MODEL_VAR** modelVar )
+int APs::InputVar( int id, MODEL_VAR** modelVar )
    {
    int numVars = 0;
    *modelVar = NULL;
@@ -411,10 +411,10 @@ int WW2100AP::InputVar( int id, MODEL_VAR** modelVar )
       }
 
    return(numVars);
-   } // end of WW2100AP::InputVar()
+   } // end of APs::InputVar()
 
 
-int WW2100AP::OutputVar( int id, MODEL_VAR** modelVar )
+int APs::OutputVar( int id, MODEL_VAR** modelVar )
    {
    int numVars = 0;
    *modelVar = NULL;
@@ -466,10 +466,10 @@ int WW2100AP::OutputVar( int id, MODEL_VAR** modelVar )
       }
 
    return(numVars);
-   } // end of WW2100AP::OutputVar()
+   } // end of APs::OutputVar()
 
 
-BOOL WW2100AP::Init( EnvContext *pContext, LPCTSTR initStr )
+BOOL APs::Init( EnvContext *pContext, LPCTSTR initStr )
    { 
    m_pEnvContext = pContext;
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
@@ -897,10 +897,10 @@ BOOL WW2100AP::Init( EnvContext *pContext, LPCTSTR initStr )
       }
 
    return ok;
-   } // end of WW2100AP::Init()
+   } // end of APs::Init()
 
 
-BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
+BOOL APs::InitRun( EnvContext *pContext, bool useInitSeed )
    {   
    MapLayer *pLayer = (MapLayer*)pContext->pMapLayer;
       
@@ -926,7 +926,7 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
       m_climateScenarioName = (0<=m_currentClimateScenarioIndex && m_currentClimateScenarioIndex<num_climate_scenarios) ?
          climateScenarioNames[m_currentClimateScenarioIndex] : "Unknown";
 
-      msg.Format("WW2100AP.InitRun: pContext->id, m_currentClimateScenarioIndex, m_climateScenarioName = %d, %d, %s", 
+      msg.Format("APs.InitRun: pContext->id, m_currentClimateScenarioIndex, m_climateScenarioName = %d, %d, %s", 
             pContext->id, m_currentClimateScenarioIndex, m_climateScenarioName);
       Report::LogMsg(msg);  
 
@@ -935,7 +935,7 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
       m_popScenarioName = (0 <= m_currentPopScenarioIndex && m_currentPopScenarioIndex<num_pop_scenarios) ?
          PopScenarioNames[m_currentPopScenarioIndex] : "Unknown";
 
-      msg.Format("WW2100AP.InitRun: m_currentPopScenarioIndex, m_popScenarioName = %d, %s",
+      msg.Format("APs.InitRun: m_currentPopScenarioIndex, m_popScenarioName = %d, %s",
          m_currentPopScenarioIndex, m_popScenarioName);
       Report::LogMsg(msg);
 
@@ -946,14 +946,14 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
       if (m_recordsHholdInc <= 0)
          {
          CString msg;
-         msg.Format("WW2100AP: Missing data. m_recordsHholdInc = %d", m_recordsHholdInc);
+         msg.Format("APs: Missing data. m_recordsHholdInc = %d", m_recordsHholdInc);
          Report::ErrorMsg(msg);
          return false;
          }
       if (!ConfirmCols(m_pHholdInc))
          {
          CString msg;
-         msg.Format("WW2100AP: Columns missing or out of order. ConfirmCols(m_pHholdInc) = %d", ConfirmCols(m_pHholdInc));
+         msg.Format("APs: Columns missing or out of order. ConfirmCols(m_pHholdInc) = %d", ConfirmCols(m_pHholdInc));
          Report::ErrorMsg(msg);
          return false;
          }
@@ -982,18 +982,18 @@ BOOL WW2100AP::InitRun( EnvContext *pContext, bool useInitSeed )
 	m_annualUrbanWaterDemand.ClearRows();
 
    return rtnFlag;
-   } // end of WW2100AP::InitRun()
+   } // end of APs::InitRun()
 
 
-bool WW2100AP::InitRunGetWeather(EnvContext* pContext)
+bool APs::InitRunGetWeather(EnvContext* pContext)
 {
    if (m_stationaryClimSeed != 0) m_WeatherRandomDraw.SetSeed((long)m_stationaryClimSeed);
 
    return(true);
-} // end of WW2100AP::InitRunGetWeather()
+} // end of APs::InitRunGetWeather()
 
 
-bool WW2100AP::RunGetWeather(EnvContext *pContext)
+bool APs::RunGetWeather(EnvContext *pContext)
    {
    if (m_currentClimateScenarioIndex == STATIONARY_CLIM_SCENARIO_INDEX // For backward compatibility with WW2100
       || m_useStationaryClim)
@@ -1018,10 +1018,10 @@ bool WW2100AP::RunGetWeather(EnvContext *pContext)
    } // end of RunGetWeather()
 
 
-BOOL WW2100AP::Run(EnvContext *pContext)
+BOOL APs::Run(EnvContext *pContext)
    {
    // testMessage(pContext, _T("Run"));
-   // If this is the cold start instantiation of WW2100AP, don't do anything at Run time.
+   // If this is the cold start instantiation of APs, don't do anything at Run time.
    if (pContext->id==ID_COLDSTART) return true; 
 
    if (pContext->id == ID_GETWEATHER) return(RunGetWeather(pContext));
@@ -1041,7 +1041,7 @@ BOOL WW2100AP::Run(EnvContext *pContext)
    }
 
 
-BOOL WW2100AP::EndRun( EnvContext *pContext )
+BOOL APs::EndRun( EnvContext *pContext )
    {
 
    if (!m_commonEndRunComplete)
@@ -1090,7 +1090,7 @@ BOOL WW2100AP::EndRun( EnvContext *pContext )
    } // end of EndRun()
 
 
-bool WW2100AP::InitColdStart( EnvContext *pContext )
+bool APs::InitColdStart( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
    m_projectionWKT = pContext->pMapLayer->m_projection;
@@ -1130,7 +1130,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
                // pLayer->SetData( idu, m_colSS_Text, _T(""));
                if (iduVS.m_foundCTflag || iduVS.m_foundSSflag)
                   {
-                  msg.Format("WW2100AP: inconsistent veg state: PVTCode, StateAbbrev = %s, %s in ColdStart", (LPCTSTR) PVT_Text, (LPCTSTR) CTSS_Text);
+                  msg.Format("APs: inconsistent veg state: PVTCode, StateAbbrev = %s, %s in ColdStart", (LPCTSTR) PVT_Text, (LPCTSTR) CTSS_Text);
                   Report::LogMsg(msg);
                   }
                }
@@ -1139,7 +1139,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
          // msg.Format("*** vegclass initialization first loop; idu_count = %d", idu_count);
          // Report::LogMsg(msg);
          } // end of loop thru IDUs
-       msg.Format("WW2100AP: first part of vegclass initialization is complete");
+       msg.Format("APs: first part of vegclass initialization is complete");
        Report::LogMsg(msg);
       
       // Now deal with forested IDUs which have unknown PVTs
@@ -1149,7 +1149,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       do
          {  
          pass_count++;
-         msg.Format("WW2100AP: *** second part of vegclass initialization: starting pass %d now", pass_count);
+         msg.Format("APs: *** second part of vegclass initialization: starting pass %d now", pass_count);
          Report::LogMsg(msg); 
          found_count = 0;
          int not_found_count = 0;
@@ -1176,14 +1176,14 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
                   pLayer->GetData(iduTgt, m_colPVT, pvtTgt);
                   pLayer->SetData( idu, m_colPVT, pvtTgt );
                   found_count++;
-                  msg.Format("WW2100AP: inferred PVT %d for VEGCLASS %d, found_count = %d", pvtTgt, vegclass, found_count);
+                  msg.Format("APs: inferred PVT %d for VEGCLASS %d, found_count = %d", pvtTgt, vegclass, found_count);
                   Report::LogMsg(msg);
                   }
                } // end of inner loop thru IDUs
             if (!result) 
                {
                not_found_count++;
-               msg.Format("WW2100AP: did not infer PVT for VEGCLASS %d, not_found_count = %d, found_count = %d", 
+               msg.Format("APs: did not infer PVT for VEGCLASS %d, not_found_count = %d, found_count = %d", 
                      vegclass, not_found_count, found_count);
                Report::LogMsg(msg);
                }
@@ -1195,7 +1195,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       do
          {  
          pass_count++;
-         msg.Format("WW2100AP: *** third part of vegclass initialization: starting pass %d now", pass_count);
+         msg.Format("APs: *** third part of vegclass initialization: starting pass %d now", pass_count);
          Report::LogMsg(msg); 
          found_count = 0;
          int not_found_count = 0;
@@ -1228,7 +1228,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
                      pLayer->GetData(iduTgt, m_colPVT, pvtTgt);
                      pLayer->SetData( idu, m_colPVT, pvtTgt );
                      found_count++;
-                     msg.Format("WW2100AP: inferred PVT %d for VEGCLASS %d from VEGCLASS %d, found_count = %d", 
+                     msg.Format("APs: inferred PVT %d for VEGCLASS %d from VEGCLASS %d, found_count = %d", 
                            pvtTgt, vegclass, vegclassTgt, found_count);
                      Report::LogMsg(msg);
                      }
@@ -1237,7 +1237,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
             if (!result) 
                {
                not_found_count++;
-               msg.Format("WW2100AP: did not infer PVT for VEGCLASS %d, not_found_count = %d, found_count = %d", 
+               msg.Format("APs: did not infer PVT for VEGCLASS %d, not_found_count = %d, found_count = %d", 
                      vegclass, not_found_count, found_count);
                Report::LogMsg(msg);
                }
@@ -1250,10 +1250,10 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       {
       RandUniform UnitUniformDist;
       int count = 0;
-      msg.Format("WW2100AP: Opening A2S file %s", (LPCTSTR)m_A2S_file);
+      msg.Format("APs: Opening A2S file %s", (LPCTSTR)m_A2S_file);
       Report::LogMsg(msg, RT_INFO);
       m_records_A2S = m_A2S_table.ReadAscii(m_A2S_file, ',', TRUE);
-      msg.Format("WW2100AP: m_records_A2S = %d", m_records_A2S);
+      msg.Format("APs: m_records_A2S = %d", m_records_A2S);
       Report::LogMsg(msg, RT_INFO);
 
       int A2Scol_START_AGE, A2Scol_fmh, A2Scol_fwi, A2Scol_fdw, A2Scol_fdd, A2Scol_fsi;
@@ -1270,7 +1270,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       if (m_records_A2S <= 0 || A2Scol_START_AGE<0 || A2Scol_fmh<0 || A2Scol_fwi<0 || A2Scol_fdw<0 || A2Scol_fdd<0 || A2Scol_fsi<0
             || !(m_colMEDIAN_AGE >= 0 && m_colSTART_AGE >= 0 && m_colEND_AGE >= 0))
          {
-         msg.Format("WW2100AP: Cannot reconcile median age with start age and end age because file, columns in file, or attributes are missing: "
+         msg.Format("APs: Cannot reconcile median age with start age and end age because file, columns in file, or attributes are missing: "
             "m_records_A2S = %d, A2Scol_START_AGE = %d, A2Scol_fmh = %d, A2Scol_fwi = %d, A2Scol_fdw = %d, A2Scol_fdd = %d, A2Scol_fwi = %d, \n"
             "m_colMEDIAN_AGE = %d, m_colSTART_AGE = %d, m_colEND_AGE = %d",
             m_records_A2S, A2Scol_START_AGE, A2Scol_fmh, A2Scol_fwi, A2Scol_fdw, A2Scol_fdd, A2Scol_fsi, m_colMEDIAN_AGE, m_colSTART_AGE, m_colEND_AGE);
@@ -1306,7 +1306,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
          else if (median_age == 250) nominal_age = (int)(200.5 + rand_num*(300.5 - 200.5)); // random integer on [200.5, 300.5]
          else
             {
-            msg.Format("WW2100AP: unexpected median_age = %d.", median_age);
+            msg.Format("APs: unexpected median_age = %d.", median_age);
             Report::ErrorMsg(msg);
             return(false);
             }
@@ -1326,7 +1326,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
             CString CTSSfromFile = m_A2S_table.GetAsString(colA2S, iRec); 
             if (CTSSfromFile.GetLength() <= 0)
                {
-               msg.Format("WW2100AP: CTSSfromFile has zero length.");
+               msg.Format("APs: CTSSfromFile has zero length.");
                Report::ErrorMsg(msg);
                return(false);
                }
@@ -1335,7 +1335,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
             VegState iduVS(PVT_Text, CTSSfromFile);
             if (!iduVS.Forest())
                {
-               msg.Format("WW2100AP: VegState(%s, %s) failed to construct a forest VEGCLASS.  colA2s = %d, iRow = %d, "
+               msg.Format("APs: VegState(%s, %s) failed to construct a forest VEGCLASS.  colA2s = %d, iRow = %d, "
                      "m_foundPVTflag = %d, m_foundCTflag = %d, m_foundSSflag = %d\n Stratum_ID = %d, CTSS_ID = %d, CoverType = %s, StructuralStage = %s", 
                      PVT_Text, CTSSfromFile, colA2S, iRec, iduVS.m_foundPVTflag, iduVS.m_foundCTflag, iduVS.m_foundSSflag, iduVS.Stratum(), iduVS.CTSS(),
                      iduVS.CoverType(), iduVS.StructuralStage());
@@ -1352,7 +1352,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
                } // end of if (!iduVS.Forest()) ... else ...
             } // end of trying to change the VEGCLASS for this IDU
          } // end of else for loop on idus for reconciling median age
-      msg.Format("WW2100AP: Changed VEGCLASS for %d IDUs to make AGECLASS consistent with MEDIAN_AGE.", count);
+      msg.Format("APs: Changed VEGCLASS for %d IDUs to make AGECLASS consistent with MEDIAN_AGE.", count);
       Report::LogMsg(msg);
       } // end of if (m_useColdStart_standage_reconciliation)
         
@@ -1373,7 +1373,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
 
    if ( m_useColdStart_SWHCfile )
       { // Read the netCDF file and populate three SWHC attributes.
-      msg.Format( "WW2100AP: Opening SWHC file %s", (LPCTSTR) m_SWHCfile );
+      msg.Format( "APs: Opening SWHC file %s", (LPCTSTR) m_SWHCfile );
       Report::LogMsg( msg, RT_INFO );
       m_pDataObj_SWHCtop = new GeoSpatialDataObj();
       m_pDataObj_SWHCtop->InitLibraries();
@@ -1418,7 +1418,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       m_records_PU = m_PopUnits_table.ReadAscii(m_PopUnits_file, ',', TRUE);
       if (m_records_PU<=0)
          {
-         msg.Format("WW2100AP_ColdStart: missing or empty Population Units file\n"
+         msg.Format("APs_ColdStart: missing or empty Population Units file\n"
             "records_PU = %d\n", m_records_PU);
          Report::ErrorMsg( msg );
          return false;
@@ -1433,7 +1433,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       m_colPU_RR_DH_ID = m_PopUnits_table.GetCol("RR_DH_ID"); err |= m_colPU_RR_DH_ID<0; // ASSERT(!err);
       if (err)
          {
-         msg.Format("WW2100AP:ColdStart - One or more missing columns in the PopulationUnits file.\n"
+         msg.Format("APs:ColdStart - One or more missing columns in the PopulationUnits file.\n"
                "m_colPU_IDU_ID, _UGB_name, _UGB_DH_ID, _RR_DH_ID = %d, %d, %d, %d", 
                m_colPU_IDU_ID, m_colPU_UGB_name, m_colPU_UGB_DH_ID, m_colPU_RR_DH_ID);
          Report::ErrorMsg(msg);
@@ -1448,7 +1448,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
 
          if ((iRec/25000)*25000==iRec)
             {
-            msg.Format( "WW2100AP_ColdStart: PopUnits file iRec = %d", iRec );
+            msg.Format( "APs_ColdStart: PopUnits file iRec = %d", iRec );
             Report::LogMsg( msg, RT_INFO );
             }
 
@@ -1471,7 +1471,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
             if (ugb==0) pLayer->SetData(idu, m_colRPA, rpaID);
             else
                {
-               msg.Format( "WW2100AP_ColdStart: an RPA IDU has a non-zero UGB in IDU.dbf; "
+               msg.Format( "APs_ColdStart: an RPA IDU has a non-zero UGB in IDU.dbf; "
                      "it will be removed from the RPA. iRec, rpaID, ugb = %d, %d, %d", iRec, rpaID, ugb );
                Report::LogMsg( msg, RT_INFO );
                pLayer->SetData(idu, m_colRPA, 0);
@@ -1485,7 +1485,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
             pLayer->GetData( idu, m_colUGB_NAME, ugaNameFromDatabase);
             if (ugbName!=ugaNameFromDatabase)
                {
-               msg.Format( "WW2100AP_ColdStart: PopUnits ugbName is not the same as ugaNameFromDatabase."
+               msg.Format( "APs_ColdStart: PopUnits ugbName is not the same as ugaNameFromDatabase."
                      "iRec, ugbName, ugaNameFromDatabase = %d, %s, %s (ugaNameFromDatabase may be blank).", 
                      iRec, ugbName.GetString(), ugaNameFromDatabase.GetString() );
                Report::LogMsg( msg, RT_INFO );
@@ -1497,7 +1497,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
                pLayer->GetData( idu, m_colUGB, ugbFromDatabase);
                if (ugbFromID!=ugbFromDatabase)
                   {
-                  msg.Format( "WW2100AP_ColdStart: PopUnits ugbFromID is not the same as ugaFromDatabase."
+                  msg.Format( "APs_ColdStart: PopUnits ugbFromID is not the same as ugaFromDatabase."
                         "iRec, ugbID, ugbFromID, ugbFromDatabase = %d, %d, %d, %d", 
                         iRec, ugbID, ugbFromID, ugbFromDatabase );
                   Report::LogMsg( msg, RT_INFO );
@@ -1526,7 +1526,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
 
       if (m_records_CT<=0 || m_records_SS<=0 || records_TT<=0 || records_Stratum2PVT<=0 || records_DT<=0 || records_PT<=0) // || records_TPM<=0)
          {
-         msg.Format("WW2100AP_ColdStart: missing or empty file\n"
+         msg.Format("APs_ColdStart: missing or empty file\n"
             "records_CT, SS, TT, Stratum2PVT, DT, PT = %d, %d, %d, %d, %d, %d\n",
             m_records_CT, m_records_SS, records_TT, records_Stratum2PVT, records_DT, records_PT); // , records_TPM);
          Report::ErrorMsg( msg );
@@ -1576,13 +1576,13 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       // int colTPM_Mean = m_TransitionProbabilityMultiplierInput_table.GetCol("Mean"); err |= colTPM_Mean<0; // ASSERT(!err);
       if (err)
          {
-         msg.Format("WW2100AP:ColdStart - One or more missing columns in the input data files.\n");
+         msg.Format("APs:ColdStart - One or more missing columns in the input data files.\n");
          Report::ErrorMsg(msg);
          return false;
          }
 
       // Build the deterministic transition lookup table.
-      msg.Format("WW2100AP:ColdStart - Building deterministic transition lookup table now...\n"); 
+      msg.Format("APs:ColdStart - Building deterministic transition lookup table now...\n"); 
       Report::InfoMsg(msg);
 
       FILE *oFile = NULL;  
@@ -1590,7 +1590,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
 	  int errNo = fopen_s(&oFile, deterministicFilename, "w");
       if ( errNo != 0 )
          {
-         CString msg( " WW2100AP:ColdStart -  ERROR: Could not open output file " );
+         CString msg( " APs:ColdStart -  ERROR: Could not open output file " );
          msg += m_DeterministicTransitionOutput_file;
          Report::ErrorMsg( msg );
          return false;
@@ -1627,7 +1627,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
             fprintf(oFile, "1,%d,%d,%d,%d,%s,%s,%d,%d,%d,%f,%f\n", pvtFrom, pvtTo, vegclassFromNum, vegclassToNum, (LPCTSTR) vegclassFromAbbrev, (LPCTSTR) vegclassToAbbrev,
                   startAge, endAge, rndAge, lai, carbon); 
             CString msg;      
-            msg.Format("WW2100AP: 1,%d,%d,%d,%d,%s,%s,%d,%d,%d,%f,%f\n", pvtFrom, pvtTo, vegclassFromNum, vegclassToNum, (LPCTSTR) vegclassFromAbbrev, (LPCTSTR) vegclassToAbbrev,
+            msg.Format("APs: 1,%d,%d,%d,%d,%s,%s,%d,%d,%d,%f,%f\n", pvtFrom, pvtTo, vegclassFromNum, vegclassToNum, (LPCTSTR) vegclassFromAbbrev, (LPCTSTR) vegclassToAbbrev,
                   startAge, endAge, rndAge, lai, carbon);      
             Report::LogMsg(msg); 
             *(PstatesInSTM + 4*iRec) = pvtFrom;
@@ -1638,7 +1638,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       fclose(oFile);
 
       // Identify any vegclass value for which there is no corresponding state in the STM.
-      msg.Format("WW2100AP: *** Checking for CT:SS values which are not represented in the STM now");
+      msg.Format("APs: *** Checking for CT:SS values which are not represented in the STM now");
       Report::LogMsg(msg); 
       ASSERT(m_colVEGCLASS>0); 
       ASSERT(m_colPVT>0);
@@ -1660,7 +1660,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
             {
             int idu_id = -1;
             pLayer->GetData(idu, m_colIDU_ID, idu_id);
-            msg.Format("WW2100AP: missing state in STM: idu_id, pvt, vegclass = %d, %d, %d", idu_id, pvt, vegclass);
+            msg.Format("APs: missing state in STM: idu_id, pvt, vegclass = %d, %d, %d", idu_id, pvt, vegclass);
             Report::LogMsg(msg);
             IDUs_with_missing_states++;
             }
@@ -1668,19 +1668,19 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
 
       if (IDUs_with_missing_states>0)
          {
-         msg.Format("WW2100AP: IDUs_with_missing_states = %d", IDUs_with_missing_states);
+         msg.Format("APs: IDUs_with_missing_states = %d", IDUs_with_missing_states);
          Report::LogMsg(msg);
          }
 
       // Build the probabilistic transition lookup table.
-      msg.Format("WW2100AP:ColdStart - Building probabilistic transition lookup table now...\n"); 
+      msg.Format("APs:ColdStart - Building probabilistic transition lookup table now...\n"); 
       Report::InfoMsg(msg);
 
 	  PCTSTR probabilisticFilename = (PCTSTR)m_ProbabilisticTransitionOutput_file;
 	  errNo = fopen_s(&oFile, probabilisticFilename, "w");
       if ( errNo != 0 )
          {
-         CString msg( " WW2100AP:ColdStart -  ERROR: Could not open output file " );
+         CString msg( " APs:ColdStart -  ERROR: Could not open output file " );
          msg += m_ProbabilisticTransitionOutput_file;
          Report::ErrorMsg( msg );
          return false;
@@ -1749,12 +1749,12 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
             if (*(PstatesInSTM + iRec_DT*4 + 2)!=0 || *(PstatesInSTM + iRec_DT*4 + 3)!=0)
          {
          CString msg;
-         msg.Format("WW2100AP: pvt %d state %d is missing its RegHar transition", *(PstatesInSTM + iRec_DT*4), *(PstatesInSTM + iRec_DT*4 + 1));
+         msg.Format("APs: pvt %d state %d is missing its RegHar transition", *(PstatesInSTM + iRec_DT*4), *(PstatesInSTM + iRec_DT*4 + 1));
          
          if (*(PstatesInSTM + iRec_DT*4 + 2)!=0) 
             Report::LogMsg(msg);
 
-         msg.Format("WW2100AP: pvt %d state %d is missing its WFSR transition", *(PstatesInSTM + iRec_DT*4), *(PstatesInSTM + iRec_DT*4 + 1));
+         msg.Format("APs: pvt %d state %d is missing its WFSR transition", *(PstatesInSTM + iRec_DT*4), *(PstatesInSTM + iRec_DT*4 + 1));
          if (*(PstatesInSTM + iRec_DT*4 + 3)!=0) Report::LogMsg(msg);
          } // end of if (*(PstatesInSTM + iRec_DT*4 + 2)!=0 || *(PstatesInSTM + iRec_DT*4 + 3)!=0)
       free(PstatesInSTM);
@@ -1762,7 +1762,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
       // Read the DGVM netCDF file to initialize the GrdCellNdx and DGVMvegtype IDU attributes
       CString pathAndFileName = ReplaceSubstring(m_DGVMvegtypefile.DGVMvegtype_filename, "CLIMATE_SCENARIO_NAME", m_climateScenarioName);
       pathAndFileName = PathManager::MakeAbsolutePath(pathAndFileName, PM_PROJECT_DIR);
-      msg.Format( "WW2100AP_ColdStart: Opening DGVM vegtype file %s", (LPCTSTR) pathAndFileName );
+      msg.Format( "APs_ColdStart: Opening DGVM vegtype file %s", (LPCTSTR) pathAndFileName );
       Report::LogMsg( msg, RT_INFO );
       CString varName(_T("VTYPE"));
       m_pDataObj_DGVMvegtype = new GeoSpatialDataObj();
@@ -1778,7 +1778,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
 
          if ((idu_count/25000)*25000==idu_count)
             {
-            msg.Format( "WW2100AP_ColdStart: DGVMvegtype idu_count = %d", idu_count );
+            msg.Format( "APs_ColdStart: DGVMvegtype idu_count = %d", idu_count );
             Report::LogMsg( msg, RT_INFO );
             }
          idu_count++;
@@ -1787,7 +1787,7 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
          Vertex centroid = pPoly->GetCentroid();
          if ((centroid.x!=centroid.x || centroid.y!=centroid.y) || (centroid.x==0 && centroid.y==0)) // detect NaNs
             {
-            msg.Format( "WW2100AP_ColdStart: bad centroid at idu_count = %d", idu_count );
+            msg.Format( "APs_ColdStart: bad centroid at idu_count = %d", idu_count );
             Report::LogMsg( msg, RT_INFO );
             continue;
             }
@@ -1797,23 +1797,23 @@ bool WW2100AP::InitColdStart( EnvContext *pContext )
          int vtype = (int)m_pDataObj_DGVMvegtype->Get( centroid.x, centroid.y, r_gridCellIndex, 0, m_projectionWKT, false, &OKflag  ); 
          if (!OKflag)
             { CString msg;
-            msg.Format("*** WW2100AP::InitColdStart() m_pDataObj_DGVMvegtype->Get() failed. centroid = (%f,%f)", centroid.x, centroid.y);
+            msg.Format("*** APs::InitColdStart() m_pDataObj_DGVMvegtype->Get() failed. centroid = (%f,%f)", centroid.x, centroid.y);
             Report::LogMsg(msg);
             return(false);
             }
 			pLayer->SetData( idu, m_colGrdCellNdx,  gridCellIndex );
          pLayer->SetData( idu, m_colDGVMvegtyp,  vtype );
          } // end IDU loop
-	   msg.Format("WW2100AP:ColdStart - initialized grid cell index\n"); 
+	   msg.Format("APs:ColdStart - initialized grid cell index\n"); 
       Report::InfoMsg(msg);
       } // end of if ( m_useColdStart_ForestSTMfiles ) 
 
    return true;
-   }  // end of WW2100AP_ColdStart()
+   }  // end of APs_ColdStart()
 
 
 
-float WW2100AP::CarbonDensity(CString vegclassAbbrev)
+float APs::CarbonDensity(CString vegclassAbbrev)
    {
    int iRec = find(&m_LAIandC_table, m_records_LAIandC, m_colLAIandC_Abbrev, vegclassAbbrev);
    float carbonDensity = 0.f;
@@ -1822,7 +1822,7 @@ float WW2100AP::CarbonDensity(CString vegclassAbbrev)
    }
 
    
-int WW2100AP::VegclassNum(CString vegclassAbbrev)
+int APs::VegclassNum(CString vegclassAbbrev)
    { int colon_pos;
       colon_pos = vegclassAbbrev.Find(':');
       CString coverTypeAbbrev = vegclassAbbrev.Left(colon_pos);
@@ -1837,24 +1837,24 @@ int WW2100AP::VegclassNum(CString vegclassAbbrev)
    } // end of VegclassNum()
 
 
-int WW2100AP::lookup(VDataObj * tableP, int nRec, int colIn, CString inString, int colOut)
+int APs::lookup(VDataObj * tableP, int nRec, int colIn, CString inString, int colOut)
    { int outVal, iRec;
    iRec = find(tableP, nRec, colIn, inString);
    ASSERT(iRec>=0 && iRec<nRec);
    outVal = tableP->GetAsInt (colOut, iRec);
    return(outVal);
-   } // end of int WW2100AP::lookup(table, colIn, inString, colOut)
+   } // end of int APs::lookup(table, colIn, inString, colOut)
 
 
-void WW2100AP::lookup(VDataObj * tableP, int nRec, int colIn, CString inString, int colOut, CString * outStringP)
+void APs::lookup(VDataObj * tableP, int nRec, int colIn, CString inString, int colOut, CString * outStringP)
    { int iRec;
    iRec = find(tableP, nRec, colIn, inString);
    ASSERT(iRec>=0 && iRec<nRec);
    *outStringP = tableP->GetAsString(colOut, iRec);
-   } // end of void WW2100AP::lookup(table, colIn, inString, colOut, outStringP)
+   } // end of void APs::lookup(table, colIn, inString, colOut, outStringP)
 
 
-int WW2100AP::find(VDataObj * tableP, int nRec, int col, CString tgt)
+int APs::find(VDataObj * tableP, int nRec, int col, CString tgt)
    {
    for (int iRec=0; iRec<nRec; iRec++)
       {
@@ -1864,10 +1864,10 @@ int WW2100AP::find(VDataObj * tableP, int nRec, int col, CString tgt)
       }
    // ASSERT(0);
    return(-1);
-   } // end of WW2100AP::find(table, nRec, col, tgt)
+   } // end of APs::find(table, nRec, col, tgt)
    
 
-bool WW2100AP::RunCarbon( EnvContext *pContext )
+bool APs::RunCarbon( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
    testMessage(pContext, _T("RunCarbon"));
@@ -1902,7 +1902,7 @@ bool WW2100AP::RunCarbon( EnvContext *pContext )
    }
 
 
-bool WW2100AP::InitCarbon( EnvContext *pContext )
+bool APs::InitCarbon( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
 
@@ -1922,17 +1922,17 @@ bool WW2100AP::InitCarbon( EnvContext *pContext )
    }
 
 
-void WW2100AP::testMessage(EnvContext *pContext, LPCTSTR modelName)
+void APs::testMessage(EnvContext *pContext, LPCTSTR modelName)
    {
    if (m_testMode==0) return;
 
    CString msg;
-   msg.Format("WW2100AP: currentYear, id, WW2100AP modelName = %d, %d, %s", pContext->currentYear, pContext->id, modelName );
+   msg.Format("APs: currentYear, id, APs modelName = %d, %d, %s", pContext->currentYear, pContext->id, modelName );
    Report::LogMsg(msg);
    } // end of testMessage()
 
 
-bool WW2100AP::SetCarbonStocks( EnvContext *pContext, int idu )
+bool APs::SetCarbonStocks( EnvContext *pContext, int idu )
    {
 /*   The Carbon Stock equations we're derived from data from David Turner.  See documentation in \envision\StudyAreas\WW2100\Carbon_Stocks.
     The POLY_FIT routine in the programming language IDL uses matrix inversion to determine the coefficients.
@@ -2019,7 +2019,7 @@ bool WW2100AP::SetCarbonStocks( EnvContext *pContext, int idu )
    }
 
 
-bool WW2100AP::InitializeTestMode(MapLayer *pLayer, int lastXndx, int lastPndx)
+bool APs::InitializeTestMode(MapLayer *pLayer, int lastXndx, int lastPndx)
    {
    CheckCol( pLayer, m_colBETAX, "BETAX", TYPE_FLOAT, CC_AUTOADD );
    CheckCols(pLayer, lastXndx, _T("X"), &m_colX0);
@@ -2036,7 +2036,7 @@ bool WW2100AP::InitializeTestMode(MapLayer *pLayer, int lastXndx, int lastPndx)
    } // end of initializeTestMode()
 
 
-bool WW2100AP::CheckCols(MapLayer *pLayer, int lastNdx, LPCTSTR prefix, int * pCol0)
+bool APs::CheckCols(MapLayer *pLayer, int lastNdx, LPCTSTR prefix, int * pCol0)
    {
    int ndx = 0;
    int colNum;
@@ -2177,7 +2177,7 @@ bool TDdataset::InterpretValueStr(CString scenarioName)
    } // end of InterpretValueStr()
 
 
-bool WW2100AP::InterpretXmlCoefficients(char * symbolPrefix, double coeff[], int numCoeff, PtrArray< ModelScalar > coeffsFromXml)
+bool APs::InterpretXmlCoefficients(char * symbolPrefix, double coeff[], int numCoeff, PtrArray< ModelScalar > coeffsFromXml)
    {
    // Interpret the coefficients from the XML file.  This is designed to work for coefficients with subscripts from 0 thru 99.
    ASSERT(numCoeff>0 && numCoeff<=99);
@@ -2199,7 +2199,7 @@ bool WW2100AP::InterpretXmlCoefficients(char * symbolPrefix, double coeff[], int
       if (!recognized)
          {
          CString msg;
-         msg.Format("WW2100AP Unrecognized coefficient symbol %s.  Recognizable symbols are %s0, ... %s%d", 
+         msg.Format("APs Unrecognized coefficient symbol %s.  Recognizable symbols are %s0, ... %s%d", 
                (LPCTSTR)  symbol, symbolPrefix, symbolPrefix, numCoeff - 1);
          Report::ErrorMsg(msg);
          return false;
@@ -2212,15 +2212,15 @@ bool WW2100AP::InterpretXmlCoefficients(char * symbolPrefix, double coeff[], int
    } // end of InterpretXmlCoefficients 
 
 
-void WW2100AP::RequiredTagIsMissing(CString tag, CString filename)
+void APs::RequiredTagIsMissing(CString tag, CString filename)
    {
    RequiredTagIsMissing(tag, filename, CString("."));
    }
 
    
-void WW2100AP::RequiredTagIsMissing(CString tag, CString filename, CString whenClause)
+void APs::RequiredTagIsMissing(CString tag, CString filename, CString whenClause)
       {
-      CString msg( "WW2100AP: Missing <");
+      CString msg( "APs: Missing <");
       msg += tag;
       msg += "> tag when reading ";
       msg += filename;
@@ -2230,14 +2230,14 @@ void WW2100AP::RequiredTagIsMissing(CString tag, CString filename, CString whenC
       }
 
 
-bool WW2100AP::LoadXmlTDcoefficient(TiXmlElement *pXml0, LPCTSTR fileName)
+bool APs::LoadXmlTDcoefficient(TiXmlElement *pXml0, LPCTSTR fileName)
    {
    bool ok;
 
    TiXmlElement *pXmlTDcoefficient = pXml0->FirstChildElement( _T( "time_dependent_coefficient" ) );
    if ( pXmlTDcoefficient == NULL )
       {
-      CString msg( "WW2100AP: Missing <time_dependent_coefficient> tag when reading " );
+      CString msg( "APs: Missing <time_dependent_coefficient> tag when reading " );
       msg += fileName;
       msg += ".  This is a required tag";
       Report::ErrorMsg( msg );
@@ -2262,7 +2262,7 @@ bool WW2100AP::LoadXmlTDcoefficient(TiXmlElement *pXml0, LPCTSTR fileName)
    //if (ok) TiXmlGetAttributes( pXmlTDcoefficient, TDcoefficientAttrs, , fileName, NULL );
    if (!ok || _symbol==NULL || _method==NULL || _value==NULL) 
       {
-      CString msg( "WW2100AP: Missing or malformed symbol, method, or value in <time_dependent_coefficient> tag when reading " );
+      CString msg( "APs: Missing or malformed symbol, method, or value in <time_dependent_coefficient> tag when reading " );
       msg += fileName;
       msg += ".  This is a required tag";
       Report::ErrorMsg( msg );
@@ -2277,7 +2277,7 @@ bool WW2100AP::LoadXmlTDcoefficient(TiXmlElement *pXml0, LPCTSTR fileName)
    else
       {
       CString msg; 
-      msg.Format( _T("WW2100AP: Unrecognized method in <time_dependent_coefficient> attributes in input file %s; symbol = %s, method = %s"), 
+      msg.Format( _T("APs: Unrecognized method in <time_dependent_coefficient> attributes in input file %s; symbol = %s, method = %s"), 
             fileName, _symbol, _method );
       Report::ErrorMsg( msg );
       return false;
@@ -2320,7 +2320,7 @@ bool WW2100AP::LoadXmlTDcoefficient(TiXmlElement *pXml0, LPCTSTR fileName)
       default:
          {
          CString msg; 
-         msg.Format( _T("WW2100AP: Unimplemented method in <time_dependent_coefficient> attributes in input file %s; symbol = %s, method = %s"), 
+         msg.Format( _T("APs: Unimplemented method in <time_dependent_coefficient> attributes in input file %s; symbol = %s, method = %s"), 
                fileName, _symbol, _method );
          Report::ErrorMsg( msg );
          return false;
@@ -2332,14 +2332,14 @@ bool WW2100AP::LoadXmlTDcoefficient(TiXmlElement *pXml0, LPCTSTR fileName)
    } // end of LoadXmlTDcoefficient() 
 
 
-bool WW2100AP::LoadXmlTDdata(const char * symbolStr, LPCTSTR fileName, TiXmlElement *pXmlTDdata, TDdataset * pTDdata)
+bool APs::LoadXmlTDdata(const char * symbolStr, LPCTSTR fileName, TiXmlElement *pXmlTDdata, TDdataset * pTDdata)
    {
    bool ok;
 
 //   TiXmlElement *pXmlTDdata = pXml0->FirstChildElement( _T( "time_dependent_data" ) );
    if ( pXmlTDdata == NULL )
       {
-      CString msg( "WW2100AP: Missing <time_dependent_data> tag when reading " );
+      CString msg( "APs: Missing <time_dependent_data> tag when reading " );
       msg += fileName;
       msg += ".  This is a required tag";
       Report::ErrorMsg( msg );
@@ -2368,7 +2368,7 @@ bool WW2100AP::LoadXmlTDdata(const char * symbolStr, LPCTSTR fileName, TiXmlElem
    if ( !ok )
       {
       CString msg;
-      msg.Format("WW2100AP: In %s <time_dependent_data>, found '%s' when looking for %s.", fileName, _symbol, symbolStr);
+      msg.Format("APs: In %s <time_dependent_data>, found '%s' when looking for %s.", fileName, _symbol, symbolStr);
       Report::ErrorMsg( msg );
       return false;
       }
@@ -2378,7 +2378,7 @@ bool WW2100AP::LoadXmlTDdata(const char * symbolStr, LPCTSTR fileName, TiXmlElem
    //if (ok) TiXmlGetAttributes( pXmlTDdata, TDdataAttrs,  fileName, NULL );
    if (!ok || _symbol==NULL || _type==NULL || _method==NULL || _value==NULL) 
       {
-      CString msg( "WW2100AP: Missing or malformed symbol, type, method, or value in <time_dependent_data> tag when reading " );
+      CString msg( "APs: Missing or malformed symbol, type, method, or value in <time_dependent_data> tag when reading " );
       msg += fileName; 
       msg += " ";
       
@@ -2402,7 +2402,7 @@ enum TD_DATA_METHOD {TD_METHOD_LINEAR, TD_METHOD_CONSTANT_RATE};
    else
    {
    CString msg; 
-   msg.Format( _T("WW2100AP: Unrecognized type in <time_dependent_dataset> attributes in input file %s; symbol = %s, type = %s"), 
+   msg.Format( _T("APs: Unrecognized type in <time_dependent_dataset> attributes in input file %s; symbol = %s, type = %s"), 
          fileName, _symbol, _type );
    Report::ErrorMsg( msg );
    return false;
@@ -2415,7 +2415,7 @@ enum TD_DATA_METHOD {TD_METHOD_LINEAR, TD_METHOD_CONSTANT_RATE};
    else
    {
    CString msg; 
-   msg.Format( _T("WW2100AP: Unrecognized method in <time_dependent_dataset> attributes in input file %s; symbol = %s, method = %s"), 
+   msg.Format( _T("APs: Unrecognized method in <time_dependent_dataset> attributes in input file %s; symbol = %s, method = %s"), 
          fileName, _symbol, _method );
    Report::ErrorMsg( msg );
    return false;
@@ -2457,7 +2457,7 @@ enum TD_DATA_METHOD {TD_METHOD_LINEAR, TD_METHOD_CONSTANT_RATE};
       default:
          {
          CString msg; 
-         msg.Format( _T("WW2100AP: Unimplemented method in <time_dependent_data> attributes in input file %s; symbol = %s, method = %s"), 
+         msg.Format( _T("APs: Unimplemented method in <time_dependent_data> attributes in input file %s; symbol = %s, method = %s"), 
                fileName, _symbol, _method );
          Report::ErrorMsg( msg );
          return false;
@@ -2469,14 +2469,14 @@ enum TD_DATA_METHOD {TD_METHOD_LINEAR, TD_METHOD_CONSTANT_RATE};
    } // end of LoadXmlTDdata() 
 
 
-bool WW2100AP::attCheck(int attVal, int minVal, int maxVal, LPCTSTR attName) 
+bool APs::attCheck(int attVal, int minVal, int maxVal, LPCTSTR attName) 
    {
    bool rtnVal = minVal<=attVal && attVal<=maxVal;
 
    if (!rtnVal)
       {
       CString msg;
-      msg.Format("WW2100AP: attribute %s is out of limits. attVal, minVal, maxVal = %d, %d, %d. Acceptable range includes limit values.", 
+      msg.Format("APs: attribute %s is out of limits. attVal, minVal, maxVal = %d, %d, %d. Acceptable range includes limit values.", 
             attName, attVal, minVal, maxVal);
       Report::ErrorMsg(msg);
       }
@@ -2485,14 +2485,14 @@ bool WW2100AP::attCheck(int attVal, int minVal, int maxVal, LPCTSTR attName)
    } // end of attCheck() for integer attributes
 
 
-bool WW2100AP::attCheck(float attVal, float minVal, float maxVal, LPCTSTR attName) 
+bool APs::attCheck(float attVal, float minVal, float maxVal, LPCTSTR attName) 
    {
    bool rtnVal = minVal<attVal && attVal<maxVal;
 
    if (!rtnVal)
       {
       CString msg;
-      msg.Format("WW2100AP: attribute %s is out of limits. attVal, minVal, maxVal = %f, %f, %f. Limit values are excluded from acceptable range.", 
+      msg.Format("APs: attribute %s is out of limits. attVal, minVal, maxVal = %f, %f, %f. Limit values are excluded from acceptable range.", 
             attName, attVal, minVal, maxVal);
       Report::ErrorMsg(msg);
       }
@@ -2501,7 +2501,7 @@ bool WW2100AP::attCheck(float attVal, float minVal, float maxVal, LPCTSTR attNam
    } // end of attCheck()
 
 
-bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
+bool APs::LoadXml( EnvContext *pContext, LPCTSTR filename )
    {
    CString msg;
 
@@ -2531,7 +2531,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
          else 
             {
             CString msg;
-            msg.Format("WW2100AP: tau_climate specified as %f in XML file %s, but tau must be >= 1.", (float)tau, filename);
+            msg.Format("APs: tau_climate specified as %f in XML file %s, but tau must be >= 1.", (float)tau, filename);
             Report::ErrorMsg(msg);
             return false;
             }
@@ -2546,7 +2546,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
          else 
             {
             CString msg;
-            msg.Format("WW2100AP: tau_WR specified as %f in XML file %s, but tau must be >= 1.", (float)tau, filename);
+            msg.Format("APs: tau_WR specified as %f in XML file %s, but tau must be >= 1.", (float)tau, filename);
             Report::ErrorMsg(msg);
             return false;
             }
@@ -2636,7 +2636,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
    TiXmlElement *pXmlFish = pXmlRoot->FirstChildElement( _T("fish" ) );
    if ( pXmlFish == NULL )
       {
-      CString msg( "WW2100AP: Missing <fish> tag when reading " );
+      CString msg( "APs: Missing <fish> tag when reading " );
       msg += filename;
       msg += ".  This is a required tag";
       Report::ErrorMsg( msg );
@@ -2652,7 +2652,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
       TiXmlElement *pXmlGroups = pXmlFish->FirstChildElement( _T( "groups" ) );
       if ( pXmlGroups == NULL )
          {
-         CString msg( "WW2100AP: Missing <groups> tag when reading " );
+         CString msg( "APs: Missing <groups> tag when reading " );
          msg += filename;
          msg += ".  This is a required tag";
          Report::ErrorMsg( msg );
@@ -2675,7 +2675,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
          if ( ! ok )
             {
             CString msg; 
-            msg.Format( _T("WW2100AP: Misformed root element reading <group> attributes in input file %s"), filename );
+            msg.Format( _T("APs: Misformed root element reading <group> attributes in input file %s"), filename );
             Report::ErrorMsg( msg );
             return false;
             }
@@ -2687,7 +2687,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
          else
             {
             CString msg;
-            msg.Format(_T("WW2100AP: number of fish groups in %s exceeds MAX_FISH_GROUPS.  MAX_FISH_GROUPS is %d."), filename, MAX_FISH_GROUPS);
+            msg.Format(_T("APs: number of fish groups in %s exceeds MAX_FISH_GROUPS.  MAX_FISH_GROUPS is %d."), filename, MAX_FISH_GROUPS);
             Report::ErrorMsg(msg);
             return false;
             }
@@ -2699,7 +2699,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
       TiXmlElement *pXmlSpp = pXmlFish->FirstChildElement( _T("species" ) );
       if ( pXmlSpp == NULL )
          {
-         CString msg( "WW2100AP: Missing <species> tag when reading " );
+         CString msg( "APs: Missing <species> tag when reading " );
          msg += filename;
          msg += ".  This is a required tag";
          Report::ErrorMsg( msg );
@@ -2730,7 +2730,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
          if ( ! ok )
             {
             CString msg; 
-            msg.Format( _T("WW2100AP: Misformed root element reading <specie> attributes in input file %s"), filename );
+            msg.Format( _T("APs: Misformed root element reading <specie> attributes in input file %s"), filename );
             Report::ErrorMsg( msg );
             return false;
             }
@@ -2762,7 +2762,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
    TiXmlElement *pXmlCarbon = pXmlRoot->FirstChildElement( _T("carbon" ) );
    if ( pXmlCarbon == NULL )
       {
-      CString msg( "WW2100AP: Missing <carbon> tag when reading " );
+      CString msg( "APs: Missing <carbon> tag when reading " );
       msg += filename;
       msg += ".  This is a required tag";
       Report::ErrorMsg( msg );
@@ -2889,7 +2889,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
             if ( ! ok )
                {
                CString msg; 
-               msg.Format( _T("WW2100AP: Misformed root element reading <price_ccv> attributes in input file %s"), filename );
+               msg.Format( _T("APs: Misformed root element reading <price_ccv> attributes in input file %s"), filename );
                Report::ErrorMsg( msg );
                return false;
                }
@@ -2913,7 +2913,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
    TiXmlElement *pXmlDGVMvegtypeData = pXmlRoot->FirstChildElement( _T("DGVMvegtypeData" ) );
    if ( pXmlDGVMvegtypeData == NULL )
       {
-      CString msg( "WW2100AP: Missing <DGVMvegtypeData> tag when reading " );
+      CString msg( "APs: Missing <DGVMvegtypeData> tag when reading " );
       msg += filename;
       msg += ".  This is a required tag";
       Report::ErrorMsg( msg );
@@ -2949,7 +2949,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
             else 
                {
                CString msg;
-               msg.Format("WW2100AP Irrigation Choice: test_mode specified as %s in XML file %s, but test_mode must be >= 0 and <=2.", attStr, filename);
+               msg.Format("APs Irrigation Choice: test_mode specified as %s in XML file %s, but test_mode must be >= 0 and <=2.", attStr, filename);
                Report::ErrorMsg(msg);
                return false;
                }
@@ -2959,7 +2959,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
          TiXmlElement *pXmlCoefficients = pXmlSubProc->FirstChildElement( _T( "coefficients" ) );
          if ( pXmlCoefficients == NULL )
             {
-            CString msg( "WW2100AP: Missing <coefficients> tag when reading " );
+            CString msg( "APs: Missing <coefficients> tag when reading " );
             msg += filename;
             msg += ".  This is a required tag";
             Report::ErrorMsg( msg );
@@ -2984,7 +2984,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
             if ( ! ok )
                {
                CString msg; 
-               msg.Format( _T("WW2100AP: Misformed root element reading <coefficient> attributes in input file %s"), filename );
+               msg.Format( _T("APs: Misformed root element reading <coefficient> attributes in input file %s"), filename );
                Report::ErrorMsg( msg );
                return false;
                }
@@ -3033,7 +3033,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
             else 
                {
                CString msg;
-               msg.Format("WW2100AP Farmland Rent: test_mode specified as %s in XML file %s, but test_mode must be >= 0 and <=2.", attStr, filename);
+               msg.Format("APs Farmland Rent: test_mode specified as %s in XML file %s, but test_mode must be >= 0 and <=2.", attStr, filename);
                Report::ErrorMsg(msg);
                return false;
                }
@@ -3069,7 +3069,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
             else 
                {
                CString msg;
-               msg.Format("WW2100AP Crop Choice: test_mode specified as %s in XML file %s, but test_mode must be >= 0 and <=2.", attStr, filename);
+               msg.Format("APs Crop Choice: test_mode specified as %s in XML file %s, but test_mode must be >= 0 and <=2.", attStr, filename);
                Report::ErrorMsg(msg);
                return false;
                }
@@ -3109,7 +3109,7 @@ bool WW2100AP::LoadXml( EnvContext *pContext, LPCTSTR filename )
    } // end of LoadXml()
 
 
-bool WW2100AP::StartXMLforSubprocess(EnvContext *pContext, LPCTSTR file_name, TiXmlElement * pXml_root, 
+bool APs::StartXMLforSubprocess(EnvContext *pContext, LPCTSTR file_name, TiXmlElement * pXml_root, 
       CString subprocess_tag, int * p_id, TiXmlElement **ppXmlSubProc, int *pTestMode)
    {
    bool rtnVal = StartXMLforSubprocess(pContext, file_name, pXml_root, subprocess_tag, p_id, ppXmlSubProc);
@@ -3122,7 +3122,7 @@ bool WW2100AP::StartXMLforSubprocess(EnvContext *pContext, LPCTSTR file_name, Ti
    } // end of StartXMLforSubprocess(7 argument version)
 
 
-bool WW2100AP::StartXMLforSubprocess(EnvContext *pContext, LPCTSTR file_name, TiXmlElement * pXml_root, 
+bool APs::StartXMLforSubprocess(EnvContext *pContext, LPCTSTR file_name, TiXmlElement * pXml_root, 
       CString subprocess_tag, int * p_id, TiXmlElement **ppXmlSubProc)
    {
    *ppXmlSubProc = pXml_root->FirstChildElement( subprocess_tag );
@@ -3135,7 +3135,7 @@ bool WW2100AP::StartXMLforSubprocess(EnvContext *pContext, LPCTSTR file_name, Ti
    } // end of StartXMLforSubprocess()
 
 
-bool WW2100AP::LoadXmlTransitionConstraint(LPCTSTR filename, TiXmlElement *pXmlConstraint, LPCTSTR tgtToUse,   
+bool APs::LoadXmlTransitionConstraint(LPCTSTR filename, TiXmlElement *pXmlConstraint, LPCTSTR tgtToUse,   
       LTconstraintParams *pConstraint)
    {
    bool ok;
@@ -3164,7 +3164,7 @@ bool WW2100AP::LoadXmlTransitionConstraint(LPCTSTR filename, TiXmlElement *pXmlC
    } // end of LoadXmlTransitionConstraint()
 
 
-bool WW2100AP::LoadXmlTransition(LPCTSTR filename, TiXmlElement *pXmlTransition, 
+bool APs::LoadXmlTransition(LPCTSTR filename, TiXmlElement *pXmlTransition, 
       LPCTSTR tgtFromUse,  LTparamSet *pConstraintSet)
    {
    bool ok;
@@ -3196,7 +3196,7 @@ bool WW2100AP::LoadXmlTransition(LPCTSTR filename, TiXmlElement *pXmlTransition,
    } // end of LoadXmlTransition()
 
 
-bool WW2100AP::LoadXmlTDdatasets(LPCTSTR file_name, TiXmlElement *pXmlSubProc, PtrArray< TDdataset > *pTDdatasetArray)
+bool APs::LoadXmlTDdatasets(LPCTSTR file_name, TiXmlElement *pXmlSubProc, PtrArray< TDdataset > *pTDdatasetArray)
    {
    TiXmlElement *pXmlTDdatasets = pXmlSubProc->FirstChildElement( _T( "time_dependent_datasets" ) );
    if ( pXmlTDdatasets == NULL )  { RequiredTagIsMissing(_T("time_dependent_datasets"), file_name); return(false); };
@@ -3223,7 +3223,7 @@ bool WW2100AP::LoadXmlTDdatasets(LPCTSTR file_name, TiXmlElement *pXmlSubProc, P
       if ( ! ok )
          {
          CString msg; 
-         msg.Format( _T("WW2100AP: Misformed root element reading <time_dependent_data ... > attributes in input file %s"), file_name );
+         msg.Format( _T("APs: Misformed root element reading <time_dependent_data ... > attributes in input file %s"), file_name );
          Report::ErrorMsg( msg );
          return false;
          }
@@ -3238,7 +3238,7 @@ bool WW2100AP::LoadXmlTDdatasets(LPCTSTR file_name, TiXmlElement *pXmlSubProc, P
          else
             {
             CString msg; 
-            msg.Format( _T("WW2100AP: Unrecognized type in <time_dependent_dataset> attributes in input file %s; symbol = %s, type = %s"), 
+            msg.Format( _T("APs: Unrecognized type in <time_dependent_dataset> attributes in input file %s; symbol = %s, type = %s"), 
                   file_name, symbol_str, type_str );
             Report::ErrorMsg( msg );
             return false;
@@ -3255,7 +3255,7 @@ bool WW2100AP::LoadXmlTDdatasets(LPCTSTR file_name, TiXmlElement *pXmlSubProc, P
          else
             {
             CString msg; 
-            msg.Format( _T("WW2100AP: Unrecognized method in <time_dependent_dataset> attributes in input file %s; symbol = %s, method = %s"), 
+            msg.Format( _T("APs: Unrecognized method in <time_dependent_dataset> attributes in input file %s; symbol = %s, method = %s"), 
                   file_name, symbol_str, method_str );
             Report::ErrorMsg( msg );
             return false;
@@ -3305,7 +3305,7 @@ CString ReplaceSubstring(CString origStr,  CString strToBeReplaced,  CString rep
    } // end of ReplaceSubString()
          
 
-bool WW2100AP::LoadXmlScalar(LPCTSTR file_name, TiXmlElement *pXmlScalar, 
+bool APs::LoadXmlScalar(LPCTSTR file_name, TiXmlElement *pXmlScalar, 
        LPCSTR tgtSymbol, ModelScalar *pScalar)
    {
    bool ok = false;
@@ -3330,7 +3330,7 @@ bool WW2100AP::LoadXmlScalar(LPCTSTR file_name, TiXmlElement *pXmlScalar,
       if ( !ok || ( _symbol != NULL && (_tcscmp(_symbol, tgtSymbol) != 0)))
          {
          CString msg; 
-         msg.Format( _T("WW2100AP: Misformed root element reading attributes in input file %s, symbol %s"), 
+         msg.Format( _T("APs: Misformed root element reading attributes in input file %s, symbol %s"), 
                file_name, tgtSymbol );
          Report::ErrorMsg( msg );
          return false;
@@ -3346,7 +3346,7 @@ bool WW2100AP::LoadXmlScalar(LPCTSTR file_name, TiXmlElement *pXmlScalar,
    } // end of LoadXmlScalar()
 
 
-bool WW2100AP::LoadXmlUGA(LPCTSTR file_name, TiXmlElement *pXmlUGA)
+bool APs::LoadXmlUGA(LPCTSTR file_name, TiXmlElement *pXmlUGA)
    {
    bool ok = false;
 
@@ -3373,7 +3373,7 @@ bool WW2100AP::LoadXmlUGA(LPCTSTR file_name, TiXmlElement *pXmlUGA)
       if ( !ok || _id<0 || _id>MAX_UGA_NDX)
          {
          CString msg; 
-         msg.Format( _T("WW2100AP: Misformed element reading UGA attributes in input file %s, or UGA id out of range"), 
+         msg.Format( _T("APs: Misformed element reading UGA attributes in input file %s, or UGA id out of range"), 
                file_name);
          Report::ErrorMsg( msg );
          return false;
@@ -3392,7 +3392,7 @@ bool WW2100AP::LoadXmlUGA(LPCTSTR file_name, TiXmlElement *pXmlUGA)
    } // end of LoadXmlUGA()
 
 
-bool WW2100AP::LoadXmlParameter(LPCTSTR file_name, TiXmlElement *pXmlParameter, 
+bool APs::LoadXmlParameter(LPCTSTR file_name, TiXmlElement *pXmlParameter, 
       LPCSTR tgtSymbol, ModelScalar *pParameter)
    {
    bool ok;
@@ -3401,7 +3401,7 @@ bool WW2100AP::LoadXmlParameter(LPCTSTR file_name, TiXmlElement *pXmlParameter,
    } // end of LoadXmlParameter()
 
 
-bool WW2100AP::LoadXmlCoefficient(LPCTSTR file_name, TiXmlElement *pXmlCoefficient, 
+bool APs::LoadXmlCoefficient(LPCTSTR file_name, TiXmlElement *pXmlCoefficient, 
       LPCSTR tgtSymbol, ModelScalar *pCoefficient)
    {
    bool ok;
@@ -3410,13 +3410,13 @@ bool WW2100AP::LoadXmlCoefficient(LPCTSTR file_name, TiXmlElement *pXmlCoefficie
    } // end of LoadXmlCoefficient()
 
 
-bool WW2100AP::LoadXmlCoefficients(LPCTSTR file_name, TiXmlElement *pXmlSubProc, PtrArray< ModelScalar > *pCoefficientArray)
+bool APs::LoadXmlCoefficients(LPCTSTR file_name, TiXmlElement *pXmlSubProc, PtrArray< ModelScalar > *pCoefficientArray)
    {
    return(LoadXmlCoefficients(file_name, pXmlSubProc, pCoefficientArray, _T("beta")));
    } // end of LoadXmlCoefficients(3 argument form)
 
 
-bool WW2100AP::LoadXmlCoefficients(LPCTSTR file_name, TiXmlElement *pXmlSubProc, PtrArray< ModelScalar > *pCoefficientArray, LPCTSTR prefix)
+bool APs::LoadXmlCoefficients(LPCTSTR file_name, TiXmlElement *pXmlSubProc, PtrArray< ModelScalar > *pCoefficientArray, LPCTSTR prefix)
    {
    TiXmlElement *pXmlCoefficients = pXmlSubProc->FirstChildElement( _T( "coefficients" ) );
    if ( pXmlCoefficients == NULL )  { RequiredTagIsMissing(_T("coefficients"), file_name); return(false); };
@@ -3446,7 +3446,7 @@ bool WW2100AP::LoadXmlCoefficients(LPCTSTR file_name, TiXmlElement *pXmlSubProc,
    } // end of LoadXmlCoefficients()
 
 
-bool WW2100AP::LoadXmlUGAs(LPCTSTR file_name, TiXmlElement *pXmlSubProc)
+bool APs::LoadXmlUGAs(LPCTSTR file_name, TiXmlElement *pXmlSubProc)
    {
    TiXmlElement *pXmlUGAs = pXmlSubProc->FirstChildElement( _T( "UGAs" ) );
    if ( pXmlUGAs == NULL )  { RequiredTagIsMissing(_T("UGAs"), file_name); return(false); };
@@ -3471,3 +3471,12 @@ bool WW2100AP::LoadXmlUGAs(LPCTSTR file_name, TiXmlElement *pXmlSubProc)
    return(true);
    } // end of LoadXmlUGAs()
 
+
+BOOL APs::InitPrescribedLULCs(EnvContext* pContext)
+{
+   bool rtn_val = false;
+
+   CString path = ReplaceSubstring(m_LULCsFile, "SCENARIO_NAME", m_simulationScenario);
+
+   return(rtn_val);
+} // end of InitPrescribedLULCs()

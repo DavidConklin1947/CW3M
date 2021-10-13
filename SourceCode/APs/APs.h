@@ -444,11 +444,11 @@ struct UGAinfo
 
 //////////////////////////////////////////////////////////////////////////
 
-class WW2100AP : public EnvAutoProcess
+class APs : public EnvAutoProcess
 {
 public:
-   WW2100AP(void);
-   ~WW2100AP( void );
+   APs(void);
+   ~APs( void );
 
    BOOL Init   ( EnvContext *pContext, LPCTSTR initStr );
    BOOL InitRun( EnvContext *pContext, bool useInitSeed);
@@ -1026,7 +1026,7 @@ protected:
 
 
 inline
-SpeciesGroup *WW2100AP::FindSppGroupFromID( int id )
+SpeciesGroup *APs::FindSppGroupFromID( int id )
    {
    for ( int i=0; i < (int) m_sppGroupArray.GetSize(); i++ )
       {

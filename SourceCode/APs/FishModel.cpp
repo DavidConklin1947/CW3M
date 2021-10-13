@@ -1,4 +1,4 @@
-// WW2100AP.cpp 
+// FishModel.cpp 
 //
 
 #include "stdafx.h"
@@ -19,7 +19,7 @@
 #endif
 
 
-bool WW2100AP::InitFish( EnvContext *pContext )
+bool APs::InitFish( EnvContext *pContext )
    {
    m_reachIndexArray.RemoveAll();
 
@@ -40,7 +40,7 @@ bool WW2100AP::InitFish( EnvContext *pContext )
    }
 
 
-bool WW2100AP::RunFish( EnvContext *pContext )
+bool APs::RunFish( EnvContext *pContext )
    {
    // basic idea - for each species, compute a probability of presence for each reach.
    //  assemble these into.  Limit this to those reaches that are in the slices coverage

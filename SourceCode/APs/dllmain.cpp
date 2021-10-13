@@ -17,10 +17,10 @@
 
 /**** TODO - indicate model/process instance pointer ****/
 //MyEvalModel    *theModel = NULL;
-WW2100AP  *theProcess = NULL;
+APs  *theProcess = NULL;
 
 /**** TODO: - indicate DLL Name (file search and replace)****/
-static AFX_EXTENSION_MODULE WW2100APDLL = { NULL, NULL };
+static AFX_EXTENSION_MODULE APsDLL = { NULL, NULL };
 
 extern "C" int APIENTRY
 DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
@@ -31,11 +31,11 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
       /**** TODO: update trace string with module name ****/
-		TRACE0("WW2100AP.DLL Initializing!\n");
+		TRACE0("APs.DLL Initializing!\n");
 		
 		// Extension DLL one-time initialization
       /**** TODO: update AfxInitExtensionModule with module name ****/
-		if (!AfxInitExtensionModule(WW2100APDLL, hInstance))
+		if (!AfxInitExtensionModule(APsDLL, hInstance))
 			return 0;
 
 		// Insert this DLL into the resource chain
@@ -51,7 +51,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 		//  result.
 
       /**** TODO: update CDynLinkLibrary constructor with module name ****/
-		new CDynLinkLibrary(WW2100APDLL);
+		new CDynLinkLibrary(APsDLL);
      
       /*** TODO:  instantiate any models/processes ***/
       //ASSERT( theModel == NULL );
@@ -59,14 +59,14 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
       //ASSERT( theModel != NULL );
 
       ASSERT( theProcess == NULL );
-      theProcess = new WW2100AP;
+      theProcess = new APs;
       ASSERT( theProcess != NULL );
 	}
     
 	else if (dwReason == DLL_PROCESS_DETACH)
 	{
       /**** TODO: Update module name in trace string ****/
-		TRACE0("WW2100AP.DLL Terminating!\n");
+		TRACE0("APs.DLL Terminating!\n");
 
       /**** TODO: Delete any instantiated models ****/
       //if ( theModel != NULL)
@@ -77,7 +77,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 
 		// Terminate the library before destructors are called
       /**** TODO: Update module name in AfxTermExtensionModule ****/
-		AfxTermExtensionModule(WW2100APDLL);
+		AfxTermExtensionModule(APsDLL);
 	}
 	return 1;   // ok
 }
@@ -112,7 +112,7 @@ void PASCAL GetExtInfo( ENV_EXT_INFO *pInfo )
    { 
    // TODO:  update as needed
    pInfo->types = EET_AUTOPROCESS;
-   pInfo->description = "WW2100AP process";
+   pInfo->description = "APs process";
    }
 
 

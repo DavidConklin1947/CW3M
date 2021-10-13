@@ -20,7 +20,7 @@
 #endif
 
 
-BOOL WW2100AP::GetUrbanPopData()
+BOOL APs::GetUrbanPopData()
 // Called at InitRun
    {
    if (m_records_UPP>0)
@@ -45,9 +45,9 @@ BOOL WW2100AP::GetUrbanPopData()
       }
    if (err)
       {
-      if (m_records_UPP<=0) msg.Format("WW2100AP_PopGrowth: missing or empty UGApop_file\n"
+      if (m_records_UPP<=0) msg.Format("APs_PopGrowth: missing or empty UGApop_file\n"
          "records_UPP = %d\n", m_records_UPP);
-      else msg.Format("WW2100AP:popGrowth - One or more missing columns in the UGBpop file.\n"
+      else msg.Format("APs:popGrowth - One or more missing columns in the UGBpop file.\n"
          "m_colUPP_UGB_DH_ID, m_colUPP_UGB_name, m_colUPP_pop2010 = %d, %d, %d",
          m_colUPP_UGB_DH_ID, m_colUPP_UGB_name, m_colUPP_pop2010);
       Report::ErrorMsg(msg);
@@ -58,7 +58,7 @@ BOOL WW2100AP::GetUrbanPopData()
    } // end of GetUrbanPopData()
 
 
-BOOL WW2100AP::InitRunPG(EnvContext *pContext)
+BOOL APs::InitRunPG(EnvContext *pContext)
    {
    CString msg;
    bool err;
@@ -85,9 +85,9 @@ BOOL WW2100AP::InitRunPG(EnvContext *pContext)
       }
    if (err)
       {
-      if (m_records_RPP<=0) msg.Format("WW2100AP_PopGrowth: missing or empty RRpop_file\n"
+      if (m_records_RPP<=0) msg.Format("APs_PopGrowth: missing or empty RRpop_file\n"
             "records_RPP = %d\n", m_records_RPP);
-      else msg.Format("WW2100AP:popGrowth - One or more missing columns in the RRpop file.\n"
+      else msg.Format("APs:popGrowth - One or more missing columns in the RRpop file.\n"
             "m_colRPP_RR_DH_ID, m_colRPP_pop2010 = %d, %d", 
             m_colRPP_RR_DH_ID, m_colRPP_pop2010);
       Report::ErrorMsg(msg);
@@ -101,17 +101,7 @@ BOOL WW2100AP::InitRunPG(EnvContext *pContext)
    } // end of InitRunPG()
 
 
-BOOL WW2100AP::InitPrescribedLULCs(EnvContext* pContext)
-{
-   bool rtn_val = false;
-
-   CString path = ReplaceSubstring(m_LULCsFile, "SCENARIO_NAME", m_simulationScenario);
-
-   return(rtn_val);
-} // end of InitPrescribedLULCs()
-
-
-BOOL WW2100AP::InitRunLandTrans(EnvContext *pContext)
+BOOL APs::InitRunLandTrans(EnvContext *pContext)
    {
 
       {
@@ -130,7 +120,7 @@ BOOL WW2100AP::InitRunLandTrans(EnvContext *pContext)
    } // end of InitRunLT()
 
 
-int WW2100AP::UGBlookup(int ugbID)
+int APs::UGBlookup(int ugbID)
 // Transforms UGB_DH_ID values into WW2100 UGB codes
    {
    switch (ugbID)
@@ -208,7 +198,7 @@ int WW2100AP::UGBlookup(int ugbID)
    } // end of UGBlookup()
 
 
-double WW2100AP::LTdevUsePredVal( // developed use predicted value
+double APs::LTdevUsePredVal( // developed use predicted value
    int UGB,
    float acres,
    float pop_den,
@@ -237,7 +227,7 @@ double WW2100AP::LTdevUsePredVal( // developed use predicted value
    } // end of LTdevUsePredVal()
 
 
-double WW2100AP::LTagUsePredVal( // agricultural use predicted value
+double APs::LTagUsePredVal( // agricultural use predicted value
    float acres,
    float slope,
    float citydist,
@@ -266,7 +256,7 @@ double WW2100AP::LTagUsePredVal( // agricultural use predicted value
    } // end of LTagUsePredVal()
 
 
-double WW2100AP::LTforUsePredVal( // agricultural use predicted value
+double APs::LTforUsePredVal( // agricultural use predicted value
    float acres,
    float slope,
    float elev,
@@ -301,7 +291,7 @@ double WW2100AP::LTforUsePredVal( // agricultural use predicted value
    } // end of LTforUsePredVal()
 
 
-void WW2100AP::UXcalcDevelopedFracs(EnvContext *pContext)
+void APs::UXcalcDevelopedFracs(EnvContext *pContext)
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
    for (int ugb = 0; ugb<=MAX_UGA_NDX; ugb++) m_UXdevelopedArea[ugb] = m_UXdevelopableArea[ugb] = 0.;
@@ -346,7 +336,7 @@ void WW2100AP::UXcalcDevelopedFracs(EnvContext *pContext)
    } // end of CalculateUXoutputVariables()
 
 
-bool WW2100AP::RunLandTrans( EnvContext *pContext )
+bool APs::RunLandTrans( EnvContext *pContext )
 /* The model domain is 
 (LULC_A = ag, other veg, forest, and developed) 
 and (OWNER = private)
@@ -448,7 +438,7 @@ Additionally, once an IDU is developed, it stays developed, i.e. no further tran
    if (m_pHholdInc==NULL)
       {
       CString msg;
-      msg.Format("WW2100AP: The household income file has not been loaded, so the Land-Use Transition model is unable to run.");
+      msg.Format("APs: The household income file has not been loaded, so the Land-Use Transition model is unable to run.");
       Report::ErrorMsg(msg);
       return(false);
       }
@@ -822,7 +812,7 @@ Additionally, once an IDU is developed, it stays developed, i.e. no further tran
    } // end of RunLandTrans()
       
 
-bool WW2100AP::RunUX(EnvContext *pContext)
+bool APs::RunUX(EnvContext *pContext)
    {
    testMessage(pContext, _T("RunUX"));
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
@@ -938,7 +928,7 @@ bool WW2100AP::RunUX(EnvContext *pContext)
    } // end of RunUX()
 
 
-bool WW2100AP::UXaddIDUsToUGA(EnvContext * pContext, int ugb, Query *pIdu_query, int *pIdus_added, float *pArea_added)
+bool APs::UXaddIDUsToUGA(EnvContext * pContext, int ugb, Query *pIdu_query, int *pIdus_added, float *pArea_added)
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
    float threshold_frac = m_UXugaArray[ugb].threshold_pct/100.f; // as a fraction, not a %
@@ -1025,7 +1015,7 @@ bool WW2100AP::UXaddIDUsToUGA(EnvContext * pContext, int ugb, Query *pIdu_query,
                m_RPAdensities[rpaID] = 0;
                if (m_UXtestMode==1)
                   { CString msg; 
-                  msg.Format("WW2100AP.UGA expansion: RPA with no area.  rpaID = %d", rpaID);
+                  msg.Format("APs.UGA expansion: RPA with no area.  rpaID = %d", rpaID);
                   Report::LogMsg(msg);
                   } // end of if (m_UXtestMode==1)
                } // end of if (m_RPAareas[rpaID]<=0)
@@ -1039,7 +1029,7 @@ bool WW2100AP::UXaddIDUsToUGA(EnvContext * pContext, int ugb, Query *pIdu_query,
    } // end of UXaddIDUsToUGA()
    
 
-bool WW2100AP::InitLandTrans( EnvContext *pContext )
+bool APs::InitLandTrans( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
 
@@ -1053,7 +1043,7 @@ bool WW2100AP::InitLandTrans( EnvContext *pContext )
    }
 
 
-void WW2100AP::InitPopDensCalcs( EnvContext *pContext )
+void APs::InitPopDensCalcs( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
 
@@ -1117,7 +1107,7 @@ void WW2100AP::InitPopDensCalcs( EnvContext *pContext )
    } // end of InitPopDensCalcs()
 
 
-bool WW2100AP::RunPopGrowth( EnvContext *pContext )
+bool APs::RunPopGrowth( EnvContext *pContext )
    {
    testMessage(pContext, _T("RunPopGrowth"));
 
@@ -1178,7 +1168,7 @@ bool WW2100AP::RunPopGrowth( EnvContext *pContext )
                // such as the Pudding River basin.  It can also arise when all the IDUs
                // which were originally in the RPA have been absorbed by an expanding UGA.
 //         CString msg;
-//         msg.Format("WW2100AP.popGrowth: RPA with no area.  rpaID = %d", rpaID);
+//         msg.Format("APs.popGrowth: RPA with no area.  rpaID = %d", rpaID);
          m_RPAdensities[rpaID] = 0.;
 //         if (pContext->currentYear==pContext->startYear) 
 //            Report::LogMsg(msg);
@@ -1251,7 +1241,7 @@ bool WW2100AP::RunPopGrowth( EnvContext *pContext )
    } // end of RunPopGrowth()
 
 
-void WW2100AP::CalculatePopGrowthOutputVariables(EnvContext *pContext)
+void APs::CalculatePopGrowthOutputVariables(EnvContext *pContext)
    {
    // Output variables - UGB adjusted densities in persons per acre for the 8 biggest UGBs
    m_MetroAdjDens = m_UGBadjPopDensities[UGB_METRO]*M2_PER_ACRE;
@@ -1288,7 +1278,7 @@ void WW2100AP::CalculatePopGrowthOutputVariables(EnvContext *pContext)
    } // end of CalculatePopGrowthOutputVariables()
 
 
-void WW2100AP::CalculateLTOutputVariables(EnvContext *pContext)
+void APs::CalculateLTOutputVariables(EnvContext *pContext)
    {
    int nRows = m_LToutVars.GetRowCount();
    int rowNdx = pContext->yearOfRun<0 ? 0 : pContext->yearOfRun;
@@ -1311,7 +1301,7 @@ void WW2100AP::CalculateLTOutputVariables(EnvContext *pContext)
    } // end of CalculateLTOutputVariables()
 
 
-bool WW2100AP::InitIrrChoice( EnvContext *pContext )
+bool APs::InitIrrChoice( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
    bool recognized;
@@ -1350,7 +1340,7 @@ bool WW2100AP::InitIrrChoice( EnvContext *pContext )
       if (!recognized)
          {
          CString msg;
-         msg.Format("WW2100AP Irrigation Choice: unrecognized coefficient symbol %s.  Recognizable symbols are beta0, ... beta16", (LPCTSTR) symbol);
+         msg.Format("APs Irrigation Choice: unrecognized coefficient symbol %s.  Recognizable symbols are beta0, ... beta16", (LPCTSTR) symbol);
          Report::ErrorMsg(msg);
          return false;
          }
@@ -1362,7 +1352,7 @@ bool WW2100AP::InitIrrChoice( EnvContext *pContext )
    recognized = m_TDcoefficient.m_symbol=="Eyr";
    if (!recognized)
       {
-      msg.Format("WW2100AP Irrigation Choice: unrecognized time dependent coefficient symbol %s."  
+      msg.Format("APs Irrigation Choice: unrecognized time dependent coefficient symbol %s."  
             "  The only recognizable symbol is Eyr, the energy cost index.", (LPCTSTR) m_TDcoefficient.m_symbol);
       Report::ErrorMsg(msg);
       return false;
@@ -1377,7 +1367,7 @@ bool WW2100AP::InitIrrChoice( EnvContext *pContext )
    } // end of InitIrrChoice()
 
 
-bool WW2100AP::InitRunIrrChoice( EnvContext *pContext )
+bool APs::InitRunIrrChoice( EnvContext *pContext )
 {
 MapLayer *pLayer = (MapLayer*)pContext->pMapLayer;
 CString msg;
@@ -1394,10 +1384,10 @@ if (m_IrrTestMode == 1)
    int pou_records = 0;
    VDataObj pou_table;
    CString POU_file = "wr_pous.csv";
-   msg.Format("WW2100AP: Opening the POU file %s", (LPCTSTR)POU_file);
+   msg.Format("APs: Opening the POU file %s", (LPCTSTR)POU_file);
    Report::LogMsg(msg, RT_INFO);
    pou_records = pou_table.ReadAscii(POU_file, ',', TRUE);
-   msg.Format("WW2100AP: pou_records = %d", pou_records);
+   msg.Format("APs: pou_records = %d", pou_records);
    Report::LogMsg(msg, RT_INFO);
    int pouColIDU_ID = pou_table.GetCol("IDU_ID");
    int pouColPOU_ID = pou_table.GetCol("POU_ID");
@@ -1408,10 +1398,10 @@ if (m_IrrTestMode == 1)
    int pod_records = 0;
    VDataObj pod_table;
    CString POD_file = "wr_pods.csv";
-   msg.Format("WW2100AP: Opening the POD file %s", (LPCTSTR)POD_file);
+   msg.Format("APs: Opening the POD file %s", (LPCTSTR)POD_file);
    Report::LogMsg(msg, RT_INFO);
    pod_records = pod_table.ReadAscii(POD_file, ',', TRUE);
-   msg.Format("WW2100AP: pod_records = %d", pod_records);
+   msg.Format("APs: pod_records = %d", pod_records);
    Report::LogMsg(msg, RT_INFO);
    int podColPOUID = pod_table.GetCol("POUID");
    int podColWATERRIGHTID = pod_table.GetCol("WATERRIGHTID");
@@ -1422,7 +1412,7 @@ if (m_IrrTestMode == 1)
    if (pou_records < 1 || pod_records < 1 || pouColIDU_ID < 0 || pouColPOU_ID < 0 || pouColAREA < 0 || pouColPERCENT < 0 ||
       podColPOUID < 0 || podColWATERRIGHTID < 0 || podColPODID < 0 || podColUSE < 0 || podColYEAR < 0)
       {
-      msg.Format("WW2100AP: problem with POU or POD file. pou_records = %d, pod_records = %d, pouColIDU_ID = %d, pouColPOU_ID = %d, pouColAREA = %d, pouColPERCENT = %d,"
+      msg.Format("APs: problem with POU or POD file. pou_records = %d, pod_records = %d, pouColIDU_ID = %d, pouColPOU_ID = %d, pouColAREA = %d, pouColPERCENT = %d,"
          " podColPOUID = %d, podColWATERRIGHTID = %d, podColPODID = %d, podColUSE = %d, podColYEAR = %d\n",
          pou_records, pod_records, pouColIDU_ID, pouColPOU_ID, pouColAREA, pouColPERCENT,
          podColPOUID, podColWATERRIGHTID, podColPODID, podColUSE, podColYEAR);
@@ -1435,7 +1425,7 @@ if (m_IrrTestMode == 1)
    int errNo = fopen_s(&oFile, Irr_WR_file, "w");
    if (errNo != 0)
       {
-      CString msg(" WW2100AP:ColdStart -  ERROR: Could not open output file ");
+      CString msg(" APs:ColdStart -  ERROR: Could not open output file ");
       msg += Irr_WR_file;
       Report::ErrorMsg(msg);
       return false;
@@ -1481,13 +1471,13 @@ if (m_IrrTestMode == 1)
                   count++;
                   } // end of if (pod_pouid==pouid)
                } // end of loop on podRow
-            msg.Format("WW2100AP: pouid %d for idu %d has %d PODs\n", pouid, idu_index, count);
+            msg.Format("APs: pouid %d for idu %d has %d PODs\n", pouid, idu_index, count);
             if (count<=0) Report::LogMsg(msg);
             } // end of if (pou_idu==idu_index) 
          } // end of loop on pouRow
       if (wr!=0 && !found_pou)
          {
-         msg.Format("WW2100AP: WREXISTS!=0 and !found_pou (WREXISTS = 0x%X\n", wr);
+         msg.Format("APs: WREXISTS!=0 and !found_pou (WREXISTS = 0x%X\n", wr);
          Report::WarningMsg(msg);
          }
       } // end of loop thru idus
@@ -1502,7 +1492,7 @@ if (m_IrrTestMode == 1)
 } // end of InitRunIrrChoice()
 
 
-bool WW2100AP::RunIrrChoice( EnvContext *pContext )
+bool APs::RunIrrChoice( EnvContext *pContext )
    {
    testMessage(pContext, _T("RunIrrChoice"));
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
@@ -1632,7 +1622,7 @@ bool WW2100AP::RunIrrChoice( EnvContext *pContext )
    } // end of RunIrrChoice()
 
 
-bool WW2100AP::InitFR( EnvContext *pContext ) 
+bool APs::InitFR( EnvContext *pContext ) 
    { 
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
 
@@ -1666,7 +1656,7 @@ bool WW2100AP::InitFR( EnvContext *pContext )
    bool recognized = m_TDcoefficient.m_symbol=="Eyr";
    if (!recognized)
       {
-      msg.Format("WW2100AP Farmland Rent: unrecognized time dependent coefficient symbol %s."  
+      msg.Format("APs Farmland Rent: unrecognized time dependent coefficient symbol %s."  
             "  The only recognizable symbol is Eyr, the energy cost index.", (LPCTSTR) m_TDcoefficient.m_symbol);
       Report::ErrorMsg(msg);
       return false;
@@ -1679,7 +1669,7 @@ bool WW2100AP::InitFR( EnvContext *pContext )
    } // end of InitFR()
 
 
-bool WW2100AP::InitRunFR( EnvContext *pContext ) 
+bool APs::InitRunFR( EnvContext *pContext ) 
    { 
    m_FR_Eyr0 = m_TDcoefficient.Get((float)pContext->startYear);
    m_FRoutVars.ClearRows();
@@ -1687,7 +1677,7 @@ bool WW2100AP::InitRunFR( EnvContext *pContext )
    }
 
 
-bool WW2100AP::RunFR( EnvContext *pContext ) 
+bool APs::RunFR( EnvContext *pContext ) 
    { 
    testMessage(pContext, _T("RunFR"));
    /*
@@ -1895,7 +1885,7 @@ bool WW2100AP::RunFR( EnvContext *pContext )
    } // end of RunFR()
 
 
-bool WW2100AP::InitCrop( EnvContext *pContext )
+bool APs::InitCrop( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
 //   bool recognized;
@@ -1904,7 +1894,7 @@ bool WW2100AP::InitCrop( EnvContext *pContext )
    m_records_crop = m_crop_table.ReadAscii(m_cropfile, ',', TRUE);
    if (m_records_crop<=0)
       {
-      msg.Format("WW2100AP Crop Choice: missing or empty coefficients file\n"
+      msg.Format("APs Crop Choice: missing or empty coefficients file\n"
          "m_records_crop = %d\n", m_records_crop);
       Report::ErrorMsg( msg );
       return false;
@@ -1921,7 +1911,7 @@ bool WW2100AP::InitCrop( EnvContext *pContext )
    m_cropCols[CROP_HAY] = m_colCrop_hay = m_crop_table.GetCol("hay"); err |= m_colCrop_hay<0; // ASSERT(!err);
    if (err)
       {
-      msg.Format("WW2100AP:ColdStart - One or more missing columns in the crop choice coefficients file.\n"
+      msg.Format("APs:ColdStart - One or more missing columns in the crop choice coefficients file.\n"
             "m_colCrop_beta, _grass_seed, _pasture, _wheat, _fallow, _corn, _clover, _hay = %d, %d, %d, %d, %d, %d, %d, %d", 
             m_colCrop_beta, m_colCrop_grass_seed, m_colCrop_pasture, m_colCrop_wheat, m_colCrop_fallow, m_colCrop_corn, m_colCrop_clover, m_colCrop_hay);
       Report::ErrorMsg(msg);
@@ -1933,7 +1923,7 @@ bool WW2100AP::InitCrop( EnvContext *pContext )
       int tableNdx = m_crop_table.GetAsInt(m_colCrop_beta, betaNdx);
       if (betaNdx!=tableNdx) 
          {
-         msg.Format("WW2100AP Crop Choice - crop coefficient table is out of order. betaNdx, tableNdx = %d, %d", betaNdx, tableNdx);
+         msg.Format("APs Crop Choice - crop coefficient table is out of order. betaNdx, tableNdx = %d, %d", betaNdx, tableNdx);
          Report::ErrorMsg(msg);
          return false;
          }
@@ -1965,7 +1955,7 @@ bool WW2100AP::InitCrop( EnvContext *pContext )
       } // end of while (TDdatasetNdx<numTDdatasets)
    if (!foundAll) 
       {
-      msg.Format("WW2100AP Crop Choice - missing one or more time_dependent_datasets. foundPG, foundPW, foundSnowpack = %d, %d, %d", 
+      msg.Format("APs Crop Choice - missing one or more time_dependent_datasets. foundPG, foundPW, foundSnowpack = %d, %d, %d", 
             foundPG, foundPW, foundSnowpack);
       Report::ErrorMsg(msg);
       return false;
@@ -1980,7 +1970,7 @@ bool WW2100AP::InitCrop( EnvContext *pContext )
    } // end of InitCrop()
 
 
-bool WW2100AP::InitRunCrop( EnvContext *pContext )
+bool APs::InitRunCrop( EnvContext *pContext )
    {
    // Initialize mean snowpack.
    // Find the climate-scenario-dependent snowpack data.
@@ -2018,7 +2008,7 @@ bool WW2100AP::InitRunCrop( EnvContext *pContext )
    } // end of InitRunCrop()
 
 
-bool WW2100AP::RunCrop( EnvContext *pContext )
+bool APs::RunCrop( EnvContext *pContext )
    { 
    testMessage(pContext, _T("RunCrop"));
    /* For each IDU
@@ -2193,7 +2183,7 @@ bool WW2100AP::RunCrop( EnvContext *pContext )
    } // end of RunCrop()
 
 
-   bool WW2100AP::CheckFCUpriceData()
+   bool APs::CheckFCUpriceData()
       // Called by InitRunUrbanWater() for the FullCostUrban scenario
       {
       CString msg;
@@ -2202,7 +2192,7 @@ bool WW2100AP::RunCrop( EnvContext *pContext )
       if (m_UWrecords_FCUresPrices <= 0 || m_UWrecords_FCUindPrices <= 0)
          {
          CString msg;
-         msg.Format("WW2100AP Urban Water: Missing data. m_UWrecords_FCUresPrices, m_UWrecords_FCUindPrices = %d, %d",
+         msg.Format("APs Urban Water: Missing data. m_UWrecords_FCUresPrices, m_UWrecords_FCUindPrices = %d, %d",
             m_UWrecords_FCUresPrices, m_UWrecords_FCUindPrices);
          Report::ErrorMsg(msg);
          return false;
@@ -2216,7 +2206,7 @@ bool WW2100AP::RunCrop( EnvContext *pContext )
       err |= m_pUW_FCUindPrices->GetCol("2010") != 2;
       if (err)
          {
-         msg.Format("WW2100AP:UrbanWater - One or more missing columns in the FullCostUrb residential or commercial/industrial price files.\n"
+         msg.Format("APs:UrbanWater - One or more missing columns in the FullCostUrb residential or commercial/industrial price files.\n"
             "First three column labels should be 'UGB_DH_ID', 'UGB_name', and '2010'.");
          Report::ErrorMsg(msg);
          return false;
@@ -2226,7 +2216,7 @@ bool WW2100AP::RunCrop( EnvContext *pContext )
       } // end of CheckFCUpriceData()
    
    
-   bool WW2100AP::InitUrbanWater(EnvContext *pContext)
+   bool APs::InitUrbanWater(EnvContext *pContext)
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
 
@@ -2235,14 +2225,14 @@ bool WW2100AP::RunCrop( EnvContext *pContext )
    if (m_UWrecords_coolingCost <= 0)
       {
       CString msg;
-      msg.Format("WW2100AP Urban Water: Missing data. m_UWrecords_coolingCost = %d", m_UWrecords_coolingCost);
+      msg.Format("APs Urban Water: Missing data. m_UWrecords_coolingCost = %d", m_UWrecords_coolingCost);
       Report::ErrorMsg(msg);
       return false;
       }
    if (!ConfirmCols(m_pUWcoolingCost))
       {
       CString msg;
-      msg.Format("WW2100AP Urban Water: Columns missing or out of order. "
+      msg.Format("APs Urban Water: Columns missing or out of order. "
          "ConfirmCols(m_pUWcoolingCost) = %d", (int)ConfirmCols(m_pUWcoolingCost));
       Report::ErrorMsg(msg);
       return false;
@@ -2286,7 +2276,7 @@ bool WW2100AP::RunCrop( EnvContext *pContext )
       if (m_uwiArray[ugb].bigFlag && (m_uwiArray[ugb].priceRes_t0<0. || m_uwiArray[ugb].priceNonRes_t0<0.))
          {
          CString msg;
-         msg.Format("WW2100AP Urban Water: Price missing or negative for UGA %d. priceRes_t0, priceNonRes_t0 = %f, %f",
+         msg.Format("APs Urban Water: Price missing or negative for UGA %d. priceRes_t0, priceNonRes_t0 = %f, %f",
                ugb, m_uwiArray[ugb].priceRes_t0, m_uwiArray[ugb].priceNonRes_t0);
          Report::ErrorMsg(msg);
          return false;
@@ -2305,7 +2295,7 @@ bool WW2100AP::RunCrop( EnvContext *pContext )
    } // end of InitUrbanWater()
 
 
-bool WW2100AP::InitRunUrbanWater(EnvContext *pContext)
+bool APs::InitRunUrbanWater(EnvContext *pContext)
    {
    MapLayer *pLayer = (MapLayer*)pContext->pMapLayer;
 
@@ -2347,7 +2337,7 @@ bool WW2100AP::InitRunUrbanWater(EnvContext *pContext)
    if (m_UWrecords_mfgInc <= 0 || m_UWrecords_commInc <= 0)
       {
       CString msg;
-      msg.Format("WW2100AP Urban Water: Missing data. m_UWrecords_mfgInc, "
+      msg.Format("APs Urban Water: Missing data. m_UWrecords_mfgInc, "
          "m_UWrecords_commInc = %d, %d",
          m_UWrecords_mfgInc, m_UWrecords_commInc);
       Report::ErrorMsg(msg);
@@ -2356,7 +2346,7 @@ bool WW2100AP::InitRunUrbanWater(EnvContext *pContext)
    if (!(ConfirmCols(m_pUWmfgInc) && ConfirmCols(m_pUWcommInc)))
       {
       CString msg;
-      msg.Format("WW2100AP Urban Water: Columns missing or out of order. "
+      msg.Format("APs Urban Water: Columns missing or out of order. "
          "ConfirmCols(m_pUWmfgInc), ConfirmCols(m_pUWcommInc) = %d, %d",
          (int)ConfirmCols(m_pUWmfgInc), (int)ConfirmCols(m_pUWcommInc));
       Report::ErrorMsg(msg);
@@ -2369,7 +2359,7 @@ bool WW2100AP::InitRunUrbanWater(EnvContext *pContext)
    return(true);
    } // end of InitRunUrbanWater()
 
-int WW2100AP::CountyIDtoUse(int countyIDin)
+int APs::CountyIDtoUse(int countyIDin)
    // COUNTYID 0 is unknown - use data for Lane (there are 2 IDUs with COUNTYID on the eastern border of Lane county)
    // COUNTYID -3 is Columbia - use data for Washington
    // COUNTYID -4 is Deschutes - use data for Lane
@@ -2397,7 +2387,7 @@ int WW2100AP::CountyIDtoUse(int countyIDin)
    } // end of CountyIDtoUse()
 
 
-COUNTYcolumn WW2100AP::CountyColFromCountyID(int countyID)
+COUNTYcolumn APs::CountyColFromCountyID(int countyID)
    {
    const COUNTYcolumn countyColFromCountyID[13] =
       // 0        1             2        3        4      5        6          7             8        9      10            11          12
@@ -2410,7 +2400,7 @@ COUNTYcolumn WW2100AP::CountyColFromCountyID(int countyID)
    } // end of CountyColFromCountyID()
 
 
-bool WW2100AP::RunUrbanWater(EnvContext *pContext)
+bool APs::RunUrbanWater(EnvContext *pContext)
    {
    testMessage(pContext, _T("RunUrbanWater"));
 
@@ -2538,7 +2528,7 @@ bool WW2100AP::RunUrbanWater(EnvContext *pContext)
             else
                {
                CString msg;
-               msg.Format("WW2100AP Urban Water: Couldn't find uga %d in the FullCostUrb residential price table. "
+               msg.Format("APs Urban Water: Couldn't find uga %d in the FullCostUrb residential price table. "
                   "Setting residential water price to long range average cost and continuing.", ugb);
                if (pContext->yearOfRun == 0) Report::ErrorMsg(msg);
                priceRes = lrac*m_uwiArray[ugb].urb_H2O_prc_multiplier;
@@ -2561,7 +2551,7 @@ bool WW2100AP::RunUrbanWater(EnvContext *pContext)
             else
                {
                CString msg;
-               msg.Format("WW2100AP Urban Water: Couldn't find uga %d in the FullCostUrb industrial and commercial price table. "
+               msg.Format("APs Urban Water: Couldn't find uga %d in the FullCostUrb industrial and commercial price table. "
                   "Setting non-residential water price to long range average cost and continuing.", ugb);
                if (pContext->yearOfRun == 0) Report::ErrorMsg(msg);
                priceNonRes = lrac*m_uwiArray[ugb].urb_H2O_prc_multiplier;
@@ -2618,7 +2608,7 @@ bool WW2100AP::RunUrbanWater(EnvContext *pContext)
       if (incomeRes <= 0.f)
          {
          CString msg;
-         msg.Format("WW2100AP Urban Water: incomeRes is 0 or negative for UGA %d. yearOfRun, incomeRes = %d, %f\n"
+         msg.Format("APs Urban Water: incomeRes is 0 or negative for UGA %d. yearOfRun, incomeRes = %d, %f\n"
             "Setting incomeRes to $90,000 and continuing",
             ugb, pContext->yearOfRun, incomeRes);
          Report::ErrorMsg(msg);
@@ -2630,7 +2620,7 @@ bool WW2100AP::RunUrbanWater(EnvContext *pContext)
       if (density <= 0. && pContext->currentYear == pContext->startYear)
          {
          CString msg;
-         msg.Format("WW2100AP Urban Water: Adjusted population density is <=0 for UGA %d %s. adjusted density (persons/mi2), population = %f, %f.  "
+         msg.Format("APs Urban Water: Adjusted population density is <=0 for UGA %d %s. adjusted density (persons/mi2), population = %f, %f.  "
             "This could be because there are no developed IDUs in the UGA. For urban water calculations, unadjusted density (i.e. UGA population / UGA area) will be used.",
             ugb, m_uwiArray[ugb].ugaName, density, m_uwiArray[ugb].population);
          Report::ErrorMsg(msg);
@@ -2691,7 +2681,7 @@ bool WW2100AP::RunUrbanWater(EnvContext *pContext)
          if (m_currentUWScenarioIndex != 3 /* != Managed */ && (price <= 0.f || ac <= 0.f))
             {
             CString msg;
-            msg.Format("WW2100AP Urban Water: Price or ac is 0 or negative for small city UGA %d. yearOfRun, price, ac, pricesmallcity_lastyr, ac_lastyr = "
+            msg.Format("APs Urban Water: Price or ac is 0 or negative for small city UGA %d. yearOfRun, price, ac, pricesmallcity_lastyr, ac_lastyr = "
                "%d, %f, %f, %f, %f\n",
                ugb, pContext->yearOfRun, price, ac, m_uwiArray[ugb].pricesmallcity_lastyr, m_uwiArray[ugb].ac_lastyr);
             Report::ErrorMsg(msg);
@@ -2924,7 +2914,7 @@ bool WW2100AP::RunUrbanWater(EnvContext *pContext)
    } // end of RunUrbanWater()
 
 
-float WW2100AP::Get4UGB(FDataObj *pDataObj, int ugb, int row)
+float APs::Get4UGB(FDataObj *pDataObj, int ugb, int row)
    {
    float rtnval;
 
@@ -3023,7 +3013,7 @@ float WW2100AP::Get4UGB(FDataObj *pDataObj, int ugb, int row)
    } // end of Get4UGB()
 
 
-bool WW2100AP::ConfirmCols(FDataObj * pDataObj)
+bool APs::ConfirmCols(FDataObj * pDataObj)
    {
 /*
 enum COUNTYcolumn
@@ -3066,7 +3056,7 @@ enum COUNTYcolumn
    } // end of ConfirmCols()
 
 
-bool WW2100AP::InitUX(EnvContext *pContext)
+bool APs::InitUX(EnvContext *pContext)
    {
    m_UXoutVars.Clear();
    m_UXoutVars.SetName(_T("UGAdevelopedFractions"));
@@ -3087,7 +3077,7 @@ bool WW2100AP::InitUX(EnvContext *pContext)
    } // end InitUX()
 
 
-void WW2100AP::UXsaveOutVars(EnvContext *pContext)
+void APs::UXsaveOutVars(EnvContext *pContext)
    {
    int nRows = m_UXoutVars.GetRowCount();
    int rowNdx = pContext->yearOfRun<0 ? 0 : pContext->yearOfRun;
@@ -3112,7 +3102,7 @@ void WW2100AP::UXsaveOutVars(EnvContext *pContext)
    } // end UXsaveOutVars()
 
 
-bool WW2100AP::InitRunUX(EnvContext *pContext)
+bool APs::InitRunUX(EnvContext *pContext)
    {
 	CString msg;
 	bool err;
@@ -3130,9 +3120,9 @@ bool WW2100AP::InitRunUX(EnvContext *pContext)
 	}
 	if (err)
 	{
-		if (m_records_UGAthreshold <= 0) msg.Format("WW2100AP_UGA Expansion: missing or empty UGA_threshold_pct_file\n"
+		if (m_records_UGAthreshold <= 0) msg.Format("APs_UGA Expansion: missing or empty UGA_threshold_pct_file\n"
 			"m_records_UGAthreshold = %d\n", m_records_UGAthreshold);
-		else msg.Format("WW2100AP_UGA Expansion - One or more missing columns in the UGA_threshold_pct_file.\n"
+		else msg.Format("APs_UGA Expansion - One or more missing columns in the UGA_threshold_pct_file.\n"
 			"m_colUGAthreshold_UGB, m_colUGAthreshold_UGB_NAME, m_colUGAthreshold_ref_thresh, m_colUGAthreshold_alt_thresh1 = %d, %d, %d, %d",
 			m_colUGAthreshold_UGB, m_colUGAthreshold_UGB_NAME, m_colUGAthreshold_ref_thresh, m_colUGAthreshold_alt_thresh1);
 		Report::ErrorMsg(msg);
@@ -3150,13 +3140,13 @@ bool WW2100AP::InitRunUX(EnvContext *pContext)
 	err = UGAthresh_col_idx <= 0;
 	if (!err)
 	{
-		msg.Format("WW2100AP::InitRunUX(): pContext->id, m_currentUGAScenarioIndex, UGAthresh_col_idx = %d, %d, %d",
+		msg.Format("APs::InitRunUX(): pContext->id, m_currentUGAScenarioIndex, UGAthresh_col_idx = %d, %d, %d",
 			pContext->id, m_currentUGAScenarioIndex, UGAthresh_col_idx);
 		Report::LogMsg(msg);
 	}
 	if (err)
 	{
-		msg.Format("WW2100AP_UGA Expansion: Current UGA Expansion scenario doesn't have corresponding threshold column in UGA_threshold.csv file.\n");
+		msg.Format("APs_UGA Expansion: Current UGA Expansion scenario doesn't have corresponding threshold column in UGA_threshold.csv file.\n");
 		Report::LogMsg(msg);
 		return false;
 	}

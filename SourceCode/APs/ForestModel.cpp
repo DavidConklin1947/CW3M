@@ -21,7 +21,7 @@
 #endif
 
 
-bool WW2100AP::InitRunDGVMvegtypeData( EnvContext *pContext )
+bool APs::InitRunDGVMvegtypeData( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
    m_projectionWKT = pContext->pMapLayer->m_projection;
@@ -44,7 +44,7 @@ bool WW2100AP::InitRunDGVMvegtypeData( EnvContext *pContext )
    }  // end of InitRunDGVMvegtypeData()
 
 
-int WW2100AP::CrosswalkVtypeToKuchler(int vtype)
+int APs::CrosswalkVtypeToKuchler(int vtype)
    {
    int kuchler = 0;
    switch (vtype)
@@ -66,7 +66,7 @@ int WW2100AP::CrosswalkVtypeToKuchler(int vtype)
    } // end of CrosswalkVtypeToKuchler()
 
 
-bool WW2100AP::GetDGVMvegtypeData( EnvContext *pContext, int yearNdx )
+bool APs::GetDGVMvegtypeData( EnvContext *pContext, int yearNdx )
 // Gets the DGVM vegtype data for the specified year.
 // Also, populate the Kuchler veg class attribute, from the DGVM vegtype.
    {
@@ -97,7 +97,7 @@ bool WW2100AP::GetDGVMvegtypeData( EnvContext *pContext, int yearNdx )
    } // end of GetDGVMvegTypeData(pContext, yearNdx)
 
 
-bool WW2100AP::RunDGVMvegtypeData( EnvContext *pContext )
+bool APs::RunDGVMvegtypeData( EnvContext *pContext )
 // Gets the DGVM vegtype data for the next timestep, except do nothing if this is the final timestep.
    {
    testMessage(pContext, _T("RunDGVMvegtypeData"));
@@ -111,7 +111,7 @@ bool WW2100AP::RunDGVMvegtypeData( EnvContext *pContext )
    } // end of RunDGVMvegtypeData(pContext)
 
 
-float WW2100AP::LeafAreaIndex(CString vegclassAbbrev)
+float APs::LeafAreaIndex(CString vegclassAbbrev)
    {
       int iRec = find(&m_LAIandC_table, m_records_LAIandC, m_colLAIandC_Abbrev, vegclassAbbrev);
       float lai = 0.f;
