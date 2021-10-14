@@ -17765,3 +17765,20 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
    return(ret_val);
 } // end of WetlSurfaceH2Ofluxes()
 
+
+Wetland* FlowModel::FindWetlandFromID(int wetlID)
+{
+   Wetland* ret_val = NULL;
+   int num_wetlands = m_wetlArray.GetSize();
+   for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
+   {
+      Wetland* pWetl = m_wetlArray[wetl_ndx];
+      if (pWetl->m_wetlID == wetlID)
+      {
+         ret_val = pWetl;
+         break;
+      }
+   } // end of loop through wetlands
+
+   return(ret_val);
+} // end of FindWetlandFromID()

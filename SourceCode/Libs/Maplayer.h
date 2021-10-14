@@ -1183,6 +1183,7 @@ protected:
       m_colSPHUMIDITY(-1), 
       m_colSTM_INDEX(-1),
       m_colTEMP(-1), 
+      m_colTEMP_WETL(-1),
       m_colTMAX(-1), 
       m_colTMIN(-1), 
       m_colTREE_HT(-1), 
@@ -1255,6 +1256,8 @@ public:
 #define STM_INDEX gIDUs->m_colSTM_INDEX
    int m_colTEMP;
 #define TEMP gIDUs->m_colTEMP
+   int m_colTEMP_WETL;
+#define TEMP_WETL gIDUs->m_colTEMP_WETL
    int m_colTMAX;
 #define TMAX gIDUs->m_colTMAX
    int m_colTMIN;

@@ -3523,6 +3523,19 @@ bool APs::InitRunPrescribedLULCs(EnvContext* pContext)
 } // end of InitRunPrescribedLULCs()
 
 
+int FindInIntCArray(CArray<int, int> intCArray, int tgtVal)
+{
+   int array_len = (int)intCArray.GetSize();
+   int ndx = array_len - 1;
+   while (ndx >= 0)
+   {
+      if (intCArray[ndx] == tgtVal) break;
+      ndx--;
+   }
+   return(ndx);
+} // end of FindInIntCArray()
+
+
 bool APs::RunPrescribedLULCs(EnvContext* pContext)
 {
 // Cycle through the current year's records in the prescribed transitions file 
@@ -3593,27 +3606,35 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
 
          if (orig_lulc_a == LULCA_WETLAND && new_lulc_a != LULCA_WETLAND) // Is this the loss of a wetland?
          { // Yes, this is the loss of a wetland.
-            int wetl_id = gIDUs->AttInt(idu_ndx, WETL_ID);
-            
-            // Move any standing water to the reach that this IDU drains into..
-            // Remove the IDU from the ordered list of IDUs in the wetland. 
-            // We'll have to make sure that no reach nor any other IDU drains into this IDU.
-            // Also we'll have to check whether there any IDUs left in this wetland.
+            // Move any standing water to the reach that this IDU drains into.
             double wetness_mm = gIDUs->Att(idu_ndx, WETNESS);
             if (wetness_mm > 0.)
             { // There is standing water.
                float idu_area_m2 = gIDUs->AttFloat(idu_ndx, AREA);
                double standing_h2o_m3 = (wetness_mm / 1000.) * idu_area_m2;
                double temp_wetl_degC = gIDUs->Att(idu_ndx, TEMP_WETL);
-               WaterParcel standingWP(standing)
+               WaterParcel standingWP(standing_h2o_m3, temp_wetl_degC);
                gIDUs->SetAtt(idu_ndx, WETNESS, 0);
 
                int comid = gIDUs->AttInt(idu_ndx, COMID);
                Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);
-               pReach->AccumAdditions(standing_h2o_WP);
+               pReach->AccumAdditions(standingWP);
             }
 
-         }
+            // Remove the IDU from the ordered lists of IDUs, HRUs, and reaches in the wetland. 
+            int wetl_id = gIDUs->AttInt(idu_ndx, WETL_ID);            
+            Wetland* pWetl = gEnvModel->m_pFlowModel->FindWetlandFromID(wetl_id);
+            ASSERT(pWetl != NULL);
+
+            int idu_ndx_in_wetl = FindInIntCArray(pWetl->m_wetlIDUndxArray, idu_ndx);
+            ASSERT(idu_ndx_in_wetl >= 0);
+            pWetl->m_wetlIDUndxArray.RemoveAt(idu_ndx_in_wetl);
+            pWetl->m_wetlHRUndxArray.RemoveAt(idu_ndx_in_wetl);
+            pWetl->m_wetlReachNdxArray.RemoveAt(idu_ndx_in_wetl);
+
+            // We'll have to make sure that no reach nor any other IDU drains into this IDU.
+            // Also we'll have to check whether there any IDUs left in this wetland.
+         } // end of if (orig_lulc_a == LULCA_WETLAND && new_lulc_a != LULCA_WETLAND)
          else if (orig_lulc_a != LULCA_WETLAND && new_lulc_a == LULCA_WETLAND) // Is this the gain of a wetland?
          { // Yes, this is the gain of a wetland.
             // Add it to an existing wetland if possible, or create a new wetland if not.
@@ -3635,6 +3656,11 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
 
    return(true);
 } // end of RunPrescribedLULCs()
+
+int FindWetlandFromID(int wetl_id)
+{
+
+} // end of FindWetlandFromID()
 
 
 bool APs::AddIDUtoUGA(EnvContext* pContext, int idu_ndx, int ugb) 
