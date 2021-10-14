@@ -1149,7 +1149,7 @@ class  LIBSAPI  MapLayer
 class LIBSAPI IDUlayer : public MapLayer
 // To add a new IDU attribute, add 4 lines here and an entry in the data dictionary spreadsheet:
 // m_colNEW_ATTRIB(-1),
-// intNEW_ATTRIB;
+// int m_colNEW_ATTRIB;
 // #define NEW_ATTRIB gIDUs->m_colNEW_ATTRIB
 // ok = ok && CheckCol(m_colNEW_ATTRIB, "NEW_ATTRIB", TYPE_<type>, CC_MUST_EXIST or CC_AUTOADD);
 // Please keep the attributes in alphabetical order.  Treat underscores like spaces when alphabetizing.
@@ -1177,6 +1177,7 @@ protected:
       m_colMAXSNOW(-1), 
       m_colPVT(-1), 
       m_colRAD_SW(-1), 
+      m_colRPA(-1),
       m_colSM_DAY(-1),
       m_colSNOW_SWE(-1),
       m_colSPHUMIDITY(-1), 
@@ -1185,6 +1186,7 @@ protected:
       m_colTMAX(-1), 
       m_colTMIN(-1), 
       m_colTREE_HT(-1), 
+      m_colUGB(-1),
       m_colVEGCLASS(-1),
       m_colVPD_SCALAR(-1), 
       m_colWET_FRAC(-1),
@@ -1241,6 +1243,8 @@ public:
 #define PVT gIDUs->m_colPVT
    int m_colRAD_SW;
 #define RAD_SW gIDUs->m_colRAD_SW
+   int m_colRPA;
+#define RPA gIDUs->m_colRPA
    int m_colSM_DAY;
 #define SM_DAY gIDUs->m_colSM_DAY
    int m_colSNOW_SWE;
@@ -1257,6 +1261,8 @@ public:
 #define TMIN gIDUs->m_colTMIN
    int m_colTREE_HT;
 #define TREE_HT gIDUs->m_colTREE_HT
+   int m_colUGB;
+#define UGB gIDUs->m_colUGB
    int m_colVEGCLASS;
 #define VEGCLASS gIDUs->m_colVEGCLASS
    int m_colVPD_SCALAR;
@@ -1303,6 +1309,7 @@ public:
       ok = ok && CheckCol(m_colMAXSNOW, "MAXSNOW", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colPVT, "PVT", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colRAD_SW, "RAD_SW", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colRPA, "RPA", TYPE_INT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colSM_DAY, "SM_DAY", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colSNOW_SWE, "SNOW_SWE", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colSPHUMIDITY, "SPHUMIDITY", TYPE_FLOAT, CC_AUTOADD);
@@ -1311,6 +1318,7 @@ public:
       ok = ok && CheckCol(m_colTMAX, "TMAX", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colTMIN, "TMIN", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colTREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colUGB, "UGB", TYPE_INT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colVEGCLASS, "VEGCLASS", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colVPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWET_FRAC, "WET_FRAC", TYPE_DOUBLE, CC_AUTOADD);

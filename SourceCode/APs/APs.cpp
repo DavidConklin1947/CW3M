@@ -19,6 +19,10 @@
 #define new DEBUG_NEW
 #endif
 
+
+EnvModel* gEnvModel = NULL;
+IDUlayer* gIDUs = NULL;
+
 static char* climateScenarioNames[] =
 { "MIROC5 from MACA v1",      // Climate Scenario = 0 (default value) 
 "GFDL from MACA v1",        // Climate Scenario = 1
@@ -471,6 +475,12 @@ int APs::OutputVar( int id, MODEL_VAR** modelVar )
 
 BOOL APs::Init( EnvContext *pContext, LPCTSTR initStr )
    { 
+   gIDUs = (IDUlayer*)pContext->pMapLayer;
+   gEnvModel = pContext->pEnvModel;
+//x   m_pIDUlayer = pFlowContext->pFlowModel->m_pIDUlayer;
+//x   m_pReachLayer = pFlowContext->pFlowModel->m_pStreamLayer;
+//x   m_pHRUlayer = pFlowContext->pFlowModel->m_pHRUlayer;
+
    m_pEnvContext = pContext;
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
 
@@ -3471,8 +3481,8 @@ bool APs::LoadXmlUGAs(LPCTSTR file_name, TiXmlElement *pXmlSubProc)
    return(true);
    } // end of LoadXmlUGAs()
 
-
-BOOL APs::InitPrescribedLULCs(EnvContext* pContext)
+/*x
+bool APs::InitPrescribedLULCs(EnvContext* pContext)
 {
    bool rtn_val = false;
 
@@ -3480,3 +3490,179 @@ BOOL APs::InitPrescribedLULCs(EnvContext* pContext)
 
    return(rtn_val);
 } // end of InitPrescribedLULCs()
+x*/
+
+bool APs::InitRunPrescribedLULCs(EnvContext* pContext)
+{
+   bool err_flag = false;
+
+   CString pathAndFileName;
+   pathAndFileName = ReplaceSubstring(m_LULCsFile, "SCENARIO_NAME", m_simulationScenario);
+   m_PLrecords = m_PLtable.ReadAscii(pathAndFileName, ',', TRUE);
+   err_flag = m_PLrecords <= 0;
+   CString msg; msg.Format("InitRunPrescribedLULCs(): m_PLrecords = %d", m_PLrecords);
+   if (err_flag) Report::ErrorMsg(msg);
+   else Report::LogMsg(msg);
+
+   m_PLcurrentRecord = 0;
+   if (!err_flag)
+   {
+      m_colPLyear = m_PLtable.GetCol("year");
+      m_colPLidu_id = m_PLtable.GetCol("IDU_ID");
+      m_colPLlulc = m_PLtable.GetCol("LULC");
+      m_colPLugb = m_PLtable.GetCol("UGB");
+      err_flag = m_colPLyear < 0 || m_colPLidu_id < 0 || m_colPLlulc < 0;
+      if (err_flag)
+      {
+         CString msg; msg.Format("InitRunPrescribedLULCs(): missing column in m_PLtable. 3 columns are expected: year, IDU_ID, LULC. 1 column is optional: UGB (defaults to 40 Metro)");
+         Report::ErrorMsg(msg);
+      }
+   }
+
+   return(!err_flag);
+} // end of InitRunPrescribedLULCs()
+
+
+bool APs::RunPrescribedLULCs(EnvContext* pContext)
+{
+// Cycle through the current year's records in the prescribed transitions file 
+// to find all the VEGCLASS transitions, and apply those.
+
+   if (m_PLcurrentRecord >= m_PLrecords) return(true);
+
+   int this_year = pContext->currentYear;
+   int record = -1;
+   int prev_idu_id = -1;
+   bool subcatchment_changed = false;
+   for (record = m_PLcurrentRecord; record < m_PLrecords; record++)
+   {
+      int record_year = m_PLtable.GetAsInt(m_colPLyear, record);
+      if (record_year > this_year) break;
+      if (record_year < this_year) continue;
+
+      int idu_id = m_PLtable.GetAsInt(m_colPLidu_id, record);
+      if (idu_id == prev_idu_id)
+      {
+         CString msg; msg.Format("RunPrescribedLULCs() duplicate idu_id %d in year %d", idu_id, record_year);
+         Report::WarningMsg(msg);
+      }
+      int idu_ndx = gIDUs->FindIndex(IDU_ID, idu_id, 0);
+      if (idu_ndx < 0) continue;
+
+      int new_lulc_or_token = m_PLtable.GetAsInt(m_colPLlulc, record);
+      int original_lulc = gIDUs->AttInt(idu_ndx, VEGCLASS);
+      int new_lulc = (new_lulc_or_token == TOKEN_FOR_NO_CHANGE) ? original_lulc : new_lulc_or_token;
+      if (new_lulc >= 1000000 && new_lulc != original_lulc)
+      { // Don't mess with new states in the upland state-and-transition model.
+         CString msg;
+         msg.Format("RunPrescribedLULCs() original_lulc = %d, new_lulc = %d. Prescribing a transition to a new forest class is not supported.",
+            original_lulc, new_lulc);
+         continue;
+      }
+
+      int new_ugb = m_colPLugb >= 0 ? m_PLtable.GetAsInt(m_colPLugb, record) : 40; // Defaults to 40 Metro.
+      int original_ugb = gIDUs->AttInt(idu_ndx, UGB);
+      if ((original_ugb < 0 && new_ugb < 0) || (original_ugb > 0 && new_ugb != original_ugb))
+      {
+         CString msg;
+         msg.Format("RunPrescribedLULCs() original_ugb = %d, new_ugb = %d. This change in UGBs is not supported.", original_ugb, new_ugb);
+         continue;
+      }
+
+      if (new_lulc != original_lulc)
+      {
+         CString msg; msg.Format("RunPrescribedLULCs(): Changing VEGCLASS for IDU_ID %d to %d",
+            idu_id, new_lulc);
+         Report::LogMsg(msg);
+         gIDUs->SetAttInt(idu_ndx, m_colVEGCLASS, new_lulc);
+
+         int orig_lulc_a = gIDUs->AttInt(idu_ndx, LULC_A);
+
+         // Find the LULC_A for the new LULC.
+         int levels_in_hierarchy = gEnvModel->m_lulcTree.GetLevels();  // 1=LULC_A, 2=LULC_B, etc...
+         LulcNode* pNode = gEnvModel->m_lulcTree.FindNode(levels_in_hierarchy, new_lulc);
+         int new_lulc_a = new_lulc;
+         int level = levels_in_hierarchy;
+         while (level > 1)
+         {
+            pNode = pNode->m_pParentNode;
+            ASSERT(pNode != NULL);
+            new_lulc_a = pNode->m_id;  
+            level--;
+         } // end of while (level > 1)
+
+         if (orig_lulc_a == LULCA_WETLAND && new_lulc_a != LULCA_WETLAND) // Is this the loss of a wetland?
+         { // Yes, this is the loss of a wetland.
+            int wetl_id = gIDUs->AttInt(idu_ndx, WETL_ID);
+            
+            // Move any standing water to the reach that this IDU drains into..
+            // Remove the IDU from the ordered list of IDUs in the wetland. 
+            // We'll have to make sure that no reach nor any other IDU drains into this IDU.
+            // Also we'll have to check whether there any IDUs left in this wetland.
+            double wetness_mm = gIDUs->Att(idu_ndx, WETNESS);
+            if (wetness_mm > 0.)
+            { // There is standing water.
+               float idu_area_m2 = gIDUs->AttFloat(idu_ndx, AREA);
+               double standing_h2o_m3 = (wetness_mm / 1000.) * idu_area_m2;
+               double temp_wetl_degC = gIDUs->Att(idu_ndx, TEMP_WETL);
+               WaterParcel standingWP(standing)
+               gIDUs->SetAtt(idu_ndx, WETNESS, 0);
+
+               int comid = gIDUs->AttInt(idu_ndx, COMID);
+               Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);
+               pReach->AccumAdditions(standing_h2o_WP);
+            }
+
+         }
+         else if (orig_lulc_a != LULCA_WETLAND && new_lulc_a == LULCA_WETLAND) // Is this the gain of a wetland?
+         { // Yes, this is the gain of a wetland.
+            // Add it to an existing wetland if possible, or create a new wetland if not.
+         }
+      }
+
+      if (new_ugb != original_ugb)
+      {
+         CString msg; msg.Format("RunPrescribedLULCs(): Changing UGB for IDU_ID %d from %d to %d",
+            idu_id, original_ugb, new_ugb);
+         Report::LogMsg(msg);
+         AddIDUtoUGA(pContext, idu_ndx, new_ugb);
+      }
+
+      prev_idu_id = idu_id;
+   }
+
+   m_PLcurrentRecord = record;
+
+   return(true);
+} // end of RunPrescribedLULCs()
+
+
+bool APs::AddIDUtoUGA(EnvContext* pContext, int idu_ndx, int ugb) 
+{ // Add the idu to the UGA, and make the change to the IDU database immediately
+
+   gIDUs->SetAttInt(idu_ndx, UGB, ugb);
+
+   // Was the idu in an RPA?
+   int rpaID = gIDUs->AttInt(idu_ndx, RPA);
+   if (rpaID > 0)
+   { // Remove the IDU from the RPA, since it is now in a UGA.
+      gIDUs->SetAttInt(idu_ndx, RPA, 0);
+      float idu_area = gIDUs->AttFloat(idu_ndx, AREA);
+      m_RPAareas[rpaID] -= idu_area;
+
+      // Is there anything left of this RPA?
+      if (m_RPAareas[rpaID] <= 0 || close_enough(m_RPAareas[rpaID], 0., 0.0001, 1.))
+      { // No, the RPA has disappeared entirely.
+         m_RPAareas[rpaID] = 0;
+         m_RPAdensities[rpaID] = 0;
+         if (m_PLtestMode == 1)
+         {
+            CString msg;
+            msg.Format("AddIDUtoUGA(): RPA with no area.  rpaID = %d", rpaID);
+            Report::LogMsg(msg);
+         } // end of if (m_PLtestMode==1)
+      } // end of if (m_RPAareas[rpaID]<=0)
+   } // end of if (rpaID>0)
+
+   return(true);
+} // end of AddIDUtoUGA()

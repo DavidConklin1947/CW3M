@@ -50,6 +50,8 @@ using namespace std;
 #define YR_OF_FIRST_POP_PROJECTION 2010 /* first population projection is for this year */
 #define PEOPLE_PER_HOUSEHOLD 2.4f
 
+#define TOKEN_FOR_NO_CHANGE -1 /* used in RunPrescribedLULCs() */
+
 // UGB codes for the 8 UGBs with populations > 20,000 in 2010
 #define UGB_METRO 40
 #define UGB_EUGENESPRINGFIELD 22
@@ -474,7 +476,8 @@ protected:
    float CarbonDensity(CString vegclassAbbrev);
    int UGBlookup(int ugbID);
 
-   //--data
+//x   int m_pIDUlayer;
+
    int m_useColdStart;
 
    bool m_useColdStart_vegclass_initialization;
@@ -560,10 +563,23 @@ protected:
    //--------------------------------------------
    //---------- Prescribed LULCs ---------------
    //--------------------------------------------
-   BOOL InitPrescribedLULCs(EnvContext* pContext);
+   bool InitPrescribedLULCs(EnvContext* pContext);
+   bool InitRunPrescribedLULCs(EnvContext* pContext);
+   bool RunPrescribedLULCs(EnvContext* pContext);
+
+   bool AddIDUtoUGA(EnvContext* pContext, int idu_to_add, int ugb); // idu_to_add is an idu_index, not an idu_id
+
    int m_idPrescribedLULCs;
    int m_PLtestMode;
    CString m_LULCsFile;
+   VDataObj m_PLtable;
+   int m_PLcurrentRecord;
+   int m_PLrecords;
+   int m_colPLyear;
+   int m_colPLidu_id;
+   int m_colPLlulc;
+   int m_colPLugb;
+
 
 
    //--------------------------------------------
@@ -576,7 +592,7 @@ protected:
       LPCTSTR tgtFromUse,  LTparamSet *pConstraintSet);
    bool LoadXmlTransitionConstraint(LPCTSTR filename, TiXmlElement *pXmlTransition, LPCTSTR tgtToUse,   
       LTconstraintParams *pConstraint);
-   double LTdevUsePredVal(int UGB, float acres, float pop_den, float HH_inc_Kdollars, float citydist, int county_group);
+   double LTdevUsePredVal(int ugb, float acres, float pop_den, float HH_inc_Kdollars, float citydist, int county_group);
    double LTagUsePredVal(float acres, float slope, float citydist, int county_group, float farm_rent);
    double LTforUsePredVal(float acres, float slope, float elev, float riv_feet, bool PNI, float ugbdist, float citydist, int county_group);
    void CalculateLTOutputVariables(EnvContext *pContext);

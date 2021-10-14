@@ -199,7 +199,7 @@ int APs::UGBlookup(int ugbID)
 
 
 double APs::LTdevUsePredVal( // developed use predicted value
-   int UGB,
+   int ugb,
    float acres,
    float pop_den,
    float HH_inc_Kdollars,
@@ -207,7 +207,7 @@ double APs::LTdevUsePredVal( // developed use predicted value
    int county_group )
    {
    m_LT_X[0] = 1; // beta[0] is the intercept
-   m_LT_X[1] = UGB>0 ? 1 : 0;
+   m_LT_X[1] = ugb>0 ? 1 : 0;
    m_LT_X[2] = pop_den;
    m_LT_X[3] = log(HH_inc_Kdollars);
    m_LT_X[4] = m_LTdevImp.m_value;;
@@ -1009,7 +1009,7 @@ bool APs::UXaddIDUsToUGA(EnvContext * pContext, int ugb, Query *pIdu_query, int 
             m_RPAareas[rpaID] -= idu_area;
 
             // Is there anything left of this RPA?
-            if (m_RPAareas[rpaID]<=0)
+            if (m_RPAareas[rpaID] <= 0 || close_enough(m_RPAareas[rpaID], 0., 0.0001, 1.))
                { // No, the RPA has disappeared entirely.
                m_RPAareas[rpaID] = 0;
                m_RPAdensities[rpaID] = 0;
