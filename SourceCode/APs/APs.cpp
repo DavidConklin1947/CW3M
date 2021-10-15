@@ -14,6 +14,7 @@
 #include <direct.h>
 #include "AlgLib\ap.h"
 #include <PathManager.h>
+#include <Flow\Flow.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -3523,14 +3524,12 @@ bool APs::InitRunPrescribedLULCs(EnvContext* pContext)
 } // end of InitRunPrescribedLULCs()
 
 
-int FindInIntCArray(CArray<int, int> intCArray, int tgtVal)
+int FindInIntCArray(int * arrayAddr, int arrayLen, int tgtVal)
 {
-   int array_len = (int)intCArray.GetSize();
-   int ndx = array_len - 1;
+   int ndx = max(arrayLen - 1, -1);
    while (ndx >= 0)
    {
-      if (intCArray[ndx] == tgtVal) break;
-      ndx--;
+      if (*(arrayAddr + ndx) == tgtVal) break;
    }
    return(ndx);
 } // end of FindInIntCArray()
@@ -3592,8 +3591,8 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
          int orig_lulc_a = gIDUs->AttInt(idu_ndx, LULC_A);
 
          // Find the LULC_A for the new LULC.
-         int levels_in_hierarchy = gEnvModel->m_lulcTree.GetLevels();  // 1=LULC_A, 2=LULC_B, etc...
-         LulcNode* pNode = gEnvModel->m_lulcTree.FindNode(levels_in_hierarchy, new_lulc);
+         int levels_in_hierarchy = pContext->pLulcTree->GetLevels();  // 1=LULC_A, 2=LULC_B, etc...
+         LulcNode* pNode = pContext->pLulcTree->FindNode(levels_in_hierarchy, new_lulc);
          int new_lulc_a = new_lulc;
          int level = levels_in_hierarchy;
          while (level > 1)
@@ -3617,16 +3616,40 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                gIDUs->SetAtt(idu_ndx, WETNESS, 0);
 
                int comid = gIDUs->AttInt(idu_ndx, COMID);
-               Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);
+ //x              Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);
+ 
+               
+               Reach* pReach = NULL;
+
+               int reach_count = (int)gEnvModel->m_pFlowModel->m_reachArray.GetSize();
+               int reach_array_ndx;
+               for (reach_array_ndx = 0; reach_array_ndx < reach_count; reach_array_ndx++)
+               {
+                  pReach = gEnvModel->m_pFlowModel->m_reachArray[reach_array_ndx];
+                  if (pReach->m_reachID == comid) break;
+               } // end of loop thru m_reachArray
+
+               ASSERT(reach_array_ndx < reach_count);
+               
+               
                pReach->AccumAdditions(standingWP);
             }
 
             // Remove the IDU from the ordered lists of IDUs, HRUs, and reaches in the wetland. 
             int wetl_id = gIDUs->AttInt(idu_ndx, WETL_ID);            
-            Wetland* pWetl = gEnvModel->m_pFlowModel->FindWetlandFromID(wetl_id);
+
+//x            Wetland* pWetl = gEnvModel->m_pFlowModel->FindWetlandFromID(wetl_id);
+            Wetland* pWetl = NULL;
+            int num_wetlands = (int)gEnvModel->m_pFlowModel->m_wetlArray.GetSize();
+            for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
+            {
+               pWetl = gEnvModel->m_pFlowModel->m_wetlArray[wetl_ndx];
+               if (pWetl->m_wetlID == wetl_id) break;
+            } // end of loop through wetlands
+
             ASSERT(pWetl != NULL);
 
-            int idu_ndx_in_wetl = FindInIntCArray(pWetl->m_wetlIDUndxArray, idu_ndx);
+            int idu_ndx_in_wetl = FindInIntCArray(&(pWetl->m_wetlIDUndxArray[0]), (int)pWetl->m_wetlIDUndxArray.GetSize(), idu_ndx);
             ASSERT(idu_ndx_in_wetl >= 0);
             pWetl->m_wetlIDUndxArray.RemoveAt(idu_ndx_in_wetl);
             pWetl->m_wetlHRUndxArray.RemoveAt(idu_ndx_in_wetl);
@@ -3657,10 +3680,12 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
    return(true);
 } // end of RunPrescribedLULCs()
 
+/*x
 int FindWetlandFromID(int wetl_id)
 {
 
 } // end of FindWetlandFromID()
+x*/
 
 
 bool APs::AddIDUtoUGA(EnvContext* pContext, int idu_ndx, int ugb) 

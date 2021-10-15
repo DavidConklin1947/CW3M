@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include <GeoSpatialDataObj.h>
 #include <EnvEngine\EnvConstants.h>
+#include <WaterParcel.h>
 #include <Flow\FlowInterface.h>
 #include <Vdataobj.h>
 #include <EnvExtension.h>
@@ -15,7 +16,15 @@
 #include <tixml.h>
 
 
+
 using namespace std;
+
+class EnvModel;
+class FlowModel;
+class LulcTree;
+//x class WaterParcel;
+class Reach;
+class Wetland;
 
 #define ID_COLDSTART 0 /* id of cold start AP in .envx file */
 #define ID_GETWEATHER 20 /* id of GetWeather AP in .envx file */

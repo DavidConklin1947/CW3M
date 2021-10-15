@@ -33,6 +33,9 @@
 
 #define PI 3.141592654
  
+#define SPECIFIC_HEAT_H2O 4.187 /* kJ/(kg degC) */
+#define DENSITY_H2O 998.2 /* kg/m^3 */
+
 #define SEA_LEVEL 1.013246e5 /* standard sea level pressure (Pa) */
 #define GRAV 9.80665 /* gravitational acceleration at reference latitude 45d 32m 33s */
 #define MOL_AIR 28.9644 /* molecular weight of air (g mole-1) */
@@ -56,18 +59,18 @@
 #define DAYS_PER_YEAR 365
 #define DAYS_PER_MONTH {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 
-# define JAN			0
-# define FEB			1
-# define MAR			2
-# define APR			3
-# define MAY			4
-# define JUN			5
-# define JUL			6
-# define AUG			7
-# define SEP			8
-# define OCT			9
-# define NOV			10
-# define DEC			11
+# define JAN0			0
+# define FEB0			1
+# define MAR0			2
+# define APR0			3
+# define MAY0			4
+# define JUN0			5
+# define JUL0			6
+# define AUG0			7
+# define SEP0			8
+# define OCT0			9
+# define NOV0			10
+# define DEC0			11
 #define MONTHS 12
 #define MONTH_BEGIN     	0
 #define MONTH_END		1

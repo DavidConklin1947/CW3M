@@ -210,6 +210,7 @@
     <ClCompile Include="tixml.cpp" />
     <ClCompile Include="Vdata.cpp" />
     <ClCompile Include="Vdataobj.cpp" />
+    <ClCompile Include="WaterParcel.cpp" />
     <ClCompile Include="XNamedColors.cpp" />
     <ClCompile Include="mtparser\MTParser.cpp" />
     <ClCompile Include="mtparser\MTParserCompiler.cpp" />
@@ -327,6 +328,7 @@
     <ClInclude Include="UNITCONV.H" />
     <ClInclude Include="Vdata.h" />
     <ClInclude Include="Vdataobj.h" />
+    <ClInclude Include="WaterParcel.h" />
     <ClInclude Include="XHTMLStatic.h" />
     <ClInclude Include="XNamedColors.h" />
     <ClInclude Include="mtparser\MTException.h" />

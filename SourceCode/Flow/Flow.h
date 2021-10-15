@@ -20,6 +20,8 @@
 #include <randgen\Randnorm.hpp>
 #include "..\..\GDAL\include\netcdf.h"
 #include <UNITCONV.H>
+#include <WaterParcel.h>
+#include <ScienceFcns.h>
 
 #include <exception>
 using namespace std;
@@ -76,8 +78,8 @@ using namespace std;
 #define NOMINAL_LOW_WATER_LITERS_PER_METER 1 /* one liter of water per meter of stream length*/
 #define NOMINAL_MINIMUM_SOIL_WATER_CONTENT 0.001 /* 1 mm of water content per meter of soil depth*/
 #define LITERS_PER_M3 1000
-#define SPECIFIC_HEAT_H2O 4.187 /* kJ/(kg degC) */
-#define DENSITY_H2O 998.2 /* kg/m^3 */
+//x #define SPECIFIC_HEAT_H2O 4.187 /* kJ/(kg degC) */
+//x #define DENSITY_H2O 998.2 /* kg/m^3 */
 #define DEFAULT_REACH_H2O_TEMP_DEGC 8.f
 #define DEFAULT_SOIL_H2O_TEMP_DEGC 5.f
 #define DEFAULT_MIN_SKIN_TEMP_DEGC 1.f /* minimum temperature of liquid stream water in contact with the air (the air temp itself may be much colder) */
@@ -210,6 +212,7 @@ using namespace std;
 //--------------------------------------------------------------------------------------------------
 
 class WaterParcel;
+class Wetland;
 class Shade_a_latorData;
 class Reach;
 class Reservoir;
@@ -357,8 +360,8 @@ protected:
 //   bool  m_valid;    // is current evaluation good?
 };
 
-
-class WaterParcel
+/*x
+class FLOWAPI WaterParcel
 {
 public:
    WaterParcel();
@@ -381,7 +384,7 @@ public:
    double m_volume_m3;
    double m_temp_degC;
 }; // end of class WaterParcel
-
+x*/
 
 // a FluxContainer is a object (e.g. HRU, Reach) that can contain fluxes. 
 class FluxContainer

@@ -17520,7 +17520,7 @@ float CalcRelHumidity(float specHumid, float tMean, float elevation)
    return ret;
    }
 
-
+/*x
 WaterParcel::WaterParcel() 
 { 
    m_volume_m3 = 0; 
@@ -17634,7 +17634,7 @@ double WaterParcel::SatVP_mbar(double tempAir_degC)
    double sat_vp_mbar = sat_vp_kPa * PA_PER_MBAR / 1000.;
    return(sat_vp_mbar);
 } // end of SatVP_mbar(tempAir_degC)
-
+x*/
 
 Reach * FlowModel::GetReachFromCOMID(int comid)
 {
@@ -17769,7 +17769,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
 Wetland* FlowModel::FindWetlandFromID(int wetlID)
 {
    Wetland* ret_val = NULL;
-   int num_wetlands = m_wetlArray.GetSize();
+   int num_wetlands = (int)m_wetlArray.GetSize();
    for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
    {
       Wetland* pWetl = m_wetlArray[wetl_ndx];

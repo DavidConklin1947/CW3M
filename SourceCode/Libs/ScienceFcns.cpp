@@ -34,7 +34,7 @@ ScienceFcns::ScienceFcns()
    days_per_mo[10] = 30;       /* NOV */
    days_per_mo[11] = 31;       /* DEC */
    day = -1;
-   for (month = JAN; month <= DEC; month++)
+   for (month = JAN0; month <= DEC0; month++)
    {
       month_days[month][0] = day + 1;
       day += days_per_mo[month];
@@ -116,7 +116,7 @@ float ScienceFcns::GrowingDegreeDays(float tmp[], float degree)
 	float	days, diff, delta, grow;
 	float grow_days = 0.0;
 
-	for (mo = JAN; mo <= DEC; mo++) 
+	for (mo = JAN0; mo <= DEC0; mo++) 
   {
 		days = ((float) ((days_per_mo[NEXT_MO(mo)] / 2.0) + (days_per_mo[mo] / 2.0)));
 		diff = tmp[NEXT_MO(mo)] - tmp[mo];
@@ -145,7 +145,7 @@ float ScienceFcns::estimate_max_soil_tmp(float meantmp[MONTHS])
   /* ESTIMATE DAILY MEAN TEMP BY INTERPOLATION */
   julday = 15; 
   flagx = FALSE;
-  for (month = JAN; month <= DEC; month++)
+  for (month = JAN0; month <= DEC0; month++)
   {
     n_days = (days_per_mo[NEXT_MO(month)] + days_per_mo[month]) / 2.0f; 
     n_days = (float)ceil(n_days); 
@@ -181,7 +181,7 @@ float ScienceFcns::estimate_max_soil_tmp(float meantmp[MONTHS])
      
   /* ESTIMATE MONTHLY SOIL TEMP */ 
   max_soil_tmp = -100.;  
-  for (month = JAN; month <= DEC; month++)
+  for (month = JAN0; month <= DEC0; month++)
   {
     /* this is how it should be done
     tmp_sum = 0.;
@@ -495,7 +495,7 @@ float ScienceFcns::FrostIndex(float tmp[])
   float divisor;
   
   ddt = ddf = 0.;
-  for (mo = JAN; mo <= DEC; mo++) 
+  for (mo = JAN0; mo <= DEC0; mo++) 
   {
     days = (float)floor((days_per_mo[mo] + days_per_mo[NEXT_MO(mo)])/2.f);
     diff = tmp[NEXT_MO(mo)] - tmp[mo];
