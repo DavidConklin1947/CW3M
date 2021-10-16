@@ -3511,6 +3511,17 @@ bool APs::InitRunPrescribedLULCs(EnvContext* pContext)
 } // end of InitRunPrescribedLULCs()
 
 
+int FindInIntCArray(int* arrayAddr, int arrayLen, int tgtVal)
+{
+   int ndx = max(arrayLen - 1, -1);
+   while (ndx >= 0)
+   {
+      if (*(arrayAddr + ndx) == tgtVal) break;
+   }
+   return(ndx);
+} // end of FindInIntCArray()
+
+
 bool APs::RunPrescribedLULCs(EnvContext* pContext)
 {
 // Cycle through the current year's records in the prescribed transitions file 
@@ -3592,22 +3603,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                gIDUs->SetAtt(idu_ndx, WETNESS, 0);
 
                int comid = gIDUs->AttInt(idu_ndx, COMID);
- //x              Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);
- 
-               
-               Reach* pReach = NULL;
-
-               int reach_count = (int)gEnvModel->m_pFlowModel->m_reachArray.GetSize();
-               int reach_array_ndx;
-               for (reach_array_ndx = 0; reach_array_ndx < reach_count; reach_array_ndx++)
-               {
-                  pReach = gEnvModel->m_pFlowModel->m_reachArray[reach_array_ndx];
-                  if (pReach->m_reachID == comid) break;
-               } // end of loop thru m_reachArray
-
-               ASSERT(reach_array_ndx < reach_count);
-               
-               
+               Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);               
                pReach->AccumAdditions(standingWP);
             }
 

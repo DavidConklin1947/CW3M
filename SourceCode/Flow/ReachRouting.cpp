@@ -6,8 +6,6 @@
 #include "Flow.h"
 #include <ScienceFcns.h>
 #include <dataobj.h>
-//x #include <idataobj.H>
-//x #include <fdataobj.h>
 
 #include <UNITCONV.H>
 #include <omp.h>
