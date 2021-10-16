@@ -478,9 +478,6 @@ BOOL APs::Init( EnvContext *pContext, LPCTSTR initStr )
    { 
    gIDUs = (IDUlayer*)pContext->pMapLayer;
    gEnvModel = pContext->pEnvModel;
-//x   m_pIDUlayer = pFlowContext->pFlowModel->m_pIDUlayer;
-//x   m_pReachLayer = pFlowContext->pFlowModel->m_pStreamLayer;
-//x   m_pHRUlayer = pFlowContext->pFlowModel->m_pHRUlayer;
 
    m_pEnvContext = pContext;
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
@@ -3482,16 +3479,6 @@ bool APs::LoadXmlUGAs(LPCTSTR file_name, TiXmlElement *pXmlSubProc)
    return(true);
    } // end of LoadXmlUGAs()
 
-/*x
-bool APs::InitPrescribedLULCs(EnvContext* pContext)
-{
-   bool rtn_val = false;
-
-   CString path = ReplaceSubstring(m_LULCsFile, "SCENARIO_NAME", m_simulationScenario);
-
-   return(rtn_val);
-} // end of InitPrescribedLULCs()
-x*/
 
 bool APs::InitRunPrescribedLULCs(EnvContext* pContext)
 {
@@ -3522,17 +3509,6 @@ bool APs::InitRunPrescribedLULCs(EnvContext* pContext)
 
    return(!err_flag);
 } // end of InitRunPrescribedLULCs()
-
-
-int FindInIntCArray(int * arrayAddr, int arrayLen, int tgtVal)
-{
-   int ndx = max(arrayLen - 1, -1);
-   while (ndx >= 0)
-   {
-      if (*(arrayAddr + ndx) == tgtVal) break;
-   }
-   return(ndx);
-} // end of FindInIntCArray()
 
 
 bool APs::RunPrescribedLULCs(EnvContext* pContext)
@@ -3638,7 +3614,6 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
             // Remove the IDU from the ordered lists of IDUs, HRUs, and reaches in the wetland. 
             int wetl_id = gIDUs->AttInt(idu_ndx, WETL_ID);            
 
-//x            Wetland* pWetl = gEnvModel->m_pFlowModel->FindWetlandFromID(wetl_id);
             Wetland* pWetl = NULL;
             int num_wetlands = (int)gEnvModel->m_pFlowModel->m_wetlArray.GetSize();
             for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
@@ -3679,13 +3654,6 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
 
    return(true);
 } // end of RunPrescribedLULCs()
-
-/*x
-int FindWetlandFromID(int wetl_id)
-{
-
-} // end of FindWetlandFromID()
-x*/
 
 
 bool APs::AddIDUtoUGA(EnvContext* pContext, int idu_ndx, int ugb) 

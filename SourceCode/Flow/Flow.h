@@ -21,7 +21,7 @@
 #include "..\..\GDAL\include\netcdf.h"
 #include <UNITCONV.H>
 #include <WaterParcel.h>
-#include <ScienceFcns.h>
+//x #include <ScienceFcns.h>
 
 #include <exception>
 using namespace std;
@@ -1544,7 +1544,6 @@ public:
    // manage global methods
    //void RunGlobalMethods( void );          
 
-   Wetland* FindWetlandFromID(int wetlID);
    bool ApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
    inline double Att(int IDUindex, int col);
    inline int AttInt(int IDUindex, int col);

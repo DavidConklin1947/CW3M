@@ -1318,6 +1318,7 @@ public:
       ok = ok && CheckCol(m_colSPHUMIDITY, "SPHUMIDITY", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colSTM_INDEX, "STM_INDEX", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colTEMP, "TEMP", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colTEMP_WETL, "TEMP_WETL", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colTMAX, "TMAX", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colTMIN, "TMIN", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colTREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);

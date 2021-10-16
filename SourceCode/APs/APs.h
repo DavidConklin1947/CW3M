@@ -485,8 +485,6 @@ protected:
    float CarbonDensity(CString vegclassAbbrev);
    int UGBlookup(int ugbID);
 
-//x   int m_pIDUlayer;
-
    int m_useColdStart;
 
    bool m_useColdStart_vegclass_initialization;
@@ -575,7 +573,6 @@ protected:
    bool InitPrescribedLULCs(EnvContext* pContext);
    bool InitRunPrescribedLULCs(EnvContext* pContext);
    bool RunPrescribedLULCs(EnvContext* pContext);
-
    bool AddIDUtoUGA(EnvContext* pContext, int idu_to_add, int ugb); // idu_to_add is an idu_index, not an idu_id
 
    int m_idPrescribedLULCs;
@@ -588,7 +585,6 @@ protected:
    int m_colPLidu_id;
    int m_colPLlulc;
    int m_colPLugb;
-
 
 
    //--------------------------------------------
