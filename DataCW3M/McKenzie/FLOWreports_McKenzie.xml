@@ -24,6 +24,46 @@
     -->
 
   <outputs>
+    <output_group name="FLOW Wetland 10 analysis" daily="y" yearly="y" >
+      <output name="wetl 10 number of IDUs" query="WETL_ID=10" value="1" type="sum" domain="idu" />
+      <output name="wetl 10 area (m2)" query="WETL_ID=10" value="AREA" type="sum" domain="idu" />
+      <output name="wetl 10 WETNESS" query="WETL_ID=10" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 WET_FRAC" query="IDU_ID=33827" value="WET_FRAC" type="sum" domain="idu" />
+      <output name="idu 33827 WETLONGEST" query="IDU_ID=33827" value="WETLONGEST" type="sum" domain="idu" />
+      <output name="idu 33827 WET_LENGTH" query="IDU_ID=33827" value="WET_LENGTH" type="sum" domain="idu" />
+      <output name="idu 33827 WETAVGDPTH" query="IDU_ID=33827" value="WETAVGDPTH" type="sum" domain="idu" />
+      <output name="idu 33827 LULC_A" query="IDU_ID=33827" value="LULC_A" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 LULC_B" query="IDU_ID=33827" value="LULC_B" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 LULC_C" query="IDU_ID=33827" value="VEGCLASS" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 LAI" query="IDU_ID=33827" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 WETNESS (mm)" query="IDU_ID=33827" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 SM_DAY (mm)" query="IDU_ID=33827" value="SM_DAY" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 WETL_CAP (mm)" query="IDU_ID=33827" value="WETL_CAP" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 WETL2Q (cms)" query="IDU_ID=33827" value="WETL2Q" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 WET_FRAC" query="IDU_ID=33807" value="WET_FRAC" type="sum" domain="idu" />
+      <output name="idu 33807 WETLONGEST" query="IDU_ID=33807" value="WETLONGEST" type="sum" domain="idu" />
+      <output name="idu 33807 WET_LENGTH" query="IDU_ID=33807" value="WET_LENGTH" type="sum" domain="idu" />
+      <output name="idu 33807 WETAVGDPTH" query="IDU_ID=33807" value="WETAVGDPTH" type="sum" domain="idu" />
+      <output name="idu 33807 LULC_A" query="IDU_ID=33807" value="LULC_A" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 LULC_B" query="IDU_ID=33807" value="LULC_B" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 LULC_C" query="IDU_ID=33807" value="VEGCLASS" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 LAI" query="IDU_ID=33807" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 WETNESS (mm)" query="IDU_ID=33807" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 SM_DAY (mm)" query="IDU_ID=33807" value="SM_DAY" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 WETL_CAP (mm)" query="IDU_ID=33807" value="WETL_CAP" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 WETL2Q (cms)" query="IDU_ID=33807" value="WETL2Q" type="areaWtMean" domain="idu" />
+      <output name="hru 2033 LAI" query="HRU_ID=2033" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="hru 2033 PRECIP (mm)" query="HRU_ID=2033" value="PRECIP" type="sum" domain="hru" />
+      <output name="hru 2033 MELT_BOX (mm)" query="HRU_ID=2033" value="MELT_BOX" type="areaWtMean" domain="hru" />
+      <output name="hru 2033 NAT_SOIL (mm)" query="HRU_ID=2033" value="NAT_SOIL" type="areaWtMean" domain="hru" />
+      <output name="hru 2033 IRRIG_SOIL (mm)" query="HRU_ID=2033" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
+      <output name="wetland 10 ET (mm per day)" query="WETL_ID=10" value="ET_DAY" type="areaWtMean" domain="idu" />
+      <output name="hru 2033 ET (mm per day)" query="HRU_ID=2033" value="ET_DAY" type="areaWtMean" domain="hru" />
+      <output name="reach 23772737 Q_DISCHARG (cms)" query="COMID=23772737" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23772737 Q2WETL (cms)" query="COMID=23772737" value="Q2WETL" type="sum" domain="reach" />
+      <output name="reach 23772737 Q_CAP (cms)" query="COMID=23772737" value="Q_CAP" type="sum" domain="reach" />
+    </output_group>
+
     <output_group name="FLOW Wetland 14 analysis" interval="daily" >
       <output name="idu 33803 WET_FRAC" query="IDU_ID=33803" value="WET_FRAC" type="sum" domain="idu" />
       <output name="idu 33803 WETLONGEST" query="IDU_ID=33803" value="WETLONGEST" type="sum" domain="idu" />
@@ -52,7 +92,7 @@
       <output name="idu 33803 WETL_CAP (mm)" query="IDU_ID=33803" value="WETL_CAP" type="areaWtMean" domain="idu" />
       <output name="idu 33803 WETL2Q (cms)" query="IDU_ID=33803" value="WETL2Q" type="areaWtMean" domain="idu" />
     </output_group>
-    
+
     <output_group name="FLOW Wetland 17 analysis" interval="daily" >
       <output name="idu 31325 WET_FRAC" query="IDU_ID=31325" value="WET_FRAC" type="sum" domain="idu" />
       <output name="idu 31325 WETLONGEST" query="IDU_ID=31325" value="WETLONGEST" type="sum" domain="idu" />
