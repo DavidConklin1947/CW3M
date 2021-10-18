@@ -1173,8 +1173,9 @@ protected:
       m_colIDU_ID(-1), 
       m_colIRRIGATION(-1), 
       m_colLAI(-1), 
-      m_colLULC_A(-1), 
-      m_colMAXSNOW(-1), 
+      m_colLULC_A(-1),
+      m_colLULC_B(-1),
+      m_colMAXSNOW(-1),
       m_colPVT(-1), 
       m_colRAD_SW(-1), 
       m_colRPA(-1),
@@ -1238,6 +1239,8 @@ public:
 #define LAI gIDUs->m_colLAI
    int m_colLULC_A;
 #define LULC_A gIDUs->m_colLULC_A
+   int m_colLULC_B;
+#define LULC_B gIDUs->m_colLULC_B
    int m_colMAXSNOW;
 #define MAXSNOW gIDUs->m_colMAXSNOW
    int m_colPVT;
@@ -1308,7 +1311,8 @@ public:
       ok = ok && CheckCol(m_colIDU_ID, "IDU_ID", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colIRRIGATION, "IRRIGATION", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colLAI, "LAI", TYPE_FLOAT, CC_AUTOADD);
-      ok = ok && CheckCol(m_colLULC_A, "LULC_A", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colLULC_A, "LULC_A", TYPE_INT, CC_MUST_EXIST);
+      ok = ok && CheckCol(m_colLULC_B, "LULC_B", TYPE_INT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colMAXSNOW, "MAXSNOW", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colPVT, "PVT", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colRAD_SW, "RAD_SW", TYPE_FLOAT, CC_AUTOADD);
@@ -1323,7 +1327,7 @@ public:
       ok = ok && CheckCol(m_colTMIN, "TMIN", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colTREE_HT, "TREE_HT", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colUGB, "UGB", TYPE_INT, CC_MUST_EXIST);
-      ok = ok && CheckCol(m_colVEGCLASS, "VEGCLASS", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colVEGCLASS, "VEGCLASS", TYPE_INT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colVPD_SCALAR, "VPD_SCALAR", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWET_FRAC, "WET_FRAC", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWET_LENGTH, "WET_LENGTH", TYPE_INT, CC_AUTOADD);

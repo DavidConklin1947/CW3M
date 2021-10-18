@@ -985,6 +985,7 @@ BOOL APs::InitRun( EnvContext *pContext, bool useInitSeed )
    if (m_idPG==pContext->id) rtnFlag = rtnFlag && InitRunPG(pContext); 
    if (m_useFR==pContext->id) rtnFlag = rtnFlag && InitRunFR( pContext );
    if (m_useCrop==pContext->id) rtnFlag = rtnFlag && InitRunCrop( pContext );
+   if (m_idPrescribedLULCs == pContext->id) rtnFlag = rtnFlag && InitRunPrescribedLULCs(pContext);
 
 	m_PGoutVars.ClearRows();
 	m_annualUrbanWaterDemand.ClearRows();
@@ -1044,6 +1045,7 @@ BOOL APs::Run(EnvContext *pContext)
    if ( m_idPG==pContext->id ) RunPopGrowth( pContext );
    if ( m_useFR==pContext->id ) RunFR( pContext );
    if ( m_useCrop==pContext->id) RunCrop( pContext );
+   if (m_idPrescribedLULCs == pContext->id) RunPrescribedLULCs(pContext);
 
    return TRUE;
    }
@@ -2780,11 +2782,11 @@ bool APs::LoadXml( EnvContext *pContext, LPCTSTR filename )
    m_useCarbonModel = 0;
    pXmlCarbon->Attribute( "id", &m_useCarbonModel );
 
-   // Prescribed LULCs
+   // Prescribed LULCs 
    TiXmlElement* pXmlSubProc = NULL;
    if (StartXMLforSubprocess(pContext, filename, pXmlRoot, _T("prescribed_LULCs"), &m_idPrescribedLULCs, &pXmlSubProc, &m_PLtestMode))
    {
-      if (m_idLandTrans > 0 && m_idLandTrans == pContext->id)
+      if (m_idPrescribedLULCs > 0 && m_idPrescribedLULCs == pContext->id)
       {
          m_LULCsFile.Empty();
          m_LULCsFile = pXmlSubProc->Attribute("prescribed_LULCs_file");
@@ -3570,25 +3572,34 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
 
       if (new_lulc != original_lulc)
       {
-         CString msg; msg.Format("RunPrescribedLULCs(): Changing VEGCLASS for IDU_ID %d to %d",
-            idu_id, new_lulc);
-         Report::LogMsg(msg);
-         gIDUs->SetAttInt(idu_ndx, m_colVEGCLASS, new_lulc);
-
          int orig_lulc_a = gIDUs->AttInt(idu_ndx, LULC_A);
 
-         // Find the LULC_A for the new LULC.
+         // Find the parent LULCs for the new LULC.
          int levels_in_hierarchy = pContext->pLulcTree->GetLevels();  // 1=LULC_A, 2=LULC_B, etc...
          LulcNode* pNode = pContext->pLulcTree->FindNode(levels_in_hierarchy, new_lulc);
-         int new_lulc_a = new_lulc;
+         int new_lulc_a = -1;
+         int new_lulc_b = -1;
          int level = levels_in_hierarchy;
          while (level > 1)
          {
             pNode = pNode->m_pParentNode;
             ASSERT(pNode != NULL);
-            new_lulc_a = pNode->m_id;  
+            int new_parent_lulc = pNode->m_id;  
+            switch (level)
+            {
+               case 3: new_lulc_b = new_parent_lulc; break; // parent of lulc_c is lulc_b
+               case 2: new_lulc_a = new_parent_lulc; break; // parent of lulc_b is lulc_a
+               default: ASSERT(false);
+            } // end of switch (level)
             level--;
          } // end of while (level > 1)
+
+         CString msg; msg.Format("RunPrescribedLULCs(): Changing VEGCLASS for IDU_ID %d to %d. New LULC_B is %d. New LULC_A is %d",
+            idu_id, new_lulc, new_lulc_b, new_lulc_a);
+         Report::LogMsg(msg);
+         gIDUs->SetAttInt(idu_ndx, VEGCLASS, new_lulc);
+         gIDUs->SetAttInt(idu_ndx, LULC_B, new_lulc_b);
+         gIDUs->SetAttInt(idu_ndx, LULC_A, new_lulc_a);
 
          if (orig_lulc_a == LULCA_WETLAND && new_lulc_a != LULCA_WETLAND) // Is this the loss of a wetland?
          { // Yes, this is the loss of a wetland.

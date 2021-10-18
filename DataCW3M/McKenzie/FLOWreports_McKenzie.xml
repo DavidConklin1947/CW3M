@@ -25,7 +25,7 @@
 
   <outputs>
     <output_group name="FLOW Wetland 10 analysis" daily="y" yearly="y" >
-      <output name="wetl 10 number of IDUs" query="WETL_ID=10" value="1" type="sum" domain="idu" />
+      <output name="wetl 10 number of IDUs" query="LULC_A=62 AND WETL_ID=10" value="1" type="sum" domain="idu" />
       <output name="wetl 10 area (m2)" query="WETL_ID=10" value="AREA" type="sum" domain="idu" />
       <output name="wetl 10 WETNESS" query="WETL_ID=10" value="WETNESS" type="areaWtMean" domain="idu" />
       <output name="idu 33827 WET_FRAC" query="IDU_ID=33827" value="WET_FRAC" type="sum" domain="idu" />
