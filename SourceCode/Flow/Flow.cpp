@@ -5902,7 +5902,7 @@ bool FlowModel::ApplyQ2WETL()
 
          double idu_area_m2 = gpFlowModel->Att(idu_ndx, AREA);
 // ???         double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
-         double idu_room_m3 = (((2000. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
+         double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
          double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
          double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
 
