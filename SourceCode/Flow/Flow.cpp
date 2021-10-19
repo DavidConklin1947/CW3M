@@ -37,7 +37,7 @@ IDUlayer* gIDUs = NULL;
 extern FlowProcess *gpFlow;
 
 FlowModel *gpModel = NULL; // ??? shouldn't gpModel be an EnvModel instead of a FlowModel?
-FlowModel* gpFlowModel = NULL;
+FlowModel* gFlowModel = NULL;
 
 FILE* insolation_ofile;
 
@@ -2818,7 +2818,7 @@ FlowModel::FlowModel()
    , m_parameter2(0.f)
    {
    gpModel = this;
-   gpFlowModel = this;
+   gFlowModel = this;
 //x   gFM = this;
 
    m_scenarioArray.RemoveAll();
@@ -5893,14 +5893,14 @@ bool FlowModel::ApplyQ2WETL()
          if (idu_comid != reachComid) continue;
 
          int hru_ndx = m_wetlHRUndxArray[i];
-         HRU* pHRU = gpFlowModel->GetHRU(hru_ndx);
-         double wetl_cap_mm = gpFlowModel->Att(idu_ndx, WETL_CAP);
-         double wetness_mm = gpFlowModel->Att(idu_ndx, WETNESS);
+         HRU* pHRU = gFlowModel->GetHRU(hru_ndx);
+         double wetl_cap_mm = gFlowModel->Att(idu_ndx, WETL_CAP);
+         double wetness_mm = gFlowModel->Att(idu_ndx, WETNESS);
          if (wetness_mm > 0)
             ASSERT(pHRU->m_standingH2Oflag);
 // ???         if (wetness_mm >= (2. * wetl_cap_mm)) continue; // There is no room to absorb any more water.
 
-         double idu_area_m2 = gpFlowModel->Att(idu_ndx, AREA);
+         double idu_area_m2 = gFlowModel->Att(idu_ndx, AREA);
 // ???         double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
          double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
          double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
@@ -5944,7 +5944,7 @@ bool FlowModel::ApplyQ2WETL()
             hru_BOXSURF_M3 += to_this_idu_standing_h2o_m3;
             pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
          }
-         gpFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm);
+         gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm);
 
       } // end of loop through IDUs in this wetland
 
@@ -7186,7 +7186,7 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
          int hbvcalib = pHRU->AttInt(HruHBVCALIB);
 // We should only need these next few lines temporarily 4/18/21
          int hru_comid = pHRU->AttInt(HruCOMID);
-         Reach* pReach = gpFlowModel->FindReachFromID(hru_comid);
+         Reach* pReach = gFlowModel->FindReachFromID(hru_comid);
          hbvcalib = pReach->AttInt(ReachHBVCALIB);
          pHRU->SetAttInt(HruHBVCALIB, hbvcalib);
 // end of temporary addition 4/18/21
@@ -8386,7 +8386,7 @@ bool FlowModel::ResetCumulativeWaterYearValues()
 inline double HRU::Att(int hruCol)
 {
    double attribute;
-   gpFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
+   gFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
    return(attribute);
 } // end of HRU::Att()
 
@@ -8394,7 +8394,7 @@ inline double HRU::Att(int hruCol)
 inline int HRU::AttInt(int hruCol)
 {
    int attribute;
-   gpFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
+   gFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
    return(attribute);
 } // end of HRU::AttInt()
 
@@ -8402,26 +8402,26 @@ inline int HRU::AttInt(int hruCol)
 inline float HRU::AttFloat(int hruCol)
 {
    float attribute;
-   gpFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
+   gFlowModel->m_pHRUlayer->GetData(this->m_hruNdx, hruCol, attribute);
    return(attribute);
 } // end of HRU::AttFloat()
 
 
 inline void HRU::SetAtt(int col, double attValue)
 {
-   gpFlowModel->m_pHRUlayer->SetDataU(this->m_hruNdx, col, attValue);
+   gFlowModel->m_pHRUlayer->SetDataU(this->m_hruNdx, col, attValue);
 } // end of HRU::SetAtt()
 
 
 inline void HRU::SetAttInt(int col, int attValue)
 {
-   gpFlowModel->m_pHRUlayer->SetDataU(this->m_hruNdx, col, attValue);
+   gFlowModel->m_pHRUlayer->SetDataU(this->m_hruNdx, col, attValue);
 } // end of HRU::SetAttInt()
 
 
 inline void HRU::SetAttFloat(int col, float attValue)
 {
-   gpFlowModel->m_pHRUlayer->SetDataU(this->m_hruNdx, col, attValue);
+   gFlowModel->m_pHRUlayer->SetDataU(this->m_hruNdx, col, attValue);
 } // end of HRU::SetAttFloat()
 
 
@@ -12487,7 +12487,7 @@ void FlowModel::GetCatchmentDerivatives( double time, double timeStep, int svCou
             }
          } // end of loop thru HRULayers of this HRU
       } // end of loop thru HRUs
-   gpFlowModel->ResetHRUfluxes();
+   gFlowModel->ResetHRUfluxes();
 
    if (pModel->m_pReachRouting->GetMethod() == GM_RKF)
       {
@@ -12536,22 +12536,22 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU, double boxSurfaceH2Oadjustment_m3)
       bool is_wetland = lulc_a == LULCA_WETLAND;
       if (is_wetland)
       {
-         double idu_wetness_mm = gpFlowModel->Att(idu_poly_ndx, WETNESS);
-         float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
+         double idu_wetness_mm = gFlowModel->Att(idu_poly_ndx, WETNESS);
+         float idu_area_m2 = gFlowModel->AttFloat(idu_poly_ndx, AREA);
          double idu_standing_h2o_m3 = idu_wetness_mm > 0. ? ((idu_wetness_mm / 1000.) * idu_area_m2) : 0.;
          idu_standing_h2o_accum_m3 += idu_standing_h2o_m3;
         
-         double idu_wetl2q_cms = gpFlowModel->Att(idu_poly_ndx, WETL2Q); // ???
+         double idu_wetl2q_cms = gFlowModel->Att(idu_poly_ndx, WETL2Q); // ???
          idu_wetl2q_accum_cms += idu_wetl2q_cms; // ???
       }
       else
       {
-         double idu_snow_swe_mm = gpFlowModel->Att(idu_poly_ndx, SNOW_SWE);
-         double idu_melt_h2o_mm = gpFlowModel->Att(idu_poly_ndx, H2O_MELT);
+         double idu_snow_swe_mm = gFlowModel->Att(idu_poly_ndx, SNOW_SWE);
+         double idu_melt_h2o_mm = gFlowModel->Att(idu_poly_ndx, H2O_MELT);
          ASSERT(idu_melt_h2o_mm >= 0.);
          if ((idu_melt_h2o_mm > 0.) || (idu_snow_swe_mm > 0.))
          {
-            float idu_area_m2 = gpFlowModel->AttFloat(idu_poly_ndx, AREA);
+            float idu_area_m2 = gFlowModel->AttFloat(idu_poly_ndx, AREA);
             double idu_melt_h2o_m3 = (idu_melt_h2o_mm / 1000.) * idu_area_m2;
             idu_melt_h2o_accum_m3 += idu_melt_h2o_m3;
             double idu_snow_swe_m3 = (idu_snow_swe_mm / 1000.) * idu_area_m2;
@@ -17591,7 +17591,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
             ASSERT(close_enough(0, wetness_mm, 1e-4, 1));
             wetness_mm = 0.;
          }
-         gpFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
+         gFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
          continue; 
       }
 
@@ -17627,10 +17627,10 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm) ... else
 
       // Update the IDU attributes WETNESS and SM_DAY.
-      gpFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
+      gFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
       if (wetness_mm > 0.) m_standingH2Oflag = true;
       sm_day_mm += idu_to_topsoil_mm;
-      gpFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
+      gFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
 
       // Convert water depths to water volumes, and add to the HRU accumulators.
       float idu_area_m2 = gIDUs->AttFloat(idu_poly_ndx, AREA);

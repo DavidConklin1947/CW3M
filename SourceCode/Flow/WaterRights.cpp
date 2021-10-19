@@ -28,7 +28,7 @@ using namespace alglib_impl;
 
 extern FlowProcess *gpFlow;
 extern FlowModel   *gpModel;
-extern FlowModel* gpFlowModel;
+extern FlowModel* gFlowModel;
 
 
 int SortWrData(const void *e0, const void *e1);
@@ -463,16 +463,16 @@ bool AltWaterMaster::PopulateHBVCALIB(FlowContext *pFlowContext)
       pIDUlayer->SetDataU(idu, m_colHBVCALIB, HBVcalib);
    }
 
-   int catchmentCount = (int)gpFlowModel->m_catchmentArray.GetSize();
+   int catchmentCount = (int)gFlowModel->m_catchmentArray.GetSize();
    for (int i = 0; i < catchmentCount; i++)
    {
-      Catchment* pCatchment = gpFlowModel->m_catchmentArray[i];
+      Catchment* pCatchment = gFlowModel->m_catchmentArray[i];
       int hruCount = pCatchment->GetHRUCountInCatchment();
       for (int h = 0; h < hruCount; h++)
       {
          HRU* pHRU = pCatchment->GetHRUfromCatchment(h);
          int hru_comid = pHRU->AttInt(HruCOMID);
-         Reach* pReach = gpFlowModel->FindReachFromID(hru_comid);
+         Reach* pReach = gFlowModel->FindReachFromID(hru_comid);
          int hbvcalib = pReach->AttInt(ReachHBVCALIB);
          pHRU->SetAttInt(HruHBVCALIB, hbvcalib);
       } // end of loop thru HRUs in this catchment

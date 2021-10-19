@@ -18,7 +18,7 @@
 #define KMD_PER_MMHR 0.000024;            // mm/h -> km/day
 
 extern IDUlayer* gIDUs; 
-extern FlowModel * gpFlowModel;
+extern FlowModel * gFlowModel;
 
 double ETEquation::NOVAL;
 
@@ -933,7 +933,7 @@ void ETEquation::WetlandET(int idu, float soilH2O_mm, float fc_mm, float wp_mm, 
    { // Calculate evaporation from standing water.
       double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
       WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
-      double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gpFlowModel->m_flowContext.dayOfYear);
+      double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gFlowModel->m_flowContext.dayOfYear);
       double evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
       WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,
          m_dailyMeanTemperature, m_dailyMeanTemperature, 1., cloudiness_frac, m_windSpeed, m_specificHumidity, rh_pct,
@@ -975,8 +975,8 @@ double ETEquation::ActualET(int iduNdx, double pet_mm, double HRUnatSoilBox_mm, 
       fTheta = (slope * ((float)HRUnatSoilBox_mm - wp_mm));
    }
 
-   gpFlowModel->SetAtt(iduNdx, F_THETA, fTheta);
-   gpFlowModel->SetAtt(iduNdx, VPD_SCALAR, vpd_scalar);
+   gFlowModel->SetAtt(iduNdx, F_THETA, fTheta);
+   gFlowModel->SetAtt(iduNdx, VPD_SCALAR, vpd_scalar);
 
    double aet_mm = pet_mm * (fTheta < vpd_scalar ? fTheta : vpd_scalar);
    return(aet_mm);

@@ -96,42 +96,42 @@ using namespace std;
 
 #define BEERS_LAW_K 0.5
 
-#define HruCOMID gpFlowModel->m_colHruCOMID
-#define HruFIELD_CAP gpFlowModel->m_colHruFIELD_CAP
-#define HruGW_FASTBOX gpFlowModel->m_colHruGW_FASTBOX
-#define HruGW_SLOWBOX gpFlowModel->m_colHruGW_SLOWBOX
-#define HruHBVCALIB gpFlowModel->m_colHruHBVCALIB
-#define HruHRU_ID gpFlowModel->m_colHruHRU_ID
-#define HruIRRIG_SOIL gpFlowModel->m_colHruIRRIG_SOIL
-#define HruBOXSURF_M3 gpFlowModel->m_colHruBOXSURF_M3
-#define HruH2OMELT_M3 gpFlowModel->m_colHruH2OMELT_M3
-#define HruH2OSTNDGM3 gpFlowModel->m_colHruH2OSTNDGM3
-#define HruNAT_SOIL gpFlowModel->m_colHruNAT_SOIL
-#define HruSNOW_BOX gpFlowModel->m_colHruSNOW_BOX
+#define HruCOMID gFlowModel->m_colHruCOMID
+#define HruFIELD_CAP gFlowModel->m_colHruFIELD_CAP
+#define HruGW_FASTBOX gFlowModel->m_colHruGW_FASTBOX
+#define HruGW_SLOWBOX gFlowModel->m_colHruGW_SLOWBOX
+#define HruHBVCALIB gFlowModel->m_colHruHBVCALIB
+#define HruHRU_ID gFlowModel->m_colHruHRU_ID
+#define HruIRRIG_SOIL gFlowModel->m_colHruIRRIG_SOIL
+#define HruBOXSURF_M3 gFlowModel->m_colHruBOXSURF_M3
+#define HruH2OMELT_M3 gFlowModel->m_colHruH2OMELT_M3
+#define HruH2OSTNDGM3 gFlowModel->m_colHruH2OSTNDGM3
+#define HruNAT_SOIL gFlowModel->m_colHruNAT_SOIL
+#define HruSNOW_BOX gFlowModel->m_colHruSNOW_BOX
 
-#define ReachDEPTH_MIN gpFlowModel->m_colReachDEPTH_MIN
-#define ReachDIRECTION gpFlowModel->m_colReachDIRECTION
-#define ReachHBVCALIB gpFlowModel->m_colReachHBVCALIB
-#define ReachQ_CAP gpFlowModel->m_colReachQ_CAP
-#define ReachQSPILL_FRC gpFlowModel->m_colReachQSPILL_FRC
-#define ReachQ2WETL gpFlowModel->m_colReachQ2WETL
-#define ReachRADSWGIVEN gpFlowModel->m_colReachRADSWGIVEN
-#define ReachREACH_H2O gpFlowModel->m_colReachREACH_H2O
-#define ReachRES_H2O gpFlowModel->m_colReachRES_H2O
-#define ReachRES_TEMP gpFlowModel->m_colReachRES_TEMP
-#define ReachTEMP_H2O gpFlowModel->m_colReachTEMP_H2O
-#define ReachTOPOELEV_E gpFlowModel->m_colReachTOPOELEV_E
-#define ReachTOPOELEV_S gpFlowModel->m_colReachTOPOELEV_S
-#define ReachTOPOELEV_W gpFlowModel->m_colReachTOPOELEV_W
-#define ReachVEG_HT_L gpFlowModel->m_colReachVEG_HT_L
-#define ReachVEG_HT_R gpFlowModel->m_colReachVEG_HT_R
-#define ReachVGDNSGIVEN gpFlowModel->m_colReachVGDNSGIVEN
-#define ReachVEGHTGIVEN gpFlowModel->m_colReachVEGHTGIVEN
-#define ReachVEGHTREACH gpFlowModel->m_colReachVEGHTREACH
-#define ReachWIDTH_CALC gpFlowModel->m_colReachWIDTH_CALC
-#define ReachWIDTH_MIN gpFlowModel->m_colReachWIDTH_MIN
-#define ReachWIDTHGIVEN gpFlowModel->m_colReachWIDTHGIVEN
-#define ReachWIDTHREACH gpFlowModel->m_colReachWIDTHREACH
+#define ReachDEPTH_MIN gFlowModel->m_colReachDEPTH_MIN
+#define ReachDIRECTION gFlowModel->m_colReachDIRECTION
+#define ReachHBVCALIB gFlowModel->m_colReachHBVCALIB
+#define ReachQ_CAP gFlowModel->m_colReachQ_CAP
+#define ReachQSPILL_FRC gFlowModel->m_colReachQSPILL_FRC
+#define ReachQ2WETL gFlowModel->m_colReachQ2WETL
+#define ReachRADSWGIVEN gFlowModel->m_colReachRADSWGIVEN
+#define ReachREACH_H2O gFlowModel->m_colReachREACH_H2O
+#define ReachRES_H2O gFlowModel->m_colReachRES_H2O
+#define ReachRES_TEMP gFlowModel->m_colReachRES_TEMP
+#define ReachTEMP_H2O gFlowModel->m_colReachTEMP_H2O
+#define ReachTOPOELEV_E gFlowModel->m_colReachTOPOELEV_E
+#define ReachTOPOELEV_S gFlowModel->m_colReachTOPOELEV_S
+#define ReachTOPOELEV_W gFlowModel->m_colReachTOPOELEV_W
+#define ReachVEG_HT_L gFlowModel->m_colReachVEG_HT_L
+#define ReachVEG_HT_R gFlowModel->m_colReachVEG_HT_R
+#define ReachVGDNSGIVEN gFlowModel->m_colReachVGDNSGIVEN
+#define ReachVEGHTGIVEN gFlowModel->m_colReachVEGHTGIVEN
+#define ReachVEGHTREACH gFlowModel->m_colReachVEGHTREACH
+#define ReachWIDTH_CALC gFlowModel->m_colReachWIDTH_CALC
+#define ReachWIDTH_MIN gFlowModel->m_colReachWIDTH_MIN
+#define ReachWIDTHGIVEN gFlowModel->m_colReachWIDTHGIVEN
+#define ReachWIDTHREACH gFlowModel->m_colReachWIDTHREACH
 
 /*! \mainpage A brief introduction to Flow:  A framework for the development of continuous-time simulation models within Envision
  *
@@ -994,8 +994,8 @@ public:
    void SetAtt(int col, double attValue);
    void SetAttInt(int col, int attValue);
 
-   int m_reachArrayNdx; // index into gpFlowModel->m_reachArray
-   int m_wetlNdx; // index into gpFlowModel->m_wetlArray[]; not the same as WETL_ID; -1 if the reach isn't associated with a wetland
+   int m_reachArrayNdx; // index into gFlowModel->m_reachArray
+   int m_wetlNdx; // index into gFlowModel->m_wetlArray[]; not the same as WETL_ID; -1 if the reach isn't associated with a wetland
    double m_q2wetl_cms;
 
    TopoSetting m_topo;

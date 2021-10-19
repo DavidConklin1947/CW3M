@@ -12,7 +12,7 @@
 
 extern FlowProcess *gpFlow;
 extern FlowModel* gpModel;
-extern FlowModel* gpFlowModel;
+extern FlowModel* gFlowModel;
 
 bool ReachRouting::Init(FlowContext* pFlowContext)
 {
@@ -794,7 +794,7 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
    double duration = (float)(finish - start) / CLOCKS_PER_SEC;
    gpModel->m_reachFluxFnRunTime += (float)duration;
 
-   gpFlowModel->ResetReachFluxes();
+   gFlowModel->ResetReachFluxes();
    return(true);
 } // end of SolveReachKinematicWave()
 

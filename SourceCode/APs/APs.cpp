@@ -22,6 +22,7 @@
 
 
 EnvModel* gEnvModel = NULL;
+FlowModel* gFlowModel = NULL;
 IDUlayer* gIDUs = NULL;
 
 static char* climateScenarioNames[] =
@@ -478,6 +479,7 @@ BOOL APs::Init( EnvContext *pContext, LPCTSTR initStr )
    { 
    gIDUs = (IDUlayer*)pContext->pMapLayer;
    gEnvModel = pContext->pEnvModel;
+   gFlowModel = gEnvModel->m_pFlowModel;
 
    m_pEnvContext = pContext;
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
@@ -3675,13 +3677,15 @@ x*/
                { // Add this IDU to an existing wetland.
                   float tgt_idu_elev_m = gIDUs->AttFloat(idu_ndx, ELEV_MEAN);
                   float tgt_idu_area_m2 = gIDUs->AttFloat(idu_ndx, AREA);
+                  double tgt_idu_fc_mm = gIDUs->Att(idu_ndx, FC);
 
                   int tgt_hru_ndx = gIDUs->AttInt(idu_ndx, HRU_NDX);
                   HRU* pHRU = gEnvModel->m_pFlowModel->m_hruArray[tgt_hru_ndx];
-                  double snow_mmH2O = pHRU->Att(hruSNOW_BOX);
+                  double snow_mmH2O = pHRU->Att(HruSNOW_BOX);
                   double snow_m3 = (snow_mmH2O / 1000.)* tgt_idu_area_m2;
-                  double melt_h2o_m3 = pHRU->Att(hruH2OMELT_M3);
-
+                  double melt_h2o_m3 = pHRU->Att(HruH2OMELT_M3);
+                  double tgt_idu_surface_h2o_mm = (snow_m3 + melt_h2o_m3) / tgt_idu_area_m2;
+                  ??? Add in the topsoil water and calculate wetness, new topsoil water
 
                   int tgt_comid = gIDUs->AttInt(idu_ndx, COMID);
                   Reach* ptgt_reach = gEnvModel->m_pFlowModel->GetReachFromCOMID(tgt_comid);

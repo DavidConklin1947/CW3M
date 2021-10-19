@@ -25,7 +25,7 @@ using namespace std;
 
 extern IDUlayer* gIDUs;
 extern FlowProcess *gpFlow;
-extern FlowModel* gpFlowModel;
+extern FlowModel* gFlowModel;
 
 
 #ifdef _DEBUG
@@ -1383,8 +1383,8 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
             irr_state = IRR_NOT_STARTED_OR_OFF_SEASON;
          } // end of if (might be irrigating) ... else ... 
 
-      gpFlowModel->SetAttFloat(idu, F_THETA, fTheta);
-      gpFlowModel->SetAttFloat(idu, VPD_SCALAR, vpd_scalar);
+      gFlowModel->SetAttFloat(idu, F_THETA, fTheta);
+      gFlowModel->SetAttFloat(idu, VPD_SCALAR, vpd_scalar);
 
    } // end if (wetland) else ...
 
