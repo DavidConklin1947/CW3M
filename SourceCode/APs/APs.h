@@ -584,6 +584,7 @@ protected:
    int m_colPLidu_id;
    int m_colPLlulc;
    int m_colPLugb;
+   int m_colPLwetl_id;
 
 
    //--------------------------------------------
