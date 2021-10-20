@@ -28,6 +28,7 @@
       <output name="wetl 10 number of IDUs" query="LULC_A=62 AND WETL_ID=10" value="1" type="sum" domain="idu" />
       <output name="wetl 10 area (m2)" query="WETL_ID=10" value="AREA" type="sum" domain="idu" />
       <output name="wetl 10 WETNESS" query="WETL_ID=10" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="wetl 10 standing water (m3)" query="WETL_ID=10 AND WETNESS>0" value="WETNESS*AREA/1000" domain="idu" />
       <output name="idu 33827 WET_FRAC" query="IDU_ID=33827" value="WET_FRAC" type="sum" domain="idu" />
       <output name="idu 33827 WETLONGEST" query="IDU_ID=33827" value="WETLONGEST" type="sum" domain="idu" />
       <output name="idu 33827 WET_LENGTH" query="IDU_ID=33827" value="WET_LENGTH" type="sum" domain="idu" />
@@ -40,6 +41,18 @@
       <output name="idu 33827 SM_DAY (mm)" query="IDU_ID=33827" value="SM_DAY" type="areaWtMean" domain="idu" />
       <output name="idu 33827 WETL_CAP (mm)" query="IDU_ID=33827" value="WETL_CAP" type="areaWtMean" domain="idu" />
       <output name="idu 33827 WETL2Q (cms)" query="IDU_ID=33827" value="WETL2Q" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 WET_FRAC" query="IDU_ID=33806" value="WET_FRAC" type="sum" domain="idu" />
+      <output name="idu 33806 WETLONGEST" query="IDU_ID=33806" value="WETLONGEST" type="sum" domain="idu" />
+      <output name="idu 33806 WET_LENGTH" query="IDU_ID=33806" value="WET_LENGTH" type="sum" domain="idu" />
+      <output name="idu 33806 WETAVGDPTH" query="IDU_ID=33806" value="WETAVGDPTH" type="sum" domain="idu" />
+      <output name="idu 33806 LULC_A" query="IDU_ID=33806" value="LULC_A" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 LULC_B" query="IDU_ID=33806" value="LULC_B" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 LULC_C" query="IDU_ID=33806" value="VEGCLASS" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 LAI" query="IDU_ID=33806" value="LAI" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 WETNESS (mm)" query="IDU_ID=33806" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 SM_DAY (mm)" query="IDU_ID=33806" value="SM_DAY" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 WETL_CAP (mm)" query="IDU_ID=33806" value="WETL_CAP" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 WETL2Q (cms)" query="IDU_ID=33806" value="WETL2Q" type="areaWtMean" domain="idu" />
       <output name="idu 33807 WET_FRAC" query="IDU_ID=33807" value="WET_FRAC" type="sum" domain="idu" />
       <output name="idu 33807 WETLONGEST" query="IDU_ID=33807" value="WETLONGEST" type="sum" domain="idu" />
       <output name="idu 33807 WET_LENGTH" query="IDU_ID=33807" value="WET_LENGTH" type="sum" domain="idu" />

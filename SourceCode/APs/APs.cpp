@@ -3607,14 +3607,13 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
          if (orig_lulc_a == LULCA_WETLAND && new_lulc_a != LULCA_WETLAND) // Is this the loss of a wetland?
          { // Yes, this is the loss of a wetland.
             // Move any standing water to the reach that this IDU drains into.
-            float tgt_idu_area_m2 = gIDUs->Att(idu_ndx, AREA);
+            float tgt_idu_area_m2 = gIDUs->AttFloat(idu_ndx, AREA);
             double wetness_mm = gIDUs->Att(idu_ndx, WETNESS);
             if (wetness_mm > 0.)
             { // There is standing water.
                double standing_h2o_m3 = (wetness_mm / 1000.) * tgt_idu_area_m2;
                double temp_wetl_degC = gIDUs->Att(idu_ndx, TEMP_WETL);
                WaterParcel standingWP(standing_h2o_m3, temp_wetl_degC);
-//x               gIDUs->SetAtt(idu_ndx, WETNESS, 0);
 
                int comid = gIDUs->AttInt(idu_ndx, COMID);
                Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);               
@@ -3624,15 +3623,6 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
             // Remove the IDU from the ordered lists of IDUs, HRUs, and reaches in the wetland. 
             int wetl_id = gIDUs->AttInt(idu_ndx, WETL_ID);            
 
-/*x
-            Wetland* pWetl = NULL;
-            int num_wetlands = (int)gEnvModel->m_pFlowModel->m_wetlArray.GetSize();
-            for (int wetl_ndx = 0; wetl_ndx < num_wetlands; wetl_ndx++)
-            {
-               pWetl = gEnvModel->m_pFlowModel->m_wetlArray[wetl_ndx];
-               if (pWetl->m_wetlID == wetl_id) break;
-            } // end of loop through wetlands
-x*/
             Wetland* pWetl = gEnvModel->m_pFlowModel->GetWetlandFromID(wetl_id);
             ASSERT(pWetl != NULL);
 
@@ -3644,7 +3634,7 @@ x*/
             pWetl->m_wetlArea_m2 -= tgt_idu_area_m2;
 
             gIDUs->SetAtt(idu_ndx, WET_FRAC, 0.);
-            gIDUs->SetAttInt(idu_ndx, WETLONGEST, 0.);
+            gIDUs->SetAttInt(idu_ndx, WETLONGEST, 0);
             gIDUs->SetAtt(idu_ndx, WETNESS, NON_WETLAND_WETNESS_TOKEN);
             gIDUs->SetAtt(idu_ndx, WETL2Q, 0.);
 
@@ -3677,23 +3667,29 @@ x*/
                { // Add this IDU to an existing wetland.
                   float tgt_idu_elev_m = gIDUs->AttFloat(idu_ndx, ELEV_MEAN);
                   float tgt_idu_area_m2 = gIDUs->AttFloat(idu_ndx, AREA);
-                  double tgt_idu_fc_mm = gIDUs->Att(idu_ndx, FC);
+                  double tgt_idu_fc_mm = gIDUs->Att(idu_ndx, FIELD_CAP);
+                  int tgt_idu_irrigation = gIDUs->AttInt(idu_ndx, IRRIGATION);
+                  double tgt_idu_wetl_cap_mm = gIDUs->Att(idu_ndx, WETL_CAP);
 
                   int tgt_hru_ndx = gIDUs->AttInt(idu_ndx, HRU_NDX);
                   HRU* pHRU = gEnvModel->m_pFlowModel->m_hruArray[tgt_hru_ndx];
                   double snow_mmH2O = pHRU->Att(HruSNOW_BOX);
                   double snow_m3 = (snow_mmH2O / 1000.)* tgt_idu_area_m2;
                   double melt_h2o_m3 = pHRU->Att(HruH2OMELT_M3);
-                  double tgt_idu_surface_h2o_mm = (snow_m3 + melt_h2o_m3) / tgt_idu_area_m2;
-                  ??? Add in the topsoil water and calculate wetness, new topsoil water
+                  double orig_topsoil_h2o_mm = tgt_idu_irrigation != 0 ? pHRU->AttFloat(HruIRRIG_SOIL) : pHRU->AttFloat(HruNAT_SOIL);
+                  double wetness_mm = orig_topsoil_h2o_mm - tgt_idu_fc_mm + (snow_m3 + melt_h2o_m3) / tgt_idu_area_m2;
 
                   int tgt_comid = gIDUs->AttInt(idu_ndx, COMID);
                   Reach* ptgt_reach = gEnvModel->m_pFlowModel->GetReachFromCOMID(tgt_comid);
 
+                  int wetl_idu0_poly_ndx = pWetl->m_wetlIDUndxArray[0];
+                  float wetl_idu0_elev_m = gIDUs->AttFloat(wetl_idu0_poly_ndx, ELEV_MEAN);
+                  double wetl_idu0_cap_mm = gIDUs->Att(wetl_idu0_poly_ndx, WETL_CAP);
+                  double max_standing_h2o_elev_m = wetl_idu0_elev_m + wetl_idu0_cap_mm / 1000.;
 
                   int orig_num_idus_in_wetl = (int)pWetl->m_wetlIDUndxArray.GetSize();
                   int idu_ndx_in_wetl = -1;
-                  for (idu_ndx_in_wetl = 0; idu_ndx_in_wetl < orig_num_idus_in_wetl; idu_ndx_in_wetl)
+                  for (idu_ndx_in_wetl = 0; idu_ndx_in_wetl < orig_num_idus_in_wetl; idu_ndx_in_wetl++)
                   {
                      float wetl_idu_elev_m = gIDUs->AttFloat(pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl], ELEV_MEAN);
                      if (tgt_idu_elev_m < wetl_idu_elev_m) break;
@@ -3703,19 +3699,54 @@ x*/
                   pWetl->m_wetlReachNdxArray.InsertAt(idu_ndx_in_wetl, ptgt_reach->m_reachArrayNdx);
                   pWetl->m_wetlArea_m2 += tgt_idu_area_m2;
 
+                  if (tgt_idu_wetl_cap_mm <= 0.)
+                  { // Infer WETL_CAP.
+                     int reference_idu_ndx_in_wetl = (idu_ndx_in_wetl == 0) ? 1 : 0;
+                     float reference_elev_m = gIDUs->AttFloat(pWetl->m_wetlIDUndxArray[reference_idu_ndx_in_wetl], ELEV_MEAN);
+                     double reference_wetl_cap_mm = gIDUs->Att(pWetl->m_wetlIDUndxArray[reference_idu_ndx_in_wetl], WETL_CAP);
+                     double tgt_idu_wetl_cap_mm = reference_wetl_cap_mm - (tgt_idu_elev_m - reference_elev_m) * 1000.;
+                     gIDUs->SetAtt(idu_ndx, WETL_CAP, tgt_idu_wetl_cap_mm);
+                  }
+
+                  gIDUs->SetAtt(idu_ndx, WETL_ID, wetl_id);
                   gIDUs->SetAtt(idu_ndx, WET_FRAC, 0.);
-                  gIDUs->SetAttInt(idu_ndx, WETLONGEST, 0.);
+                  gIDUs->SetAttInt(idu_ndx, WETLONGEST, 0);
                   gIDUs->SetAtt(idu_ndx, WETNESS, wetness_mm);
                   gIDUs->SetAtt(idu_ndx, WETL2Q, 0.);
 
+                  if (snow_m3 > 0.)
+                  { // What was in the snow compartment gets put into the surface water or topsoil compartments.
+                     HRULayer* pHRULayer = pHRU->GetLayer(BOX_SNOWPACK);
+                     pHRULayer->AddFluxFromGlobalHandler((float)snow_m3, FL_BOTTOM_SINK);     //m3/d
+                  }
 
+                  double new_surface_h2o_m3 = wetness_mm <= 0. ? 0. : ((wetness_mm / 1000.) * tgt_idu_area_m2);
+                  if (new_surface_h2o_m3 != melt_h2o_m3)
+                  {
+                     HRULayer* pHRULayer = pHRU->GetLayer(BOX_SURFACE_H2O);
+                     double change_in_surface_h2o_m3 = new_surface_h2o_m3 - melt_h2o_m3;
+                     if (change_in_surface_h2o_m3 > 0.) 
+                        pHRULayer->AddFluxFromGlobalHandler((float)change_in_surface_h2o_m3, FL_TOP_SOURCE);    
+                     else 
+                        pHRULayer->AddFluxFromGlobalHandler(-(float)change_in_surface_h2o_m3, FL_BOTTOM_SINK);    
+                  }
 
-               }
+                  double new_topsoil_h2o_mm = tgt_idu_fc_mm - ((wetness_mm < 0.) ? wetness_mm : 0.);
+                  if (new_topsoil_h2o_mm != orig_topsoil_h2o_mm)
+                  {
+                     HRULayer* pHRULayer = (tgt_idu_irrigation != 0) ? pHRU->GetLayer(BOX_IRRIG_SOIL) : pHRU->GetLayer(BOX_NAT_SOIL);
+                     double change_in_topsoil_h2o_m3 = ((new_topsoil_h2o_mm - orig_topsoil_h2o_mm) / 1000.) * tgt_idu_area_m2;
+                     if (change_in_topsoil_h2o_m3 > 0)
+                        pHRULayer->AddFluxFromGlobalHandler((float)change_in_topsoil_h2o_m3, FL_TOP_SOURCE);
+                     else
+                        pHRULayer->AddFluxFromGlobalHandler(-(float)change_in_topsoil_h2o_m3, FL_BOTTOM_SINK);
+                  }
 
-            }
-
-         }
-      }
+                  if (wetness_mm > 0.) pHRU->m_standingH2Oflag = true;
+               } // end of if (pWetl == NULL) ... else 
+            } // end of logic to add this IDU to an existing wetland.
+         } // end of logic for gain of a wetland
+      } // end of if (new_lulc != original_lulc)
 
       if (new_ugb != original_ugb)
       {
@@ -3723,10 +3754,10 @@ x*/
             idu_id, original_ugb, new_ugb);
          Report::LogMsg(msg);
          AddIDUtoUGA(pContext, idu_ndx, new_ugb);
-      }
+      } // end of if (new_ugb != original_ugb)
 
       prev_idu_id = idu_id;
-   }
+   } // end of loop through records in prescribed LULCs file
 
    m_PLcurrentRecord = record;
 
