@@ -28,7 +28,7 @@
       <output name="wetl 10 number of IDUs" query="LULC_A=62 AND WETL_ID=10" value="1" type="sum" domain="idu" />
       <output name="wetl 10 area (m2)" query="WETL_ID=10" value="AREA" type="sum" domain="idu" />
       <output name="wetl 10 WETNESS" query="WETL_ID=10" value="WETNESS" type="areaWtMean" domain="idu" />
-      <output name="wetl 10 standing water (m3)" query="WETL_ID=10 AND WETNESS>0" value="WETNESS*AREA/1000" domain="idu" />
+      <output name="wetl 10 standing water (m3)" query="WETL_ID=10 AND WETNESS>0" value="WETNESS*AREA/1000" type="sum" domain="idu" />
       <output name="idu 33827 WET_FRAC" query="IDU_ID=33827" value="WET_FRAC" type="sum" domain="idu" />
       <output name="idu 33827 WETLONGEST" query="IDU_ID=33827" value="WETLONGEST" type="sum" domain="idu" />
       <output name="idu 33827 WET_LENGTH" query="IDU_ID=33827" value="WET_LENGTH" type="sum" domain="idu" />
