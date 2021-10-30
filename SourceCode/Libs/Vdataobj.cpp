@@ -719,13 +719,21 @@ int VDataObj::_ReadAscii( HANDLE hFile, TCHAR delimiter, BOOL showMsg )
 
    buffer[ fileSize ] = NULL;
 
+
    //-- skip any leading comments --//
-   TCHAR *p = buffer;
+   TCHAR* p = SkipLeadingComments(buffer);
+/*x
    while ( *p == ';' )
       {
-      p = strchr( p, '\n' );
+      TCHAR* start = p;
+      p = _tcschr(p, '\n');
+
+      if (p == NULL)
+         p = _tcschr(start, '\r');
+
       p++;
       }
+x*/
 
    //-- start parsing buffer --//
    TCHAR *end = strchr( p, '\n' );
@@ -737,7 +745,7 @@ int VDataObj::_ReadAscii( HANDLE hFile, TCHAR delimiter, BOOL showMsg )
    *end    = NULL;
    int  _cols = 1;
 
-   // if delimiter == NULL, then autodetect by scanning the frist cset of charactores
+   // if delimiter == NULL, then autodetect by scanning the first set of characters
    if ( delimiter == NULL )
       {
       //int testCount  = 0;
@@ -745,7 +753,7 @@ int VDataObj::_ReadAscii( HANDLE hFile, TCHAR delimiter, BOOL showMsg )
       int commaCount = 0;
       int spaceCount = 0;
 
-      TCHAR *test = buffer;
+      TCHAR *test = p;
 
       while ( *test != NULL && *test != '\n' ) // && testCount < 240 )
          {
@@ -797,12 +805,16 @@ int VDataObj::_ReadAscii( HANDLE hFile, TCHAR delimiter, BOOL showMsg )
 
    //-- ready to start parsing data --//
    int cols = GetColCount();
+   ASSERT(cols == _cols);
+   cols = _cols;
+
 
    VData *data = new VData[ cols ];
    memset( data, 0, cols * sizeof( VData ) );
 
    // reset ptr to next line
-   p = end+1;
+//x   p = end+1;
+   p = next + 1;
 
    // strip any leading newlines
    while ( *p == '\r' || *p == '\n' )
@@ -863,6 +875,113 @@ int VDataObj::_ReadAscii( HANDLE hFile, TCHAR delimiter, BOOL showMsg )
 
    return GetRowCount();
    }
+
+
+int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines beginning with ';' are ignored.
+{
+// "CSV" = Comma-Separated Values
+#define COMMA ','
+
+// Read the entire file, including any leading comments, into "buffer".
+   CString pathAndFileName;
+   PathManager::FindPath(fileName, pathAndFileName);
+
+   HANDLE hFile = CreateFile(pathAndFileName,
+      GENERIC_READ, // open for reading
+      0, // do not share
+      NULL, // no security
+      OPEN_EXISTING, // existing file only
+      FILE_ATTRIBUTE_NORMAL, // normal file
+      NULL); // no attr. template
+   if (hFile == INVALID_HANDLE_VALUE)
+   {
+      CString msg;
+      msg.Format("VDataObj::ReadCSVwithLeadingComments() Couldn't find file. pathAndFileName = %s", pathAndFileName.GetString());
+      Report::ErrorMsg(msg);
+      return 0;
+   }
+
+   LARGE_INTEGER _fileSize;
+   BOOL ok = GetFileSizeEx(hFile, &_fileSize); ASSERT(ok);
+   DWORD fileSize = (DWORD)_fileSize.LowPart;
+   TCHAR* buffer = new TCHAR[(size_t)(fileSize + 2)];
+   memset(buffer, 0, ((size_t)(fileSize + 2)) * sizeof(TCHAR));
+   DWORD bytesRead = 0;
+   bool rtn_from_ReadFile = ReadFile(hFile, buffer, fileSize, &bytesRead, NULL);
+   ASSERT(rtn_from_ReadFile);
+   CloseHandle(hFile);
+
+// Set up the VDataObj with the right number of columns and store the column names.
+   Clear();
+   m_name = pathAndFileName;
+
+   TCHAR* start_of_data = SkipLeadingComments(buffer); // Point into the buffer just past any leading comments.
+   TCHAR* p = start_of_data;
+   int num_cols = 1;
+
+   while (*p != NULL && *p != '\r' && *p != '\n') if (*p++ == COMMA) num_cols++; // count the number of columns
+   SetSize(num_cols, 0);  // Initialize with zero rows.
+
+// Copy the column names to the VDataObj.
+   TCHAR d[3];
+   d[0] = COMMA;
+   d[1] = '\n';
+   d[2] = NULL;
+   TCHAR* next;
+   p = strtok_s(start_of_data, d, &next);
+   int col = 0;
+   while (p != NULL)
+   {
+      while (*p == ' ') p++; // Strip leading blanks in label field.
+      SetLabel(col++, p);
+      p = strtok_s(NULL, d, &next); 
+   }
+   p = next + 1; // Set pointer to next line.
+
+// Copy the data from the buffer into the VDataObj, one row at a time.
+   VData* one_row = new VData[num_cols];
+   memset(one_row, 0, num_cols * sizeof(VData));
+   float bytesPerRow = float(num_cols * sizeof(VData));
+   float rAI = bytesRead / (10.0f * bytesPerRow);
+   UINT rowAllocIncr = (UINT)rAI;
+   if ((int)rowAllocIncr < 50) rowAllocIncr = 50;
+   matrix.SetRowAllocationIncr(rowAllocIncr);
+
+   INT_PTR rowcount = 0;
+   while (p != NULL && *p != EOF && *p != NULL)
+   {
+      // get a row of data
+      for (int i = 0; i < num_cols; i++)
+      {
+         // p is the current position pointer.  Before parsing, find the end of the string and NULL it out
+         if (*p == COMMA) *p = NULL; // nothing to parse           
+         else
+         {
+            next = p + 1;
+            while (*next != COMMA
+               && *next != '\r'
+               && *next != '\n'
+               && *next != NULL)
+               next++;
+
+            // NULL out the delimiter
+            *next = NULL;
+         }
+         // Now p points to the current token, and "next" points to the NULL at the end of the current token.
+         one_row[i].Parse(p);       
+         p = next + 1; // Move to the next token.
+      }
+
+      AppendRow(one_row, num_cols);
+      rowcount++;
+      p++; // Skip over the newline character.
+   }
+
+   delete[] one_row;
+   delete[] buffer;
+
+   return(rowcount);
+} // end of ReadCSVwithLeadingComments()
 
 
 //-- VDataObj::WriteAscii() ------------------------------------------
@@ -1291,3 +1410,20 @@ int VDataObj::ReadDBF( LPCTSTR databaseName )
 
    return count;
    }
+
+
+TCHAR* VDataObj::SkipLeadingComments(TCHAR* p)
+{
+   while (*p == ';')
+   {
+      TCHAR* start = p;
+      p = _tcschr(p, '\n');
+
+      if (p == NULL)
+         p = _tcschr(start, '\r');
+
+      p++;
+   }
+   return(p);
+} // end of SkipLeadingComments()
+

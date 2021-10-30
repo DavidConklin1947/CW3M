@@ -215,3 +215,4 @@ int DataObj::CopyToClipboard( char delimiter /* =\t */)
    return 1;
    }
 #endif
+

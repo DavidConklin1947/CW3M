@@ -140,6 +140,8 @@ class  LIBSAPI VDataObj : public DataObj
       float  GetSum( int col, int startRow );
 
       //-- File I/O --//
+      TCHAR* SkipLeadingComments(TCHAR* p);
+      int ReadCSVwithLeadingComments(CString fileName);
       virtual int ReadAscii ( LPCSTR fileName, TCHAR delimiter=0, BOOL showMsg=TRUE );
       virtual int _ReadAscii( HANDLE hFile,    TCHAR delimiter=0, BOOL showMsg=TRUE );
       virtual int WriteAscii( LPCSTR fileName, TCHAR delimiter=',', int colWidth=0 );
