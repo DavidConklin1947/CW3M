@@ -905,6 +905,7 @@ int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines begi
    BOOL ok = GetFileSizeEx(hFile, &_fileSize); ASSERT(ok);
    DWORD fileSize = (DWORD)_fileSize.LowPart;
    TCHAR* buffer = new TCHAR[(size_t)(fileSize + 2)];
+   TCHAR* adr_of_last_char = buffer + (size_t)fileSize - 1;
    memset(buffer, 0, ((size_t)(fileSize + 2)) * sizeof(TCHAR));
    DWORD bytesRead = 0;
    bool rtn_from_ReadFile = ReadFile(hFile, buffer, fileSize, &bytesRead, NULL);
@@ -953,17 +954,17 @@ int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines begi
    matrix.SetRowAllocationIncr(rowAllocIncr);
 
    INT_PTR rowcount = 0;
-   while (p != NULL && *p != EOF && *p != NULL)
+   while (p < adr_of_last_char && p != NULL && *p != EOF && *p != NULL)
    {
       // get a row of data
-      for (int i = 0; i < num_cols; i++)
+      for (int i = 0; i < num_cols && p < adr_of_last_char; i++)
       {
          // p is the current position pointer.  Before parsing, find the end of this value string and NULL it out
          if (*p == COMMA) next = p; // nothing to parse           
          else
          {
             next = p + 1;
-            while (*next != COMMA && *next != '\r' && *next != '\n' && *next != NULL) next++;
+            while (next < adr_of_last_char &&*next != COMMA && *next != '\r' && *next != '\n' && *next != NULL) next++;
          } // end of if (*p == COMMA) ... else ...
          *next = NULL; // NULL out the delimiter
 
@@ -972,7 +973,7 @@ int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines begi
 
          // Move to the first character of the next token.
          p = next;
-         while (*p == 0 || *p == '\r' || *p == '\n') p++; 
+         while ((p < adr_of_last_char) && (*p == 0 || *p == '\r' || *p == '\n')) p++; 
       } // end of for (int i = 0; i < num_cols; i++)
 
       AppendRow(one_row, num_cols);
