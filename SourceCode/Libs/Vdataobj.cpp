@@ -914,21 +914,26 @@ int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines begi
 // Set up the VDataObj with the right number of columns and store the column names.
    Clear();
    m_name = pathAndFileName;
+   TCHAR* start_of_col_names = SkipLeadingComments(buffer); // Point into the buffer just past any leading comments.
 
-   TCHAR* start_of_data = SkipLeadingComments(buffer); // Point into the buffer just past any leading comments.
-   TCHAR* p = start_of_data;
+   // Count the number of columns and initialize the VDataObj.
+   TCHAR* p = start_of_col_names;
    int num_cols = 1;
-
    while (*p != NULL && *p != '\r' && *p != '\n') if (*p++ == COMMA) num_cols++; // count the number of columns
    SetSize(num_cols, 0);  // Initialize with zero rows.
 
+   // Find the start of the actual data values.
+   *p = 0; // Null-terminate the end of the column names.
+   while (*p == 0 || *p == '\r' || *p == '\n') p++;
+   TCHAR* start_of_data = p;
+ 
 // Copy the column names to the VDataObj.
    TCHAR d[3];
    d[0] = COMMA;
    d[1] = '\n';
    d[2] = NULL;
-   TCHAR* next;
-   p = strtok_s(start_of_data, d, &next);
+   TCHAR* next = NULL;
+   p = strtok_s(start_of_col_names, d, &next);
    int col = 0;
    while (p != NULL)
    {
@@ -936,9 +941,9 @@ int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines begi
       SetLabel(col++, p);
       p = strtok_s(NULL, d, &next); 
    }
-   p = next + 1; // Set pointer to next line.
 
 // Copy the data from the buffer into the VDataObj, one row at a time.
+   p = start_of_data;
    VData* one_row = new VData[num_cols];
    memset(one_row, 0, num_cols * sizeof(VData));
    float bytesPerRow = float(num_cols * sizeof(VData));
@@ -953,29 +958,26 @@ int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines begi
       // get a row of data
       for (int i = 0; i < num_cols; i++)
       {
-         // p is the current position pointer.  Before parsing, find the end of the string and NULL it out
-         if (*p == COMMA) *p = NULL; // nothing to parse           
+         // p is the current position pointer.  Before parsing, find the end of this value string and NULL it out
+         if (*p == COMMA) next = p; // nothing to parse           
          else
          {
             next = p + 1;
-            while (*next != COMMA
-               && *next != '\r'
-               && *next != '\n'
-               && *next != NULL)
-               next++;
+            while (*next != COMMA && *next != '\r' && *next != '\n' && *next != NULL) next++;
+         } // end of if (*p == COMMA) ... else ...
+         *next = NULL; // NULL out the delimiter
 
-            // NULL out the delimiter
-            *next = NULL;
-         }
          // Now p points to the current token, and "next" points to the NULL at the end of the current token.
-         one_row[i].Parse(p);       
-         p = next + 1; // Move to the next token.
-      }
+         one_row[i].Parse(p);
+
+         // Move to the first character of the next token.
+         p = next;
+         while (*p == 0 || *p == '\r' || *p == '\n') p++; 
+      } // end of for (int i = 0; i < num_cols; i++)
 
       AppendRow(one_row, num_cols);
       rowcount++;
-      p++; // Skip over the newline character.
-   }
+   } // end of while (p != NULL && *p != EOF && *p != NULL)
 
    delete[] one_row;
    delete[] buffer;
