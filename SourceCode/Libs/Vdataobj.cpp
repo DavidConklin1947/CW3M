@@ -637,13 +637,13 @@ CString VDataObj::GetAsString( int col, int row )
 //--  Opens and loads the file into the data object
 //-------------------------------------------------------------------
 
-int VDataObj::ReadAscii( LPCTSTR _fileName, TCHAR delimiter, BOOL showMsg )
-   {
+int VDataObj::ReadAscii(LPCTSTR _fileName, TCHAR delimiter, BOOL showMsg)
+{
    CString fileName;
-   PathManager::FindPath( _fileName, fileName );
+   PathManager::FindPath(_fileName, fileName);
 
 #ifndef NO_MFC
-   HANDLE hFile = hFile = CreateFile(fileName, 
+   HANDLE hFile = hFile = CreateFile(fileName,
       GENERIC_READ, // open for reading
       0, // do not share
       NULL, // no security
@@ -655,174 +655,162 @@ int VDataObj::ReadAscii( LPCTSTR _fileName, TCHAR delimiter, BOOL showMsg )
    //fopen_s( &fp, fileName, "rt" );     // open for "read"
 
 #else
-   FILE* hFile=fopen(fileName,"r");
+   FILE* hFile = fopen(fileName, "r");
 #endif
 
 
-   if ( hFile == INVALID_HANDLE_VALUE && showMsg )
-      {
+   if (hFile == INVALID_HANDLE_VALUE && showMsg)
+   {
       CString msg;
       msg.Format("VDataObj::ReadAscii() Couldn't find file. _filename = %s", _fileName);
       Report::ErrorMsg(msg);
       return 0;
-      }
+   }
 
    m_path = fileName;
 
-   if ( this->m_name.IsEmpty() )
+   if (this->m_name.IsEmpty())
       this->m_name = fileName;
 
-   return _ReadAscii( hFile, delimiter, showMsg );
-   }
+   return _ReadAscii(hFile, delimiter, showMsg);
+}
 
 
 //-------------------------------------------------------------------
 
-int VDataObj::_ReadAscii( HANDLE hFile, TCHAR delimiter, BOOL showMsg )
-   {
+int VDataObj::_ReadAscii(HANDLE hFile, TCHAR delimiter, BOOL showMsg)
+{
    Clear();   // reset data object, strings
 
 #ifndef NO_MFC
    LARGE_INTEGER _fileSize;
-   BOOL ok = GetFileSizeEx( hFile, &_fileSize );
-   ASSERT( ok );
+   BOOL ok = GetFileSizeEx(hFile, &_fileSize);
+   ASSERT(ok);
 
-   DWORD fileSize = (DWORD) _fileSize.LowPart;
+   DWORD fileSize = (DWORD)_fileSize.LowPart;
 
    //long fileSize = _filelength ( _fileno( fp ) );
-   
-   TCHAR *buffer  = new TCHAR[ fileSize+2 ];
-   memset( buffer, 0, (fileSize+2) * sizeof( TCHAR ) );
+
+   TCHAR* buffer = new TCHAR[fileSize + 2];
+   memset(buffer, 0, (fileSize + 2) * sizeof(TCHAR));
 
    //fread ( buffer, fileSize, 1, fp );
    //fclose( fp );
    DWORD bytesRead = 0;
-   ReadFile( hFile, buffer, fileSize, &bytesRead, NULL );
-   CloseHandle( hFile );
+   ReadFile(hFile, buffer, fileSize, &bytesRead, NULL);
+   CloseHandle(hFile);
 #else
    //this is linux specific; rewrite for other desired systems
-   long f_d=fileno((FILE*)hFile);
+   long f_d = fileno((FILE*)hFile);
    struct stat st;
-   fstat(f_d,&st);
-   off_t fileSize=st.st_size;
-   TCHAR *buffer=new TCHAR[fileSize+2];
-   size_t bytesRead=fread(buffer,sizeof(TCHAR),fileSize,(FILE*)hFile)*sizeof(TCHAR);
+   fstat(f_d, &st);
+   off_t fileSize = st.st_size;
+   TCHAR* buffer = new TCHAR[fileSize + 2];
+   size_t bytesRead = fread(buffer, sizeof(TCHAR), fileSize, (FILE*)hFile) * sizeof(TCHAR);
    fclose((FILE*)hFile);
 #endif
 
 
-   if ( bytesRead == 0 )
-      {
-      delete [] buffer;
+   if (bytesRead == 0)
+   {
+      delete[] buffer;
       return 0;
-      }
+   }
 
-   buffer[ fileSize ] = NULL;
-
+   buffer[fileSize] = NULL;
 
    //-- skip any leading comments --//
-   TCHAR* p = SkipLeadingComments(buffer);
-/*x
-   while ( *p == ';' )
-      {
-      TCHAR* start = p;
-      p = _tcschr(p, '\n');
-
-      if (p == NULL)
-         p = _tcschr(start, '\r');
-
+   TCHAR* p = buffer;
+   while (*p == ';')
+   {
+      p = strchr(p, '\n');
       p++;
-      }
-x*/
+   }
 
-   //-- start parsing buffer --//
-   TCHAR *end = strchr( p, '\n' );
+//-- start parsing buffer --//
+   TCHAR* end = strchr(p, '\n');
 
-   if ( *(end-1) == 13 )  // \r
+   if (*(end - 1) == 13)  // \r
       end--;
 
    //-- NULL-terminate then get column count --//
-   *end    = NULL;
+   *end = NULL;
    int  _cols = 1;
 
-   // if delimiter == NULL, then autodetect by scanning the first set of characters
-   if ( delimiter == NULL )
-      {
-      //int testCount  = 0;
-      int tabCount   = 0;
+   // if delimiter == NULL, then autodetect by scanning the frist cset of charactores
+   if (delimiter == NULL)
+   {
+   //int testCount  = 0;
+      int tabCount = 0;
       int commaCount = 0;
       int spaceCount = 0;
 
-      TCHAR *test = p;
+      TCHAR* test = buffer;
 
-      while ( *test != NULL && *test != '\n' ) // && testCount < 240 )
+      while (*test != NULL && *test != '\n') // && testCount < 240 )
+      {
+         switch (*test)
          {
-         switch( *test )
-            {
             case '\t':  tabCount++;    break;
             case ',':   commaCount++;  break;
             case ' ':   spaceCount++;  break;
-            }
-         
+         }
+
          test++;
          //testCount++;
-         }
+      }
 
       delimiter = ',';
 
-      if ( ( tabCount > commaCount ) && ( tabCount > spaceCount ) )
+      if ((tabCount > commaCount) && (tabCount > spaceCount))
          delimiter = '\t';
-      else if ( ( spaceCount > tabCount ) && ( spaceCount > commaCount ) )
+      else if ((spaceCount > tabCount) && (spaceCount > commaCount))
          delimiter = ' ';
-      }
+   }
 
-   // count the nuber of delimiters
-   while ( *p != NULL )
-      {
-      if ( *p++ == delimiter )
+// count the nuber of delimiters
+   while (*p != NULL)
+   {
+      if (*p++ == delimiter)
          _cols++;
-      }
+   }
 
-   SetSize( _cols, 0 );  // resize matrix, statArray
+   SetSize(_cols, 0);  // resize matrix, statArray
 
    //-- set labels from first line (labels are delimited) --//
-   TCHAR d[ 3 ];
-   d[ 0 ] = delimiter;
-   d[ 1 ] = '\n';
-   d[ 2 ] = NULL;
-   TCHAR *next;
+   TCHAR d[3];
+   d[0] = delimiter;
+   d[1] = '\n';
+   d[2] = NULL;
+   TCHAR* next;
 
-   p = strtok_s( buffer, d, &next );
+   p = strtok_s(buffer, d, &next);
    _cols = 0;
 
-   while ( p != NULL )
-      {
-      while ( *p == ' ' ) p++;   // strip leading blanks
+   while (p != NULL)
+   {
+      while (*p == ' ') p++;   // strip leading blanks
 
-      SetLabel( _cols++, p );
-      p = strtok_s( NULL, d, &next );   // look for delimiter or newline
-      }
+      SetLabel(_cols++, p);
+      p = strtok_s(NULL, d, &next);   // look for delimiter or newline
+   }
 
-   //-- ready to start parsing data --//
+//-- ready to start parsing data --//
    int cols = GetColCount();
-   ASSERT(cols == _cols);
-   cols = _cols;
 
-
-   VData *data = new VData[ cols ];
-   memset( data, 0, cols * sizeof( VData ) );
+   VData* data = new VData[cols];
+   memset(data, 0, cols * sizeof(VData));
 
    // reset ptr to next line
-//x   p = end+1;
-   p = next + 1;
+   p = end + 1;
 
    // strip any leading newlines
-   while ( *p == '\r' || *p == '\n' )
+   while (*p == '\r' || *p == '\n')
       p++;
 
    INT_PTR rowcount = 0;
 
-   float bytesPerRow = float(  cols * sizeof(VData) );
+   float bytesPerRow = float(cols * sizeof(VData));
    float rAI = bytesRead / (10.0f * bytesPerRow);
    UINT rowAllocIncr = (UINT)rAI;
 
@@ -831,50 +819,50 @@ x*/
 
    matrix.SetRowAllocationIncr(rowAllocIncr);
 
-   while ( p != NULL && *p != EOF && *p != NULL)
+   while (p != NULL && *p != EOF && *p != NULL)
+   {
+   // get a row of data
+      for (int i = 0; i < cols; i++)
       {
-      // get a row of data
-      for ( int i=0; i < cols; i++ )
-         {
-         // p is the current position pointer.  Before parsing, find the end of the string and NULL it out
-         if ( *p == delimiter )  // nothing to parse?
+      // p is the current position pointer.  Before parsing, find the end of the string and NULL it out
+         if (*p == delimiter)  // nothing to parse?
             *p = NULL;
          else
-            {
-            next = p+1;
-            while ( *next != delimiter 
-                 && *next != '\r' 
-                 && *next != '\n' 
-                 && *next != NULL )
+         {
+            next = p + 1;
+            while (*next != delimiter
+               && *next != '\r'
+               && *next != '\n'
+               && *next != NULL)
                next++;
 
             // NULL out the delimiter
             *next = NULL;
-            }
+         }
 
-         // at the start of this loop, p should point to the current token,
-         // and next should point to the first char past the end of the current token
-         data[ i ].Parse( p );
+      // at the start of this loop, p should point to the current token,
+      // and next should point to the first char past the end of the current token
+         data[i].Parse(p);
          //if ( i == 0 )
          //   TRACE1( "%s\n", p );
          //else
          //   TRACE1( "---%s\n", p );
-         
-         // move to the next token
-         p = next+1;
-         }
 
-      AppendRow( data, cols );
-      rowcount++;
-      p++;
+         // move to the next token
+         p = next + 1;
       }
 
-   //-- clean up --//
-   delete [] data;
-   delete [] buffer;
+      AppendRow(data, cols);
+      rowcount++;
+      p++;
+   }
+
+//-- clean up --//
+   delete[] data;
+   delete[] buffer;
 
    return GetRowCount();
-   }
+}
 
 
 int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines beginning with ';' are ignored.

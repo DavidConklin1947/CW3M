@@ -3490,7 +3490,6 @@ bool APs::InitRunPrescribedLULCs(EnvContext* pContext)
 
    CString pathAndFileName;
    pathAndFileName = ReplaceSubstring(m_LULCsFile, "SCENARIO_NAME", m_simulationScenario);
-//x   m_PLrecords = m_PLtable.ReadAscii(pathAndFileName, ',', TRUE);
    m_PLrecords = m_PLtable.ReadCSVwithLeadingComments(pathAndFileName);
    err_flag = m_PLrecords <= 0;
    CString msg; msg.Format("InitRunPrescribedLULCs(): m_PLrecords = %d", m_PLrecords);
