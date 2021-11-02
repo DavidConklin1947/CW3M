@@ -1449,7 +1449,7 @@ public:
 };
 
 
-class Wetland
+class FLOWAPI Wetland
 {
    friend class FlowModel;
 
@@ -1457,6 +1457,7 @@ public:
    Wetland(int wetlID);
    ~Wetland() {  };
    double ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3); // Returns volume of water remaining when wetland is at its capacity.
+   bool InitWETL_CAPifNecessary(); // Set nominal values of WETL_CAP. 
 
 public:
    int m_wetlID;

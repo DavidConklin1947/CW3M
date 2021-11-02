@@ -3669,7 +3669,6 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   float tgt_idu_area_m2 = gIDUs->AttFloat(idu_ndx, AREA);
                   double tgt_idu_fc_mm = gIDUs->Att(idu_ndx, FIELD_CAP);
                   int tgt_idu_irrigation = gIDUs->AttInt(idu_ndx, IRRIGATION);
-                  double tgt_idu_wetl_cap_mm = gIDUs->Att(idu_ndx, WETL_CAP);
 
                   int tgt_hru_ndx = gIDUs->AttInt(idu_ndx, HRU_NDX);
                   HRU* pHRU = gEnvModel->m_pFlowModel->m_hruArray[tgt_hru_ndx];
@@ -3698,16 +3697,6 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   pWetl->m_wetlHRUndxArray.InsertAt(idu_ndx_in_wetl, tgt_hru_ndx);
                   pWetl->m_wetlReachNdxArray.InsertAt(idu_ndx_in_wetl, ptgt_reach->m_reachArrayNdx);
                   pWetl->m_wetlArea_m2 += tgt_idu_area_m2;
-
-                  if (tgt_idu_wetl_cap_mm <= 0.)
-                  { // Infer WETL_CAP.
-                     int reference_idu_ndx_in_wetl = (idu_ndx_in_wetl == 0) ? 1 : 0;
-                     float reference_elev_m = gIDUs->AttFloat(pWetl->m_wetlIDUndxArray[reference_idu_ndx_in_wetl], ELEV_MEAN);
-                     double reference_wetl_cap_mm = gIDUs->Att(pWetl->m_wetlIDUndxArray[reference_idu_ndx_in_wetl], WETL_CAP);
-                     double tgt_idu_wetl_cap_mm = reference_wetl_cap_mm - (tgt_idu_elev_m - reference_elev_m) * 1000.;
-                     gIDUs->SetAtt(idu_ndx, WETL_CAP, tgt_idu_wetl_cap_mm);
-                  }
-
                   gIDUs->SetAtt(idu_ndx, WETL_ID, wetl_id);
                   gIDUs->SetAtt(idu_ndx, WET_FRAC, 0.);
                   gIDUs->SetAttInt(idu_ndx, WETLONGEST, 0);
@@ -3743,6 +3732,8 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   }
 
                   if (wetness_mm > 0.) pHRU->m_standingH2Oflag = true;
+
+                  pWetl->InitWETL_CAPifNecessary();
                } // end of if (pWetl == NULL) ... else 
             } // end of logic to add this IDU to an existing wetland.
          } // end of logic for gain of a wetland
