@@ -865,7 +865,7 @@ int VDataObj::_ReadAscii(HANDLE hFile, TCHAR delimiter, BOOL showMsg)
 }
 
 
-int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines beginning with ';' are ignored.
+int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines beginning with ';' are ignored. Returns # of records, or -1 for error.
 {
 // "CSV" = Comma-Separated Values
 #define COMMA ','
@@ -873,6 +873,13 @@ int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines begi
 // Read the entire file, including any leading comments, into "buffer".
    CString pathAndFileName;
    PathManager::FindPath(fileName, pathAndFileName);
+   if (pathAndFileName.GetLength() <= 0)
+   {
+      CString msg;
+      msg.Format("VDataObj::ReadCSVwithLeadingComments() Couldn't find file. fileName = %s", fileName.GetString());
+      Report::ErrorMsg(msg);
+      return(-1);
+   }
 
    HANDLE hFile = CreateFile(pathAndFileName,
       GENERIC_READ, // open for reading
@@ -884,9 +891,9 @@ int VDataObj::ReadCSVwithLeadingComments(CString fileName) // Initial lines begi
    if (hFile == INVALID_HANDLE_VALUE)
    {
       CString msg;
-      msg.Format("VDataObj::ReadCSVwithLeadingComments() Couldn't find file. pathAndFileName = %s", pathAndFileName.GetString());
+      msg.Format("VDataObj::ReadCSVwithLeadingComments() Couldn't open file. pathAndFileName = %s", pathAndFileName.GetString());
       Report::ErrorMsg(msg);
-      return 0;
+      return(-1);
    }
 
    LARGE_INTEGER _fileSize;

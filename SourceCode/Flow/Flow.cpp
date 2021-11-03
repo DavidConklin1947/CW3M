@@ -5962,7 +5962,7 @@ bool Wetland::InitWETL_CAPifNecessary() // Set nominal values of WETL_CAP.
    double wetl_cap_0_mm = existing_wetl_cap_0_mm;
    if (existing_wetl_cap_0_mm <= 0.)
    {
-      double nominal_wetl_cap_0_mm = 1000. + ((double)highest_idu_elev_m - (double)lowest_idu_elev_m);
+      double nominal_wetl_cap_0_mm = (((double)highest_idu_elev_m - (double)lowest_idu_elev_m) + 1.) * MM_PER_M;
       wetl_cap_0_mm = nominal_wetl_cap_0_mm;
       gIDUs->SetAtt(m_wetlIDUndxArray[0], WETL_CAP, wetl_cap_0_mm);
    }
@@ -5991,6 +5991,7 @@ bool Wetland::InitWETL_CAPifNecessary() // Set nominal values of WETL_CAP.
       i++;
    } // end of loop thru additional IDUs in the wetland
 
+   return(true);
 } // end of InitWETL_CAPifNecessary()
 
 
