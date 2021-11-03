@@ -19,6 +19,20 @@
     <output name="WETAVGDPTH" query="WETL_ID=14" value="WETAVGDPTH" type="areaWtMean" />
   </output_group>
 
+  <output_group name="REP Wetland 15 Report" >
+    <output name="idu 32345 LULC_A" query="IDU_ID=32345" value="LULC_A" type="sum" />
+    <output name="idu 32345 LULC_B" query="IDU_ID=32345" value="LULC_B" type="sum" />
+    <output name="idu 32345 LULC_C (VEGCLASS)" query="IDU_ID=32345" value="VEGCLASS" type="sum" />
+    <output name="ELEV_MEAN (m) lowest IDU (32345)" query="IDU_ID=32345" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WET_FRAC lowest IDU (32345)" query="IDU_ID=32345" value="WET_FRAC" type="areaWtMean" />
+    <output name="WETLONGEST (days) lowest IDU (32345)" query="IDU_ID=32345" value="WETLONGEST" type="areaWtMean" />
+    <output name="WETAVGDPTH (mm) lowest IDU (32345)" query="IDU_ID=32345" value="WETAVGDPTH" type="areaWtMean" />
+    <output name="ELEV_MEAN (m) highest IDU (32225)" query="IDU_ID=32225" value="ELEV_MEAN" type="areaWtMean" />
+    <output name="WET_FRAC highest IDU (32225)" query="IDU_ID=32225" value="WET_FRAC" type="areaWtMean" />
+    <output name="WETLONGEST (days) highest IDU (32225)" query="IDU_ID=32225" value="WETLONGEST" type="areaWtMean" />
+    <output name="WETAVGDPTH (mm) highest IDU (32225)" query="IDU_ID=32225" value="WETAVGDPTH" type="areaWtMean" />
+  </output_group>
+
   <output_group name="REP Wetland 17 Report" >
     <output name="idu 31325 LULC_C (VEGCLASS)" query="IDU_ID=31325" value="VEGCLASS" type="sum" />
     <output name="WET_FRAC" query="WETL_ID=17" value="WET_FRAC" type="areaWtMean" />

@@ -24,6 +24,17 @@
     -->
 
   <outputs>
+    <output_group name="FLOW Wetland 15 analysis" daily="y" monthly="y" yearly="y" >
+      <output name="idu 32345 WET_LENGTH" query="IDU_ID=32345" value="WET_LENGTH" type="sum" domain="idu" />
+      <output name="hru 1939 PRECIP (mm)" query="HRU_ID=1939" value="PRECIP" type="sum" domain="hru" />
+      <output name="idu 32345 WETNESS (mm)" query="IDU_ID=32345" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="idu 32345 SM_DAY (mm)" query="IDU_ID=32345" value="SM_DAY" type="areaWtMean" domain="idu" />
+      <output name="reach 23772753 Q_DISCHARG (cms) out to downstream" query="COMID=23772753" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23772767 Q_DISCHARG (cms) in from upstream" query="COMID=23772767" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reaches 23772753-65 Q2WETL (cms)" query="23772752&lt;COMID and COMID&lt;23772766" value="Q2WETL" type="sum" domain="reach" />
+      <output name="total WETL2Q (cms)" query="WETL_ID=15" value="WETL2Q" type="sum" domain="idu" />
+    </output_group>
+
     <output_group name="FLOW Wetland 10 analysis" daily="y" monthly="y" yearly="y" >
       <output name="wetl 10 number of IDUs" query="LULC_A=62 AND WETL_ID=10" value="1" type="sum" domain="idu" />
       <output name="wetl 10 area (m2)" query="WETL_ID=10" value="AREA" type="sum" domain="idu" />
