@@ -3522,6 +3522,7 @@ int FindInIntCArray(int* arrayAddr, int arrayLen, int tgtVal)
    while (ndx >= 0)
    {
       if (*(arrayAddr + ndx) == tgtVal) break;
+      ndx--;
    }
    return(ndx);
 } // end of FindInIntCArray()

@@ -1,0 +1,24 @@
+;  Prescribed LULC changes for No_wetlands_demo scenario
+; Turns off active wetlands in 2010
+;  LULC values are for the most detailed LULC category, i.e. LULC_C aka VEGCLASS for WW2100.
+; Entries should be in order from earliest year to latest year.
+YEAR,IDU_ID,LULC,UGB,WETL_ID,DESCRIPTION
+2010,33827,122,22,10,One of the IDUs in wetland 10 goes to Developed Low Density.
+2010,33807,122,22,10,The other IDU in wetland 10 goes to Developed Low Density.
+2010,33803,299,0,14,The IDU in wetland 14 goes to Ag Fallow.
+2010,32723,122,22,15,A wetland 15 IDU goes to Developed Low Density.
+2010,32250,122,22,15,A wetland 15 IDU goes to Developed Low Density.
+2010,31837,122,22,15,A wetland 15 IDU goes to Developed Low Density.
+2010,31703,122,22,15,A wetland 15 IDU goes to Developed Low Density.
+2010,31811,122,22,15,A wetland 15 IDU goes to Developed Low Density.
+2010,32289,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32280,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32345,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32250,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32193,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32312,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32245,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32293,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32286,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,32225,299,22,15,A wetland 15 IDU goes to Ag Fallow.
+2010,31325,299,22,15,The IDU in wetland 17 IDU goes to Ag Fallow.

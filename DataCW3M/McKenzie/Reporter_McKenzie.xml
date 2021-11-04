@@ -31,6 +31,8 @@
     <output name="WET_FRAC highest IDU (32225)" query="IDU_ID=32225" value="WET_FRAC" type="areaWtMean" />
     <output name="WETLONGEST (days) highest IDU (32225)" query="IDU_ID=32225" value="WETLONGEST" type="areaWtMean" />
     <output name="WETAVGDPTH (mm) highest IDU (32225)" query="IDU_ID=32225" value="WETAVGDPTH" type="areaWtMean" />
+    <output name="PRECIP_YR (mm H2O) McKenzie basin total precipitation" query="1" value="PRECIP_YR" type="areaWtMean" />
+    <output name="TEMP_YR (degC) McKenzie basin average daily temperature" query="1" value="TEMP" type="areaWtMean" />
   </output_group>
 
   <output_group name="REP Wetland 17 Report" >
