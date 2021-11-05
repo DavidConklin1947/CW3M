@@ -3545,17 +3545,17 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
       if (record_year > this_year) break;
       if (record_year < this_year) continue;
 
-      int idu_id = m_PLtable.GetAsInt(m_colPLidu_id, record);
-      if (idu_id == prev_idu_id)
+      int tgt_idu_id = m_PLtable.GetAsInt(m_colPLidu_id, record);
+      if (tgt_idu_id == prev_idu_id)
       {
-         CString msg; msg.Format("RunPrescribedLULCs() duplicate idu_id %d in year %d", idu_id, record_year);
+         CString msg; msg.Format("RunPrescribedLULCs() duplicate idu_id %d in year %d", tgt_idu_id, record_year);
          Report::WarningMsg(msg);
       }
-      int idu_ndx = gIDUs->FindIndex(IDU_ID, idu_id, 0);
-      if (idu_ndx < 0) continue;
+      int tgt_idu_ndx = gIDUs->FindIndex(IDU_ID, tgt_idu_id, 0);
+      if (tgt_idu_ndx < 0) continue;
 
       int new_lulc_or_token = m_PLtable.GetAsInt(m_colPLlulc, record);
-      int original_lulc = gIDUs->AttInt(idu_ndx, VEGCLASS);
+      int original_lulc = gIDUs->AttInt(tgt_idu_ndx, VEGCLASS);
       int new_lulc = (new_lulc_or_token == TOKEN_FOR_NO_CHANGE) ? original_lulc : new_lulc_or_token;
       if (new_lulc >= 1000000 && new_lulc != original_lulc)
       { // Don't mess with new states in the upland state-and-transition model.
@@ -3566,7 +3566,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
       }
 
       int new_ugb = m_colPLugb >= 0 ? m_PLtable.GetAsInt(m_colPLugb, record) : 40; // Defaults to 40 Metro.
-      int original_ugb = gIDUs->AttInt(idu_ndx, UGB);
+      int original_ugb = gIDUs->AttInt(tgt_idu_ndx, UGB);
       if ((original_ugb < 0 && new_ugb < 0) || (original_ugb > 0 && new_ugb != original_ugb))
       {
          CString msg;
@@ -3576,7 +3576,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
 
       if (new_lulc != original_lulc)
       {
-         int orig_lulc_a = gIDUs->AttInt(idu_ndx, LULC_A);
+         int orig_lulc_a = gIDUs->AttInt(tgt_idu_ndx, LULC_A);
 
          // Find the parent LULCs for the new LULC.
          int levels_in_hierarchy = pContext->pLulcTree->GetLevels();  // 1=LULC_A, 2=LULC_B, etc...
@@ -3599,48 +3599,94 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
          } // end of while (level > 1)
 
          CString msg; msg.Format("RunPrescribedLULCs(): Changing VEGCLASS for IDU_ID %d to %d. New LULC_B is %d. New LULC_A is %d",
-            idu_id, new_lulc, new_lulc_b, new_lulc_a);
+            tgt_idu_id, new_lulc, new_lulc_b, new_lulc_a);
          Report::LogMsg(msg);
-         gIDUs->SetAttInt(idu_ndx, VEGCLASS, new_lulc);
-         gIDUs->SetAttInt(idu_ndx, LULC_B, new_lulc_b);
-         gIDUs->SetAttInt(idu_ndx, LULC_A, new_lulc_a);
+         gIDUs->SetAttInt(tgt_idu_ndx, VEGCLASS, new_lulc);
+         gIDUs->SetAttInt(tgt_idu_ndx, LULC_B, new_lulc_b);
+         gIDUs->SetAttInt(tgt_idu_ndx, LULC_A, new_lulc_a);
 
-         if (orig_lulc_a == LULCA_WETLAND && new_lulc_a != LULCA_WETLAND) // Is this the loss of a wetland?
-         { // Yes, this is the loss of a wetland.
+         if (orig_lulc_a == LULCA_WETLAND && new_lulc_a != LULCA_WETLAND) // Is this the loss of a wetland IDU?
+         { // Yes, this is the loss of a wetland IDU.
+            int wetl_id = gIDUs->AttInt(tgt_idu_ndx, WETL_ID);
+            Wetland* pWetl = gEnvModel->m_pFlowModel->GetWetlandFromID(wetl_id);
+            ASSERT(pWetl != NULL);
+            int tgt_idu_ndx_in_wetl = FindInIntCArray(&(pWetl->m_wetlIDUndxArray[0]), (int)pWetl->m_wetlIDUndxArray.GetSize(), tgt_idu_ndx);
+
+            float tgt_idu_area_m2 = gIDUs->AttFloat(tgt_idu_ndx, AREA);
+            int hru_ndx = gIDUs->AttInt(tgt_idu_ndx, HRU_NDX);
+            HRU* pHRU = gFlowModel->m_hruArray[hru_ndx];
+ 
+            // Remove this IDU's area from pHRU>m_wetlandArea_m2 for the HRU it belongs to.
+            // Also update pHRU->m_snowpackArea_m2.
+            pHRU->m_wetlandArea_m2 -= tgt_idu_area_m2;
+            if (close_enough(pHRU->m_wetlandArea_m2, 0., 1., 1.))
+            { // This HRU no longer contains a wetland.
+               pHRU->m_wetlandArea_m2 = 0.;
+               pHRU->m_standingH2Oflag = false;
+               pHRU->m_snowpackArea_m2 = pHRU->m_HRUtotArea_m2;
+            }
+            else
+            { // There is still some wetland in this HRU.
+               ASSERT(pHRU->m_wetlandArea_m2 > 0.);
+               pHRU->m_snowpackArea_m2 = pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2;
+            }
+
             // Move any standing water to the reach that this IDU drains into.
-            float tgt_idu_area_m2 = gIDUs->AttFloat(idu_ndx, AREA);
-            double wetness_mm = gIDUs->Att(idu_ndx, WETNESS);
+            double wetness_mm = gIDUs->Att(tgt_idu_ndx, WETNESS);
             if (wetness_mm > 0.)
             { // There is standing water.
                double standing_h2o_m3 = (wetness_mm / 1000.) * tgt_idu_area_m2;
-               double temp_wetl_degC = gIDUs->Att(idu_ndx, TEMP_WETL);
+               double temp_wetl_degC = gIDUs->Att(tgt_idu_ndx, TEMP_WETL);
                WaterParcel standingWP(standing_h2o_m3, temp_wetl_degC);
 
-               int comid = gIDUs->AttInt(idu_ndx, COMID);
+               int comid = gIDUs->AttInt(tgt_idu_ndx, COMID);
                Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);               
                pReach->AccumAdditions(standingWP);
-            }
+
+               // Remove the water from the HRU. 
+               HRULayer* pBox_surface_h2o = pHRU->GetLayer(BOX_SURFACE_H2O);
+               pBox_surface_h2o->AddFluxFromGlobalHandler((float)standingWP.m_volume_m3, FL_STREAM_SINK);
+            } // end of if (wetness_mm > 0.)
+
+            // Recalculate pHRU->m_standingH2Oflag and pReach->wetlNdx.
+            // Makes use of these conventions: that an HRU can only be associated with at most one wetland,
+            // and that similarly a reach can only be associated with at most one wetland.
+            pHRU->m_standingH2Oflag = false;
+            int tgt_reach_ndx = pWetl->m_wetlReachNdxArray[tgt_idu_ndx_in_wetl];
+            Reach* pReach = gFlowModel->m_reachArray[tgt_reach_ndx];
+            pReach->m_wetlNdx = -1;
+            for (int idu_ndx_in_wetl = 0; idu_ndx_in_wetl < pWetl->m_wetlIDUndxArray.GetSize(); idu_ndx_in_wetl++)
+            {
+               int idu_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl];
+               if (idu_ndx == tgt_idu_ndx) continue;
+
+               double idu_wetness_mm = gIDUs->Att(idu_ndx, WETNESS);
+               pHRU->m_standingH2Oflag = pHRU->m_standingH2Oflag || (idu_wetness_mm > 0.);
+
+               int reach_ndx = pWetl->m_wetlReachNdxArray[idu_ndx_in_wetl];
+               if (reach_ndx == tgt_reach_ndx) pReach->m_wetlNdx = pWetl->m_wetlNdx;
+            } // end of loop thru the pWetl->m_wetlIDUndxArray
 
             // Remove the IDU from the ordered lists of IDUs, HRUs, and reaches in the wetland. 
-            int wetl_id = gIDUs->AttInt(idu_ndx, WETL_ID);            
-
-            Wetland* pWetl = gEnvModel->m_pFlowModel->GetWetlandFromID(wetl_id);
-            ASSERT(pWetl != NULL);
-
-            int idu_ndx_in_wetl = FindInIntCArray(&(pWetl->m_wetlIDUndxArray[0]), (int)pWetl->m_wetlIDUndxArray.GetSize(), idu_ndx);
             ASSERT(idu_ndx_in_wetl >= 0);
-            pWetl->m_wetlIDUndxArray.RemoveAt(idu_ndx_in_wetl);
-            pWetl->m_wetlHRUndxArray.RemoveAt(idu_ndx_in_wetl);
-            pWetl->m_wetlReachNdxArray.RemoveAt(idu_ndx_in_wetl);
+            pWetl->m_wetlIDUndxArray.RemoveAt(tgt_idu_ndx_in_wetl);
+            pWetl->m_wetlHRUndxArray.RemoveAt(tgt_idu_ndx_in_wetl);
+            pWetl->m_wetlReachNdxArray.RemoveAt(tgt_idu_ndx_in_wetl);
             pWetl->m_wetlArea_m2 -= tgt_idu_area_m2;
 
-            gIDUs->SetAtt(idu_ndx, WET_FRAC, 0.);
-            gIDUs->SetAttInt(idu_ndx, WETLONGEST, 0);
-            gIDUs->SetAtt(idu_ndx, WETNESS, NON_WETLAND_WETNESS_TOKEN);
-            gIDUs->SetAtt(idu_ndx, WETL2Q, 0.);
+            gIDUs->SetAtt(tgt_idu_ndx, WET_FRAC, 0.);
+            gIDUs->SetAttInt(tgt_idu_ndx, WETLONGEST, 0);
+            gIDUs->SetAtt(tgt_idu_ndx, WETNESS, NON_WETLAND_WETNESS_TOKEN);
+            gIDUs->SetAtt(tgt_idu_ndx, WETL2Q, 0.);
 
-            // We'll have to make sure that no reach nor any other IDU drains into this IDU.
-            // Also we'll have to check whether there any IDUs left in this wetland.
+            // Are there any IDUs left in this wetland?
+            if (pWetl->m_wetlIDUndxArray.GetSize() <= 0)
+            {
+               CString msg;
+               msg.Format("RunPrescribedLULCs() There are no more IDUs left in wetland %d.", wetl_id);
+               Report::LogMsg(msg);
+            }
+
          } // end of if (orig_lulc_a == LULCA_WETLAND && new_lulc_a != LULCA_WETLAND)
          else if (orig_lulc_a != LULCA_WETLAND && new_lulc_a == LULCA_WETLAND) // Is this the gain of a wetland?
          { // Yes, this is the gain of a wetland.
@@ -3649,7 +3695,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
             {
                CString msg;
                msg.Format("RunPrescribedLULCs() m_colPLwetl_id = %d. Please specify what wetland IDU_ID %d should be added to.",
-                  m_colPLwetl_id, idu_id);
+                  m_colPLwetl_id, tgt_idu_id);
                Report::WarningMsg(msg);
             }
             else
@@ -3666,12 +3712,12 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                }
                else
                { // Add this IDU to an existing wetland.
-                  float tgt_idu_elev_m = gIDUs->AttFloat(idu_ndx, ELEV_MEAN);
-                  float tgt_idu_area_m2 = gIDUs->AttFloat(idu_ndx, AREA);
-                  double tgt_idu_fc_mm = gIDUs->Att(idu_ndx, FIELD_CAP);
-                  int tgt_idu_irrigation = gIDUs->AttInt(idu_ndx, IRRIGATION);
+                  float tgt_idu_elev_m = gIDUs->AttFloat(tgt_idu_ndx, ELEV_MEAN);
+                  float tgt_idu_area_m2 = gIDUs->AttFloat(tgt_idu_ndx, AREA);
+                  double tgt_idu_fc_mm = gIDUs->Att(tgt_idu_ndx, FIELD_CAP);
+                  int tgt_idu_irrigation = gIDUs->AttInt(tgt_idu_ndx, IRRIGATION);
 
-                  int tgt_hru_ndx = gIDUs->AttInt(idu_ndx, HRU_NDX);
+                  int tgt_hru_ndx = gIDUs->AttInt(tgt_idu_ndx, HRU_NDX);
                   HRU* pHRU = gEnvModel->m_pFlowModel->m_hruArray[tgt_hru_ndx];
                   double snow_mmH2O = pHRU->Att(HruSNOW_BOX);
                   double snow_m3 = (snow_mmH2O / 1000.)* tgt_idu_area_m2;
@@ -3679,7 +3725,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   double orig_topsoil_h2o_mm = tgt_idu_irrigation != 0 ? pHRU->AttFloat(HruIRRIG_SOIL) : pHRU->AttFloat(HruNAT_SOIL);
                   double wetness_mm = orig_topsoil_h2o_mm - tgt_idu_fc_mm + (snow_m3 + melt_h2o_m3) / tgt_idu_area_m2;
 
-                  int tgt_comid = gIDUs->AttInt(idu_ndx, COMID);
+                  int tgt_comid = gIDUs->AttInt(tgt_idu_ndx, COMID);
                   Reach* ptgt_reach = gEnvModel->m_pFlowModel->GetReachFromCOMID(tgt_comid);
 
                   int wetl_idu0_poly_ndx = pWetl->m_wetlIDUndxArray[0];
@@ -3694,15 +3740,15 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                      float wetl_idu_elev_m = gIDUs->AttFloat(pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl], ELEV_MEAN);
                      if (tgt_idu_elev_m < wetl_idu_elev_m) break;
                   }
-                  pWetl->m_wetlIDUndxArray.InsertAt(idu_ndx_in_wetl, idu_ndx);
+                  pWetl->m_wetlIDUndxArray.InsertAt(idu_ndx_in_wetl, tgt_idu_ndx);
                   pWetl->m_wetlHRUndxArray.InsertAt(idu_ndx_in_wetl, tgt_hru_ndx);
                   pWetl->m_wetlReachNdxArray.InsertAt(idu_ndx_in_wetl, ptgt_reach->m_reachArrayNdx);
                   pWetl->m_wetlArea_m2 += tgt_idu_area_m2;
-                  gIDUs->SetAtt(idu_ndx, WETL_ID, wetl_id);
-                  gIDUs->SetAtt(idu_ndx, WET_FRAC, 0.);
-                  gIDUs->SetAttInt(idu_ndx, WETLONGEST, 0);
-                  gIDUs->SetAtt(idu_ndx, WETNESS, wetness_mm);
-                  gIDUs->SetAtt(idu_ndx, WETL2Q, 0.);
+                  gIDUs->SetAtt(tgt_idu_ndx, WETL_ID, wetl_id);
+                  gIDUs->SetAtt(tgt_idu_ndx, WET_FRAC, 0.);
+                  gIDUs->SetAttInt(tgt_idu_ndx, WETLONGEST, 0);
+                  gIDUs->SetAtt(tgt_idu_ndx, WETNESS, wetness_mm);
+                  gIDUs->SetAtt(tgt_idu_ndx, WETL2Q, 0.);
 
                   if (snow_m3 > 0.)
                   { // What was in the snow compartment gets put into the surface water or topsoil compartments.
@@ -3743,12 +3789,12 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
       if (new_ugb != original_ugb)
       {
          CString msg; msg.Format("RunPrescribedLULCs(): Changing UGB for IDU_ID %d from %d to %d",
-            idu_id, original_ugb, new_ugb);
+            tgt_idu_id, original_ugb, new_ugb);
          Report::LogMsg(msg);
-         AddIDUtoUGA(pContext, idu_ndx, new_ugb);
+         AddIDUtoUGA(pContext, tgt_idu_ndx, new_ugb);
       } // end of if (new_ugb != original_ugb)
 
-      prev_idu_id = idu_id;
+      prev_idu_id = tgt_idu_id;
    } // end of loop through records in prescribed LULCs file
 
    m_PLcurrentRecord = record;
