@@ -33,6 +33,10 @@
       <output name="reach 23772767 Q_DISCHARG (cms) in from upstream" query="COMID=23772767" value="Q_DISCHARG" type="sum" domain="reach" />
       <output name="reaches 23772753-65 Q2WETL (cms)" query="23772752&lt;COMID and COMID&lt;23772766" value="Q2WETL" type="sum" domain="reach" />
       <output name="total WETL2Q (cms)" query="WETL_ID=15" value="WETL2Q" type="sum" domain="idu" />
+      <output name="idu 32345 TEMP (degC)" query="IDU_ID=32345" value="TEMP" type="areaWtMean" domain="idu" />
+      <output name="idu 32345 TEMP_WETL (degC)" query="IDU_ID=32345" value="TEMP_WETL" type="areaWtMean" domain="idu" />
+      <output name="reach 23772753 TEMP_H2O (degC) out to downstream" query="COMID=23772753" value="TEMP_H2O" type="sum" domain="reach" />
+      <output name="reach 23772767 TEMP_H2O (degC) in from upstream" query="COMID=23772767" value="TEMP_H2O" type="sum" domain="reach" />
     </output_group>
 
     <output_group name="FLOW Wetland 10 analysis" daily="y" monthly="y" yearly="y" >

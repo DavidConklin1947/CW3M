@@ -5878,11 +5878,14 @@ bool FlowModel::ApplyQ2WETL()
 double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
 // Returns volume of water remaining out of H2OtoWetl_m3 when the wetland reaches its capacity.
 // If all of H2OtoWetl_m3 can be absorbed by the wetland, then returns 0.
-// Updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attribute WETNESS.
-// Sets pHRU->m_standingH2Oflag to true.
+// Updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attributes WETNESS and TEMP_WETL.
+// Sets pHRU->m_standingH2Oflag to true when there is standing water.
 {
    ASSERT(H2OtoWetl_m3 > 0.);
    if (H2OtoWetl_m3 <= 0.) return(0.);
+
+   Reach* pReach = gFlowModel->FindReachFromID(reachComid);
+   double reach_temp_degC = pReach->Att(ReachTEMP_H2O);
 
    int num_wetl_idus = (int)m_wetlIDUndxArray.GetCount();
    double remaining_m3 = H2OtoWetl_m3;
@@ -5934,8 +5937,16 @@ double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
       {
          HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
          pBOX_SURFACE_H2O->AddFluxFromGlobalHandler((float)(-to_this_idu_standing_h2o_m3), FL_SINK);
-         double to_this_idu_standing_h2o_mm = (to_this_idu_standing_h2o_m3 / idu_area_m2) * 1000.;
-         new_wetness_mm += to_this_idu_standing_h2o_mm;
+
+         double standing_h2o_m3 = (wetness_mm > 0) ? ((wetness_mm / 1000.) * idu_area_m2) : 0.;
+         double standing_h2o_degC = (standing_h2o_m3 > 0.) ? gIDUs->Att(idu_ndx, TEMP_WETL) : 0.;
+         WaterParcel standingWP(standing_h2o_m3, standing_h2o_degC);
+         WaterParcel to_this_iduWP = WaterParcel(to_this_idu_standing_h2o_m3, reach_temp_degC);
+         standingWP.MixIn(to_this_iduWP);
+         new_wetness_mm = (standingWP.m_volume_m3 / idu_area_m2) * 1000.;
+         double new_standing_h2o_degC = standingWP.WaterTemperature();
+         gIDUs->SetAtt(idu_ndx, TEMP_WETL, new_standing_h2o_degC);
+
          pHRU->m_standingH2Oflag = true;
          double hru_H2OSTNDGM3 = pHRU->Att(HruH2OSTNDGM3);
          hru_H2OSTNDGM3 += to_this_idu_standing_h2o_m3;
