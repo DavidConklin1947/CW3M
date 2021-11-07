@@ -24,19 +24,67 @@
     -->
 
   <outputs>
-    <output_group name="FLOW Wetland 15 analysis" daily="y" monthly="y" yearly="y" >
-      <output name="idu 32345 WET_LENGTH" query="IDU_ID=32345" value="WET_LENGTH" type="sum" domain="idu" />
-      <output name="hru 1939 PRECIP (mm)" query="HRU_ID=1939" value="PRECIP" type="sum" domain="hru" />
-      <output name="idu 32345 WETNESS (mm)" query="IDU_ID=32345" value="WETNESS" type="areaWtMean" domain="idu" />
-      <output name="idu 32345 SM_DAY (mm)" query="IDU_ID=32345" value="SM_DAY" type="areaWtMean" domain="idu" />
-      <output name="reach 23772753 Q_DISCHARG (cms) out to downstream" query="COMID=23772753" value="Q_DISCHARG" type="sum" domain="reach" />
-      <output name="reach 23772767 Q_DISCHARG (cms) in from upstream" query="COMID=23772767" value="Q_DISCHARG" type="sum" domain="reach" />
-      <output name="reaches 23772753-65 Q2WETL (cms)" query="23772752&lt;COMID and COMID&lt;23772766" value="Q2WETL" type="sum" domain="reach" />
-      <output name="total WETL2Q (cms)" query="WETL_ID=15" value="WETL2Q" type="sum" domain="idu" />
-      <output name="idu 32345 TEMP (degC)" query="IDU_ID=32345" value="TEMP" type="areaWtMean" domain="idu" />
-      <output name="idu 32345 TEMP_WETL (degC)" query="IDU_ID=32345" value="TEMP_WETL" type="areaWtMean" domain="idu" />
-      <output name="reach 23772753 TEMP_H2O (degC) out to downstream" query="COMID=23772753" value="TEMP_H2O" type="sum" domain="reach" />
-      <output name="reach 23772767 TEMP_H2O (degC) in from upstream" query="COMID=23772767" value="TEMP_H2O" type="sum" domain="reach" />
+    <output_group name="FLOW McKenzie flow skill assessment" daily="y" monthly="y" yearly="y" >
+      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
+              query="COMID=23773373" value="((Q_DISCHARG-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
+      <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
+              query="COMID=23773393" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393.csv" format="E0" />
+      <output in_use="1" name="USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359"
+              query="COMID=23773359" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
+      <output in_use="1" name="USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
+              query="COMID=23773037" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
+              query="COMID=23773009" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411"
+              query="COMID=23773411" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
+      <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
+              query="COMID=23773405" value="Q_DISCHARG*35.3146667*0.997" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
+              query="COMID=23772909" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857"
+              query="COMID=23772857" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857.csv" format="E0" />
+      <output in_use="1" name="USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801"
+              query="COMID=23772801" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801.csv" format="E0" />
+      <output in_use="1" name="USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369"
+              query="COMID=23774369" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369.csv" format="E0" />
+      <output in_use="1" name="USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
+              query="COMID=23772751" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
+      <output in_use="1" name="USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513"
+              query="COMID=23773513" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW Daily McKenzie temperature skill assessment" daily="y" monthly="y" yearly="y" >
+      <output in_use="1" name="USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
+            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
+           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
+      <output in_use="1" name="USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
+              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
+      <output in_use="1" name="USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429"
+              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
+      <output in_use="1" name="USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405"
+              query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      <output in_use="1" name="USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909"
+              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      <output in_use="1" name="USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
+              query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
+             obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
     </output_group>
 
     <output_group name="FLOW Wetland 10 analysis" daily="y" monthly="y" yearly="y" >
@@ -122,6 +170,21 @@
       <output name="idu 33803 WETL2Q (cms)" query="IDU_ID=33803" value="WETL2Q" type="areaWtMean" domain="idu" />
     </output_group>
 
+    <output_group name="FLOW Wetland 15 analysis" daily="y" monthly="y" yearly="y" >
+      <output name="idu 32345 WET_LENGTH" query="IDU_ID=32345" value="WET_LENGTH" type="sum" domain="idu" />
+      <output name="hru 1939 PRECIP (mm)" query="HRU_ID=1939" value="PRECIP" type="sum" domain="hru" />
+      <output name="idu 32345 WETNESS (mm)" query="IDU_ID=32345" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="idu 32345 SM_DAY (mm)" query="IDU_ID=32345" value="SM_DAY" type="areaWtMean" domain="idu" />
+      <output name="reach 23772753 Q_DISCHARG (cms) out to downstream" query="COMID=23772753" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reach 23772767 Q_DISCHARG (cms) in from upstream" query="COMID=23772767" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output name="reaches 23772753-65 Q2WETL (cms)" query="23772752&lt;COMID and COMID&lt;23772766" value="Q2WETL" type="sum" domain="reach" />
+      <output name="total WETL2Q (cms)" query="WETL_ID=15" value="WETL2Q" type="sum" domain="idu" />
+      <output name="idu 32345 TEMP (degC)" query="IDU_ID=32345" value="TEMP" type="areaWtMean" domain="idu" />
+      <output name="idu 32345 TEMP_WETL (degC)" query="IDU_ID=32345" value="TEMP_WETL" type="areaWtMean" domain="idu" />
+      <output name="reach 23772753 TEMP_H2O (degC) out to downstream" query="COMID=23772753" value="TEMP_H2O" type="sum" domain="reach" />
+      <output name="reach 23772767 TEMP_H2O (degC) in from upstream" query="COMID=23772767" value="TEMP_H2O" type="sum" domain="reach" />
+    </output_group>
+
     <output_group name="FLOW Wetland 17 analysis" interval="daily" >
       <output name="idu 31325 WET_FRAC" query="IDU_ID=31325" value="WET_FRAC" type="sum" domain="idu" />
       <output name="idu 31325 WETLONGEST" query="IDU_ID=31325" value="WETLONGEST" type="sum" domain="idu" />
@@ -147,6 +210,7 @@
       <output name="idu 31325 WETL_CAP (mm)" query="IDU_ID=31325" value="WETL_CAP" type="areaWtMean" domain="idu" />
       <output name="idu 31325 WETL2Q (cms)" query="IDU_ID=31325" value="WETL2Q" type="areaWtMean" domain="idu" />
     </output_group>
+    
     <output_group name="FLOW Mohawk25 water budget" interval="yearly" >
       <output name="PRECIP (mm H2O)" query="HBVCALIB=25" value="PRECIP" type="areaWtMean" domain="idu" />
       <output name="SNOW_EVAP (mm SWE)" query="HBVCALIB=25" value="SNOW_EVAP" type="areaWtMean" domain="idu" />
@@ -165,49 +229,7 @@
   <output name="GW_SLOWBOX (mm H2O)" query="HBVCALIB=25" value="GW_SLOWBOX" type="areaWtMean" domain="hru" />
   <output name="ADDED_CMS" query="HBVCALIB=25" value="ADDED_CMS" type="sum" domain="reach" />
   -->
-    
-    <output_group name="FLOW Yearly McKenzie flow skill assessment" interval ="yearly" >
-      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
-              query="COMID=23773373" value="((Q_DISCHARG-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
-      <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
-              query="COMID=23773393" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393.csv" format="E0" />
-      <output in_use="1" name="USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359"
-              query="COMID=23773359" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
-      <output in_use="1" name="USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
-              query="COMID=23773037" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-      <output in_use="1" name="USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
-              query="COMID=23773009" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
-      <output in_use="1" name="USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411"
-              query="COMID=23773411" value="Q_DISCHARG*35.315*0.983" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
-      <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="Q_DISCHARG*35.3146667*0.997" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
-      <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
-              query="COMID=23772909" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
-      <output in_use="1" name="USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857"
-              query="COMID=23772857" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857.csv" format="E0" />
-      <output in_use="1" name="USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801"
-              query="COMID=23772801" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801.csv" format="E0" />
-      <output in_use="1" name="USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369"
-              query="COMID=23774369" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369.csv" format="E0" />
-      <output in_use="1" name="USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
-              query="COMID=23772751" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
-      <output in_use="1" name="USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513"
-              query="COMID=23773513" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
-    </output_group>
-    
+
     <output_group name="FLOW Shade-a-lator study area comparison" interval="daily" >
       <output name="KCAL_REACH (kcal)" query="SAL_REACH=1" value="KCAL_REACH" type="sum" domain="reach" />
       <output name="LENGTH (km)" query="SAL_REACH=1" value="LENGTH/1000" type="sum" domain="reach" />
@@ -587,155 +609,7 @@
            query="HBVCALIB=8" value="TEMP" type="areawtmean" domain="idu" />
     </output_group>
 
-    <output_group name="FLOW Daily McKenzie flow skill assessment" interval ="daily" >
-      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
-              query="COMID=23773373" value="((Q_DISCHARG-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
-      <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
-              query="COMID=23773393" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393.csv" format="E0" />
-      <output in_use="1" name="USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359"
-              query="COMID=23773359" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
-      <output in_use="1" name="USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
-              query="COMID=23773037" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-      <output in_use="1" name="USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
-              query="COMID=23773009" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
-      <output in_use="1" name="USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411"
-              query="COMID=23773411" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
-      <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="Q_DISCHARG*35.3146667*0.997" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
-      <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
-              query="COMID=23772909" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
-      <output in_use="1" name="USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857"
-              query="COMID=23772857" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857.csv" format="E0" />
-      <output in_use="1" name="USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801"
-              query="COMID=23772801" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801.csv" format="E0" />
-      <output in_use="1" name="USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369"
-              query="COMID=23774369" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369.csv" format="E0" />
-      <output in_use="1" name="USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
-              query="COMID=23772751" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
-      <output in_use="1" name="USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513"
-              query="COMID=23773513" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
-    </output_group>
-
-    <output_group name="FLOW Daily McKenzie temperature skill assessment" interval ="daily" >
-      <output in_use="1" name="USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
-            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
-           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-      <output in_use="1" name="USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
-              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
-      <output in_use="1" name="USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429"
-              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
-      <output in_use="1" name="USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
-      <output in_use="1" name="USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909"
-              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
-      <output in_use="1" name="USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
-              query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
-    </output_group>
-    
-
-    <output_group name="FLOW Yearly McKenzie temperature skill assessment" interval ="yearly" >
-      <output in_use="1" name="USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
-            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
-           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-      <output in_use="1" name="USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
-              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
-      <output in_use="1" name="USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429"
-              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
-      <output in_use="1" name="USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
-      <output in_use="1" name="USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909"
-              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
-      <output in_use="1" name="USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
-              query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
-    </output_group>
-
-    <output_group name="FLOW Monthly McKenzie flow skill assessment" interval ="monthly" >
-      <output in_use="1" name="USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373"
-              query="COMID=23773373" value="((Q_DISCHARG-SPRING_CMS)*2.716+SPRING_CMS)*35.315" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158500_flow_MCKENZIE RIVER AT OUTLET OF CLEAR LAKE, OR_23773373.csv" format="E0" />
-      <output in_use="1" name="USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393"
-              query="COMID=23773393" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158790_flow_SMITH RIVER ABV SMITH R RESV NR BELKNAP SPRINGS_23773393.csv" format="E0" />
-      <output in_use="1" name="USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359"
-              query="COMID=23773359" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14158850_flow_MCKENZIE R BLW TRAIL BR DAM NR BELKNAP SPRINGS_23773359.csv" format="E0" />
-      <output in_use="1" name="USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
-              query="COMID=23773037" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159200_flow_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-      <output in_use="1" name="USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
-              query="COMID=23773009" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159500_flow_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
-      <output in_use="1" name="USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411"
-              query="COMID=23773411" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
-      <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="Q_DISCHARG*35.3146667*0.997" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
-      <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
-              query="COMID=23772909" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
-      <output in_use="1" name="USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857"
-              query="COMID=23772857" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14163150_flow_MCKENZIE RIVER BLW LEABURG DAM, NR LEABURG, OR_23772857.csv" format="E0" />
-      <output in_use="1" name="USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801"
-              query="COMID=23772801" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14163900_flow_MCKENZIE RIVER NEAR WALTERVILLE_23772801.csv" format="E0" />
-      <output in_use="1" name="USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369"
-              query="COMID=23774369" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164700_flow_CEDAR CREEK AT SPRINGFIELD_23774369.csv" format="E0" />
-      <output in_use="1" name="USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
-              query="COMID=23772751" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164900_flow_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
-      <output in_use="1" name="USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513"
-              query="COMID=23773513" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
-    </output_group>
-
-    <output_group name="FLOW Monthly McKenzie temperature skill assessment" interval ="monthly" >
-      <output in_use="1" name="USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
-            query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
-           obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
-      <output in_use="1" name="USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009"
-              query="COMID=23773009" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14159500_temp_SOUTH FORK MCKENZIE RIVER NEAR RAINBOW_23773009.csv" format="E0" />
-      <output in_use="1" name="USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429"
-              query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
-      <output in_use="1" name="USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405"
-              query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
-      <output in_use="1" name="USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909"
-              query="COMID=23772909" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162500_temp_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
-      <output in_use="1" name="USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751"
-              query="COMID=23772751" value="TEMP_H2O" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14164900_temp_MCKENZIE RIVER ABV HAYDEN BR, AT SPRINGFIELD, OR_23772751.csv" format="E0" />
-    </output_group>
-
-<!-- 
+    <!-- 
     <output_group name="FLOW BLU analysis" interval="daily" >
       <output in_use="1" name="Q_DISCHARG from 23773403 upstream into BLU outfall reach" query="COMID=23773403" value="Q_DISCHARG" type="sum" domain="reach" />
       <output in_use="1" name="Q_DISCHARG from 23773407 upstream into BLU outfall reach" query="COMID=23773407" value="Q_DISCHARG" type="sum" domain="reach" />

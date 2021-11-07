@@ -3668,7 +3668,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
             } // end of loop thru the pWetl->m_wetlIDUndxArray
 
             // Remove the IDU from the ordered lists of IDUs, HRUs, and reaches in the wetland. 
-            ASSERT(idu_ndx_in_wetl >= 0);
+            ASSERT(tgt_idu_ndx_in_wetl >= 0);
             pWetl->m_wetlIDUndxArray.RemoveAt(tgt_idu_ndx_in_wetl);
             pWetl->m_wetlHRUndxArray.RemoveAt(tgt_idu_ndx_in_wetl);
             pWetl->m_wetlReachNdxArray.RemoveAt(tgt_idu_ndx_in_wetl);
