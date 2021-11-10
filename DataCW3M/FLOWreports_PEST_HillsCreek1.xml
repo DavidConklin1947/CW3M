@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-
-<outputs>
-  <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
-    <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23751946" value="Q_DISCHARG*35.3146667*1.012" type="sum" domain="reach" 
-    obs="..\Observations\Willamette Gages\Flow\USGS 14145500_flow_MF WILLAMETTE RIVER ABV SALT CRK, NEAR OAKRIDGE,OR_23751940.csv" format="E0" />
-  </output_group>
-</outputs>
