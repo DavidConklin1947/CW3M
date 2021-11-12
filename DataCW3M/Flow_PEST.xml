@@ -69,7 +69,6 @@
                    This is generally the IDU layer. (optional, defaults to first layer)
         query:     Subset of the layer used to create catchments.  If empty or not present,
                    the entire layer is used. (optional)
-        area_col:  column name containing the area of the polygon. (optional, defaults to "AREA")
         catchmentID_col:  column name containing the catchmentID identifying unique catchments, generated
                    during the aggregation process. This column will be added to the layer if it doesn't
                    already exist.  (optional - defaults to CATCH_ID)
@@ -96,6 +95,21 @@
       -->
     </macro>
   </macros>
+  <!--
+    enum // Global Method Timing flags
+    {
+    GMT_INIT = 1,       // called during Init();
+    GMT_INITRUN = 2,       // called during InitRun();
+    GMT_START_YEAR = 4,       // called at the beginning of a Envision timestep (beginning of each year of run)  (PreRun)
+    GMT_START_STEP = 8,       // called at the beginning of a Flow timestep PreRun)
+    GMT_CATCHMENT = 16,      // called during GetCatchmentDerivatives()
+    GMT_REACH = 32,      // called during GetReachDerivatives()
+    GMT_RESERVOIR = 64,      // called during GetReservoirDerivatives()
+    GMT_END_STEP = 128,     // called at the beginning of a Flow timestep PreRun)
+    GMT_END_YEAR = 256,     // called at the end of a Envision timestep (beginning of each year of run) (PostRun)
+    GMT_ENDRUN = 512,      // called during EndRun()
+    };
+-->
 
   <catchments layer="IDU"
             query=""
@@ -148,22 +162,6 @@
     <lateral_exchange name="Lateral Exchange" method="none" query=""/>
     <hru_vertical_exchange name="Vertical Exchange" method="none" query="" />
 
-    <!--
-    enum // Global Method Timing flags
-    {
-    GMT_INIT = 1,       // called during Init();
-    GMT_INITRUN = 2,       // called during InitRun();
-    GMT_START_YEAR = 4,       // called at the beginning of a Envision timestep (beginning of each year of run)  (PreRun)
-    GMT_START_STEP = 8,       // called at the beginning of a Flow timestep PreRun)
-    GMT_CATCHMENT = 16,      // called during GetCatchmentDerivatives()
-    GMT_REACH = 32,      // called during GetReachDerivatives()
-    GMT_RESERVOIR = 64,      // called during GetReservoirDerivatives()
-    GMT_END_STEP = 128,     // called at the beginning of a Flow timestep PreRun)
-    GMT_END_YEAR = 256,     // called at the end of a Envision timestep (beginning of each year of run) (PostRun)
-    GMT_ENDRUN = 512,      // called during EndRun()
-    };
--->
-    
     <external name="HBV"   method="fn=hbv.dll:HBVdailyProcess" use="1" timing="1+16"/> 
 
     <!--The layers tag will remove water from the layer distribution matching the query first and then remove the unmatched idus 
@@ -302,12 +300,37 @@ flow_cms="1.10"
     <Spring name="French Cr." COMID="23780793" flow_cfs="155" temp_C="4.9" />
     <Spring name="Little N Santiam" COMID="23780805" flow_cfs="173" temp_C="4.9" />
 
+    <Spring name="Above HCR" COMID="23752170" flow_cfs="300" temp_C="4.9" />
+
     <external name="MCfire"
             method="fn=MCfire.dll:CW3Mfire_DailyProcess"
             use="1"
             timing="1+2+4+16"
             initInfo="..\ForestStates.csv"
               />
+
+  <!--
+    enum // Global Method Timing flags
+    {
+    GMT_INIT = 1,       // called during Init();
+    GMT_INITRUN = 2,       // called during InitRun();
+    GMT_START_YEAR = 4,       // called at the beginning of a Envision timestep (beginning of each year of run)  (PreRun)
+    GMT_START_STEP = 8,       // called at the beginning of a Flow timestep PreRun)
+    GMT_CATCHMENT = 16,      // called during GetCatchmentDerivatives()
+    GMT_REACH = 32,      // called during GetReachDerivatives()
+    GMT_RESERVOIR = 64,      // called during GetReservoirDerivatives()
+    GMT_END_STEP = 128,     // called at the beginning of a Flow timestep PreRun)
+    GMT_END_YEAR = 256,     // called at the end of a Envision timestep (beginning of each year of run) (PostRun)
+    GMT_ENDRUN = 512,      // called during EndRun()
+    };
+-->
+
+  <external name="WetlandSTM"
+          method="fn=STMengine.dll:CW3Mwetland_DailyProcess"
+          use="1"
+          timing="1+2+4+128+256"
+              />
+    
       </global_methods>
 
   <controlPoints>
@@ -408,7 +431,7 @@ flow_cms="1.10"
                rule_priorities="hills_creek_rule_priorities.csv"  rp_dir="Rules_HC\"                                  tailwater_elev="391.0"
                turbine_efficiency="0.9"                           td_elev="472.0"                                     fc1_elev="470.0"
                buffer_zone="HC_buffer.csv"                        ressim_output_f="HC_ressim_flow_1935_2008.csv"      ressim_output_r="HC_ressim_rule_1935_2008.csv"
-               inactive_elev="441.046"                            reservoir_type="FloodControl"/>
+               inactive_elev="441.046"                            reservoir_type="FloodControl" />
 
     <reservoir id="2"   name="Lookout Point Reservoir (USACE)"    path="Reservoirs\"                                  initVolume="143948194"
                area_vol_curve="lookout_point_area_capacity.csv"   av_dir="Area_Capacity_Curves\"                      minOutflow="34"
@@ -538,7 +561,7 @@ flow_cms="1.10"
     -->
 
   <tables>
-    <table name="HBV" description="HBV Parameters" col="HBVCALIB" source="HBV_PEST.csv" type="float" />
+    <table name="HBV" description="HBV Parameters" col="HBVCALIB" source="HBV.csv" type="float" />
   </tables>
 
   <!--
