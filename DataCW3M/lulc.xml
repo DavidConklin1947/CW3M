@@ -102,8 +102,10 @@
 		<lulc id='71' parentID='21' name='Other Tree Crops' />
 		<lulc id='76' parentID='21' name='Walnuts' />
 		<lulc id='77' parentID='21' name='Pears' />
+    
       <lulc id='111' parentID='71' name='Open Water' />
       <lulc id='112' parentID='72' name='Perennial Ice/Snow' />
+    
       <lulc id='121' parentID='14' name='Developed/Open Space' />
       <lulc id='122' parentID='13' name='Developed/Low Intensity' />
       <lulc id='123' parentID='12' name='Developed/Med Intensity' />

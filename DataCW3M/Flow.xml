@@ -301,6 +301,7 @@ flow_cms="1.10"
     <Spring name="Little N Santiam" COMID="23780805" flow_cfs="173" temp_C="4.9" />
 
     <Spring name="Above HCR" COMID="23752170" flow_cfs="300" temp_C="4.9" />
+    <Spring name="Above FAL" COMID="23752606" flow_cfs="57" temp_C="4.9" />
 
     <external name="MCfire"
             method="fn=MCfire.dll:CW3Mfire_DailyProcess"

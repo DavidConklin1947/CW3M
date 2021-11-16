@@ -177,13 +177,16 @@ label:  readable field description
 				<attr value="71" color="(255,0,0)" label="Other Tree Crops" />
 				<attr value="76" color="(255,0,0)" label="Walnuts" />
 				<attr value="77" color="(255,0,0)" label="Pears" />
+        
 				<attr value="111" color="(0,0,127)" label="Open Water" />
 				<attr value="112" color="(255,255,255)" label="Perennial Ice/Snow" />
+        
 				<attr value="121" color="(221,255,40)" label="Developed Open Space" />
 				<attr value="122" color="(181,120,120)" label="Developed Low-Intensity" />
 				<attr value="123" color="(221,90,90)" label="Developed Medium-Intensity" />
 				<attr value="124" color="(221,60,60)" label="Developed High-Intensity" />
 				<attr value="125" color="(221,100,100)" label="Developed Undifferentiated" />
+        
 				<attr value="131" color="(175,175,175)" label="Barren" />
 				<attr value="141" color="(175,200,0)" label="Deciduous Forest" />
 				<attr value="142" color="(21,225,21)" label="Evergreen Forest" />
