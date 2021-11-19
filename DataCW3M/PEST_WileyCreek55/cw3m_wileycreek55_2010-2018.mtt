@@ -1,0 +1,66 @@
+ PARAMETER STATISTICAL MATRICES: CASE c:\cw3m.git\trunk\datacw3m\pest_wileycreek55\cw3m_wileycreek55_2010-2018
+
+ OPTIMISATION ITERATION NUMBER  6
+
+
+ Parameter standard deviations ----->
+
+ Adjustable        Group           Current          Standard
+ parameter                         value            deviation
+ fc                fc               364.325          9.34056    
+ beta              beta             1.50234         7.438104E-02
+ perc              perc            0.265300         2.153725E-02
+ uzl               uzl              12.5349         0.823710    
+ k0                k0              0.336801         3.150158E-02
+ k1                k1              0.111504         3.024027E-02
+ k2                k2              0.149544         1.146209E-02
+ et_mult           et_mult          2.24801         8.273327E-02
+
+ Note that if a parameter is log-transformed, the standard deviation in the 
+ above table refers to the log of the parameter. Note also that the objective
+ function used in the calculation of the covariance matrix (and eigenvalues
+ of the covariance matrix) was calculated at the end of the previous iteration.
+
+
+ Parameter covariance matrix ----->
+
+                   fc          beta         perc         uzl           k0           k1           k2        et_mult   
+ fc              87.25      -0.1552       5.0160E-03   0.1748       4.2078E-02  -2.3519E-02   3.5501E-02  -0.1401    
+ beta          -0.1552       5.5325E-03   1.1247E-04  -1.6148E-02  -7.4728E-04   6.6306E-04  -1.3076E-04  -1.1030E-03
+ perc           5.0160E-03   1.1247E-04   4.6385E-04  -9.5272E-03   1.7633E-04  -1.5847E-04   1.3351E-04  -8.7310E-05
+ uzl            0.1748      -1.6148E-02  -9.5272E-03   0.6785       2.6572E-03  -9.8897E-04  -1.6644E-03  -8.9500E-03
+ k0             4.2078E-02  -7.4728E-04   1.7633E-04   2.6572E-03   9.9235E-04  -9.1402E-04   1.6266E-04   1.6986E-04
+ k1            -2.3519E-02   6.6306E-04  -1.5847E-04  -9.8897E-04  -9.1402E-04   9.1447E-04  -1.3482E-04   1.6514E-05
+ k2             3.5501E-02  -1.3076E-04   1.3351E-04  -1.6644E-03   1.6266E-04  -1.3482E-04   1.3138E-04   1.4126E-04
+ et_mult       -0.1401      -1.1030E-03  -8.7310E-05  -8.9500E-03   1.6986E-04   1.6514E-05   1.4126E-04   6.8448E-03
+
+
+ Parameter correlation coefficient matrix ----->
+
+                   fc          beta         perc         uzl           k0           k1           k2        et_mult   
+ fc              1.000      -0.2234       2.4934E-02   2.2721E-02   0.1430      -8.3266E-02   0.3316      -0.1813    
+ beta          -0.2234        1.000       7.0205E-02  -0.2636      -0.3189       0.2948      -0.1534      -0.1792    
+ perc           2.4934E-02   7.0205E-02    1.000      -0.5370       0.2599      -0.2433       0.5408      -4.9000E-02
+ uzl            2.2721E-02  -0.2636      -0.5370        1.000       0.1024      -3.9703E-02  -0.1763      -0.1313    
+ k0             0.1430      -0.3189       0.2599       0.1024        1.000      -0.9595       0.4505       6.5176E-02
+ k1            -8.3266E-02   0.2948      -0.2433      -3.9703E-02  -0.9595        1.000      -0.3890       6.6005E-03
+ k2             0.3316      -0.1534       0.5408      -0.1763       0.4505      -0.3890        1.000       0.1490    
+ et_mult       -0.1813      -0.1792      -4.9000E-02  -0.1313       6.5176E-02   6.6005E-03   0.1490        1.000    
+
+
+ Normalized eigenvectors of covariance matrix ----->
+
+               Vector_1     Vector_2     Vector_3     Vector_4     Vector_5     Vector_6     Vector_7     Vector_8   
+ fc            -2.0146E-04   3.9262E-04  -8.6460E-05  -1.3285E-05  -2.3776E-03   3.3534E-04  -2.0817E-03   -1.000    
+ beta          -1.0519E-02   6.6637E-03  -2.9934E-03  -0.2824      -0.7990      -0.5303      -2.3481E-02   1.7794E-03
+ perc          -0.1151       0.3421       0.9143      -0.1695       6.8749E-02  -1.1242E-02  -1.4056E-02  -5.7273E-05
+ uzl           -3.9844E-03   2.7780E-03   1.4521E-02  -6.4831E-03  -2.5607E-02  -2.1996E-03   0.9995      -2.0199E-03
+ k0             0.7031       5.9024E-02  -7.0853E-02  -0.6781       0.1692       9.3208E-02   3.8097E-03  -4.8236E-04
+ k1             0.7008      -1.3044E-02   0.2264       0.6444      -0.1947      -6.5117E-02  -1.4107E-03   2.6962E-04
+ k2            -8.7487E-03  -0.9370       0.3271      -0.1175       1.2437E-02   3.0526E-02  -2.5600E-03  -4.0686E-04
+ et_mult       -3.1581E-02   3.5303E-02   2.3922E-02  -5.1138E-02  -0.5381       0.8395      -1.2839E-02   1.6065E-03
+
+
+ Eigenvalues ----->
+
+                2.6859E-05   5.6182E-05   3.0427E-04   1.6610E-03   4.1224E-03   7.5328E-03   0.6788        87.25    

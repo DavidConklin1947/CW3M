@@ -4,6 +4,6 @@
 <outputs>
   <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
     <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23785723" value="Q_DISCHARG*35.315*0.971" type="sum" domain="reach" 
-    obs="..\Observations\Willamette Gages\Flow\USGS 14187000_flow_WILEY CREEK NEAR FOSTER, OR_23785721.csv" format="E0" />
+    obs="..\Observations\Willamette Gages\Flow\USGS 14187000_flow_WILEY CREEK NEAR FOSTER, OR_23785723.csv" format="E0" />
   </output_group>
 </outputs>
