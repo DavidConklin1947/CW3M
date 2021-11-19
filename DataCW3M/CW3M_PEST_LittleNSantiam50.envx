@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<!-- CW3M_McKenzie.envx -->
+<!-- PEST_LittleNSantiam50.envx -->
 
 <Envision ver='5.0'>
 
@@ -29,7 +29,7 @@
     addReturnsToBudget         ='0'
     collectPolicyData          ='0'
     exportMapInterval          ='-1'
-	  exportBmpInterval          ='-1'
+    exportBmpInterval          ='-1'
     exportBmpPixelSize          ='60'
     exportBmpCols              =''
     exportOutputs              ='1'
@@ -37,7 +37,7 @@
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
     useWaterYears              ='0'
-    spinup='0'
+    spinup		       ='0'
   />
 
   <layers >
