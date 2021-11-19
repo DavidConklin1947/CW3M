@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<outputs>
+  <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
+    <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23786251" value="Q_DISCHARG*35.315*1.000" type="sum" domain="reach" 
+    obs="..\Observations\Willamette Gages\Flow\USGS 14188800_flow_THOMAS CREEK NEAR SCIO, OR_23786251.csv" format="E0" />
+  </output_group>
+</outputs>
