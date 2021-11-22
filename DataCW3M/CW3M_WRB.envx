@@ -16,7 +16,7 @@
     dynamicUpdate              ='15'
     spatialIndexDistance       ='0'
     areaCutoff                 ='0'
-    startYear                  ='2000'
+    startYear                  ='2010'
     mapUnits                   ='meters'
     deltaAllocationSize        ='320000'
     multiRunIterations         ='25'

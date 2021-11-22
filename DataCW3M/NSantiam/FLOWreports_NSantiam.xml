@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
   <outputs>
+    <output_group name="FLOW Jan Irene Millers property" daily="y" monthly="y" yearly="y" >
+      <output name="Q_DISCHARG (cfs) at Mehama gage 14183000 upstream" query="COMID=23780481" value="Q_DISCHARG*35.3147*1.000" type="sum" domain="reach" 
+                           obs="..\Observations\NSantiam\USGS_14183000_flow_NORTH SANTIAM RIVER AT MEHAMA, OR_23780481.csv" format="E0" />
+      <output name="Q_DISCHARG (cfs) at Millers property" query="COMID=23780477" value="Q_DISCHARG*35.3147*1.000" type="sum" domain="reach" />
+      <output name="Q_DISCHARG (cfs) at Greens Bridge gage 14184100 downstream" query="COMID=23780883" value="Q_DISCHARG*35.3147*1.000" type="sum" domain="reach" 
+             obs="..\Observations\NSantiam\USGS_14184100_flow_NORTH SANTIAM R AT GREENS BRIDGE, NR JEFFERSON, OR_23780883.csv" format="E0" />
+    </output_group>
 
     <output_group name="FLOW NSantiam Thermal Energy Budget for streams" daily="yes" monthly="y" yearly="y" >
       <output in_use="1" name="REACH_H2O (m3 H2O)" query="1" value="REACH_H2O" type="sum" domain="reach" />
