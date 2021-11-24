@@ -1,0 +1,66 @@
+PARAMETER SENSITIVITIES: CASE c:\cw3m.git\trunk\datacw3m\pest_cot6\cw3m_cot6_2010-2018
+
+
+ OPTIMISATION ITERATION NO.  1 ----->
+ Parameter name    Group          Current value    Sensitivity
+   fc              fc               520.944         1.516676E-03
+   beta            beta             1.01923          0.00000    
+   perc            perc            0.163961          0.00000    
+   uzl             uzl              8.50326          0.00000    
+   k0              k0              0.218876          0.00000    
+   k1              k1              0.151643          0.00000    
+   k2              k2              3.676000E-02      0.00000    
+   et_mult         et_mult          1.00000          3.91064    
+
+
+ OPTIMISATION ITERATION NO.  2 ----->
+ Parameter name    Group          Current value    Sensitivity
+   fc              fc               494.557         1.766773E-03
+   beta            beta             1.01923          0.00000    
+   perc            perc            0.163961          0.00000    
+   uzl             uzl              8.50326          0.00000    
+   k0              k0              0.218876          0.00000    
+   k1              k1              0.151643          0.00000    
+   k2              k2              3.676000E-02      0.00000    
+   et_mult         et_mult          1.33312          3.07297    
+
+
+ OPTIMISATION ITERATION NO.  3 ----->
+ Parameter name    Group          Current value    Sensitivity
+   fc              fc               413.210         2.642156E-03
+   beta            beta             1.01923         3.270803E-17
+   perc            perc            0.163961          0.00000    
+   uzl             uzl              8.50326         1.262178E-18
+   k0              k0              0.218876         4.956715E-17
+   k1              k1              0.151643          0.00000    
+   k2              k2              3.676000E-02      0.00000    
+   et_mult         et_mult          1.66846          3.78841    
+
+
+ OPTIMISATION ITERATION NO.  4 ----->
+ Parameter name    Group          Current value    Sensitivity
+   fc              fc               413.210         2.642156E-03
+   beta            beta             4.07692         2.832702E-18
+   perc            perc            0.163961          0.00000    
+   uzl             uzl              12.2425          0.00000    
+   k0              k0              0.188997         5.914121E-17
+   k1              k1              0.151643          0.00000    
+   k2              k2              3.676000E-02      0.00000    
+   et_mult         et_mult          1.66846          3.78841    
+
+
+
+                        COMPLETION OF OPTIMISATION PROCESS
+
+ Composite sensitivities for all observations/prior info ----->
+
+ Number of observations with non-zero weight =  3277
+ Parameter name    Group          Current value    Sensitivity
+   fc              fc               413.210         6.865211E-03
+   beta            beta             1.01923          0.00000    
+   perc            perc            0.163961          0.00000    
+   uzl             uzl              8.50326          0.00000    
+   k0              k0              0.218876          0.00000    
+   k1              k1              0.151643          0.00000    
+   k2              k2              3.676000E-02      0.00000    
+   et_mult         et_mult          1.66846          3.07296    
