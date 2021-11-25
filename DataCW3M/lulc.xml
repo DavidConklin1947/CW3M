@@ -285,10 +285,11 @@
       <lulc id='3509220' parentID='427' name='DFal:Gm2 OCR_fww 126-200' />
       <lulc id='3752000' parentID='43' name='DO:GF Douglas-fir/Oak grass-forb' />
       <lulc id='3752100' parentID='43' name='DO:GFp Douglas-fir/Oak grass-forb post-disturbance' />
-      <lulc id='3754100' parentID='43' name='DO:Yo Douglas-fir/Oak SSap_open' />
-      <lulc id='4002000' parentID='421' name='(DF:GF) Douglas-fir GrassForb' />
+    <lulc id='3754100' parentID='43' name='DO:Yo Douglas-fir/Oak SSap_open' />
+    <lulc id='3755210' parentID='43' name='DO:Pm1 Douglas-fir/Oak  Pole_med_single' />
+    <lulc id='4002000' parentID='421' name='(DF:GF) Douglas-fir GrassForb' />
       <lulc id='4002100' parentID='421' name='(DF:GFp) Douglas-fir GrassForb_PostDist*' />
-      <lulc id='4003100' parentID='421' name='(DF:SHo) Douglas-fir OpenShrub' />
+    <lulc id='4003100' parentID='421' name='(DF:SHo) Douglas-fir OpenShrub' />
       <lulc id='4055310' parentID='421' name='DFmx:Pc1 ~31-50' />
       <lulc id='4056320' parentID='425' name='DFmx:Sc2 OWC_fdx 51-70' />
       <lulc id='4058320' parentID='426' name='DFmx:Lc2 OWC_fdx 110-210' />

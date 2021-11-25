@@ -4,6 +4,7 @@
 <Envision ver='5.0'>
 
   <settings
+    studyAreaName='UpperWRB'
     actorInitMethod            ='4'
     actorAssociations          ='0'
     loadSharedPolicies         ='1'
@@ -35,14 +36,17 @@
     exportDeltas               ='0'
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
-    maxDaysInYear ='365'
+    useWaterYears              ='0'
+    spinup='0'
   />
+  <!-- for debugging, to run for just 1 day in each year    maxDaysInYear ='1'
+-->
 
   <layers >
 
     <layer
       name         ='IDU'
-      path         ='UpperWRB\IDU_UpperWRB.shp'
+      path         ='{studyAreaName}\IDU_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,0'
@@ -53,7 +57,7 @@
 	/>
     <layer
   name         ='HRU'
-  path         ='UpperWRB\HRU_UpperWRB.shp'
+  path         ='{studyAreaName}\HRU_{studyAreaName}.shp'
   type         ='0'
   includeData  ='1'
   color        ='0,0,155'
@@ -65,7 +69,7 @@
 
   <layer
       name         ='Reach'
-      path         ='UpperWRB\Reach_UpperWRB.shp'
+      path         ='{studyAreaName}\Reach_{studyAreaName}.shp'
       type         ='0'
       includeData  ='1'
       color        ='0,0,155'
@@ -200,6 +204,20 @@ initRunOnStartup ='0'
    />
 
     <autonomous_process
+    name         ='PrescribedLULCs'
+    path         ='APs.dll'
+    id           ='25'
+    use          ='1'
+    timing       ='0'
+    freq         ='1'
+    sandbox      ='0'
+    fieldName    =''
+    initInfo     ='APs.xml'
+    dependencies =''
+    initRunOnStartup ='0'
+   />
+
+    <autonomous_process
 name         ='PopGrowth'
 path         ='APs.dll'
 id           ='30'
@@ -265,7 +283,7 @@ timing       ='0'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='UpperWRB\Flow_UpperWRB.xml'
+initInfo     ='Flow.xml'
    />
 
     <!-- Policies are applied here, i.e. after all the APs with timing=0 have run, but before any of the APs with timing=1 begin to run. -->
@@ -299,7 +317,7 @@ initRunOnStartup  ='0'
    />
    
 <autonomous_process
-name         ='VegSTMengine'
+name         ='UplandSTM'
 path         ='VegSTM.dll'
 id           ='130'
 use          ='1'
@@ -307,25 +325,25 @@ timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='VegSTM.xml'
+initInfo     ='UplandSTM.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
-<!--
+
 <autonomous_process
-name         ='UpdateDGVMvegtype'
-path         ='APs.dll'
-id           ='140'
+name         ='WetlandSTM'
+path         ='STMengine.dll'
+id           ='131'
 use          ='1'
 timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='APs.xml'
+initInfo     ='WetlandSTM.xml'
 dependencies =''
 initRunOnStartup ='0'
    />
--->    
+    
 <autonomous_process
 name         ='FarmlandRent'
 path         ='APs.dll'
@@ -392,7 +410,7 @@ timing       ='1'
 freq         ='10'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='Reporter.xml'
+initInfo     ='{studyAreaName}\Reporter_{studyAreaName}.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
@@ -449,9 +467,11 @@ initRunOnStartup  ='0'
                       S C E N A R I O S 
 ===================================================================================
 -->
+  <scenarios
+    climate_scenarios_file='ClimateScenarios.xml' default_climate_scenario='13'
+    simulation_scenarios_file='SimulationScenarios.xml' default_simulation_scenario='0'
+  />
   
-  <scenarios default ='0' file='Scenarios.xml' />
-
 </Envision>
   
 
