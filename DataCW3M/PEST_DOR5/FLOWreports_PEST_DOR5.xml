@@ -3,7 +3,7 @@
 
 <outputs>
   <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
-    <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23759440" value="Q_DISCHARG*35.3146667*1.020" type="sum" domain="reach" 
-    obs="..\Observations\Willamette Gages\Flow\USGS 14155500_flow_ROW RIVER NEAR COTTAGE GROVE, OR_23759440.csv" format="E0" />
+    <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23759452" value="Q_DISCHARG*35.3146667*0.997" type="sum" domain="reach" 
+    obs="..\Observations\Willamette Gages\Flow\USGS 14154500_flow_ROW RIVER ABOVE PITCHER CREEK, NEAR DORENA, OR_23759452.csv" format="E0" />
   </output_group>
 </outputs>
