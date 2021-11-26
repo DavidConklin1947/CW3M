@@ -410,7 +410,7 @@ timing       ='1'
 freq         ='10'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='{studyAreaName}\Reporter_{studyAreaName}.xml'
+initInfo     ='Reporter.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
