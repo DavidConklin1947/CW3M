@@ -1159,13 +1159,16 @@ class LIBSAPI IDUlayer : public MapLayer
 protected:
    IDUlayer(Map* pMap) :
       MapLayer(pMap),
+      m_colAG_VAL(-1),
       m_colAGECLASS(-1),
       m_colAREA(-1),
       m_colCOMID(-1),
+      m_colDEV_VAL(-1),
       m_colECOREGION(-1),
       m_colELEV_MEAN(-1),
       m_colF_THETA(-1),
       m_colFIELD_CAP(-1),
+      m_colFOR_VAL(-1),
       m_colHBVCALIB(-1), 
       m_colHRU_ID(-1),
       m_colHRU_NDX(-1),
@@ -1208,13 +1211,17 @@ protected:
 public:
 #define STM_VEGCLASS_MINIMUM 2000000
 
-   // Some IDU attributes, in alphabetic order.
+   // Some IDU attributes, in alphabetic order, with underscores treated like spaces.
+   int m_colAG_VAL;
+#define AG_VAL gIDUs->m_colAG_VAL
    int m_colAGECLASS;
 #define AGECLASS gIDUs->m_colAGECLASS
    int m_colAREA;
 #define AREA gIDUs->m_colAREA
    int m_colCOMID;
 #define COMID gIDUs->m_colCOMID
+   int m_colDEV_VAL;
+#define DEV_VAL gIDUs->m_colDEV_VAL
    int m_colECOREGION;
 #define ECOREGION gIDUs->m_colECOREGION
    int m_colELEV_MEAN;
@@ -1223,6 +1230,8 @@ public:
 #define F_THETA gIDUs->m_colF_THETA
    int m_colFIELD_CAP;
 #define FIELD_CAP gIDUs->m_colFIELD_CAP
+   int m_colFOR_VAL;
+#define FOR_VAL gIDUs->m_colFOR_VAL
    int m_colHBVCALIB;
 #define HBVCALIB gIDUs->m_colHBVCALIB
    int m_colHRU_ID;
@@ -1297,13 +1306,16 @@ public:
       bool ok = true;
 
       // Some IDU attributes, in alphabetic order.
+      ok = ok && CheckCol(m_colAG_VAL, "AG_VAL", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colAGECLASS, "AGECLASS", TYPE_INT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colAREA, "AREA", TYPE_DOUBLE, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colCOMID, "COMID", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colDEV_VAL, "DEV_VAL", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colECOREGION, "ECOREGION", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colF_THETA, "F_THETA", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colFIELD_CAP, "FIELD_CAP", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colFOR_VAL, "FOR_VAL", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colHBVCALIB, "HBVCALIB", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colHRU_ID, "HRU_ID", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colHRU_NDX, "HRU_NDX", TYPE_INT, CC_AUTOADD);

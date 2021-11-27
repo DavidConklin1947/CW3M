@@ -19,6 +19,7 @@
 #define new DEBUG_NEW
 #endif
 
+extern IDUlayer* gIDUs;
 
 BOOL APs::GetUrbanPopData()
 // Called at InitRun
@@ -1032,6 +1033,10 @@ bool APs::UXaddIDUsToUGA(EnvContext * pContext, int ugb, Query *pIdu_query, int 
 bool APs::InitLandTrans( EnvContext *pContext )
    {
    MapLayer *pLayer = (MapLayer*) pContext->pMapLayer;
+
+   gIDUs->SetColDataU(AG_VAL, 0.f);
+   gIDUs->SetColDataU(DEV_VAL, 0.f);
+   gIDUs->SetColDataU(FOR_VAL, 0.f);
 
    if (m_LTtestMode>0) 
       {
