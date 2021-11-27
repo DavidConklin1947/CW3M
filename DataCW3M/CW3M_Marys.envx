@@ -12,7 +12,7 @@
     logMsgLevel                ='0'
     noBuffering                ='0'
     multiRunDecadalMapsModulus ='10'
-    defaultPeriod              ='1'
+    defaultPeriod              ='9'
     dynamicUpdate              ='15'
     spatialIndexDistance       ='0'
     areaCutoff                 ='0'
@@ -37,6 +37,7 @@
     exportDeltaCols            =''
     discardMultiRunDeltas      ='1'
     useWaterYears              ='0'
+    spinup                     ='0'
   />
   <!-- for debugging, to run for just 1 day in each year: maxDaysInYear ='1'
   not working as of 6/4/19: useWaterYears ='1'
@@ -303,7 +304,7 @@ initRunOnStartup  ='0'
    />
    
 <autonomous_process
-name         ='VegSTMengine'
+name         ='UplandSTM'
 path         ='VegSTM.dll'
 id           ='130'
 use          ='1'
@@ -311,25 +312,25 @@ timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='VegSTM.xml'
+initInfo     ='UplandSTM.xml'
 dependencies =''
 initRunOnStartup  ='0'
    />
-<!--
+
 <autonomous_process
-name         ='UpdateDGVMvegtype'
-path         ='APs.dll'
-id           ='140'
+name         ='WetlandSTM'
+path         ='STMengine.dll'
+id           ='131'
 use          ='1'
 timing       ='1'
 freq         ='1'
 sandbox      ='0'
 fieldName    =''
-initInfo     ='APs.xml'
+initInfo     ='WetlandSTM.xml'
 dependencies =''
 initRunOnStartup ='0'
    />
--->    
+    
 <autonomous_process
 name         ='FarmlandRent'
 path         ='APs.dll'

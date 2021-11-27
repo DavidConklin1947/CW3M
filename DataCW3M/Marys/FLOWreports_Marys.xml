@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+  <outputs>
+    <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
+      <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23762895" value="Q_DISCHARG*35.3146667*1.0" type="sum" domain="reach"
+      obs="..\Observations\Willamette Gages\Flow\USGS 14171000_flow_MARYS RIVER NEAR PHILOMATH, OR_23762895.csv" format="E0" />
+    </output_group>
+
+    <output_group name="FLOW yearly HBV compartments mm H2O" interval="yearly" >
+      <output in_use="1" name="snowpack" query="1" value="SNOWPACK" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="MELT_BOX" query="1" value="MELT_BOX" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="NAT_SOIL" query="1" value="NAT_SOIL" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="IRRIG_SOIL" query="1" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="GW_FASTBOX" query="1" value="GW_FASTBOX" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="GW_SLOWBOX" query="1" value="GW_SLOWBOX" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="HRU total" query="1" value="SNOWPACK+MELT_BOX+NAT_SOIL+IRRIG_SOIL+GW_FASTBOX+GW_SLOWBOX" type="areaWtMean" domain="hru" />
+    </output_group>
+    
+    
+    <output_group name="FLOW Marys flows with Obs with leapdays (cfs)" daily="y" monthly="y" yearly="y" >
+      <output in_use="1" name="MARYS RIVER NEAR PHILOMATH 23762895" query="COMID = 23762895" value="reachOutflow*35.3147" type="sum" domain="reach" obs="..\Observations\IncludingLeapDays\obs_usgs14171000.csv" format="E0" />
+      <output in_use="1" name="Rock Creek 23763931" query="COMID=23763931" value="Q*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP AT 23762895" query="COMID = 23762895" value="PRECIP" type="areaWtMean" domain="idu" />
+    </output_group>
+
+    <output_group name="FLOW HBVCALIB outflows" >
+      <output in_use="1" name="HBVCALIB=23 outflow 23762881 Marys outlet (cfs)" query="COMID=23762881" value="Q*35.3146667" type="sum" domain="reach" />
+    </output_group>
+    
+    <output_group name="FLOW Selected Flows for Corvallis area (cfs)" daily="n" monthly="y" yearly="y" >
+      <output in_use="1" name="23764715 Dunawi Creek (cfs)" query="COMID = 23764715" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764721 South Fork Dunawi Creek (cfs)" query="COMID = 23764721" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764703 Oak Creek to Marys R (cfs)" query="COMID = 23764703" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764671 Oak Creek to Lamprey Cr (cfs)" query="COMID = 23764671" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764667 Oak Creek to Mulkey Cr (cfs)" query="COMID = 23764667" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23765593 Lamprey Creek (cfs)" query="COMID = 23765593" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762873 Dixon Creek to Willamette R (cfs)" query="COMID = 23762873" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764647 North Fork Dixon Creek (cfs)" query="COMID = 23764647" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762875 South Fork Dixon Creek (cfs)" query="COMID = 23762875" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764771 (cfs)" query="COMID = 23764771" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764733 Millrace (cfs)" query="COMID = 23764733" value="reachOutflow*35.3147" type="sum" domain="reach" />
+    </output_group>
+
+    <!--
+    <output_group name="FLOW Flows in Corvallis-Philomath UGA (cfs)" daily="n" monthly="y" yearly="y" >
+      <output in_use="1" name="23762869 Willamette R (cfs)" query="COMID = 23762869" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762877 Willamette R (cfs)" query="COMID = 23762877" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23763007 Willamette R (cfs)" query="COMID = 23763007" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23763009 Willamette R (cfs)" query="COMID = 23763009" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23763083 East Channel of Willamette R (cfs)" query="COMID = 23763083" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23763085 East Channel of Willamette R (cfs)" query="COMID = 23763085" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23763011 Booneville Channel (cfs)" query="COMID = 23763011" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764795 West Fork of Booneville Channel (cfs)" query="COMID = 23764795" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764837 West Fork of Booneville Channel (cfs)" query="COMID = 23764837" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762881 Marys R (cfs)" query="COMID = 23762881" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762883 Marys R (cfs)" query="COMID = 23762883" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762885 Marys R (cfs)" query="COMID = 23762885" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762887 Marys R (cfs)" query="COMID = 23762887" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762889 Marys R (cfs)" query="COMID = 23762889" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762897 Marys R (cfs)" query="COMID = 23762897" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762899 Marys R (cfs)" query="COMID = 23762899" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764605 Mountain View Creek (cfs)" query="COMID = 23764605" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762873 Dixon Creek (cfs)" query="COMID = 23762873" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764647 Dixon Creek (cfs)" query="COMID = 23764647" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762875 (cfs)" query="COMID = 23762875" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23765593 (cfs)" query="COMID = 23765593" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764667 Oak Creek (cfs)" query="COMID = 23764667" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764671 Oak Creek (cfs)" query="COMID = 23764671" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764703 Oak Creek (cfs)" query="COMID = 23764703" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764669 Mulkey Creek (cfs)" query="COMID = 23764669" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764715 Dunawi Creek (cfs)" query="COMID = 23764715" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764723 Dunawi Creek (cfs)" query="COMID = 23764723" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764721 (cfs)" query="COMID = 23764721" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764733 Millrace (cfs)" query="COMID = 23764733" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764707 Newton Creek (cfs)" query="COMID = 23764707" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764719 Newton Creek (cfs)" query="COMID = 23764719" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764757 Newton Creek (cfs)" query="COMID = 23764757" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764705 (cfs)" query="COMID = 23764705" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764711 (cfs)" query="COMID = 23764711" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764717 (cfs)" query="COMID = 23764717" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764755 (cfs)" query="COMID = 23764755" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764771 (cfs)" query="COMID = 23764771" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764779 (cfs)" query="COMID = 23764779" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23762939 Greasy Creek (cfs)" query="COMID = 23762939" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764825 (cfs)" query="COMID = 23764825" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764841 (cfs)" query="COMID = 23764841" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764893 (cfs)" query="COMID = 23764893" value="reachOutflow*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="23764877 Dry Creek (cfs)" query="COMID = 23764877" value="reachOutflow*35.3147" type="sum" domain="reach" />
+    </output_group>
+    
+-->
+
+  </outputs>
+  
