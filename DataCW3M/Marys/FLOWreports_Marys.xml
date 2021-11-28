@@ -2,31 +2,18 @@
 
   <outputs>
     <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
-      <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23762895" value="Q_DISCHARG*35.3146667*1.0" type="sum" domain="reach"
+      <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23762895" value="Q_DISCHARG*35.3146667*1.05" type="sum" domain="reach"
       obs="..\Observations\Willamette Gages\Flow\USGS 14171000_flow_MARYS RIVER NEAR PHILOMATH, OR_23762895.csv" format="E0" />
     </output_group>
-
-    <output_group name="FLOW yearly HBV compartments mm H2O" interval="yearly" >
-      <output in_use="1" name="snowpack" query="1" value="SNOWPACK" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="MELT_BOX" query="1" value="MELT_BOX" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="NAT_SOIL" query="1" value="NAT_SOIL" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="IRRIG_SOIL" query="1" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="GW_FASTBOX" query="1" value="GW_FASTBOX" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="GW_SLOWBOX" query="1" value="GW_SLOWBOX" type="areaWtMean" domain="hru" />
-      <output in_use="1" name="HRU total" query="1" value="SNOWPACK+MELT_BOX+NAT_SOIL+IRRIG_SOIL+GW_FASTBOX+GW_SLOWBOX" type="areaWtMean" domain="hru" />
-    </output_group>
     
-    
-    <output_group name="FLOW Marys flows with Obs with leapdays (cfs)" daily="y" monthly="y" yearly="y" >
-      <output in_use="1" name="MARYS RIVER NEAR PHILOMATH 23762895" query="COMID = 23762895" value="reachOutflow*35.3147" type="sum" domain="reach" obs="..\Observations\IncludingLeapDays\obs_usgs14171000.csv" format="E0" />
-      <output in_use="1" name="Rock Creek 23763931" query="COMID=23763931" value="Q*35.3147" type="sum" domain="reach" />
-      <output in_use="1" name="PRECIP AT 23762895" query="COMID = 23762895" value="PRECIP" type="areaWtMean" domain="idu" />
+    <output_group name="FLOW Marys flows (cfs)" daily="y" monthly="y" yearly="y" >
+      <output in_use="1" name="HBVCALIB=23 outflow 23762881 Marys outlet (cfs)" query="COMID=23762881" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Muddy Cr outlet into Marys 23762959" query="COMID = 23762959" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="MARYS RIVER NEAR PHILOMATH 23762895" query="COMID = 23762895" value="Q_DISCHARG*35.31466677" type="sum" domain="reach" />
+      <output in_use="1" name="Rock Creek 23763931" query="COMID=23763931" value="Q_DISCHARG*35.3147" type="sum" domain="reach" />
+      <output in_use="1" name="PRECIP for HBVCALIB 23" query="HBVCALIB=23" value="PRECIP" type="areaWtMean" domain="idu" />
     </output_group>
 
-    <output_group name="FLOW HBVCALIB outflows" >
-      <output in_use="1" name="HBVCALIB=23 outflow 23762881 Marys outlet (cfs)" query="COMID=23762881" value="Q*35.3146667" type="sum" domain="reach" />
-    </output_group>
-    
     <output_group name="FLOW Selected Flows for Corvallis area (cfs)" daily="n" monthly="y" yearly="y" >
       <output in_use="1" name="23764715 Dunawi Creek (cfs)" query="COMID = 23764715" value="reachOutflow*35.3147" type="sum" domain="reach" />
       <output in_use="1" name="23764721 South Fork Dunawi Creek (cfs)" query="COMID = 23764721" value="reachOutflow*35.3147" type="sum" domain="reach" />
@@ -87,7 +74,17 @@
       <output in_use="1" name="23764893 (cfs)" query="COMID = 23764893" value="reachOutflow*35.3147" type="sum" domain="reach" />
       <output in_use="1" name="23764877 Dry Creek (cfs)" query="COMID = 23764877" value="reachOutflow*35.3147" type="sum" domain="reach" />
     </output_group>
-    
+
+    <output_group name="FLOW yearly HBV compartments mm H2O" interval="yearly" >
+      <output in_use="1" name="snowpack" query="1" value="SNOWPACK" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="MELT_BOX" query="1" value="MELT_BOX" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="NAT_SOIL" query="1" value="NAT_SOIL" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="IRRIG_SOIL" query="1" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="GW_FASTBOX" query="1" value="GW_FASTBOX" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="GW_SLOWBOX" query="1" value="GW_SLOWBOX" type="areaWtMean" domain="hru" />
+      <output in_use="1" name="HRU total" query="1" value="SNOWPACK+MELT_BOX+NAT_SOIL+IRRIG_SOIL+GW_FASTBOX+GW_SLOWBOX" type="areaWtMean" domain="hru" />
+    </output_group>
+        
 -->
 
   </outputs>
