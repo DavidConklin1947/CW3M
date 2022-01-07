@@ -1,7 +1,7 @@
 // STMengine.cpp 
 // James Sulzman wrote a state-and-transition engine for the WW2100 project called DynamicVeg.
-// Dave Conklin simplified and extensively rewrote DynamicVeg for the OUWIN and INFEWS projects, and renamed it STMengine.
-// Conklin subsequently used STMengine as the starting point for a more generic version called STMengine, adding
+// Dave Conklin simplified and extensively rewrote DynamicVeg for the OUWIN and INFEWS projects, and renamed it VegSTM.
+// Conklin subsequently used VegSTM as the starting point for a more generic version called STMengine, adding
 // a capability for conditional transitions. Conditional transitions, a generalization of probabilistic transitions,
 // are transitions based on the value of a particular IDU attribute, relative to specified thresholds.
 

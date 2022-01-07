@@ -76,6 +76,8 @@ public:
 	// xml input variables
 	CString  m_podTablePath;					// POD lookup file .csv
 	CString  m_pouTablePath;					// POU lookup file .csv
+	CString  m_altPodTablePath;					// POD lookup file .csv
+	CString  m_altPouTablePath;					// POU lookup file .csv
 	CString  m_dynamicWRTablePath;		   // dynamic water rights file .csv
 	int      m_irrigatedHruLayer;				// index of HRU layer where irrigation water is applied
 	int      m_nonIrrigatedHruLayer;			// index of HRU layer where non-irrigation water is applied

@@ -22,6 +22,7 @@
 #include "FlowContext.h"
 #include <EnvEngine\EnvModel.h>
 #include "GeoSpatialDataObj.h"
+#include <PathManager.h>
 
 using namespace alglib_impl;
 
@@ -4275,6 +4276,30 @@ int AltWaterMaster::LoadWRDatabase(FlowContext *pFlowContext)
 
    // *************** Begin loading Point of Diversion input file ****************************************
 
+   CString msg;
+   CString file_name = m_podTablePath;
+   ::ApplySubstituteStrings(file_name, m_pEnvContext->m_substituteStrings);
+   PathManager::FindPath(file_name, m_podTablePath);
+   if (m_podTablePath.IsEmpty())
+   {
+      msg.Format("AltWaterMaster::LoadXml() Couldn't find POD file %s", file_name.GetString());
+      Report::LogMsg(msg);
+
+      file_name = m_altPodTablePath;
+      ::ApplySubstituteStrings(file_name, m_pEnvContext->m_substituteStrings);
+      PathManager::FindPath(file_name, m_podTablePath);
+      if (m_podTablePath.IsEmpty())
+      {
+         msg.Format("AltWaterMaster::LoadXml() Couldn't find alternate POD file %s", file_name.GetString());
+         Report::ErrorMsg(msg);
+         return(false);
+      }
+      msg.Format("AltWaterMaster::LoadXml() Using alternate POD file %s", m_podTablePath.GetString());
+   }
+   else msg.Format("AltWaterMaster::LoadXml() Using POD file %s", m_podTablePath.GetString());
+   Report::LogMsg(msg);
+
+
 	int podRecords = m_podDb.ReadAscii(m_podTablePath); // Pre-sorted data file. sorted by PriorityYear, PriorityMonth, PriorityDOY, and BeginDOY respectively
 
 	if (podRecords == 0)
@@ -4610,6 +4635,30 @@ int AltWaterMaster::LoadWRDatabase(FlowContext *pFlowContext)
 	// *************** End loading Point of Diversion input file ****************************************
 
 	// *************** Begin loading Place of Use input file ****************************************
+
+   file_name = m_pouTablePath;
+   ::ApplySubstituteStrings(file_name, m_pEnvContext->m_substituteStrings);
+   PathManager::FindPath(file_name, m_pouTablePath);
+   if (m_pouTablePath.IsEmpty())
+   {
+      CString msg;
+      msg.Format("AltWaterMaster::LoadXml() Couldn't find POU file %s", file_name.GetString());
+      Report::LogMsg(msg);
+
+      file_name = m_altPodTablePath;
+      ::ApplySubstituteStrings(file_name, m_pEnvContext->m_substituteStrings);
+      PathManager::FindPath(file_name, m_pouTablePath);
+      if (m_pouTablePath.IsEmpty())
+      {
+         msg.Format("AltWaterMaster::LoadXml() Couldn't find alternate POU file %s", file_name.GetString());
+         Report::ErrorMsg(msg);
+         return(false);
+      }
+      msg.Format("AltWaterMaster::LoadXml() Using alternate POU file %s", m_pouTablePath.GetString());
+      Report::LogMsg(msg);
+   }
+   else msg.Format("AltWaterMaster::LoadXml() Using POU file %s", m_pouTablePath.GetString());
+   Report::LogMsg(msg);
 
 	int pouDBNdx;
 
@@ -5820,9 +5869,11 @@ bool AltWaterMaster::LoadXml(WaterAllocation *pMethod, TiXmlElement *pXmlElement
    {
    LPTSTR query    = NULL;   // ignored for now
    LPTSTR method   = NULL;
-   LPTSTR podTable = NULL;
-   LPTSTR pouTable = NULL;
-	LPTSTR dynamicWRTable = NULL;
+   CString podTable = NULL;
+   CString pouTable = NULL;
+   CString alternatePodTable = NULL;
+   CString alternatePouTable = NULL;
+   LPTSTR dynamicWRTable = NULL;
    LPTSTR value    = NULL;
    LPTSTR aggCols  = NULL;
    int irrigatedHruLayer = 0;
@@ -5850,9 +5901,11 @@ bool AltWaterMaster::LoadXml(WaterAllocation *pMethod, TiXmlElement *pXmlElement
       { "name",											TYPE_CSTRING,  &(pMethod->m_name),		false,   0 },
       { "method",											TYPE_STRING,   &method,						true,    0 },
       { "query",											TYPE_STRING,   &query,						false,   0 },
-      { "pod_table",										TYPE_STRING,   &podTable,					true,    0 },
-      { "pou_table",										TYPE_STRING,   &pouTable,					true,    0 },
-		{ "dynamic_WR_table",							TYPE_STRING,   &dynamicWRTable,			true,    0 },
+      { "pod_table",										TYPE_CSTRING,   &podTable,					true,    0 },
+      { "pou_table",										TYPE_CSTRING,   &pouTable,					true,    0 },
+      { "alternate_pod_table",						TYPE_CSTRING,   &alternatePodTable,		false,    0 },
+      { "alternate_pou_table",						TYPE_CSTRING,   &alternatePouTable,		false,    0 },
+      { "dynamic_WR_table",							TYPE_STRING,   &dynamicWRTable,			true,    0 },
       { "n_years_WR_not_used_limit",				TYPE_INT,      &nYearsWRNotUsedLimit,	true,    0 },
       { "n_days_WR_shortage_1",						TYPE_INT,      &nDaysWRConflict1,		true,    0 },
       { "n_days_WR_shortage_2",						TYPE_INT,      &nDaysWRConflict2,		true,    0 },
@@ -5886,6 +5939,9 @@ bool AltWaterMaster::LoadXml(WaterAllocation *pMethod, TiXmlElement *pXmlElement
 
    m_podTablePath = podTable;
    m_pouTablePath = pouTable;
+   m_altPodTablePath = alternatePodTable;
+   m_altPouTablePath = alternatePouTable;
+
    m_dynamicWRTablePath = dynamicWRTable;
    m_irrigatedHruLayer = BOX_IRRIG_SOIL;
    m_nonIrrigatedHruLayer = BOX_NAT_SOIL;
@@ -6011,7 +6067,7 @@ bool AltWaterMaster::WriteWRreport()
 
    // Now set the string "filename" equal to Users\<username>\Documents\SurfaceIrrigationWaterRightsReportByPOD.csv
    filename.Format("%s\\SurfaceIrrigationWaterRightsReportByPOD.csv", szBuffer);
-   const char * filename_const4 = filename;
+   const char* filename_const4 = filename;
 
    errNo = fopen_s(&oFile, filename_const4, "w");
    if (errNo != 0) return(false);
@@ -6022,7 +6078,7 @@ bool AltWaterMaster::WriteWRreport()
    // loop thru the m_podArray entries: for each entry with use=WRU_INSTREAM, find the associated reach
    for (int podNdx = 0; podNdx < podArrayLen; podNdx++)
    {
-      Reach *pReach = m_podArray[podNdx]->m_pReach;
+      Reach* pReach = m_podArray[podNdx]->m_pReach;
       if (m_podArray[podNdx]->m_useCode == WRU_IRRIGATION && m_podArray[podNdx]->m_permitCode == WRP_SURFACE)
          fprintf(oFile, "%d, %d, %d, %d, %f, %f, %d, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %f, %d, %d, %f, %d\n",
             podNdx,
@@ -6040,8 +6096,8 @@ bool AltWaterMaster::WriteWRreport()
             m_podArray[podNdx]->m_priorDoy,
             m_podArray[podNdx]->m_permitCode,
             m_podArray[podNdx]->m_useCode,
-            m_podArray[podNdx]->m_podStatus,         
-            m_podArray[podNdx]->m_pouID, 
+            m_podArray[podNdx]->m_podStatus,
+            m_podArray[podNdx]->m_pouID,
             m_podArray[podNdx]->m_pouRate,
             m_podArray[podNdx]->m_inUse,
             m_podArray[podNdx]->m_nPODSperWR,
@@ -6050,6 +6106,5 @@ bool AltWaterMaster::WriteWRreport()
    }
 
    fclose(oFile); oFile = NULL;
-
    return(true);
 } // end of WriteWRreport()
