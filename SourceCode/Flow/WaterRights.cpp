@@ -4645,7 +4645,7 @@ int AltWaterMaster::LoadWRDatabase(FlowContext *pFlowContext)
       msg.Format("AltWaterMaster::LoadXml() Couldn't find POU file %s", file_name.GetString());
       Report::LogMsg(msg);
 
-      file_name = m_altPodTablePath;
+      file_name = m_altPouTablePath;
       ::ApplySubstituteStrings(file_name, m_pEnvContext->m_substituteStrings);
       PathManager::FindPath(file_name, m_pouTablePath);
       if (m_pouTablePath.IsEmpty())
