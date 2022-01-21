@@ -3125,10 +3125,11 @@ int MapLayer::LoadShape(LPCTSTR filename, bool loadDB, int extraCols /* =0 */, i
       // get path of shape file
       p = strrchr(dbf, '\\');
 
+      int retval_LoadDataDBF = 0;
       if (p == NULL)  // no path
          {
 #ifndef NO_CODEBASE
-         LoadDataDBF(m_tableName, extraCols, records);
+         retval_LoadDataDBF = LoadDataDBF(m_tableName, extraCols, records);
 #else
 #ifdef USE_SHAPELIB
          LoadDataDBF(m_tableName, extraCols, records);
@@ -3143,7 +3144,7 @@ int MapLayer::LoadShape(LPCTSTR filename, bool loadDB, int extraCols /* =0 */, i
          p++;
          *p = NULL;
 #ifndef NO_CODEBASE
-         LoadDataDBF(m_tableName, extraCols, records);
+         retval_LoadDataDBF = LoadDataDBF(m_tableName, extraCols, records);
 #else
 #ifdef USE_SHAPELIB
          VData::SetUseWideChar(true);
@@ -3156,7 +3157,8 @@ int MapLayer::LoadShape(LPCTSTR filename, bool loadDB, int extraCols /* =0 */, i
          }
 
       delete[] dbf;
-      }
+      if (retval_LoadDataDBF < 0) return(retval_LoadDataDBF);
+      } // end of if (loadDB)
 
 
    // get corresponding prj file

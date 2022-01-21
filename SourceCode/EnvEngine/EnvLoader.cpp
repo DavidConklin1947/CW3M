@@ -1341,7 +1341,7 @@ int EnvLoader::LoadLayer( Map *pMap, LPCTSTR name, LPCTSTR path, int type,  int 
    // note: ExtraCols will be set to not save by default
    MapLayer *pLayer = AddMapLayer( path, type, extraCols, includeData, records, loadFieldInfo );
 
-   if ( pLayer != NULL )      // map successfully added?
+   if ( pLayer != NULL && pLayer->m_pDbTable != NULL)      // map successfully added?
       {
       // add in any other relevent information
       pLayer->m_name = name;
