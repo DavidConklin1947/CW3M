@@ -66,7 +66,7 @@
              obs="..\Observations\McKenzie\USGS_14165000_flow_MOHAWK RIVER NEAR SPRINGFIELD_23773513.csv" format="E0" />
     </output_group>
 
-    <output_group name="FLOW Daily McKenzie temperature skill assessment" daily="y" monthly="y" yearly="y" >
+    <output_group name="FLOW McKenzie temperature skill assessment" daily="y" monthly="y" yearly="y" >
       <output in_use="1" name="USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037"
             query="COMID=23773037" value="TEMP_H2O" type="sum" domain="reach"
            obs="..\Observations\McKenzie\USGS_14159200_temp_SO FK MCKENZIE RIVER ABOVE COUGAR LAKE NR RAINBOW_23773037.csv" format="E0" />
