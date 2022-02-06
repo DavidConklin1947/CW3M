@@ -4,16 +4,15 @@
 
 #include "GlobalMethods.h"
 #include "Flow.h"
+#include <ScienceFcns.h>
 #include <dataobj.h>
-//x #include <idataobj.H>
-//x #include <fdataobj.h>
 
 #include <UNITCONV.H>
 #include <omp.h>
 
 extern FlowProcess *gpFlow;
 extern FlowModel* gpModel;
-extern FlowModel* gpFlowModel;
+extern FlowModel* gFlowModel;
 
 bool ReachRouting::Init(FlowContext* pFlowContext)
 {
@@ -93,31 +92,17 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
          }
          if (pNode->m_waterParcel.m_volume_m3 <= 0)
          {
-            int hbvcalibInt; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalibInt);
-            VData hbvcalibV = hbvcalibInt;
-            if (m_pHBVtable->m_type == DOT_FLOAT) hbvcalibV.ChangeType(TYPE_FLOAT);
-            float w2a_slp = 0;
-            float w2a_int = 0;
-            bool ok = m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_SLP, w2a_slp);
-            ok &= m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_INT, w2a_int);
-            if (!ok || (w2a_slp == 0 && w2a_int == 0))
-            {
-               w2a_int = DEFAULT_SOIL_H2O_TEMP_DEGC;
-               w2a_slp = 0;
-            }
-            float temp_air_degC = gpModel->GetTodaysReachTEMP_AIR(pReach);
-            double temp_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
-               : w2a_slp * max(0, temp_air_degC) + w2a_int;
-            temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
-
+            double H2O_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
+            if (pNode->m_waterParcel.m_volume_m3 < 0) H2O_temp_degC = fabs(pNode->m_waterParcel.WaterTemperature());
             float depth = GetManningDepthFromQ(pReach, pNode->m_discharge, pReach->m_wdRatio);
             float width = pReach->m_wdRatio * depth;
             float volume = (width * depth * pReach->m_length / subnode_count);
 
             float node_current_added_volume_m3 = (float)(volume - pNode->m_waterParcel.m_volume_m3);
-            WaterParcel node_current_added_volumeWP = WaterParcel(node_current_added_volume_m3, temp_h2o_degC);
-            pNode->m_addedVolumeWP.MixIn(node_current_added_volumeWP);
-            pNode->m_waterParcel = WaterParcel(volume, temp_h2o_degC);
+            WaterParcel node_current_added_volumeWP = WaterParcel(node_current_added_volume_m3, H2O_temp_degC);
+            pNode->m_addedVolTodayWP.MixIn(node_current_added_volumeWP);
+            pNode->m_addedVolYTD_WP.MixIn(node_current_added_volumeWP);
+            pNode->m_waterParcel = WaterParcel(volume, H2O_temp_degC);
          }
       } // end of loop thru subnodes
    } // end of logic to ensure that every discharge is > 0 and every volume is > 0
@@ -533,10 +518,32 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
 //       double subreach_precip_vol_m3 = pSubreach->m_subreach_surf_area_m2 * reach_precip_mm / 1000;
 //       WaterParcel subreach_precipWP(subreach_precip_vol_m3, temp_air_degC);
 //       pSubreach->m_waterParcel.MixIn(subreach_precipWP); // ??? This violates conservation of mass because IDU surface areas overlap stream surface areas.
-   if (!rtnWP.Evaporate(evap_m3, evap_kJ))
-   { // Evaporation was unsuccessful because it would have resulted in negative thermal energy or negative volume.
-      Report::LogMsg("ReachRouting::ApplyEnergyFluxes() Evaporation unsuccessful due to low temperature or low volume.");
+
+   bool evaporate_rtn = true;
+   if (evap_kJ >= rtnWP.ThermalEnergy()) 
+   { // Skip evaporation due to low temperature.
+      // Our model for evaporation breaks down here because it assumes that all the energy required
+      // to evaporate the water comes from the water itself.  But the specific heat of water is only
+      // about 4 J per gram per deg C above 0 deg C, while the latent heat of vaporization for water
+      // is about 2500 J per gram of water.  In reality, some of the energy for vaporization is coming from
+      // the air moving across the surface of the water (hence, swamp coolers produce cool air) and some of
+      // the energy for vaporization is coming from the water (hence, water cools down as it evaporates).
+      // Moreover, the respective rates change as the temperature of the water changes (hot water cools down 
+      // faster, but doesn't cool the air as much). Our model calculates an evap rate as a depth of water lost 
+      // from the surface of a water body per second of time, and then applies that rate to the whole day.  The model
+      // oversimplifies, and doesn't work under some conditions.
+      // At cold temperatures, there won't be much evaporation anyway, so we'll just ignore it.
+      evaporate_rtn = false;
    }
+   else if (evap_m3 >= rtnWP.m_volume_m3)
+   { // Skip evaporation due to low volume.
+      CString msg;
+      msg.Format("ApplyEnergyFluxes() Skip evap due to low volume. evap_kJ = %f, rtnWP.ThermalEnergy() = %f rtnWP.m_temp_degC = %f, evap_m3 = %f, rtnWP.m_volume_m3 = %f",
+         evap_kJ, rtnWP.ThermalEnergy(), rtnWP.m_temp_degC, evap_m3, rtnWP.m_volume_m3);
+      Report::LogMsg(msg);
+      evaporate_rtn = false;
+   } // end of else if (evap_m3 >= rtnWP.m_volume_m3)
+   else evaporate_rtn = rtnWP.Evaporate(evap_m3, evap_kJ);
 
    // Gain thermal energy from incoming shortwave radiation and lose it to outgoing longwave radiation.
    double net_rad_kJ = sw_kJ - lw_kJ;
@@ -559,7 +566,13 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
    { // The water is gaining energy from the atmosphere.
       double thermal_energy_kJ = rtnWP.ThermalEnergy() + net_rad_kJ;
       rtnWP.m_temp_degC = WaterParcel::WaterTemperature(rtnWP.m_volume_m3, thermal_energy_kJ);
-      ASSERT(rtnWP.m_temp_degC < 50.);
+      if (rtnWP.m_temp_degC >= 50.)
+      {
+         ASSERT(rtnWP.m_temp_degC < 50.);
+         CString msg;
+         msg.Format("ReachRouting::ApplyEnergyFluxes() rtnWP.m_temp_degC = %f", rtnWP.m_temp_degC);
+         Report::LogWarning(msg);
+      }
    }
 
    ASSERT(rtnWP.m_temp_degC >= 0);
@@ -607,14 +620,14 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       prev_hbvcalibInt = hbvcalibInt;
 
       WaterParcel upstream_inflowWP = GetReachInflowWP(pReach, 0);
-      Reach* pUpstreamLeftReach = gpModel->GetReachFromNode(pReach->m_pLeft);
+      Reach* pUpstreamLeftReach = GetReachFromNode(pReach->m_pLeft);
       if (pUpstreamLeftReach != NULL)
       {
          int final_subnode = pUpstreamLeftReach->GetSubnodeCount() - 1;
          ReachSubnode* pNode = (ReachSubnode*)pUpstreamLeftReach->m_subnodeArray[final_subnode];
          int upstream_discharge_doy = pNode->m_dischargeDOY;
          ASSERT(upstream_discharge_doy == pFlowContext->dayOfYear);
-         Reach* pUpstreamRightReach = gpModel->GetReachFromNode(pReach->m_pRight);
+         Reach* pUpstreamRightReach = GetReachFromNode(pReach->m_pRight);
          if (pUpstreamRightReach != NULL)
          {
             int final_subnode = pUpstreamRightReach->GetSubnodeCount() - 1;
@@ -654,9 +667,28 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
       double depth_x_length_accum = 0.;
       double manning_depth_x_length_accum = 0;
       double volume_accum_m3 = 0.;
+      double temp_h2o_air_slope = 0;
+      double temp_h2o_air_intercept = 0;
       double rad_sw_net_W_m2 = pFlowContext->pFlowModel->GetReachShade_a_lator_W_m2(pReach, rad_sw_unshaded_W_m2);
       double width_given_m = pReach->Att(ReachWIDTHGIVEN);
-      for (int l = 0; l < pReach->GetSubnodeCount(); l++)
+
+      // Sort out lateral additions and withdrawals.
+      WaterParcel addition_to_reachWP = pReach->m_additionsWP;
+      double withdrawal_from_reach_m3 = 0.;
+      double flux_m3 = pReach->GetFluxValue();
+      if (flux_m3 < 0.)
+      { // This is into the reach. Assign a temperature to it and add it to addition_to_reachWP.
+         double volume_m3 = -flux_m3;
+         double temp_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
+            : w2a_slp * max(0, temp_air_degC) + w2a_int;
+         temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
+         WaterParcel into_the_reachWP = WaterParcel(volume_m3, temp_h2o_degC);
+         addition_to_reachWP.MixIn(into_the_reachWP);
+      }
+      else if (flux_m3 > 0.) withdrawal_from_reach_m3 = flux_m3;
+
+      int num_subnodes = pReach->GetSubnodeCount();
+      for (int l = 0; l < num_subnodes; l++)
       {
          pFlowContext->pReach = pReach;
          ReachSubnode* pSubreach = pReach->GetReachSubnode(l);
@@ -664,25 +696,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
 
          double orig_m_volume_m3 = pSubreach->m_waterParcel.m_volume_m3;
          double vts_frac = pReach->GetSubreachViewToSky_frac(l);
-
-         double lateralInflow_m3 = GetLateralInflow(pReach);
-         ASSERT(!isnan(lateralInflow_m3));
-         WaterParcel lateralInflowWP(0, 0);
-         if (lateralInflow_m3 > 0)
-         { // The net lateral flow is into the reach. Assign a temperature to it.
-            lateralInflowWP.m_volume_m3 = lateralInflow_m3;
-            double temp_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
-               : w2a_slp * max(0, temp_air_degC) + w2a_int;
-            temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
-            lateralInflowWP.m_temp_degC = temp_h2o_degC;
-            pSubreach->m_runoffWP = lateralInflowWP;
-            pSubreach->m_withdrawal_m3 = 0.;
-         }
-         else
-         { // lateralInflow_m3 is negative or zero, meaning the flow, if any, is a withdrawal from the reach
-            pSubreach->m_runoffWP = WaterParcel(0, 0);
-            pSubreach->m_withdrawal_m3 = -lateralInflow_m3;
-         }
+         pSubreach->m_runoffWP = WaterParcel(addition_to_reachWP.m_volume_m3 / num_subnodes, addition_to_reachWP.WaterTemperature());
+         pSubreach->m_withdrawal_m3 = withdrawal_from_reach_m3 / num_subnodes;
 
          double evap_m3, evap_kJ, sw_kJ, lw_kJ;
          WaterParcel adjustedWP = ApplyEnergyFluxes(pSubreach->m_waterParcel, pSubreach->m_subreach_surf_area_m2, rad_sw_net_W_m2, 
@@ -779,7 +794,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
    double duration = (float)(finish - start) / CLOCKS_PER_SEC;
    gpModel->m_reachFluxFnRunTime += (float)duration;
 
-   return true;
+   gFlowModel->ResetReachFluxes();
+   return(true);
 } // end of SolveReachKinematicWave()
 
 
@@ -816,6 +832,13 @@ double ReachRouting::NetLWout_W_m2(double tempAir_degC, double cL, double tempH2
    } // end of NetLWout_W_m2()
 
 
+WaterParcel ReachRouting::GetAdditionsToReach(Reach* pReach)
+{
+   return(pReach->m_additionsWP);
+} // end of GetAdditionsToReach()
+
+
+/*
 double ReachRouting::GetLateralInflow( Reach *pReach )
    {
    float inflow = 0;
@@ -838,6 +861,7 @@ double ReachRouting::GetLateralInflow( Reach *pReach )
 
    return inflow;
    } // end of GetLateralInflow()
+*/
 
 
 void ReachRouting::MoveWP(double volume_m3, WaterParcel* pFromWP, WaterParcel* pToWP)
@@ -931,7 +955,8 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
          // Add some magic water. This violates conservation of mass.
          double magic_H2O_to_add_m3 = pSubnode->m_min_volume_m3 - (original_volume_m3 + upstream_inflowWP.m_volume_m3 + net_lateral_inflow_m3);
          WaterParcel magic_H2O_to_addWP(magic_H2O_to_add_m3, original_temp_degC);
-         pSubnode->m_addedVolumeWP.MixIn(magic_H2O_to_addWP);
+         pSubnode->m_addedVolTodayWP.MixIn(magic_H2O_to_addWP);
+         pSubnode->m_addedVolYTD_WP.MixIn(magic_H2O_to_addWP);
          pSubnode->m_waterParcel.MixIn(WaterParcel(magic_H2O_to_addWP));
      } // end of block for adding magic water to the reach
    } // end of block for net lateral flow out of the reach
@@ -985,7 +1010,8 @@ WaterParcel ReachRouting::ApplyReachOutflowWP(Reach* pReach, int subnode, double
       double magic_H2O_temp_degC = original_temp_degC;
       WaterParcel magicWP = WaterParcel(magic_H2O_to_add_m3, magic_H2O_temp_degC);
       pSubnode->m_waterParcel.MixIn(magicWP);
-      pSubnode->m_addedVolumeWP.MixIn(magicWP);
+      pSubnode->m_addedVolTodayWP.MixIn(magicWP);
+      pSubnode->m_addedVolYTD_WP.MixIn(magicWP);
    }
 
    if (pSubnode->m_withdrawal_m3 > 0.)
@@ -1012,8 +1038,8 @@ WaterParcel ReachRouting::GetReachInflowWP(Reach* pReach, int subNode)
       if (pRes != NULL) inflowWP = pRes->m_outflowWP;
       else
       {
-         if (pReach->m_pLeft != NULL) inflowWP = (gpModel->GetReachFromNode(pReach->m_pLeft))->GetReachDischargeWP();
-         if (pReach->m_pRight != NULL) inflowWP.MixIn((gpModel->GetReachFromNode(pReach->m_pRight))->GetReachDischargeWP());
+         if (pReach->m_pLeft != NULL) inflowWP = (GetReachFromNode(pReach->m_pLeft))->GetReachDischargeWP();
+         if (pReach->m_pRight != NULL) inflowWP.MixIn((GetReachFromNode(pReach->m_pRight))->GetReachDischargeWP());
       }
    }
    else
@@ -1052,7 +1078,7 @@ double ReachRouting::GetReachSVOutflow( ReachNode *pReachNode, int sv )   // rec
       }
    else
       {
-      Reach *pReach = gpModel->GetReachFromNode( pReachNode );
+      Reach *pReach = GetReachFromNode( pReachNode );
       ReachSubnode *pNode = (ReachSubnode*) pReach->m_subnodeArray[ 0 ]; 
 
       if ( pReach != NULL && pNode->m_waterParcel.m_volume_m3 > 0.0f)
