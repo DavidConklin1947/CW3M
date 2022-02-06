@@ -92,17 +92,32 @@ bool ReachRouting::Step( FlowContext *pFlowContext )
          }
          if (pNode->m_waterParcel.m_volume_m3 <= 0)
          {
-            double H2O_temp_degC = DEFAULT_REACH_H2O_TEMP_DEGC;
-            if (pNode->m_waterParcel.m_volume_m3 < 0) H2O_temp_degC = fabs(pNode->m_waterParcel.WaterTemperature());
+            int hbvcalibInt; gpModel->m_pStreamLayer->GetData(pReach->m_polyIndex, gpModel->m_colReachHBVCALIB, hbvcalibInt);
+            VData hbvcalibV = hbvcalibInt;
+            if (m_pHBVtable->m_type == DOT_FLOAT) hbvcalibV.ChangeType(TYPE_FLOAT);
+            float w2a_slp = 0;
+            float w2a_int = 0;
+            bool ok = m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_SLP, w2a_slp);
+            ok &= m_pHBVtable->Lookup(hbvcalibV, gpModel->m_colHbvW2A_INT, w2a_int);
+            if (!ok || (w2a_slp == 0 && w2a_int == 0))
+            {
+               w2a_int = DEFAULT_SOIL_H2O_TEMP_DEGC;
+               w2a_slp = 0;
+            }
+            float temp_air_degC = gpModel->GetTodaysReachTEMP_AIR(pReach);
+            double temp_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
+               : w2a_slp * max(0, temp_air_degC) + w2a_int;
+            temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
+
             float depth = GetManningDepthFromQ(pReach, pNode->m_discharge, pReach->m_wdRatio);
             float width = pReach->m_wdRatio * depth;
             float volume = (width * depth * pReach->m_length / subnode_count);
 
             float node_current_added_volume_m3 = (float)(volume - pNode->m_waterParcel.m_volume_m3);
-            WaterParcel node_current_added_volumeWP = WaterParcel(node_current_added_volume_m3, H2O_temp_degC);
+            WaterParcel node_current_added_volumeWP = WaterParcel(node_current_added_volume_m3, temp_h2o_degC);
             pNode->m_addedVolTodayWP.MixIn(node_current_added_volumeWP);
             pNode->m_addedVolYTD_WP.MixIn(node_current_added_volumeWP);
-            pNode->m_waterParcel = WaterParcel(volume, H2O_temp_degC);
+            pNode->m_waterParcel = WaterParcel(volume, temp_h2o_degC);
          }
       } // end of loop thru subnodes
    } // end of logic to ensure that every discharge is > 0 and every volume is > 0

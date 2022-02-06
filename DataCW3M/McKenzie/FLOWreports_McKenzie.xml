@@ -312,7 +312,7 @@
       <output in_use="1" name="ET from HBVCALIB 16 McKenzie outlet m3" query="HBVCALIB=16" value="ET_DAY*Area/1000" type="sum" domain="idu" />
     </output_group>
 
-    <output_group name="FLOW McKenzie Thermal Energy Budget for streams daily" interval="daily" >
+    <output_group name="FLOW McKenzie Thermal Energy Budget for streams" interval="daily" >
       <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
@@ -353,7 +353,7 @@
       <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
     </output_group>
 
-    <output_group name="FLOW McKenzie Thermal Energy Budget for streams monthly" interval="monthly" >
+    <output_group name="FLOW McKenzie Thermal Energy Budget for streams" interval="monthly" >
       <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
@@ -394,7 +394,7 @@
       <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
     </output_group>
 
-    <output_group name="FLOW McKenzie Thermal Energy Budget for streams yearly" interval="yearly" >
+    <output_group name="FLOW McKenzie Thermal Energy Budget for streams" interval="yearly" >
       <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
