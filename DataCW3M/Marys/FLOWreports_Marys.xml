@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 
   <outputs>
+    <output_group name="FLOW Q Components for Reach 23762977 (cfs)" daily="y" monthly="y" yearly="y" >
+      <output in_use="1" name="Q_DISCHARG 23762977 upper Muddy Cr." query="COMID = 23762977" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Q_DISCHARG from upstream" query="COMID = 23762979" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOFF" query="COMID = 23762977" value="IN_RUNOFF*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Added by model (ADDED_VOL expressed as a flow)" query="COMID = 23762977" value="ADDED_VOL*35.3146667/86400" type="sum" domain="reach" />
+      <output in_use="1" name="In from springs" query="COMID = 23762977" value="SPRING_CMS*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="WETL2Q" query="COMID = 23762977" value="WETL2Q*35.3146667" type="sum" domain="idu" />
+      <output in_use="1" name="IN_MUNI" query="COMID = 23762977" value="IN_MUNI*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="OUT_MUNI" query="COMID = 23762977" value="OUT_MUNI*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="OUT_IRRIG" query="COMID = 23762977" value="OUT_IRRIG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Q2WETL" query="COMID = 23762977" value="Q2WETL*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Evaporation expressed as a flow" query="COMID = 23762977" value="(EVAP_MM/1000)*AREA_H2O*35.3146667/86400" type="sum" domain="reach" />
+    </output_group>
+    
     <output_group name="FLOW Q_DISCHARG at gage" daily="y" monthly="y" >
       <output in_use="1" name="Q_DISCHARG (cfs)" query="COMID=23762895" value="Q_DISCHARG*35.3146667*1.05" type="sum" domain="reach"
       obs="..\Observations\Willamette Gages\Flow\USGS 14171000_flow_MARYS RIVER NEAR PHILOMATH, OR_23762895.csv" format="E0" />

@@ -2,15 +2,97 @@
 
 
   <outputs>
-    <output_group name="FLOW Q at gage daily" interval="daily" >
-      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773405" value="Q*35.315*0.997" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+ <!--
+    <output_group name="FLOW Q Components for 23773431 (cfs and deg C)" daily="y" monthly="n" yearly="n" >
+      <output in_use="1" name="Q_DISCHARG 23773431" query="COMID = 23773431" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Q_DISCHARG from upstream" query="COMID = 23773433" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOFF" query="COMID = 23773431" value="IN_RUNOFF*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Added by model (ADDED_VOL expressed as a flow)" query="COMID = 23773431" value="ADDED_VOL*35.3146667/86400" type="sum" domain="reach" />
+      <output in_use="1" name="In from springs" query="COMID = 23773431" value="SPRING_CMS*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="WETL2Q" query="COMID = 23773431" value="WETL2Q*35.3146667" type="sum" domain="idu" />
+      <output in_use="1" name="IN_MUNI" query="COMID = 23773431" value="IN_MUNI*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="OUT_MUNI" query="COMID = 23773431" value="OUT_MUNI*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="OUT_IRRIG" query="COMID = 23773431" value="OUT_IRRIG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Q2WETL" query="COMID = 23773431" value="Q2WETL*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Evaporation expressed as a flow" query="COMID = 23773431" value="(EVAP_MM/1000)*AREA_H2O*35.3146667/86400" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_AIR" query="COMID = 23773431" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O" query="COMID = 23773431" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O from upstream" query="COMID = 23773433" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOF_C" query="COMID = 23773431" value="IN_RUNOF_C" type="sum" domain="reach" />
+      <output in_use="1" name="ADDEDVOL_C" query="COMID = 23773431" value="ADDEDVOL_C" type="sum" domain="reach" />
+      <output in_use="1" name="SPRINGTEMP" query="COMID = 23773431" value="SPRINGTEMP" type="sum" domain="reach" />
+      <output in_use="1" name="Total inflows except from upstream and WETL2Q" query="COMID=23773431" value="35.3146667*(IN_RUNOFF+ADDED_VOL+IN_MUNI)" type="sum" domain="reach" />
+      <output in_use="1" name="Total outflows" query="COMID=23773431" value="35.3146667*(Q_DISCHARG+OUT_MUNI+OUT_IRRIG+Q2WETL+((EVAP_MM/1000)*AREA_H2O/86400))" type="sum" domain="reach" />
+      <output in_use="1" name="Water volume in reach" query="COMID=23773431" value="(35.3146667/100)*REACH_H2O" type="sum" domain="reach" />
     </output_group>
+-->
+    <output_group name="FLOW Q Components for Blue R below Tidbits Cr 23773429 (cms and deg C and m3)" daily="y" monthly="n" yearly="n" >
+      <output in_use="1" name="Q_DISCHARG 23773429" query="COMID = 23773429" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output in_use="1" name="Q_DISCHARG from upstream" query="COMID = 23773431" value="Q_DISCHARG" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOFF" query="COMID = 23773429" value="IN_RUNOFF" type="sum" domain="reach" />
+      <output in_use="1" name="Added by model (ADDED_VOL expressed as a flow)" query="COMID = 23773429" value="ADDED_VOL/86400" type="sum" domain="reach" />
+      <output in_use="1" name="In from springs" query="COMID = 23773429" value="SPRING_CMS" type="sum" domain="reach" />
+      <output in_use="1" name="WETL2Q" query="COMID = 23773429" value="WETL2Q" type="sum" domain="idu" />
+      <output in_use="1" name="IN_MUNI" query="COMID = 23773429" value="IN_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="OUT_MUNI" query="COMID = 23773429" value="OUT_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="OUT_IRRIG" query="COMID = 23773429" value="OUT_IRRIG" type="sum" domain="reach" />
+      <output in_use="1" name="Q2WETL" query="COMID = 23773429" value="Q2WETL" type="sum" domain="reach" />
+      <output in_use="1" name="Evaporation expressed as a flow" query="COMID = 23773429" value="(EVAP_MM/1000)*AREA_H2O/86400" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_AIR" query="COMID = 23773429" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O" query="COMID = 23773429" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O from upstream" query="COMID = 23773431" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOF_C" query="COMID = 23773429" value="IN_RUNOF_C" type="sum" domain="reach" />
+      <output in_use="1" name="ADDEDVOL_C" query="COMID = 23773429" value="ADDEDVOL_C" type="sum" domain="reach" />
+      <output in_use="1" name="SPRINGTEMP" query="COMID = 23773429" value="SPRINGTEMP" type="sum" domain="reach" />
+      <output in_use="1" name="Total inflows except from upstream and WETL2Q" query="COMID=23773429" value="IN_RUNOFF+ADDED_VOL+IN_MUNI" type="sum" domain="reach" />
+      <output in_use="1" name="Total outflows" query="COMID=23773429" value="Q_DISCHARG+OUT_MUNI+OUT_IRRIG+Q2WETL+((EVAP_MM/1000)*AREA_H2O/86400)" type="sum" domain="reach" />
+      <output in_use="1" name="Water volume in reach" query="COMID=23773429" value="REACH_H2O" type="sum" domain="reach" />
+    </output_group>
+<!--
+    <output_group name="FLOW Q Components for Blue R below Tidbits Cr  23773429 (cfs and deg C and ccf)" daily="y" monthly="n" yearly="n" >
+      <output in_use="1" name="Q_DISCHARG 23773429" query="COMID = 23773429" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Q_DISCHARG from upstream" query="COMID = 23773431" value="Q_DISCHARG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOFF" query="COMID = 23773429" value="IN_RUNOFF*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Added by model (ADDED_VOL expressed as a flow)" query="COMID = 23773429" value="ADDED_VOL*35.3146667/86400" type="sum" domain="reach" />
+      <output in_use="1" name="In from springs" query="COMID = 23773429" value="SPRING_CMS*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="WETL2Q" query="COMID = 23773429" value="WETL2Q*35.3146667" type="sum" domain="idu" />
+      <output in_use="1" name="IN_MUNI" query="COMID = 23773429" value="IN_MUNI*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="OUT_MUNI" query="COMID = 23773429" value="OUT_MUNI*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="OUT_IRRIG" query="COMID = 23773429" value="OUT_IRRIG*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Q2WETL" query="COMID = 23773429" value="Q2WETL*35.3146667" type="sum" domain="reach" />
+      <output in_use="1" name="Evaporation expressed as a flow" query="COMID = 23773429" value="(EVAP_MM/1000)*AREA_H2O*35.3146667/86400" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_AIR" query="COMID = 23773429" value="TEMP_AIR" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O" query="COMID = 23773429" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="TEMP_H2O from upstream" query="COMID = 23773431" value="TEMP_H2O" type="sum" domain="reach" />
+      <output in_use="1" name="IN_RUNOF_C" query="COMID = 23773429" value="IN_RUNOF_C" type="sum" domain="reach" />
+      <output in_use="1" name="ADDEDVOL_C" query="COMID = 23773429" value="ADDEDVOL_C" type="sum" domain="reach" />
+      <output in_use="1" name="SPRINGTEMP" query="COMID = 23773429" value="SPRINGTEMP" type="sum" domain="reach" />
+      <output in_use="1" name="Total inflows except from upstream and WETL2Q" query="COMID=23773429" value="35.3146667*(IN_RUNOFF+ADDED_VOL+IN_MUNI)" type="sum" domain="reach" />
+      <output in_use="1" name="Total outflows" query="COMID=23773429" value="35.3146667*(Q_DISCHARG+OUT_MUNI+OUT_IRRIG+Q2WETL+((EVAP_MM/1000)*AREA_H2O/86400))" type="sum" domain="reach" />
+      <output in_use="1" name="Water volume in reach" query="COMID=23773429" value="(35.3146667/100)*REACH_H2O" type="sum" domain="reach" />
+    </output_group>
+-->
+    
+    <output_group name="FLOW Blue River flow skill assessment" daily="y" monthly="y" yearly="y" >
+        <output in_use="1" name="USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411"
+               query="COMID=23773411" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+              obs="..\Observations\McKenzie\USGS_14161500_flow_LOOKOUT CREEK NEAR BLUE RIVER_23773411.csv" format="E0" />
+        <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
+                query="COMID=23773405" value="Q_DISCHARG*35.3146667*0.997" type="sum" domain="reach"
+               obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+        <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
+                query="COMID=23772909" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
+               obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
+      </output_group>
 
-    <output_group name="FLOW Q at gage monthly" interval="monthly" >
-      <output in_use="1" name="adjusted Q (cfs)" query="COMID=23773405" value="Q*35.315*0.997" type="sum" domain="reach"
-             obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
-    </output_group>
+      <output_group name="FLOW Blue River temperature skill assessment" daily="y" monthly="y" yearly="y" >
+        <output in_use="1" name="USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429"
+                query="COMID=23773429" value="TEMP_H2O" type="sum" domain="reach"
+               obs="..\Observations\McKenzie\USGS_14161100_temp_BLUE RIVER BELOW TIDBITS CREEK, NR BLUE RIVER, OR_23773429.csv" format="E0" />
+        <output in_use="1" name="USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405"
+                query="COMID=23773405" value="TEMP_H2O" type="sum" domain="reach"
+               obs="..\Observations\McKenzie\USGS_14162200_temp_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
+      </output_group>
 
     <output_group name="FLOW ET by watershed and reservoir" interval="yearly" >
       <output in_use="1" name="ET from BLU avg mm/day" query="HBVCALIB=49 or HBVCALIB=9" value="ET_DAY" type="areaWtMean" domain="idu" />
