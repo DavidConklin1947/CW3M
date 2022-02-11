@@ -80,9 +80,6 @@
         <output in_use="1" name="USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405"
                 query="COMID=23773405" value="Q_DISCHARG*35.3146667*0.997" type="sum" domain="reach"
                obs="..\Observations\McKenzie\USGS_14162200_flow_BLUE RIVER AT BLUE RIVER_23773405.csv" format="E0" />
-        <output in_use="1" name="USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909"
-                query="COMID=23772909" value="Q_DISCHARG*35.3146667" type="sum" domain="reach"
-               obs="..\Observations\McKenzie\USGS_14162500_flow_MCKENZIE RIVER NEAR VIDA_23772909.csv" format="E0" />
       </output_group>
 
       <output_group name="FLOW Blue River temperature skill assessment" daily="y" monthly="y" yearly="y" >

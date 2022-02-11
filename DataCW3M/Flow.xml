@@ -270,7 +270,7 @@
     <Spring name="Springs feeding Blue R at and above Tidbit Creek" 
     COMID="23773429"
     flow_cms="1.60"
-     temp_C="4.9"
+     temp_C="-1."
        />
 
     <Spring name="Springs above Smith R Reservoir"
