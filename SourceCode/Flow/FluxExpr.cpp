@@ -1116,7 +1116,7 @@ Spring * Spring::LoadXml(TiXmlElement* pXmlFluxExpr, FlowModel * pModel, MapLaye
       CString msg;
       msg.Format("Spring::LoadXml() Spring %s temperature = %f is out of range for liquid water; changing it to -1. now. "
          "This will cause the spring water to enter at the same temperature as surface runoff.", name, temp_C);
-      Report::WarningMsg(msg);
+      Report::LogMsg(msg);
       temp_C = -1.;
    }
 

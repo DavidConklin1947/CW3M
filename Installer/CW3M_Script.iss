@@ -61,6 +61,8 @@ Source: "{#InputPath}\DataCW3M\Observations\Marys\*"; DestDir: "\CW3M_{#MyAppVer
 Source: "{#InputPath}\DataCW3M\Observations\McKenzie\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\McKenzie"; 
 Source: "{#InputPath}\DataCW3M\Observations\NSantiam\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\NSantiam"; 
 Source: "{#InputPath}\DataCW3M\Observations\Willamette\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\Willamette"; 
+Source: "{#InputPath}\DataCW3M\Observations\Willamette Gages\Flow\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\Willamette Gages\Flow"; 
+Source: "{#InputPath}\DataCW3M\Observations\Willamette Gages\Temp\*"; DestDir: "\CW3M_{#MyAppVersion}\Observations\Willamette Gages\Temp"; 
 
 Source: "{#InputPath}\DataCW3M\Reservoirs\Area_Capacity_Curves\*"; DestDir: "\CW3M_{#MyAppVersion}\Reservoirs\Area_Capacity_Curves"; 
 Source: "{#InputPath}\DataCW3M\Reservoirs\ControlPoints\*"; DestDir: "\CW3M_{#MyAppVersion}\Reservoirs\ControlPoints"; 
@@ -149,7 +151,7 @@ Source: "{#InputPath}\DataCW3M\Clackamas\Reach_Clackamas*"; DestDir: "\CW3M_{#My
 ;Source: "{#InputPath}\DataCW3M\Clackamas\Reporter_Clackamas.xml"; DestDir: "\CW3M_{#MyAppVersion}\Clackamas"; 
 
 Source: "{#InputPath}\DataCW3M\CW3M_Marys.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
-;Source: "{#InputPath}\DataCW3M\Marys\FLOWreports_Marys.xml"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
+Source: "{#InputPath}\DataCW3M\Marys\FLOWreports_Marys.xml"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
 Source: "{#InputPath}\DataCW3M\Marys\flow2010.ic"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
 Source: "{#InputPath}\DataCW3M\Marys\HRU_Marys*"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
 Source: "{#InputPath}\DataCW3M\Marys\IDU_Marys.cpg"; DestDir: "\CW3M_{#MyAppVersion}\Marys"; 
