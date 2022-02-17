@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CW3M"
-#define MyAppVersion "1.2.1"
+#define MyAppVersion "1.2.2"
 ;#define MyAppVersion "x.x.x"
 #define MyAppPublisher "Oregon Freshwater Simulations, Inc."
 #define MyAppURL "http:/www.freshwatersim.com"
@@ -181,6 +181,8 @@ Source: "{#InputPath}\DataCW3M\McKenzie\Reach_McKenzie*"; DestDir: "\CW3M_{#MyAp
 ;Source: "{#InputPath}\DataCW3M\McKenzie\PEST\*"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie\PEST";
 Source: "{#InputPath}\DataCW3M\McKenzie\Reporter_McKenzie.xml"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 Source: "{#InputPath}\DataCW3M\McKenzie\Shade_a_latorData\*"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie\Shade_a_latorData"; 
+Source: "{#InputPath}\DataCW3M\McKenzie\wr_pods_McKenzie.csv"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
+Source: "{#InputPath}\DataCW3M\McKenzie\wr_pous_McKenzie.csv"; DestDir: "\CW3M_{#MyAppVersion}\McKenzie"; 
 
 Source: "{#InputPath}\DataCW3M\CW3M_NSantiam.envx"; DestDir: "\CW3M_{#MyAppVersion}"; 
 Source: "{#InputPath}\DataCW3M\NSantiam\FLOWreports_NSantiam.xml"; DestDir: "\CW3M_{#MyAppVersion}\NSantiam"; 
