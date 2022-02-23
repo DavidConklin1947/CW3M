@@ -3381,8 +3381,10 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachTURNOVER, _T("TURNOVER"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachXFLUX_D, _T("XFLUX_D"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachSPRING_CMS, _T("SPRING_CMS"), TYPE_FLOAT, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachSPRINGTEMP, _T("SPRINGTEMP"), TYPE_FLOAT, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOFF, _T("IN_RUNOFF"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOF_C, _T("IN_RUNOF_C"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachOUT_LATERL, _T("OUT_LATERL"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_UPSTREAM, _T("Q_UPSTREAM"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_MIN, _T("Q_MIN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachHBVCALIB, _T("HBVCALIB"), TYPE_INT, CC_MUST_EXIST);
@@ -3994,6 +3996,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pIDUlayer->SetColDataU(m_colWETL2Q, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOF_C, 0);
+   m_pReachLayer->SetColDataU(m_colReachOUT_LATERL, 0);
    m_pReachLayer->SetColDataU(m_colReachQ_UPSTREAM, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRINGTEMP, 0);
@@ -8323,20 +8326,32 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
          double reach_evap_m3 = 0.;
          double reach_surf_area_m2 = 0.;
          WaterParcel reach_in_runoffWP(0, 0);
+         double reach_out_lateral_m3 = 0.;
          for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
          {
             ReachSubnode *pNode = pReach->GetReachSubnode(j);
             reachH2O_m3 += pNode->m_waterParcel.m_volume_m3;
             reach_evap_m3 += pNode->m_evap_m3;
             reach_surf_area_m2 += pNode->m_subreach_surf_area_m2;
-           reach_in_runoffWP.MixIn(pNode->m_runoffWP);
+            reach_in_runoffWP.MixIn(pNode->m_runoffWP);
+            reach_out_lateral_m3 += pNode->m_withdrawal_m3;
          }
          double reach_evap_mm = (reach_evap_m3 / reach_surf_area_m2) * MM_PER_M;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colStreamREACH_H2O, reachH2O_m3);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachEVAP_MM, reach_evap_mm);
+         float spring_cms = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachSPRING_CMS, spring_cms); 
+         if (spring_cms > 0)
+         { // Spring water is tracked separately in the reach attributes SPRING_CMS and SPRINGTEMP, so remove it before storing reach_in_runoffWP to IN_RUNOFF and IN_RUNOF_C.
+            float springtemp_degC = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachSPRINGTEMP, springtemp_degC);
+            WaterParcel springWP((double)spring_cms * SEC_PER_DAY, springtemp_degC);
+            bool rtn_flag = reach_in_runoffWP.Evaporate((double)spring_cms * SEC_PER_DAY, springWP.ThermalEnergy()); // Remove spring water from the accumulation of pNode->m_runoffWP.
+            if (!rtn_flag) reach_in_runoffWP = WaterParcel(0, 0);
+         }
          double reach_in_runoff_cms = reach_in_runoffWP.m_volume_m3 / SEC_PER_DAY;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOFF, reach_in_runoff_cms);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOF_C, reach_in_runoffWP.WaterTemperature());
+         double reach_out_lateral_cms = reach_out_lateral_m3 / SEC_PER_DAY;
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachOUT_LATERL, reach_out_lateral_cms);
       }
    }
 
