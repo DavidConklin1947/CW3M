@@ -3385,6 +3385,8 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOFF, _T("IN_RUNOFF"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachIN_RUNOF_C, _T("IN_RUNOF_C"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachOUT_LATERL, _T("OUT_LATERL"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachFLOOD_CMS, _T("FLOOD_CMS"), TYPE_DOUBLE, CC_AUTOADD);
+   EnvExtension::CheckCol(m_pStreamLayer, m_colReachFLOOD_C, _T("FLOOD_C"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_UPSTREAM, _T("Q_UPSTREAM"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachQ_MIN, _T("Q_MIN"), TYPE_DOUBLE, CC_AUTOADD);
    EnvExtension::CheckCol(m_pStreamLayer, m_colReachHBVCALIB, _T("HBVCALIB"), TYPE_INT, CC_MUST_EXIST);
@@ -3997,6 +3999,8 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOF_C, 0);
    m_pReachLayer->SetColDataU(m_colReachOUT_LATERL, 0);
+   m_pReachLayer->SetColDataU(m_colReachFLOOD_CMS, 0);
+   m_pReachLayer->SetColDataU(m_colReachFLOOD_C, 0);
    m_pReachLayer->SetColDataU(m_colReachQ_UPSTREAM, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRINGTEMP, 0);
@@ -5866,10 +5870,21 @@ bool FlowModel::ApplyQ2WETL()
       for (int i = 0; i < num_idus_in_wetl; i++)
       {
          double reach_remaining_cms = remaining_cms_array[i];
+         if (reach_remaining_cms <= 0) continue;
          double reach_remaining_m3 = reach_remaining_cms * SEC_PER_DAY;
          int reach_ndx = pWetl->m_wetlReachNdxArray[i];
          Reach* pReach = m_reachArray[reach_ndx];
          pReach->AddFluxFromGlobalHandler((float)-reach_remaining_m3);
+         double flood_cms = 0.;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_CMS, flood_cms);
+         double flood_c = 0.;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_C, flood_c);
+         WaterParcel floodWP(flood_cms * SEC_PER_DAY, flood_c);
+         // Flood water is modeled here as having the same temperature as the water in the reach. Maybe there is a better way???
+         double temp_h2o_degC = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTEMP_H2O, temp_h2o_degC);
+         WaterParcel reach_remainingWP(reach_remaining_m3, temp_h2o_degC);
+         floodWP.MixIn(reach_remainingWP);
+         flood_cms = floodWP.m_volume_m3 / SEC_PER_DAY;
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachFLOOD_CMS, flood_cms);
+         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachFLOOD_C, floodWP.m_temp_degC);
       }
 
    } // end of loop thru wetlands
@@ -6443,6 +6458,8 @@ bool FlowModel::StartStep( FlowContext *pFlowContext )
 
    m_pReachLayer->SetColDataU(m_colReachXFLUX_D, 0);
    m_pReachLayer->SetColDataU(m_colReachSPRING_CMS, 0);
+   m_pReachLayer->SetColDataU(m_colReachFLOOD_CMS, 0);
+   m_pReachLayer->SetColDataU(m_colReachFLOOD_C, 0);
 
    // Make sure today's weather is loaded into the IDU and HRU layers.
    GetTodaysWeatherField(CDT_PRECIP);
@@ -8347,6 +8364,14 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
             bool rtn_flag = reach_in_runoffWP.Evaporate((double)spring_cms * SEC_PER_DAY, springWP.ThermalEnergy()); // Remove spring water from the accumulation of pNode->m_runoffWP.
             if (!rtn_flag) reach_in_runoffWP = WaterParcel(0, 0);
          }
+
+         // Separate out flood water from normal runoff.
+         double flood_cms = 0; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_CMS, flood_cms);
+         double flood_m3 = flood_cms * SEC_PER_DAY;
+         double flood_c = 0; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_C, flood_c);
+         WaterParcel floodWP(flood_m3, flood_c);
+         reach_in_runoffWP.Evaporate(flood_m3, floodWP.ThermalEnergy());
+
          double reach_in_runoff_cms = reach_in_runoffWP.m_volume_m3 / SEC_PER_DAY;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOFF, reach_in_runoff_cms);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOF_C, reach_in_runoffWP.WaterTemperature());
@@ -8937,6 +8962,9 @@ bool FlowModel::InitReaches(void)
    m_pStreamLayer->SetColData(m_colStreamCOMID_DOWN, 0, true);
    m_pStreamLayer->SetColData(m_colStreamCOMID_LEFT, 0, true);
    m_pStreamLayer->SetColData(m_colStreamCOMID_RT, 0, true);
+   m_pReachLayer->SetColDataU(m_colReachOUT_LATERL, 0);
+   m_pReachLayer->SetColDataU(m_colReachFLOOD_CMS, 0);
+   m_pReachLayer->SetColDataU(m_colReachFLOOD_C, 0);
 
    roots = m_reachTree.GetRootCount();
    for (int i = 0; i < roots; i++)

@@ -357,6 +357,8 @@
       <output name="WETL2Q MJ" query="1" value="TEMP_WETL*WETL2Q*86400*998.2*4.187/1000" type="sum" domain="idu" />
       <output name="OUT_LATERL m3" query="1" value="OUT_LATERL*86400" type="sum" domain="reach" />
       <output name="OUT_LATERL MJ" query="1" value="TEMP_H2O*OUT_LATERL*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="FLOOD m3" query="1" value="FLOOD_CMS*86400" type="sum" domain="reach" />
+      <output name="FLOOD MJ" query="1" value="FLOOD_C*FLOOD_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
     </output_group>
 
     <output_group name="FLOW Thermal Energy Budget for 8 CGR yearly" interval="yearly" >

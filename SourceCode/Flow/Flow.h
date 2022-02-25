@@ -1981,6 +1981,8 @@ public:
    int m_colReachIN_RUNOFF;
    int m_colReachIN_RUNOF_C; // temperature of water running off the land into the reach, deg C
    int m_colReachOUT_LATERL; // from m_withdrawals_m3
+   int m_colReachFLOOD_CMS;
+   int m_colReachFLOOD_C;
    int m_colReachQ_UPSTREAM;
    int m_colReachQ_MIN;
    int m_colReachHBVCALIB;

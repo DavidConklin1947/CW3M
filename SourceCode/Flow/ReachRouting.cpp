@@ -583,10 +583,12 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
       rtnWP.m_temp_degC = WaterParcel::WaterTemperature(rtnWP.m_volume_m3, thermal_energy_kJ);
       if (rtnWP.m_temp_degC >= 50.)
       {
-         ASSERT(rtnWP.m_temp_degC < 50.);
          CString msg;
          msg.Format("ReachRouting::ApplyEnergyFluxes() rtnWP.m_temp_degC = %f", rtnWP.m_temp_degC);
          Report::LogWarning(msg);
+         msg.Format("origWP = (%f, %f), H2Oarea_m2 = %f, netSW_W_m2 = %f, H2Otemp_degC = %f, airTemp_degC = %f",
+            origWP.m_volume_m3, origWP.m_temp_degC, H2Oarea_m2, netSW_W_m2, H2Otemp_degC, airTemp_degC);
+         Report::LogMsg(msg);
       }
    }
 
@@ -700,7 +702,8 @@ bool ReachRouting::SolveReachKinematicWave(FlowContext* pFlowContext)
          WaterParcel into_the_reachWP = WaterParcel(volume_m3, temp_h2o_degC);
          addition_to_reachWP.MixIn(into_the_reachWP);
       }
-      else if (flux_m3 > 0.) withdrawal_from_reach_m3 = flux_m3;
+      else if (flux_m3 > 0.) 
+         withdrawal_from_reach_m3 = flux_m3;
 
       int num_subnodes = pReach->GetSubnodeCount();
       for (int l = 0; l < num_subnodes; l++)

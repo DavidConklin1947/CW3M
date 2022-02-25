@@ -633,7 +633,8 @@ bool FluxExpr::Step( FlowContext *pFlowContext )
                   WaterParcel water_going_into_the_reachWP(-totalSatisfiedDemand, m_temp_C);
                   pReach->AccumAdditions(water_going_into_the_reachWP);
                }
-               else pReach->CheckForNaNs("FluxExpr::Step 2", pReach->AddFluxFromGlobalHandler( totalSatisfiedDemand ));
+               else 
+                  pReach->CheckForNaNs("FluxExpr::Step 2", pReach->AddFluxFromGlobalHandler( totalSatisfiedDemand ));
 
                float totalSatisfiedDemand_cms = totalSatisfiedDemand / SEC_PER_DAY;
                pReach->m_availableDischarge -= totalSatisfiedDemand_cms;     // m3/sec
@@ -1175,7 +1176,33 @@ bool Spring::Step(FlowContext* pFlowContext)
 
    // Add water to reach.
    double H2O_to_add_m3 = m_springFlow_cms * SEC_PER_DAY;
-   WaterParcel H2O_to_addWP(H2O_to_add_m3, m_temp_C > 0. ? m_temp_C : 0.);
+   double temp_h2o_degC = m_temp_C;
+   if (temp_h2o_degC <= 0)
+   { // The temperature of the spring water is unspecified. Assign a temperature based on air temperature.
+
+      ParamTable * pHBVtable = pModel->GetTable("HBV");
+      ASSERT(pHBVtable != NULL);
+      ASSERT(pModel->m_colHbvW2A_SLP >= 0);
+      ASSERT(pModel->m_colHbvW2A_INT >= 0);
+      int hbvcalibInt; pReachLayer->GetData(m_pReach->m_polyIndex, pModel->m_colReachHBVCALIB, hbvcalibInt);
+      VData hbvcalibV = hbvcalibInt;
+      if (pHBVtable->m_type == DOT_FLOAT) hbvcalibV.ChangeType(TYPE_FLOAT);
+      float w2a_slp = 0;
+      float w2a_int = 0;
+      bool ok = pHBVtable->Lookup(hbvcalibV, pModel->m_colHbvW2A_SLP, w2a_slp);
+      ok &= pHBVtable->Lookup(hbvcalibV, pModel->m_colHbvW2A_INT, w2a_int);
+      ASSERT(ok);
+      if (w2a_slp == 0 && w2a_int == 0)
+      {
+         w2a_int = DEFAULT_SOIL_H2O_TEMP_DEGC;
+         w2a_slp = 0;
+      }
+      float temp_air_degC = pModel->GetTodaysReachTEMP_AIR(m_pReach);
+      temp_h2o_degC = (w2a_slp == 0) ? DEFAULT_SOIL_H2O_TEMP_DEGC
+         : w2a_slp * max(0, temp_air_degC) + w2a_int;
+      temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
+   }
+   WaterParcel H2O_to_addWP(H2O_to_add_m3, temp_h2o_degC);
 /*x
    // Special logic for Clear Lake
    WaterParcel seasonal_springWP(0, 0);
