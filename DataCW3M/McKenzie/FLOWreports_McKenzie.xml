@@ -313,6 +313,16 @@
     </output_group>
 
     <output_group name="FLOW McKenzie Thermal Energy Budget for streams" daily="y" monthly="y" yearly="y" >
+      <output name="total water in streams and reservoirs m3" query="1" value="REACH_H2O+RES_H2O" type="sum" domain="reach" />
+      <output name="total incoming water m3" query="1" value="ADDED_VOL+86400*(IN_RUNOFF+SPRING_CMS+ADDED_Q)" type="sum" domain="reach" />
+      <output name="total outgoing water except basin discharge m3" query="1" value="(EVAP_MM*AREA_H2O/1000)+(RES_EVAPMM*RESAREA_HA*10000/1000)+86400*(OUT_MUNI+OUT_IRRIG)" type="sum" domain="reach" />
+      <output name="total thermal energy MJ" query="1" value="(TEMP_H2O*REACH_H2O+RES_TEMP*RES_H2O)*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="total incoming energy MJ" query="1" 
+              value="0.9982*4.187*(86400*(IN_RUNOF_C*IN_RUNOFF+SPRINGTEMP*SPRING_CMS)+ADDEDVOL_C*ADDED_VOL)+(AREA_H2O*RAD_SW_IN+RESAREA_HA*10000*RES_SW_IN)*86400/1000000" 
+              type="sum" domain="reach" />
+      <output name="total outgoing energy except basin discharge MJ" query="1" 
+              value="(AREA_H2O*RAD_LW_OUT + RESAREA_HA*10000*RES_LW_OUT)*86400/1000000 + ((EVAP_MM*AREA_H2O/1000)*998.2)*(2.5-0.00236*TEMP_H2O) + (((RES_EVAPMM/1000)*RESAREA_HA*10000)*998.2)*(2.5-0.00236*RES_TEMP) + (TEMP_H2O*OUT_MUNI + OUTIRRIG_C*OUT_IRRIG)*86400*998.2*4.187/1000" 
+              type="sum" domain="reach" />
       <output in_use="1" name="thermal energy reach water (MJ)" query="1" value="TEMP_H2O*REACH_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="thermal energy in reservoir water (MJ)" query="1" value="RES_TEMP*RES_H2O*998.2*4.187/1000" type="sum" domain="reach" />
       <output in_use="1" name="lateral inflow (MJ)" query="1" value="IN_RUNOF_C*IN_RUNOFF*86400*998.2*4.187/1000" type="sum" domain="reach" />
@@ -359,6 +369,8 @@
       <output name="OUT_LATERL MJ" query="1" value="TEMP_H2O*OUT_LATERL*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="FLOOD m3" query="1" value="FLOOD_CMS*86400" type="sum" domain="reach" />
       <output name="FLOOD MJ" query="1" value="FLOOD_C*FLOOD_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="WETL_VOL m3" query="WETL_ID>0" value="WETL_VOL" type="sum" domain="idu" />
+      <output name="Wetland ET_DAY m3" query="WETL_ID>0" value="ET_DAY*AREA/1000" type="sum" domain="idu" />
     </output_group>
 
     <output_group name="FLOW Thermal Energy Budget for 8 CGR yearly" interval="yearly" >

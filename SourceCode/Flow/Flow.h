@@ -2091,8 +2091,8 @@ public:
    double m_totEvapFromReachesYr_m3;
    double m_totEvapFromReservoirsYr_m3;
 
-   double CalcTotH2OinReaches(); // Returns m3 H2O
-   double CalcTotH2OinReservoirs(); // Returns m3 H2O
+   WaterParcel CalcTotH2OinReaches(); 
+   WaterParcel CalcTotH2OinReservoirs(); 
    double CalcTotH2OinHRUs(); // Returns m3 H2O
    double CalcTotH2O(); // Returns m3 H2O
    

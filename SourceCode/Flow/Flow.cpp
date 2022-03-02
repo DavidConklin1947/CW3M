@@ -3778,8 +3778,9 @@ bool FlowModel::Init( EnvContext *pEnvContext )
    } // end of loop through IDUs
 
    if (m_flowContext.pEnvContext->coldStartFlag)
-   { // Initialize the WETNESS attribute.
+   { // Initialize the WETNESS and WETL_VOL attributes.
       m_pIDUlayer->SetColDataU(m_colWETNESS, -1000.);
+      m_pIDUlayer->SetColDataU(WETL_VOL, 0);
       for (MapLayer::Iterator idu = m_pIDUlayer->Begin(); idu != m_pIDUlayer->End(); idu++)
       {
          int lulc_a = 0; m_pIDUlayer->GetData(idu, m_colLulcA, lulc_a);
@@ -4091,9 +4092,13 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pIDUlayer->SetColDataU(m_colPRCP_Y_AVG, 0.);
    m_pIDUlayer->SetColDataU(m_colAET_Y_AVG, 0.);
 
-   CString msg;
-   msg.Format("*** FlowModel::InitRun() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f, m_totArea = %f",
-      CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
+   WaterParcel totH2OinReachesWP = CalcTotH2OinReaches();
+   WaterParcel totH2OinReservoirsWP = CalcTotH2OinReservoirs();
+   CString msg; 
+   msg.Format("*** FlowModel::InitRun() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3, m_totArea = %f",
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy()/1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy()/1000.,
+      CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
    Report::LogMsg(msg);
 
    pEnvContext->m_simDate.month = DEC;
@@ -4964,8 +4969,12 @@ bool FlowModel::InitializeSpinup() // Initialize all the state variables from de
    CString msg;
    msg.Format("FlowModel::InitializeSpinup() set default values for state variables.");
    Report::LogMsg(msg);
-   msg.Format("FlowModel::InitializeSpinup() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f, m_totArea = %f",
-      CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
+   WaterParcel totH2OinReachesWP = CalcTotH2OinReaches();
+   WaterParcel totH2OinReservoirsWP = CalcTotH2OinReservoirs();
+   msg.Format("*** FlowModel::InitializeSpinup() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3, m_totArea = %f",
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
+      CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
    Report::LogMsg(msg);
 
    return(true);
@@ -5187,8 +5196,12 @@ bool FlowModel::ReadState()
    }
 
    CString msg;
-   msg.Format("FlowModel::ReadState() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f, m_totArea = %f",
-      CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
+   WaterParcel totH2OinReachesWP = CalcTotH2OinReaches();
+   WaterParcel totH2OinReservoirsWP = CalcTotH2OinReservoirs();
+   msg.Format("*** FlowModel::ReadState() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3, m_totArea = %f",
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
+      CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
    Report::LogMsg(msg);
 
    // Make sure the water volumes in the attributes are consistent with the water volumes in the HRUs.
@@ -5777,12 +5790,6 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
       if (dayOfYear == 274)
          ResetCumulativeWaterYearValues();        
-      /*
-      CString msg;
-      msg.Format("*** Flow::Run() at end of day CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f",
-         CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs());
-      Report::LogMsg(msg);
-      */
       }  // end of: while ( m_time < m_stopTime )   // note - doesn't guarantee alignment with stop time
 
    // Done with the internal flow timestep loop, finish up...
@@ -5876,8 +5883,13 @@ bool FlowModel::ApplyQ2WETL()
          Reach* pReach = m_reachArray[reach_ndx];
          pReach->AddFluxFromGlobalHandler((float)-reach_remaining_m3);
          double flood_cms = 0.;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_CMS, flood_cms);
+         double flood_m3 = 0.;
+         if (flood_cms != 0)
+         {
+            flood_m3 = flood_cms * SEC_PER_DAY;
+         }
          double flood_c = 0.;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_C, flood_c);
-         WaterParcel floodWP(flood_cms * SEC_PER_DAY, flood_c);
+         WaterParcel floodWP(flood_m3, flood_c);
          // Flood water is modeled here as having the same temperature as the water in the reach. Maybe there is a better way???
          double temp_h2o_degC = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTEMP_H2O, temp_h2o_degC);
          WaterParcel reach_remainingWP(reach_remaining_m3, temp_h2o_degC);
@@ -6391,13 +6403,17 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
       } // end of if (m_hruLayerNames.GetSize()>3)
 
    m_StartYear_totH2O_m3 = CalcTotH2O();
-   m_StartYear_totReaches_m3 = CalcTotH2OinReaches();
-   m_StartYear_totReservoirs_m3 = CalcTotH2OinReservoirs();
+   m_StartYear_totReaches_m3 = CalcTotH2OinReaches().m_volume_m3;
+   m_StartYear_totReservoirs_m3 = CalcTotH2OinReservoirs().m_volume_m3;
    m_StartYear_totHRUs_m3 = CalcTotH2OinHRUs();
 
    CString msg;
-   msg.Format("*** FlowModel::StartYear() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f, m_totArea = %f",
-      CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
+   WaterParcel totH2OinReachesWP = CalcTotH2OinReaches();
+   WaterParcel totH2OinReservoirsWP = CalcTotH2OinReservoirs();
+   msg.Format("*** FlowModel::StartYear() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3, m_totArea = %f",
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
+      CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
    Report::LogMsg(msg);
 
    int hruCount = pFlowContext->pFlowModel->GetHRUCount();
@@ -6674,6 +6690,15 @@ bool FlowModel::EndStep( FlowContext *pFlowContext )
       float rad_sw; m_pIDUlayer->GetData(idu, m_colRAD_SW, rad_sw);
       rad_sw_yr = pFlowContext->dayOfYear > 0 ? ((rad_sw_yr * (pFlowContext->dayOfYear - 1) + rad_sw) / pFlowContext->dayOfYear) : rad_sw;
       m_pIDUlayer->SetDataU(idu, m_colRAD_SW_YR, rad_sw_yr);
+
+      double wetness_mm = Att(idu, WETNESS);
+      if (wetness_mm > 0)
+      {
+         float area_m2 = AttFloat(idu, AREA);
+         double wetl_vol_m3 = (wetness_mm / 1000.) * area_m2;
+         SetAtt(idu, WETL_VOL, wetl_vol_m3);
+      }
+      else SetAtt(idu, WETL_VOL, 0);
    } // end of loop thru IDUs
 
    m_totEvapFromReachesYr_m3 += CalcTotDailyEvapFromReaches();
@@ -6747,8 +6772,8 @@ bool FlowModel::EndYear( FlowContext *pFlowContext )
    rowMetrics[3] = ((float)m_StartYear_totReservoirs_m3 / m_totArea)*1000.f;
    rowMetrics[4] = ((float)m_StartYear_totHRUs_m3 / m_totArea)*1000.f;
    rowMetrics[5] = ((float)CalcTotH2O() / m_totArea)*1000.f;
-   rowMetrics[6] = ((float)CalcTotH2OinReaches() / m_totArea)*1000.f;
-   rowMetrics[7] = ((float)CalcTotH2OinReservoirs() / m_totArea)*1000.f;
+   rowMetrics[6] = ((float)CalcTotH2OinReaches().m_volume_m3 / m_totArea)*1000.f;
+   rowMetrics[7] = ((float)CalcTotH2OinReservoirs().m_volume_m3 / m_totArea)*1000.f;
    rowMetrics[8] = ((float)CalcTotH2OinHRUs() / m_totArea)*1000.f;
    rowMetrics[9] = rowMetrics[5] - rowMetrics[1];
    this->m_FlowWaterBalanceReport.AppendRow(rowMetrics);
@@ -6918,30 +6943,30 @@ double FlowModel::MagicHRUwaterReport_m3(bool msgFlag) // Report on NaNs and add
    } // end of double CalcTotDailyEvapFromReaches()
 
 
-double FlowModel::CalcTotH2OinReaches() // Returns m3 H2O
+WaterParcel FlowModel::CalcTotH2OinReaches() 
 {
    int reachCount = GetReachCount();
-   double totReachVol_m3 = 0.;
+   WaterParcel totReachH2O_WP(0, 0);
 
    for (int reach_ndx = 0; reach_ndx < reachCount; reach_ndx++)
    {
       Reach *pReach = m_reachArray[reach_ndx];
-      double reachH2O_m3 = 0.;
+      WaterParcel reachH2O_WP(0, 0);
       for (int j = 0; j < pReach->m_subnodeArray.GetSize(); j++)
       {
          ReachSubnode *pNode = pReach->GetReachSubnode(j);
-         reachH2O_m3 += pNode->m_waterParcel.m_volume_m3;
-      }
-      totReachVol_m3 += reachH2O_m3;
+         reachH2O_WP.MixIn(pNode->m_waterParcel);
+       }
+      totReachH2O_WP.MixIn(reachH2O_WP);
    } // end of loop thru reaches
 
-   return(totReachVol_m3);
+   return(totReachH2O_WP);
 } // end of CalcTotH2OinReaches()
 
 
-double FlowModel::CalcTotH2OinReservoirs() // Returns m3 H2O
+WaterParcel FlowModel::CalcTotH2OinReservoirs() 
 {
-   double totReservoirVol_m3 = 0.;
+   WaterParcel totReservoirH2O_WP(0, 0);
    int reservoirCount = (int)m_reservoirArray.GetSize();
    int numNonzeroReservoirs = 0;
 
@@ -6950,23 +6975,11 @@ double FlowModel::CalcTotH2OinReservoirs() // Returns m3 H2O
       Reservoir *pRes = m_reservoirArray[i];
       if (pRes!=NULL && pRes->m_in_use && pRes->m_volume > 0.f)
       {
-         totReservoirVol_m3 += pRes->m_volume;
+         totReservoirH2O_WP.MixIn(pRes->m_resWP); 
          numNonzeroReservoirs++;
       }
-/*
-      if (pRes != NULL)
-      {
-         CString msg; msg.Format("CalcTotH2OinReservoirs m_id = %d, m_volume = %f ", pRes->m_id, pRes->m_volume);
-         Report::LogMsg(msg);
-      }
-*/
    }
-   /*
-   CString msg;
-   msg.Format("FlowModel::CalcTotH2OinReservoirs() totReservoirVol_m3 = %lf, numNonzeroReservoirs = %d", totReservoirVol_m3, numNonzeroReservoirs);
-   Report::LogMsg(msg);
-   */
-   return(totReservoirVol_m3);
+   return(totReservoirH2O_WP);
 } // end of CalcTotH2OinReservoirs()
 
 
@@ -6987,8 +7000,8 @@ double FlowModel::CalcTotH2OinHRUs()
 double FlowModel::CalcTotH2O()
 {
    double totH2O_m3 = CalcTotH2OinHRUs();
-   totH2O_m3 += CalcTotH2OinReaches();
-   totH2O_m3 += CalcTotH2OinReservoirs();
+   totH2O_m3 += CalcTotH2OinReaches().m_volume_m3;
+   totH2O_m3 += CalcTotH2OinReservoirs().m_volume_m3;
 
    return(totH2O_m3);
 } // end of CalcTotH2O()
@@ -8370,7 +8383,9 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
          double flood_m3 = flood_cms * SEC_PER_DAY;
          double flood_c = 0; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_C, flood_c);
          WaterParcel floodWP(flood_m3, flood_c);
-         reach_in_runoffWP.Evaporate(flood_m3, floodWP.ThermalEnergy());
+         bool rtn_flag = reach_in_runoffWP.Evaporate(flood_m3, floodWP.ThermalEnergy());
+         if (!rtn_flag)
+            reach_in_runoffWP = WaterParcel(0, 0);
 
          double reach_in_runoff_cms = reach_in_runoffWP.m_volume_m3 / SEC_PER_DAY;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOFF, reach_in_runoff_cms);

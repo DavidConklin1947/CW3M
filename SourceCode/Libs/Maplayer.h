@@ -1199,6 +1199,7 @@ protected:
       m_colWETAVGDPTH(-1),
       m_colWETL_CAP(-1), 
       m_colWETL_ID(-1),
+      m_colWETL_VOL(-1),
       m_colWETL2Q(-1), 
       m_colWETLONGEST(-1),
       m_colWETNESS(-1),
@@ -1292,6 +1293,8 @@ public:
 #define WETL_CAP gIDUs->m_colWETL_CAP
    int m_colWETL_ID;
 #define WETL_ID gIDUs->m_colWETL_ID
+   int m_colWETL_VOL;
+#define WETL_VOL gIDUs->m_colWETL_VOL
    int m_colWETL2Q;
 #define WETL2Q gIDUs->m_colWETL2Q
    int m_colWETLONGEST;
@@ -1346,6 +1349,7 @@ public:
       ok = ok && CheckCol(m_colWETAVGDPTH, "WETAVGDPTH", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_ID, "WETL_ID", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWETL_VOL, "WETL_VOL", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETLONGEST, "WETLONGEST", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);

@@ -3391,7 +3391,7 @@ bool AltWaterMaster::EndStep(FlowContext *pFlowContext)
    rowDailyMetrics[10] = m_fromClackamasDy_m3_per_s;
    rowDailyMetrics[11] = m_fromLakeOswegoDy_m3_per_s;
 
-   float totH2OinReaches_m3 = (float)pFlowContext->pFlowModel->CalcTotH2OinReaches();
+   float totH2OinReaches_m3 = (float)pFlowContext->pFlowModel->CalcTotH2OinReaches().m_volume_m3;
    rowDailyMetrics[12] = totH2OinReaches_m3;
    rowDailyMetrics[13] = (float)num_of_IDUs_shut_off; // year-to-date, not just today
    rowDailyMetrics[14] = acreage_of_IDUs_shut_off; // year-to-date, not just today
