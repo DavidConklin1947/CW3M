@@ -6758,11 +6758,16 @@ bool FlowModel::EndYear( FlowContext *pFlowContext )
    row[ 6 ] = m_annualTotalSnowfall;
 
    m_pTotalFluxData->AppendRow( row, 7 );
-   
+
    CString msg;
-   msg.Format("*** FlowModel::EndYear() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f, m_totArea = %f",
-      CalcTotH2OinReaches(), CalcTotH2OinReservoirs(), CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
+   WaterParcel totH2OinReachesWP = CalcTotH2OinReaches();
+   WaterParcel totH2OinReservoirsWP = CalcTotH2OinReservoirs();
+   msg.Format("*** FlowModel::EndYear() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3, m_totArea = %f",
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
+      CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
    Report::LogMsg(msg);
+
 
    CArray< float, float > rowMetrics;
    rowMetrics.SetSize(10);

@@ -1185,9 +1185,14 @@ bool AltWaterMaster::Init(FlowContext *pFlowContext)
       pReach->m_availableDischarge = (pReach->GetReachDischargeWP()).m_volume_m3 / SEC_PER_DAY;
    }
 
-   msg.Format("*** AltWaterMaster::Init() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f",
-      pFlowContext->pFlowModel->CalcTotH2OinReaches(), pFlowContext->pFlowModel->CalcTotH2OinReservoirs(), pFlowContext->pFlowModel->CalcTotH2OinHRUs(), pFlowContext->pFlowModel->CalcTotH2O());
+   WaterParcel totH2OinReachesWP = pFlowContext->pFlowModel->CalcTotH2OinReaches();
+   WaterParcel totH2OinReservoirsWP = pFlowContext->pFlowModel->CalcTotH2OinReservoirs();
+   msg.Format("*** AltWaterMaster::Init() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3",
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
+      pFlowContext->pFlowModel->CalcTotH2OinHRUs(), pFlowContext->pFlowModel->CalcTotH2O());
    Report::LogMsg(msg);
+
 
    /*
    // Dump the POD array and the reach array.
@@ -1498,8 +1503,12 @@ bool AltWaterMaster::InitRun(FlowContext *pFlowContext)
    m_totH2OlastYr_m3 = pFlowContext->pFlowModel->CalcTotH2O();
 
    CString msg;
-   msg.Format("*** AltWaterMaster::InitRun() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f",
-      pFlowContext->pFlowModel->CalcTotH2OinReaches(), pFlowContext->pFlowModel->CalcTotH2OinReservoirs(), pFlowContext->pFlowModel->CalcTotH2OinHRUs(), pFlowContext->pFlowModel->CalcTotH2O());
+   WaterParcel totH2OinReachesWP = pFlowContext->pFlowModel->CalcTotH2OinReaches();
+   WaterParcel totH2OinReservoirsWP = pFlowContext->pFlowModel->CalcTotH2OinReservoirs();
+   msg.Format("*** AltWaterMaster::InitRun() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3",
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
+      pFlowContext->pFlowModel->CalcTotH2OinHRUs(), pFlowContext->pFlowModel->CalcTotH2O());
    Report::LogMsg(msg);
 
    return true;
@@ -3503,10 +3512,14 @@ bool AltWaterMaster::EndStep(FlowContext *pFlowContext)
          {
          m_totH2OlastYr_m3 = pFlowContext->pFlowModel->CalcTotH2O(); // Calculate starting water in the HRUs.
          CString msg;
-         msg.Format("*** AltWaterMaster::StartYear() yearOfRun 0: CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, CalcTotH2O() = %f",
-            pFlowContext->pFlowModel->CalcTotH2OinReaches(), pFlowContext->pFlowModel->CalcTotH2OinReservoirs(), pFlowContext->pFlowModel->CalcTotH2OinHRUs(), pFlowContext->pFlowModel->CalcTotH2O());
+         WaterParcel totH2OinReachesWP = pFlowContext->pFlowModel->CalcTotH2OinReaches();
+         WaterParcel totH2OinReservoirsWP = pFlowContext->pFlowModel->CalcTotH2OinReservoirs();
+         msg.Format("*** AltWaterMaster::StartYear() yearOfRun 0: CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3",
+            totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+            totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
+            pFlowContext->pFlowModel->CalcTotH2OinHRUs(), pFlowContext->pFlowModel->CalcTotH2O());
          Report::LogMsg(msg);
-         }
+      }
 
       if (m_dynamicWRType == 3 || m_dynamicWRType==4) for (MapLayer::Iterator idu = pLayer->Begin(); idu != pLayer->End(); idu++)
          {
@@ -3943,8 +3956,12 @@ bool AltWaterMaster::EndYear(FlowContext *pFlowContext)
    float tot_H2O_this_year_mm = (float)((m_totH2OlastYr_m3 / tot_area) * 1000.);
 
    CString msg;
-   msg.Format("*** AltWaterMaster::EndYear() CalcTotH2OinReaches() = %f, CalcTotH2OinReservoirs() = %f, CalcTotH2OinHRUs = %f, tot_H2O_this_year_mm = %f",
-      pFlowContext->pFlowModel->CalcTotH2OinReaches(), pFlowContext->pFlowModel->CalcTotH2OinReservoirs(), pFlowContext->pFlowModel->CalcTotH2OinHRUs(), tot_H2O_this_year_mm);
+   WaterParcel totH2OinReachesWP = pFlowContext->pFlowModel->CalcTotH2OinReaches();
+   WaterParcel totH2OinReservoirsWP = pFlowContext->pFlowModel->CalcTotH2OinReservoirs();
+   msg.Format("*** AltWaterMaster::EndYear() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3",
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
+      pFlowContext->pFlowModel->CalcTotH2OinHRUs(), pFlowContext->pFlowModel->CalcTotH2O());
    if (tot_H2O_this_year_mm != tot_H2O_this_year_mm) Report::ErrorMsg(msg); // Nan!
    else Report::LogMsg(msg);
 

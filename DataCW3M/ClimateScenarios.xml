@@ -81,7 +81,7 @@
       <climate type="windspd"  path="\WeatherOnPolygons\trunk\ActualWeather\WRB_idu_2000-latest\infews_vas"    var_name="vas"     />
     </climate_scenario>
 
-    <!-- Gridded recent actual weather used for demos - 2010-17 -->
+    <!-- Gridded recent actual weather used for demos - 2010-... -->
     <climate_scenario name="GriddedRecentWeatherForDemos" id="7" maxDaysInClimateYear="366"  firstYear="2010" lastYear="2020" NetCDF_row_0_location_N_or_S="N" >
       <climate type="precip"
                path="GriddedRecentWeather\UofIMETDATA_precipitation_amount_2010-2020.nc"
