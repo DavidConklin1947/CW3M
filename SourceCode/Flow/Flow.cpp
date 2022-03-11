@@ -4937,10 +4937,12 @@ bool FlowModel::InitializeSpinup() // Initialize all the state variables from de
       pHRU->SetAtt(HruH2OMELT_M3, 0.);
       pHRU->SetAtt(HruH2OSTNDGM3, 0.);
 
-      double nat_soil_h2o_mm = 1000. * pBox_nat_soil->m_volumeWater / pHRU->m_HRUtotArea_m2;
+      float area_irrig_m2 = pHRU->AttFloat(HruAREA_IRRIG);
+      float area_nat_soil_m2 = pHRU->m_HRUtotArea_m2 - area_irrig_m2;
+      double nat_soil_h2o_mm = area_nat_soil_m2 > 0 ? (1000. * pBox_nat_soil->m_volumeWater / area_nat_soil_m2) : 0;
       pHRU->SetAttFloat(HruNAT_SOIL, (float)nat_soil_h2o_mm);
 
-      double irrig_soil_h2o_mm = 1000. * pBox_irrig_soil->m_volumeWater / pHRU->m_HRUtotArea_m2;
+      double irrig_soil_h2o_mm = area_irrig_m2 > 0 ? (1000. * pBox_irrig_soil->m_volumeWater / area_irrig_m2) : 0;
       pHRU->SetAttFloat(HruIRRIG_SOIL, (float)irrig_soil_h2o_mm);
 
       pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pHRU->GetLayer(BOX_FAST_GW)->m_volumeWater / pHRU->m_HRUtotArea_m2));
@@ -5069,6 +5071,8 @@ bool FlowModel::ReadState()
       HRU* pHRU = m_hruArray[i];
       double hru_water_m3 = 0.;
 
+      float area_irrig_soil_m2 = pHRU->AttFloat(HruAREA_IRRIG);
+      float area_nat_soil_m2 = pHRU->m_HRUtotArea_m2 - area_irrig_soil_m2;
       for (int j = 0; j < hruLayerCount; j++)
       {
          HRULayer* pLayer = pHRU->GetLayer(j);
@@ -5082,8 +5086,23 @@ bool FlowModel::ReadState()
          {
             case BOX_SNOWPACK: pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
             case BOX_SURFACE_H2O: pHRU->SetAttFloat(HruBOXSURF_M3, (float)pLayer->m_volumeWater); break;
-            case BOX_NAT_SOIL: pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
-            case BOX_IRRIG_SOIL: pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
+
+            case BOX_NAT_SOIL: 
+            {   
+               ASSERT(area_nat_soil_m2 > 0 || pLayer->m_volumeWater == 0);
+               float nat_soil_mm = area_nat_soil_m2 > 0 ? ((float)(1000. * pLayer->m_volumeWater / area_nat_soil_m2)) : 0;
+               pHRU->SetAttFloat(HruNAT_SOIL, nat_soil_mm);
+            }
+            break;
+
+            case BOX_IRRIG_SOIL: 
+            {
+               ASSERT(area_irrig_soil_m2 > 0 || pLayer->m_volumeWater == 0);
+               float irrig_soil_mm = area_irrig_soil_m2 > 0 ? ((float)(1000. * pLayer->m_volumeWater / area_irrig_soil_m2)) : 0;
+               pHRU->SetAttFloat(HruIRRIG_SOIL, irrig_soil_mm);
+            }
+            break;
+            
             case BOX_FAST_GW: pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
             case BOX_SLOW_GW: pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pLayer->m_volumeWater / pHRU->m_HRUtotArea_m2)); break;
          }
@@ -5331,7 +5350,7 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
    pHRU->SetAtt(HruH2OMELT_M3, hru_H2OMELT_M3);
    pHRU->SetAtt(HruH2OSTNDGM3, hru_H2OSTNDGM3);
    pHRU->SetAtt(HruNAT_SOIL, hru_topsoil_h2o_mm);
-   pHRU->SetAtt(HruIRRIG_SOIL, 0.);
+   pHRU->SetAtt(HruIRRIG_SOIL, 0.); ASSERT(pHRU->m_areaIrrigated == 0);
 
    // Finally, update the SNOW_SWE, WETNESS, H2O_MELT, and SM_DAY attributes for the IDUs in the HRU.
    for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
@@ -5555,7 +5574,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          pHRU->SetAttFloat(HruNAT_SOIL, (float)nat_soil_h2o_mm);
 
          double irrig_soil_h2o_mm = hru_irrigated_area_m2 > 0 ? (1000. * pBox_irrig_soil->m_volumeWater / hru_irrigated_area_m2) : 0.;
-         pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pBox_irrig_soil->m_volumeWater / pHRU->m_HRUtotArea_m2));
+         pHRU->SetAttFloat(HruIRRIG_SOIL, (float)irrig_soil_h2o_mm);
 
          pHRU->SetAttFloat(HruGW_FASTBOX, (float)(1000. * pBox_fast_gw->m_volumeWater / pHRU->m_HRUtotArea_m2));
          pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pBox_slow_gw->m_volumeWater / pHRU->m_HRUtotArea_m2));
@@ -5935,7 +5954,7 @@ double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
 
       double idu_area_m2 = gFlowModel->Att(idu_ndx, AREA);
 // ???         double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
-      double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
+      double idu_room_m3 = ((wetl_cap_mm - wetness_mm) / 1000.) * idu_area_m2;
       double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
       double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
 
@@ -5954,9 +5973,15 @@ double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
          double to_this_idu_soil_mm = (to_this_idu_soil_m3 / idu_area_m2) * 1000.;
          HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
          pBOX_NAT_SOIL->AddFluxFromGlobalHandler((float)(-to_this_idu_soil_m3), FL_SINK);
-         double hru_NAT_SOIL_mm = pHRU->AttFloat(HruNAT_SOIL);
-         hru_NAT_SOIL_mm += to_this_idu_soil_mm;
-         pHRU->SetAttFloat(HruNAT_SOIL, (float)hru_NAT_SOIL_mm);
+         double hru_nat_soil_mm = pHRU->AttFloat(HruNAT_SOIL);
+         float hru_area_m2 = pHRU->AttFloat(HruAREA_M2);
+         float hru_area_irrig_m2 = pHRU->AttFloat(HruAREA_IRRIG);
+         double hru_area_nat_soil_m2 = hru_area_m2 - hru_area_irrig_m2;
+         double hru_nat_soil_m3 = (hru_nat_soil_mm / 1000) * hru_area_nat_soil_m2;
+         hru_nat_soil_m3 += to_this_idu_soil_m3;
+         ASSERT(hru_area_nat_soil_m2 > 0);
+         hru_nat_soil_mm = hru_area_nat_soil_m2 > 0 ? (1000 * (hru_nat_soil_m3 / hru_area_nat_soil_m2)) : 0;
+         pHRU->SetAttFloat(HruNAT_SOIL, (float)hru_nat_soil_mm);
 
          if (idu_room_in_soil_m3 >= to_this_idu_soil_m3)
             new_wetness_mm = -(-wetness_mm - to_this_idu_soil_mm);
@@ -6378,6 +6403,7 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
                   targetIrrigatedArea += area * pHRU->m_frc_naturl;
                }
             if (targetIrrigatedArea > pHRU->m_HRUeffArea_m2) targetIrrigatedArea = pHRU->m_HRUeffArea_m2;
+            double targetNonIrrigatedArea = pHRU->m_HRUeffArea_m2 - targetIrrigatedArea;
             pHRU->GetLayer(BOX_IRRIG_SOIL)->m_HRUareaFraction = (float)(targetIrrigatedArea / pHRU->m_HRUeffArea_m2); 
             pHRU->GetLayer(BOX_NAT_SOIL)->m_HRUareaFraction = 1.f - pHRU->GetLayer(BOX_IRRIG_SOIL)->m_HRUareaFraction;
             if (pHRU->GetLayer(BOX_NAT_SOIL)->m_HRUareaFraction < 0.f) pHRU->GetLayer(BOX_NAT_SOIL)->m_HRUareaFraction = 0.f;
@@ -6388,17 +6414,19 @@ bool FlowModel::StartYear( FlowContext *pFlowContext )
             // to reflect this year's decisions about which IDUs to irrigate (the output of the irrigation decision model).            if (pFlowContext->pEnvContext->yearOfRun <= 0)
             float totWater = irrigatedVolume + nonIrrigatedVolume;
 
-            double layer2_volumeWater = pHRU->GetLayer(BOX_NAT_SOIL)->m_HRUareaFraction * totWater;
-            pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater = layer2_volumeWater; 
-            pHRU->SetAttFloat(HruNAT_SOIL, (float)(1000. * pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-
-            pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater = pHRU->GetLayer(BOX_IRRIG_SOIL)->m_HRUareaFraction * totWater;
-            pHRU->SetAttFloat(HruIRRIG_SOIL, (float)(1000. * pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater / pHRU->m_HRUtotArea_m2));
-
             pHRU->m_areaIrrigated = targetIrrigatedArea;
             pHRU->m_fracIrrigated = targetIrrigatedArea / pHRU->m_HRUtotArea_m2;
             m_pHRUlayer->SetDataU(h, m_colHruAREA_IRRIG, pHRU->m_areaIrrigated);
-            } // end of loop thru HRUs
+
+            double layer2_volumeWater = pHRU->GetLayer(BOX_NAT_SOIL)->m_HRUareaFraction * totWater;
+            pHRU->GetLayer(BOX_NAT_SOIL)->m_volumeWater = layer2_volumeWater; 
+            double nat_soil_mm = targetNonIrrigatedArea > 0 ? (1000 * layer2_volumeWater / targetNonIrrigatedArea) : 0;
+            pHRU->SetAttFloat(HruNAT_SOIL, (float)nat_soil_mm);
+
+            pHRU->GetLayer(BOX_IRRIG_SOIL)->m_volumeWater = pHRU->GetLayer(BOX_IRRIG_SOIL)->m_HRUareaFraction * totWater;
+            double irrig_mm = targetIrrigatedArea > 0 ? (1000 * layer2_volumeWater / targetIrrigatedArea) : 0;
+            pHRU->SetAttFloat(HruIRRIG_SOIL, (float)irrig_mm);
+         } // end of loop thru HRUs
          } // end of if (label[0] == name[0])
       } // end of if (m_hruLayerNames.GetSize()>3)
 

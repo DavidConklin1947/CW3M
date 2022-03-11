@@ -535,9 +535,11 @@ x*/
             } // end of switch on soil layer
 
          float trial_ending_layer_m3 = (float)(pHRULayer->m_volumeWater + pHRULayer->GetFluxValue());
-         if (trial_ending_layer_m3 < 0.f)
+         if (trial_ending_layer_m3 < 0.f && !close_enough(trial_ending_layer_m3, 0., 1e-4, 1.))
          {
-            ASSERT(close_enough(trial_ending_layer_m3, 0., 1e-4, 1.));
+            CString msg;
+            msg.Format("HBVdailyProcess() pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f", pHRULayer->m_layer, trial_ending_layer_m3);
+            Report::WarningMsg(msg);
          }
 
          } // end of loop thru the soil layers

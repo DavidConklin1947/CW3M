@@ -96,6 +96,8 @@ using namespace std;
 
 #define BEERS_LAW_K 0.5
 
+#define HruAREA_IRRIG gFlowModel->m_colHruAREA_IRRIG
+#define HruAREA_M2 gFlowModel->m_colHruAREA_M2
 #define HruCOMID gFlowModel->m_colHruCOMID
 #define HruFIELD_CAP gFlowModel->m_colHruFIELD_CAP
 #define HruGW_FASTBOX gFlowModel->m_colHruGW_FASTBOX

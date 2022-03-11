@@ -312,6 +312,32 @@
       <output in_use="1" name="ET from HBVCALIB 16 McKenzie outlet m3" query="HBVCALIB=16" value="ET_DAY*Area/1000" type="sum" domain="idu" />
     </output_group>
 
+    <output_group name="FLOW Wetland 10 Analysis" daily="y"  monthly="y" yearly="y" >
+      <output name="Water in reach 23772737 m3" query="COMID=23772737" value="REACH_H2O" type="sum" domain="reach" />
+      <output name="Surface water in wetland m3" query="WETL_ID=10" value="WETL_VOL" type="sum" domain="idu" />
+      <output name="From upstream 23772739 Q_DISCHARG m3" query="COMID=23772739" value="Q_DISCHARG*86400" type="sum" domain="reach" />
+      <output name="lateral inflow IN_RUNOFF m3" query="COMID=23772737" value="IN_RUNOFF*86400" type="sum" domain="reach" />
+      <output name="FLOOD m3" query="COMID=23772737" value="FLOOD_CMS*86400" type="sum" domain="reach" />
+      <output name="WETL2Q m3" query="COMID=23772737" value="WETL2Q*86400" type="sum" domain="idu" />
+      <output name="water from springs m3" query="COMID=23772737" value="SPRING_CMS*86400" type="sum" domain="reach" />
+      <output name="water into reach 23772737 except WETL2Q and from upstream (m3)" query="COMID=23773737" value="86400*(IN_RUNOFF+FLOOD_CMS+SPRING_CMS+ADDED_Q)+ADDED_VOL" type="sum" domain="reach" />
+      <output name="To downstream from 23772737 Q_DISCHARG m3" query="COMID=23772737" value="86400*Q_DISCHARG" type="sum" domain="reach" />
+      <output name="OUT_LATERL m3" query="COMID=23772737" value="OUT_LATERL*86400" type="sum" domain="reach" />
+      <output name="Q2WETL m3" query="COMID=23772737" value="Q2WETL*86400" type="sum" domain="reach" />
+      <output name="evaporation from reach 23772737 m3" query="COMID=23772737" value="EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output name="Wetland ET_DAY m3" query="WETL_ID=10" value="ET_DAY*AREA/1000" type="sum" domain="idu" />
+      <output name="OUT_MUNI (m3 H2O)" query="COMID=23772737" value="OUT_MUNI*86400" type="sum" domain="reach" />
+      <output name="OUT_IRRIG (m3 H2O)" query="COMID=23772737" value="OUT_IRRIG*86400" type="sum" domain="reach" />
+      <output name="water out of reach 23772737 m3" query="COMID=23772737" value="86400*(Q_DISCHARG+OUT_LATERL+Q2WETL+OUT_MUNI+OUT_IRRIG)+EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
+      <output name="surface water out of wetland except FLOOD and infiltration m3" query="WETL_ID=10" value="86400*WETL2Q+ET_DAY*AREA/1000" type="sum" domain="idu" />
+      <output name="PRECIP (mm H2O) average daily precipitation" query="HRU_ID=2033" value="PRECIP" type="areaWtMean" domain="hru" />
+      <output name="TEMP (degC) average daily temperature" query="WETL_ID=10" value="TEMP" type="areaWtMean" domain="idu" />
+      <output name="ADDED_VOL m3" query="COMID=23772737" value="ADDED_VOL" type="sum" domain="reach" />
+      <output name="ADDED_Q m3" query="COMID=23772737" value="ADDED_Q*86400" type="sum" domain="reach" />
+      <output name="WETNESS for IDU 33827 mm" query="IDU_ID=33827" value="WETNESS" type="sum" domain="idu" />
+      <output name="WETNESS for IDU 33807 mm" query="IDU_ID=33807" value="WETNESS" type="sum" domain="idu" />
+    </output_group>
+
     <output_group name="FLOW McKenzie Thermal Energy Budget for streams" daily="y" monthly="y" yearly="y" >
       <output name="total water in streams and reservoirs m3" query="1" value="REACH_H2O+RES_H2O" type="sum" domain="reach" />
       <output name="total incoming water m3" query="1" value="ADDED_VOL+86400*(IN_RUNOFF+SPRING_CMS+ADDED_Q)" type="sum" domain="reach" />
