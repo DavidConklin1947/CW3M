@@ -5649,10 +5649,13 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          if (hru_h2o_melt_m3 < 0.)
          {
             if (surface_h2o_m3 == 0 || hru_standing_h2o_m3 == 0)
-               ASSERT(close_enough(abs(hru_h2o_melt_m3), 0, 0.001, 0.1));
+               ASSERT(close_enough(abs(hru_h2o_melt_m3), 0, 0.001, 1.0));
             else
-            {
-               ASSERT(close_enough(surface_h2o_m3, hru_standing_h2o_m3, 1e-5, 1));
+            { // Meltwater, which is the difference between surface_h2o_m3 (= pBox_surface_h2o->m_volumeWater) and hru_standing_h2o_m3, 
+               // when it is negative should be a tiny fraction of hru_standing_h2o_m3 arising from roundoff.
+               ASSERT(surface_h2o_m3 > 0);
+               double fraction = hru_h2o_melt_m3 / surface_h2o_m3;
+               ASSERT(close_enough(fraction, 0, 1e-3, 1e-3));
             }
             hru_h2o_melt_m3 = 0.;
          }
