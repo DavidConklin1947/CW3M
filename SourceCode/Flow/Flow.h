@@ -363,8 +363,11 @@ protected:
 
 // a FluxContainer is a object (e.g. HRU, Reach) that can contain fluxes. 
 class FluxContainer
-   // Somewhat counterintuitively, negative fluxes represent quantities going into the flux container,
-   // and positive fluxes represent fluxes coming out of the flux container.
+   // 3/14/22 It seems that m_globalHandlerFluxValue values < 0 actually represent material leaving the container, after all.
+   // Confusion arises because of the use of symbols like FL_BOTTOM_SINK which cause AddFluxFromGlobalHandler() to flip 
+   // the sign of the flux before adding it to m_globalHandlerFluxValue.
+   // Prior to 3/14/22 I had commented "Somewhat counterintuitively, negative fluxes represent quantities going into the flux container,
+   // and positive fluxes represent fluxes coming out of the flux container."  This confusion may manifest in other places in the code.
 {
    friend class FlowModel;
 

@@ -3764,7 +3764,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                      if (change_in_surface_h2o_m3 > 0.) 
                         pHRULayer->AddFluxFromGlobalHandler((float)change_in_surface_h2o_m3, FL_TOP_SOURCE);    
                      else 
-                        pHRULayer->AddFluxFromGlobalHandler(-(float)change_in_surface_h2o_m3, FL_BOTTOM_SINK);    
+                        pHRULayer->AddFluxFromGlobalHandler((float)change_in_surface_h2o_m3, FL_BOTTOM_SINK);
                   }
 
                   double new_topsoil_h2o_mm = tgt_idu_fc_mm - ((wetness_mm < 0.) ? wetness_mm : 0.);

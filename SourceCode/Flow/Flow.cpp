@@ -5644,10 +5644,16 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             WaterParcel wetl2qWP(wetl2q_accum_m3, reach_degC);
             pReach->AccumAdditions(wetl2qWP);
          }
+
          double hru_h2o_melt_m3 = surface_h2o_m3 - hru_standing_h2o_m3;
          if (hru_h2o_melt_m3 < 0.)
          {
-            ASSERT(close_enough(surface_h2o_m3, hru_standing_h2o_m3, 1e-5, 1));
+            if (surface_h2o_m3 == 0 || hru_standing_h2o_m3 == 0)
+               ASSERT(close_enough(abs(hru_h2o_melt_m3), 0, 0.001, 0.1));
+            else
+            {
+               ASSERT(close_enough(surface_h2o_m3, hru_standing_h2o_m3, 1e-5, 1));
+            }
             hru_h2o_melt_m3 = 0.;
          }
          pHRU->SetAtt(HruH2OMELT_M3, hru_h2o_melt_m3);

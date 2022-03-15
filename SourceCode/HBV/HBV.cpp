@@ -188,6 +188,11 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       // Here total snowpack SWE = water_in_snowpack_mm + snow_in_snowpack_mmSWE
       HRULayer* pHRULayer0 = pHRU->GetLayer(BOX_SNOWPACK);
       float snow_in_snowpack_m3SWE = (float)pHRULayer0->m_volumeWater;
+      if (pHRULayer0->GetFluxValue() != 0)
+      { // This can happen on Jan 1 if an IDU with snow has been converted to a wetland IDU by RunPrescribedLULCs().
+         float layer0_flux_value_m3SWE = pHRULayer0->GetFluxValue();
+         snow_in_snowpack_m3SWE += layer0_flux_value_m3SWE;
+      }
       float snow_in_snowpack_mmSWE = (float)(((snow_in_snowpack_m3SWE / non_wetl_area_m2) * 1000.f > 0.0f) ? (snow_in_snowpack_m3SWE / non_wetl_area_m2) * 1000.f : 0.0f);
       HRULayer *pHRULayer1 = pHRU->GetLayer(BOX_SURFACE_H2O);
       int num_idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize();
@@ -538,7 +543,8 @@ x*/
          if (trial_ending_layer_m3 < 0.f && !close_enough(trial_ending_layer_m3, 0., 1e-4, 1.))
          {
             CString msg;
-            msg.Format("HBVdailyProcess() pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f", pHRULayer->m_layer, trial_ending_layer_m3);
+            msg.Format("HBVdailyProcess() pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f, m_volumeWater = %f, GetFluxValue() = %f", 
+               pHRULayer->m_layer, trial_ending_layer_m3, pHRULayer->m_volumeWater, pHRULayer->GetFluxValue());
             Report::WarningMsg(msg);
          }
 
