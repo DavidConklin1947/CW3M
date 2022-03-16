@@ -8419,8 +8419,25 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
          { // Spring water is tracked separately in the reach attributes SPRING_CMS and SPRINGTEMP, so remove it before storing reach_in_runoffWP to IN_RUNOFF and IN_RUNOF_C.
             float springtemp_degC = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachSPRINGTEMP, springtemp_degC);
             WaterParcel springWP((double)spring_cms * SEC_PER_DAY, springtemp_degC);
-            bool rtn_flag = reach_in_runoffWP.Evaporate((double)spring_cms * SEC_PER_DAY, springWP.ThermalEnergy()); // Remove spring water from the accumulation of pNode->m_runoffWP.
-            if (!rtn_flag) reach_in_runoffWP = WaterParcel(0, 0);
+            int evap_code = reach_in_runoffWP.Evaporate((double)spring_cms * SEC_PER_DAY, springWP.ThermalEnergy()); // Remove spring water from reach_in_runoffWP..
+            switch (evap_code)
+            {
+               case -1: // temperature of WaterParcel after evaporation is > NOMINAL_MAX_WATER_TEMP_DEGC
+               {
+                  CString msg; 
+                  msg.Format("WriteDataToMap()1 reach_in_runoffWP.m_temp_degC = %f", reach_in_runoffWP.m_temp_degC);
+                  Report::LogWarning(msg);
+               }
+               break;
+
+               case -2:
+               case -3:
+                  reach_in_runoffWP = WaterParcel(0, 0);
+                  break;
+
+               default:
+                  break;
+            }
          }
 
          // Separate out flood water from normal runoff.
@@ -8428,9 +8445,25 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
          double flood_m3 = flood_cms * SEC_PER_DAY;
          double flood_c = 0; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_C, flood_c);
          WaterParcel floodWP(flood_m3, flood_c);
-         bool rtn_flag = reach_in_runoffWP.Evaporate(flood_m3, floodWP.ThermalEnergy());
-         if (!rtn_flag)
-            reach_in_runoffWP = WaterParcel(0, 0);
+         int evap_code = reach_in_runoffWP.Evaporate(flood_m3, floodWP.ThermalEnergy()); // Remove flood water from reach_in_runoffWP.
+         switch (evap_code)
+         {
+            case -1: // temperature of WaterParcel after evaporation is > NOMINAL_MAX_WATER_TEMP_DEGC
+            {
+               CString msg;
+               msg.Format("WriteDataToMap()2 reach_in_runoffWP.m_temp_degC = %f", reach_in_runoffWP.m_temp_degC);
+               Report::LogWarning(msg);
+            }
+            break;
+
+            case -2:
+            case -3:
+               reach_in_runoffWP = WaterParcel(0, 0);
+               break;
+
+            default:
+               break;
+         }
 
          double reach_in_runoff_cms = reach_in_runoffWP.m_volume_m3 / SEC_PER_DAY;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOFF, reach_in_runoff_cms);

@@ -77,6 +77,7 @@ using namespace std;
 #define NOMINAL_LOW_FLOW_CMS 0.001 /* 1 liter of water per sec */
 #define NOMINAL_LOW_WATER_LITERS_PER_METER 1 /* one liter of water per meter of stream length*/
 #define NOMINAL_MINIMUM_SOIL_WATER_CONTENT 0.001 /* 1 mm of water content per meter of soil depth*/
+#define NOMINAL_MINIMUM_WATER_DEPTH_MM 50 /* Less than this depth may lead to drying up in less than one day. */
 #define LITERS_PER_M3 1000
 #define DEFAULT_REACH_H2O_TEMP_DEGC 8.f
 #define DEFAULT_SOIL_H2O_TEMP_DEGC 5.f
