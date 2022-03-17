@@ -540,7 +540,9 @@ x*/
             } // end of switch on soil layer
 
          float trial_ending_layer_m3 = (float)(pHRULayer->m_volumeWater + pHRULayer->GetFluxValue());
-         if (trial_ending_layer_m3 < 0.f && !close_enough(trial_ending_layer_m3, 0., 1e-4, 1.))
+ //x        if (trial_ending_layer_m3 < 0.f && !close_enough(trial_ending_layer_m3, 0., 1e-4, 1.))
+         if (trial_ending_layer_m3 < 0.f && -trial_ending_layer_m3 > 10. 
+            && !close_enough(pHRULayer->m_volumeWater, -(pHRULayer->GetFluxValue()), 1e-4, 1.))
          {
             CString msg;
             msg.Format("HBVdailyProcess() pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f, m_volumeWater = %f, GetFluxValue() = %f", 
