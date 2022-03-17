@@ -555,7 +555,7 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
       // At cold temperatures, there won't be much evaporation anyway, so we'll just ignore it.
       evap_code = 2;
       CString msg;
-      msg.Format("ApplyEnergyFluxes() Evaporate all the water. evap_kJ = %f, rtnWP.ThermalEnergy() = %f rtnWP.m_temp_degC = %f, evap_m3 = %f, "
+      msg.Format("ApplyEnergyFluxes()1 Evaporate all the water. evap_kJ = %f, rtnWP.ThermalEnergy() = %f rtnWP.m_temp_degC = %f, evap_m3 = %f, "
          "rtnWP.m_volume_m3 = %f, airTemp_degC = %f, evap_code = %d",
          evap_kJ, rtnWP.ThermalEnergy(), rtnWP.m_temp_degC, evap_m3, rtnWP.m_volume_m3, airTemp_degC, evap_code);
       Report::LogMsg(msg);
@@ -567,7 +567,7 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
    { // Evaporate all the water.
       evap_code = 3;
       CString msg;
-      msg.Format("ApplyEnergyFluxes() Evaporate all the water. evap_kJ = %f, rtnWP.ThermalEnergy() = %f rtnWP.m_temp_degC = %f, evap_m3 = %f, "
+      msg.Format("ApplyEnergyFluxes()2 Evaporate all the water. evap_kJ = %f, rtnWP.ThermalEnergy() = %f rtnWP.m_temp_degC = %f, evap_m3 = %f, "
          "rtnWP.m_volume_m3 = %f, airTemp_degC = %f, evap_code = %d",
          evap_kJ, rtnWP.ThermalEnergy(), rtnWP.m_temp_degC, evap_m3, rtnWP.m_volume_m3, airTemp_degC, evap_code);
       Report::LogMsg(msg);
@@ -581,9 +581,9 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
       if (evap_code != 0)
       {
          CString msg;
-         msg.Format("ApplyEnergyFluxes() evap_code is non-zero. evap_code = %d, rtnWP = (%f, %f), evap_m3 = %f, evap_kJ = %f",
+         msg.Format("ApplyEnergyFluxes()3 evap_code is non-zero. evap_code = %d, rtnWP = (%f, %f), evap_m3 = %f, evap_kJ = %f",
             evap_code, rtnWP.m_volume_m3, rtnWP.m_temp_degC, evap_m3, evap_kJ);
-         Report::WarningMsg(msg);
+         Report::LogWarning(msg);
       }
    }
 
@@ -618,13 +618,13 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
    { // The water is gaining energy from the atmosphere.
       double thermal_energy_kJ = rtnWP.ThermalEnergy() + net_rad_kJ;
       rtnWP.m_temp_degC = WaterParcel::WaterTemperature(rtnWP.m_volume_m3, thermal_energy_kJ);
-      if (rtnWP.m_temp_degC > NOMINAL_MAX_WATER_TEMP_DEGC)
+      if (rtnWP.m_temp_degC > NOMINAL_MAX_WATER_TEMP_DEGC + 5)
       {
          double net_rad_W_m2 = ((net_rad_kJ * 1000) / SEC_PER_DAY) / H2Oarea_m2;
          double sw_W_m2 = ((sw_kJ * 1000) / SEC_PER_DAY) / H2Oarea_m2;
          double lw_W_m2 = ((lw_kJ * 1000) / SEC_PER_DAY) / H2Oarea_m2;
          CString msg;
-         msg.Format("ApplyEnergyFluxes() m_temp_degC is > NOMINAL_MAX_WATER_TEMP_DEGC. rtnWP = (%f, %f), net_rad_kJ = %f, sw_kJ = %f, lw_kJ = %f, origWP = (%f, %f), airTemp_degC =%f, "
+         msg.Format("ApplyEnergyFluxes()4 m_temp_degC is > NOMINAL_MAX_WATER_TEMP_DEGC + 5. rtnWP = (%f, %f), net_rad_kJ = %f, sw_kJ = %f, lw_kJ = %f, origWP = (%f, %f), airTemp_degC =%f, "
             "net_rad_W_m2 = %f, sw_W_m2 = %f, lw_W_m2 = %f, evap_m_s = %f, evap_m3 = %f, evap_code = %d",
             rtnWP.m_volume_m3, rtnWP.m_temp_degC, net_rad_kJ, sw_kJ, lw_kJ, origWP.m_volume_m3, origWP.m_temp_degC, airTemp_degC, net_rad_W_m2, sw_W_m2, lw_W_m2, evap_m_s, evap_m3, evap_code);
          Report::WarningMsg(msg);
@@ -634,19 +634,19 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
             double evap_m_s = Reach::Evap_m_s(origWP.WaterTemperature(), rad_sw_net_W_m2, net_lw_out_W_m2, airTemp_degC, windspeed_m_sec, spHumidity);
             double evap_m3 = evap_m_s * H2Oarea_m2 * SEC_PER_DAY;
             CString msg;
-            msg.Format("ApplyEnergyFluxes() evap_m_s = %f, evap_m3 = %f", evap_m_s, evap_m3);
+            msg.Format("ApplyEnergyFluxes()5 evap_m_s = %f, evap_m3 = %f", evap_m_s, evap_m3);
             Report::WarningMsg(msg);
          }
       }
    }
 
    ASSERT(rtnWP.m_temp_degC >= 0);
-   if (rtnWP.m_temp_degC >= NOMINAL_MAX_WATER_TEMP_DEGC)
+   if (rtnWP.m_temp_degC >= NOMINAL_MAX_WATER_TEMP_DEGC + 5)
    {
       double orig_depth_mm = 1000 * (origWP.m_volume_m3 / H2Oarea_m2);
       double rtn_depth_mm = 1000 * (rtnWP.m_volume_m3 / H2Oarea_m2);
       CString msg;
-      msg.Format("ReachRouting::ApplyEnergyFluxes() rtnWP.m_temp_degC = %f, orig_depth_mm = %f, rtn_depth_mm = %f, "
+      msg.Format("ReachRouting::ApplyEnergyFluxes()6 rtnWP.m_temp_degC = %f, orig_depth_mm = %f, rtn_depth_mm = %f, "
          "origWP = (%f, %f), rtnWP = (%f, %f), H2Oarea_m2 = %f, netSW_W_m2 = %f, H2Otemp_degC = %f, airTemp_degC = %f",
          rtnWP.m_temp_degC, orig_depth_mm, rtn_depth_mm,
          origWP.m_volume_m3, origWP.m_temp_degC, rtnWP.m_volume_m3, rtnWP.m_temp_degC, H2Oarea_m2, netSW_W_m2, H2Otemp_degC, airTemp_degC);
