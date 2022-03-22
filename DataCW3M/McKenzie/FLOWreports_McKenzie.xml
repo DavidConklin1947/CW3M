@@ -320,7 +320,7 @@
       <output name="FLOOD m3" query="COMID=23772737" value="FLOOD_CMS*86400" type="sum" domain="reach" />
       <output name="WETL2Q m3" query="COMID=23772737" value="WETL2Q*86400" type="sum" domain="idu" />
       <output name="water from springs m3" query="COMID=23772737" value="SPRING_CMS*86400" type="sum" domain="reach" />
-      <output name="water into reach 23772737 except WETL2Q and from upstream (m3)" query="COMID=23773737" value="86400*(IN_RUNOFF+FLOOD_CMS+SPRING_CMS+ADDED_Q)+ADDED_VOL" type="sum" domain="reach" />
+      <output name="water into reach 23772737 except WETL2Q and from upstream (m3)" query="COMID=23772737" value="86400*(IN_RUNOFF+FLOOD_CMS+SPRING_CMS+ADDED_Q)+ADDED_VOL" type="sum" domain="reach" />
       <output name="To downstream from 23772737 Q_DISCHARG m3" query="COMID=23772737" value="86400*Q_DISCHARG" type="sum" domain="reach" />
       <output name="OUT_LATERL m3" query="COMID=23772737" value="OUT_LATERL*86400" type="sum" domain="reach" />
       <output name="Q2WETL m3" query="COMID=23772737" value="Q2WETL*86400" type="sum" domain="reach" />
@@ -341,7 +341,7 @@
     <output_group name="FLOW McKenzie Thermal Energy Budget for streams" daily="y" monthly="y" yearly="y" >
       <output name="total water in streams and reservoirs m3" query="1" value="REACH_H2O+RES_H2O" type="sum" domain="reach" />
       <output name="total incoming water m3" query="1" value="ADDED_VOL+86400*(IN_RUNOFF+SPRING_CMS+ADDED_Q)" type="sum" domain="reach" />
-      <output name="total outgoing water except basin discharge m3" query="1" value="(EVAP_MM*AREA_H2O/1000)+(RES_EVAPMM*RESAREA_HA*10000/1000)+86400*(OUT_MUNI+OUT_IRRIG)" type="sum" domain="reach" />
+      <output name="total outgoing water except basin discharge m3" query="1" value="(EVAP_MM*AREA_H2O/1000)+(RES_EVAPMM*RESAREA_HA*10000/1000)+86400*(OUT_MUNI+OUT_IRRIG+OUT_LATERL+Q2WETL)" type="sum" domain="reach" />
       <output name="total thermal energy MJ" query="1" value="(TEMP_H2O*REACH_H2O+RES_TEMP*RES_H2O)*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="total incoming energy MJ" query="1" 
               value="0.9982*4.187*(86400*(IN_RUNOF_C*IN_RUNOFF+SPRINGTEMP*SPRING_CMS)+ADDEDVOL_C*ADDED_VOL)+(AREA_H2O*RAD_SW_IN+RESAREA_HA*10000*RES_SW_IN)*86400/1000000" 
