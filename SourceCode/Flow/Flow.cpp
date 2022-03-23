@@ -8440,30 +8440,9 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
             }
          }
 
-         // Separate out flood water from normal runoff.
-         double flood_cms = 0; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_CMS, flood_cms);
-         double flood_m3 = flood_cms * SEC_PER_DAY;
-         double flood_c = 0; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_C, flood_c);
-         WaterParcel floodWP(flood_m3, flood_c);
-         int evap_code = reach_in_runoffWP.Evaporate(flood_m3, floodWP.ThermalEnergy()); // Remove flood water from reach_in_runoffWP.
-         switch (evap_code)
-         {
-            case -1: // temperature of WaterParcel after evaporation is > NOMINAL_MAX_WATER_TEMP_DEGC
-            {
-               CString msg;
-               msg.Format("WriteDataToMap()2 reach_in_runoffWP.m_temp_degC = %f", reach_in_runoffWP.m_temp_degC);
-               Report::LogWarning(msg);
-            }
-            break;
-
-            case -2:
-            case -3:
-               reach_in_runoffWP = WaterParcel(0, 0);
-               break;
-
-            default:
-               break;
-         }
+         // It is not necessary to separate out flood water from normal runoff because at this point
+         // the flood water is in m_globalHandlerFluxValue.  It hasn't gotten to pNode->m_runoffWP yet
+         // because ApplyQ2WETL() runs after ReachRouting::Step().
 
          double reach_in_runoff_cms = reach_in_runoffWP.m_volume_m3 / SEC_PER_DAY;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOFF, reach_in_runoff_cms);
