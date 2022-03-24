@@ -13610,3 +13610,8 @@ BOOL PourPointDlg::OnInitDialog()
    }
 #endif //NO_MFC
 
+
+void IDUlayer::SetAttCol(int col, double attValue)
+{
+   for (MapLayer::Iterator i = Begin(); i != End(); i++) SetAtt(i, col, attValue);
+} // end of IDUlayer::SetAttCol()

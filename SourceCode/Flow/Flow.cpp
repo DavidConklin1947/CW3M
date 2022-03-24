@@ -3462,7 +3462,7 @@ bool FlowModel::Init( EnvContext *pEnvContext )
 
    m_pCatchmentLayer->SetColData( m_colMAXSNOW,        0.0f, true );
    m_pCatchmentLayer->SetColData( m_colHruApr1SWE,       0.0f, true );
-   m_pCatchmentLayer->SetColData( m_colHruApr1SWE10Yr,   0.0f, true );
+   m_pCatchmentLayer->SetColData(m_colHruApr1SWE10Yr, 0.0f, true);
 
    Report::LogMsg( "Flow: Initializing reaches/catchments/reservoirs/control points" );
 
@@ -3999,6 +3999,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pIDUlayer->SetColDataU(m_colSNOWCANOPY, 0.f);
    m_pIDUlayer->SetColDataU(m_colSM2ATM, 0);
    m_pIDUlayer->SetColDataU(m_colWETL2Q, 0);
+   m_pIDUlayer->SetAttZero(FLOODDEPTH);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOFF, 0);
    m_pReachLayer->SetColDataU(m_colReachIN_RUNOF_C, 0);
    m_pReachLayer->SetColDataU(m_colReachOUT_LATERL, 0);
@@ -5625,6 +5626,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             } // end of if (wetness_mm > 0.)
 
             SetAtt(idu_poly_ndx, WETL2Q, idu_wetl2q_cms);
+            SetAtt(idu_poly_ndx, FLOODDEPTH, 0.);
          } // end of loop thru IDUs for this HRU
          ASSERT(!pHRU->m_standingH2Oflag || hru_standing_h2o_area_m2 > 0.);
 
@@ -5902,7 +5904,7 @@ bool FlowModel::ApplyQ2WETL()
          reach_remaining_cms = reach_remaining_m3 / SEC_PER_DAY;
          remaining_cms_array.Add(reach_remaining_cms);
       } // end of loop thru the IDUs which make up this wetland
-
+/*x
       // Return any remaining water to the reaches from which it came.
       ASSERT(remaining_cms_array.GetSize() == num_idus_in_wetl);
       for (int i = 0; i < num_idus_in_wetl; i++)
@@ -5929,6 +5931,33 @@ bool FlowModel::ApplyQ2WETL()
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachFLOOD_CMS, flood_cms);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachFLOOD_C, floodWP.m_temp_degC);
       }
+x*/
+      // Distribute any remaining water as floodwater, filling the wetland IDUs above their
+      // capacity.  The excess water will drain back to the reaches in the following
+      // timestep.
+      ASSERT(remaining_cms_array.GetSize() == num_idus_in_wetl);
+      double flood_h2o_accum_m3 = 0.;
+      for (int idu_ndx_in_wetl = 0; idu_ndx_in_wetl < num_idus_in_wetl; idu_ndx_in_wetl++)
+      {
+         double reach_remaining_cms = remaining_cms_array[idu_ndx_in_wetl];
+         if (reach_remaining_cms <= 0) continue;
+         flood_h2o_accum_m3 += reach_remaining_cms * SEC_PER_DAY;
+      } // end of loop thru IDUs in this wetland
+      double flood_depth_mm = 1000 * (flood_h2o_accum_m3 / pWetl->m_wetlArea_m2);
+
+      // Add flood_depth_mm to each IDU in the wetland.
+      for (int idu_ndx_in_wetl = 0; idu_ndx_in_wetl < num_idus_in_wetl; idu_ndx_in_wetl++)
+      {
+         int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl];
+         float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
+         double idu_flood_h2o_m3 = (flood_depth_mm / 1000) * idu_area_m2;
+
+         int reach_ndx = pWetl->m_wetlReachNdxArray[idu_ndx_in_wetl];
+         Reach* pReach = m_reachArray[reach_ndx];
+         int comid = pReach->m_reachID;
+         pWetl->ReachH2OtoWetlandIDU(comid, idu_flood_h2o_m3, idu_poly_ndx);
+         SetAtt(idu_poly_ndx, FLOODDEPTH, flood_depth_mm);
+      } // end of loop thru IDUs in this wetland
 
    } // end of loop thru wetlands
 
@@ -5938,7 +5967,7 @@ bool FlowModel::ApplyQ2WETL()
 
 double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
 // Returns volume of water remaining out of H2OtoWetl_m3 when the wetland reaches its capacity.
-// If all of H2OtoWetl_m3 can be absorbed by the wetland, then returns 0.
+// If all of H2OtoWetl_m3 can be absorbed by the wetland without exceeding the WETL_CAPs for the IDUs, then returns 0.
 // Updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attributes WETNESS and TEMP_WETL.
 // Sets pHRU->m_standingH2Oflag to true when there is standing water.
 {
@@ -5962,17 +5991,16 @@ double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
       double wetness_mm = gFlowModel->Att(idu_ndx, WETNESS);
       if (wetness_mm > 0)
          ASSERT(pHRU->m_standingH2Oflag);
-// ???         if (wetness_mm >= (2. * wetl_cap_mm)) continue; // There is no room to absorb any more water.
-
       double idu_area_m2 = gFlowModel->Att(idu_ndx, AREA);
-// ???         double idu_room_m3 = (((2. * wetl_cap_mm) - wetness_mm) / 1000.) * idu_area_m2;
-      double idu_room_m3 = ((wetl_cap_mm - wetness_mm) / 1000.) * idu_area_m2;
+      double idu_room_mm = wetl_cap_mm - wetness_mm; // This works even if wetness is < 0, because of how wetness is defined.
+      double idu_room_m3 = (idu_room_mm / 1000.) * idu_area_m2;
       double to_this_idu_m3 = min(idu_room_m3, remaining_m3);
       double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
 
-      if (idu_room_m3 >= remaining_m3) remaining_m3 = 0.;
+      if (to_this_idu_m3 >= remaining_m3) remaining_m3 = 0.;
       else remaining_m3 -= to_this_idu_m3;
-
+      ReachH2OtoWetlandIDU(reachComid, to_this_idu_m3, idu_ndx);
+/*x
       // If the soil is not yet saturated (i.e. wetness < 0), it can absorb some or all of the 
       // water coming from the reach.
       double to_this_idu_soil_m3 = 0.;
@@ -6023,11 +6051,93 @@ double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
          pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
       }
       gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm);
-
+x*/
    } // end of loop through IDUs in this wetland
 
    return(remaining_m3);
 } // end of ReachH2OtoWetland()
+
+
+bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduPolyNdx)
+// Updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attributes WETNESS and TEMP_WETL.
+// Sets pHRU->m_standingH2Oflag to true when there is standing water.
+{
+   int idu_ndx = iduPolyNdx;
+   double remaining_m3 = H2OtoWetl_m3;
+   Reach* pReach = gFlowModel->FindReachFromID(reachComid);
+
+   ASSERT(H2OtoWetl_m3 > 0.);
+   if (H2OtoWetl_m3 <= 0.) return(0.);
+   int idu_comid = gIDUs->AttInt(idu_ndx, COMID);
+   ASSERT(idu_comid == reachComid);;
+
+   double reach_temp_degC = pReach->Att(ReachTEMP_H2O);
+
+   int hru_ndx = gIDUs->AttInt(idu_ndx, HRU_NDX);
+   HRU* pHRU = gFlowModel->GetHRU(hru_ndx);
+   double wetness_mm = gFlowModel->Att(idu_ndx, WETNESS);
+   if (wetness_mm > 0)
+      ASSERT(pHRU->m_standingH2Oflag);
+   double idu_area_m2 = gFlowModel->Att(idu_ndx, AREA);
+   double to_this_idu_m3 = H2OtoWetl_m3;
+   double to_this_idu_mm = (to_this_idu_m3 / idu_area_m2) * 1000.;
+
+   // If the soil is not yet saturated (i.e. wetness < 0), it can absorb some or all of the 
+   // water coming from the reach.
+   double to_this_idu_soil_m3 = 0.;
+   double new_wetness_mm = wetness_mm;
+   if (wetness_mm < 0.)
+   { // The soil can absorb more water.
+      double idu_room_in_soil_mm = -wetness_mm;
+      double idu_room_in_soil_m3 = (idu_room_in_soil_mm / 1000.) * idu_area_m2;
+      to_this_idu_soil_m3 = min(idu_room_in_soil_m3, to_this_idu_m3);
+      double to_this_idu_soil_mm = (to_this_idu_soil_m3 / idu_area_m2) * 1000.;
+      HRULayer* pBOX_NAT_SOIL = pHRU->GetLayer(BOX_NAT_SOIL);
+//x      pBOX_NAT_SOIL->AddFluxFromGlobalHandler((float)(-to_this_idu_soil_m3), FL_SINK);
+      pBOX_NAT_SOIL->AccumAdditions(to_this_idu_soil_m3);
+      double hru_nat_soil_mm = pHRU->AttFloat(HruNAT_SOIL);
+      float hru_area_m2 = pHRU->AttFloat(HruAREA_M2);
+      float hru_area_irrig_m2 = pHRU->AttFloat(HruAREA_IRRIG);
+      double hru_area_nat_soil_m2 = hru_area_m2 - hru_area_irrig_m2;
+      double hru_nat_soil_m3 = (hru_nat_soil_mm / 1000) * hru_area_nat_soil_m2;
+      hru_nat_soil_m3 += to_this_idu_soil_m3;
+      ASSERT(hru_area_nat_soil_m2 > 0);
+      hru_nat_soil_mm = hru_area_nat_soil_m2 > 0 ? (1000 * (hru_nat_soil_m3 / hru_area_nat_soil_m2)) : 0;
+      pHRU->SetAttFloat(HruNAT_SOIL, (float)hru_nat_soil_mm);
+
+      if (idu_room_in_soil_m3 >= to_this_idu_soil_m3)
+         new_wetness_mm = -(-wetness_mm - to_this_idu_soil_mm);
+   } // end of if (wetness_mm < 0.)
+
+   // When the soil is saturated, then any additional water becomes standing water.
+   double to_this_idu_standing_h2o_m3 = to_this_idu_m3 - to_this_idu_soil_m3;
+   if (to_this_idu_standing_h2o_m3 > 0)
+   {
+      HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
+//x      pBOX_SURFACE_H2O->AddFluxFromGlobalHandler((float)(-to_this_idu_standing_h2o_m3), FL_SINK);
+      pBOX_SURFACE_H2O->AccumAdditions(to_this_idu_standing_h2o_m3);
+
+      double standing_h2o_m3 = (wetness_mm > 0) ? ((wetness_mm / 1000.) * idu_area_m2) : 0.;
+      double standing_h2o_degC = (standing_h2o_m3 > 0.) ? gIDUs->Att(idu_ndx, TEMP_WETL) : 0.;
+      WaterParcel standingWP(standing_h2o_m3, standing_h2o_degC);
+      WaterParcel to_this_iduWP = WaterParcel(to_this_idu_standing_h2o_m3, reach_temp_degC);
+      standingWP.MixIn(to_this_iduWP);
+      new_wetness_mm = (standingWP.m_volume_m3 / idu_area_m2) * 1000.;
+      double new_standing_h2o_degC = standingWP.WaterTemperature();
+      gIDUs->SetAtt(idu_ndx, TEMP_WETL, new_standing_h2o_degC);
+
+      pHRU->m_standingH2Oflag = true;
+      double hru_H2OSTNDGM3 = pHRU->Att(HruH2OSTNDGM3);
+      hru_H2OSTNDGM3 += to_this_idu_standing_h2o_m3;
+      pHRU->SetAtt(HruH2OSTNDGM3, hru_H2OSTNDGM3);
+      double hru_BOXSURF_M3 = pHRU->Att(HruBOXSURF_M3);
+      hru_BOXSURF_M3 += to_this_idu_standing_h2o_m3;
+      pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
+   }
+   gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm);
+
+   return(true);
+} // end of ReachH2OtoWetlandIDU()
 
 
 bool Wetland::InitWETL_CAPifNecessary() // Set nominal values of WETL_CAP. 
@@ -8382,9 +8492,11 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
          WaterParcel dischargeWP = pReach->GetReachDischargeWP(); 
          double discharge_cms = dischargeWP.m_volume_m3 / SEC_PER_DAY;
          ASSERT(discharge_cms > 0.);
+         double q2wetl_cms = pReach->Att(ReachQ2WETL);
+         double downstream_cms = discharge_cms - q2wetl_cms;
 
-         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachQ_DISCHARG, discharge_cms);  // m3/sec        
-         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachLOG_Q, log10(discharge_cms));  // log10(m3/sec)
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachQ_DISCHARG, downstream_cms);  // m3/sec        
+         m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachLOG_Q, log10(downstream_cms));  // log10(m3/sec)
          m_pStreamLayer->SetDataU(pReach->m_polyIndex, m_colReachTEMP_H2O, dischargeWP.WaterTemperature());  // degC       
 
          Reservoir* pReservoir = pReach->m_pReservoir;

@@ -377,7 +377,7 @@ protected:
    ~FluxContainer() { }
 
 protected:
-   float m_globalHandlerFluxValue;        // current value of the global flux  - m3/day
+   float m_globalHandlerFluxValue; // m3/day, >0 means into the container, <0 means leaving the container  
 
 public:
    bool m_nanOccurred; // true when a not-a-number has occurred
@@ -630,6 +630,8 @@ public:
    Reach *GetReach( void );
 
    bool AddFluxFromGlobalHandler( float value, WFAINDEX index  );  // m3/day
+   bool AccumAdditions(double h2oEnteringHRUlayer_m3);
+   bool AccumWithdrawals(double h2oLeavingHRUlayer_m3);
 
    bool CheckForNaNs(CString callerName, bool OKflag)
       {
@@ -1463,6 +1465,7 @@ public:
    Wetland(int wetlID);
    ~Wetland() {  };
    double ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3); // Returns volume of water remaining when wetland is at its capacity.
+   bool ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduPolyNdx);
    bool InitWETL_CAPifNecessary(); // Set nominal values of WETL_CAP. 
 
 public:
@@ -2478,6 +2481,22 @@ bool HRULayer::AddFluxFromGlobalHandler(float value, WFAINDEX wfaIndex)
    m_nanOccurred = true;
    return(false);
    } // end of HRULayer::AddFluxFromGlobalHandler()
+
+/*x
+bool HRULayer::AccumAdditions(float h2oEnteringHRUlayer_m3)
+{
+   bool rtn_val = AddFluxFromGlobalHandler(h2oEnteringHRUlayer_m3, FL_TOP_SOURCE);
+   return(rtn_val);
+} // end of HRULayer::AccumAdditions()
+
+
+bool HRULayer::AccumWithdrawals(float h2oLeavingHRUlayer_m3)
+{
+   bool rtn_val = AddFluxFromGlobalHandler(h2oLeavingHRUlayer_m3, FL_SINK);
+   return(rtn_val);
+} // end of HRULayer::AccumWithdrawals()
+x*/
+
 
 inline
 float Reach::GetCatchmentArea( void )

@@ -1168,6 +1168,7 @@ protected:
       m_colELEV_MEAN(-1),
       m_colF_THETA(-1),
       m_colFIELD_CAP(-1),
+      m_colFLOODDEPTH(-1),
       m_colFOR_VAL(-1),
       m_colHBVCALIB(-1), 
       m_colHRU_ID(-1),
@@ -1231,6 +1232,8 @@ public:
 #define F_THETA gIDUs->m_colF_THETA
    int m_colFIELD_CAP;
 #define FIELD_CAP gIDUs->m_colFIELD_CAP
+   int m_colFLOODDEPTH;
+#define FLOODDEPTH gIDUs->m_colFLOODDEPTH
    int m_colFOR_VAL;
 #define FOR_VAL gIDUs->m_colFOR_VAL
    int m_colHBVCALIB;
@@ -1318,6 +1321,7 @@ public:
       ok = ok && CheckCol(m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colF_THETA, "F_THETA", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colFIELD_CAP, "FIELD_CAP", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colFLOODDEPTH, "FLOODDEPTH", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colFOR_VAL, "FOR_VAL", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colHBVCALIB, "HBVCALIB", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colHRU_ID, "HRU_ID", TYPE_INT, CC_AUTOADD);
@@ -1388,6 +1392,10 @@ public:
       ASSERT(col >= 0);
       SetDataU(IDUpolyNdx, col, attValue);
    } // end of IDUlayer::SetAtt()
+
+
+   void SetAttCol(int col, double attValue);
+   inline void SetAttZero(int col) { SetAttCol(col, 0); }
 
    inline void SetAttFloat(int IDUpolyNdx, int col, float attValue)
    {
