@@ -631,7 +631,7 @@ bool FluxExpr::Step( FlowContext *pFlowContext )
                if (totalSatisfiedDemand < 0)
                {
                   WaterParcel water_going_into_the_reachWP(-totalSatisfiedDemand, m_temp_C);
-                  pReach->AccumAdditions(water_going_into_the_reachWP);
+                  pReach->AccumWPadditions(water_going_into_the_reachWP);
                }
                else 
                   pReach->CheckForNaNs("FluxExpr::Step 2", pReach->AddFluxFromGlobalHandler( totalSatisfiedDemand ));
@@ -1203,30 +1203,7 @@ bool Spring::Step(FlowContext* pFlowContext)
       temp_h2o_degC = max(temp_h2o_degC, DEFAULT_MIN_SKIN_TEMP_DEGC);
    }
    WaterParcel H2O_to_addWP(H2O_to_add_m3, temp_h2o_degC);
-/*x
-   // Special logic for Clear Lake
-   WaterParcel seasonal_springWP(0, 0);
-   if (m_pReach->m_reachID == 23773373)
-   {
-      double tau_for_avg_in_days = 45; // days
-      static double upstream_inflow_avg_cms;
-      double upstream_inflow_today_cms = m_pReach->GetUpstreamInflow();
-      if (pFlowContext->pFlowModel->m_timeInRun == 0)
-         upstream_inflow_avg_cms = upstream_inflow_today_cms;
-      else
-      {
-         double tau = pFlowContext->pFlowModel->m_timeInRun > tau_for_avg_in_days ? tau_for_avg_in_days : pFlowContext->pFlowModel->m_timeInRun;
-         upstream_inflow_avg_cms = upstream_inflow_avg_cms * exp(-1 / tau) + upstream_inflow_today_cms * (1 - exp(-1 / tau));
-      }
-
-      double additional_frac = 0.; // 0.8351;
-      double additional_m3 = additional_frac * upstream_inflow_avg_cms * SEC_PER_DAY;
-      WaterParcel additionalWP(additional_m3, m_temp_C);
-
-      H2O_to_addWP.MixIn(additionalWP);
-   } // end of   if (m_pReach->m_reachID == 23773373)  special logic for the Clear Lake springs
-x*/
-   if (m_temp_C > 0.) m_pReach->AccumAdditions(H2O_to_addWP);
+   if (m_temp_C > 0.) m_pReach->AccumWPadditions(H2O_to_addWP);
    else m_pReach->AddFluxFromGlobalHandler((float)(-H2O_to_add_m3));
    m_pReach->m_availableDischarge += H2O_to_addWP.m_volume_m3 / SEC_PER_DAY;
 

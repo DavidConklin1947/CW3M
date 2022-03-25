@@ -3641,7 +3641,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
 
                int comid = gIDUs->AttInt(tgt_idu_ndx, COMID);
                Reach* pReach = gEnvModel->m_pFlowModel->GetReachFromCOMID(comid);               
-               pReach->AccumAdditions(standingWP);
+               pReach->AccumWPadditions(standingWP);
 
                // Remove the water from the HRU. 
                HRULayer* pBox_surface_h2o = pHRU->GetLayer(BOX_SURFACE_H2O);

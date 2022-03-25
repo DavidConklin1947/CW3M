@@ -630,7 +630,7 @@ public:
    Reach *GetReach( void );
 
    bool AddFluxFromGlobalHandler( float value, WFAINDEX index  );  // m3/day
-   bool AccumAdditions(double h2oEnteringHRUlayer_m3);
+   bool AccumAdditions(float h2oEnteringHRUlayer_m3);
    bool AccumWithdrawals(double h2oLeavingHRUlayer_m3);
 
    bool CheckForNaNs(CString callerName, bool OKflag)
@@ -980,7 +980,7 @@ public:
    static double LatentHeatOfVaporization_MJ_kg(double temp_H2O_degC);
    static double Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity);
 
-   bool AccumAdditions(WaterParcel incomingWP);
+   bool AccumWPadditions(WaterParcel incomingWP);
    bool AccumWithdrawals(double withdrawal_volume_m3);
    bool  AddFluxFromGlobalHandler(float value);
 
@@ -2481,21 +2481,6 @@ bool HRULayer::AddFluxFromGlobalHandler(float value, WFAINDEX wfaIndex)
    m_nanOccurred = true;
    return(false);
    } // end of HRULayer::AddFluxFromGlobalHandler()
-
-/*x
-bool HRULayer::AccumAdditions(float h2oEnteringHRUlayer_m3)
-{
-   bool rtn_val = AddFluxFromGlobalHandler(h2oEnteringHRUlayer_m3, FL_TOP_SOURCE);
-   return(rtn_val);
-} // end of HRULayer::AccumAdditions()
-
-
-bool HRULayer::AccumWithdrawals(float h2oLeavingHRUlayer_m3)
-{
-   bool rtn_val = AddFluxFromGlobalHandler(h2oLeavingHRUlayer_m3, FL_SINK);
-   return(rtn_val);
-} // end of HRULayer::AccumWithdrawals()
-x*/
 
 
 inline

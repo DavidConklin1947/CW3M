@@ -336,6 +336,10 @@
       <output name="ADDED_Q m3" query="COMID=23772737" value="ADDED_Q*86400" type="sum" domain="reach" />
       <output name="WETNESS for IDU 33827 mm" query="IDU_ID=33827" value="WETNESS" type="sum" domain="idu" />
       <output name="WETNESS for IDU 33807 mm" query="IDU_ID=33807" value="WETNESS" type="sum" domain="idu" />
+      <output name="FLOODDEPTH for IDU 33827 mm" query="IDU_ID=33827" value="FLOODDEPTH" type="sum" domain="idu" />
+      <output name="FLOODDEPTH for IDU 33807 mm" query="IDU_ID=33807" value="FLOODDEPTH" type="sum" domain="idu" />
+      <output name="IDU FLOODDEPTH mm" query="WETL_ID=10" value="FLOODDEPTH" type="areaWtMean" domain="idu" />
+      <output name="IDU FLOODDEPTH m3" query="WETL_ID=10" value="(FLOODDEPTH/1000)*AREA" type="sum" domain="idu" />
     </output_group>
 
     <output_group name="FLOW McKenzie Thermal Energy Budget for streams" daily="y" monthly="y" yearly="y" >
@@ -393,10 +397,11 @@
       <output name="WETL2Q MJ" query="1" value="TEMP_WETL*WETL2Q*86400*998.2*4.187/1000" type="sum" domain="idu" />
       <output name="OUT_LATERL m3" query="1" value="OUT_LATERL*86400" type="sum" domain="reach" />
       <output name="OUT_LATERL MJ" query="1" value="TEMP_H2O*OUT_LATERL*86400*998.2*4.187/1000" type="sum" domain="reach" />
-      <output name="FLOOD m3" query="1" value="FLOOD_CMS*86400" type="sum" domain="reach" />
-      <output name="FLOOD MJ" query="1" value="FLOOD_C*FLOOD_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
+      <output name="Reach FLOOD m3" query="1" value="FLOOD_CMS*86400" type="sum" domain="reach" />
+      <output name="Reach FLOOD MJ" query="1" value="FLOOD_C*FLOOD_CMS*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="WETL_VOL m3" query="WETL_ID>0" value="WETL_VOL" type="sum" domain="idu" />
       <output name="Wetland ET_DAY m3" query="WETL_ID>0" value="ET_DAY*AREA/1000" type="sum" domain="idu" />
+      <output name="IDU FLOODDEPTH m3" query="WETL_ID>0" value="(FLOODDEPTH/1000)*AREA" type="sum" domain="idu" />
     </output_group>
 
     <output_group name="FLOW Thermal Energy Budget for 8 CGR yearly" interval="yearly" >
