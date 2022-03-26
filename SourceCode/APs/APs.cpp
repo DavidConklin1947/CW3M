@@ -3747,7 +3747,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   gIDUs->SetAtt(tgt_idu_ndx, WETL_ID, wetl_id);
                   gIDUs->SetAtt(tgt_idu_ndx, WET_FRAC, 0.);
                   gIDUs->SetAttInt(tgt_idu_ndx, WETLONGEST, 0);
-                  gIDUs->SetAtt(tgt_idu_ndx, WETNESS, wetness_mm);
+                  gIDUs->SetAtt(tgt_idu_ndx, WETNESS, wetness_mm); // ??? the part over WETL_CAP ought to go into FLOODDEPTH.
                   gIDUs->SetAtt(tgt_idu_ndx, WETL2Q, 0.);
 
                   if (snow_m3 > 0.)

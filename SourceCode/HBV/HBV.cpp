@@ -210,10 +210,13 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             if (!is_wetland) continue;
 
             double wetness_mm = Att(idu_poly_ndx, WETNESS);
-            if (wetness_mm <= 0.) continue;
+            double flooddepth_mm = Att(idu_poly_ndx, FLOODDEPTH);
+            ASSERT(wetness_mm >= 0 || flooddepth_mm == 0);
+            double standing_h2o_mm = wetness_mm + flooddepth_mm;
+            if (standing_h2o_mm <= 0.) continue;
 
             float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
-            double idu_standing_h2o_m3 = (wetness_mm / 1000.) * idu_area_m2;
+            double idu_standing_h2o_m3 = (standing_h2o_mm / 1000.) * idu_area_m2;
             hru_standing_h2o_m3 += idu_standing_h2o_m3;
          } // end of loop thru the IDUs in this HRU
 

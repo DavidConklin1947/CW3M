@@ -1321,7 +1321,7 @@ public:
       ok = ok && CheckCol(m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colF_THETA, "F_THETA", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colFIELD_CAP, "FIELD_CAP", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && CheckCol(m_colFLOODDEPTH, "FLOODDEPTH", TYPE_FLOAT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colFLOODDEPTH, "FLOODDEPTH", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colFOR_VAL, "FOR_VAL", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colHBVCALIB, "HBVCALIB", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colHRU_ID, "HRU_ID", TYPE_INT, CC_AUTOADD);

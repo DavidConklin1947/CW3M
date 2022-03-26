@@ -317,7 +317,7 @@
       <output name="Surface water in wetland m3" query="WETL_ID=10" value="WETL_VOL" type="sum" domain="idu" />
       <output name="From upstream 23772739 Q_DISCHARG m3" query="COMID=23772739" value="Q_DISCHARG*86400" type="sum" domain="reach" />
       <output name="lateral inflow IN_RUNOFF m3" query="COMID=23772737" value="IN_RUNOFF*86400" type="sum" domain="reach" />
-      <output name="FLOOD m3" query="COMID=23772737" value="FLOOD_CMS*86400" type="sum" domain="reach" />
+      <output name="Reach FLOOD m3" query="COMID=23772737" value="FLOOD_CMS*86400" type="sum" domain="reach" />
       <output name="WETL2Q m3" query="COMID=23772737" value="WETL2Q*86400" type="sum" domain="idu" />
       <output name="water from springs m3" query="COMID=23772737" value="SPRING_CMS*86400" type="sum" domain="reach" />
       <output name="water into reach 23772737 except WETL2Q and from upstream (m3)" query="COMID=23772737" value="86400*(IN_RUNOFF+FLOOD_CMS+SPRING_CMS+ADDED_Q)+ADDED_VOL" type="sum" domain="reach" />
