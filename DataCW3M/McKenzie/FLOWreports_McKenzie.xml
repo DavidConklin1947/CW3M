@@ -275,7 +275,7 @@
       <output name="23772703 RADSWGIVEN (W per m2)" query="COMID=23772703" value="RADSWGIVEN" type="sum" domain="reach" />
       <output name="23772703 AREA_H2O (m2)" query="COMID=23772703" value="AREA_H2O" type="sum" domain="reach" />
       <output name="23772703 KCAL_REACH (kcal)" query="COMID=23772703" value="KCAL_REACH" type="sum" domain="reach" />
-      <output name="23772703 net KCAL" query="COMID=23772703" value="(RAD_SW_IN-RAD_LW_OUT)*AREA_H2O*86.4/4.184" type="sum" domain="reach" />
+      <output name="23772703 net KCAL" query="COMID=23772703" value="(RAD_SW_IN-RAD_LW_OUT)*AREA_H2O*86400/(4.184*1000)" type="sum" domain="reach" />
       <output name="23772703 KCAL_GIVEN (kcal)" query="COMID=23772703" value="KCAL_GIVEN" type="sum" domain="reach" />
       <output name="23772703 WIDTH_CALC (m)" query="COMID=23772703" value="WIDTH_CALC" type="sum" domain="reach" />
       <output name="23772703 WIDTHGIVEN (m)" query="COMID=23772703" value="WIDTHGIVEN" type="sum" domain="reach" />

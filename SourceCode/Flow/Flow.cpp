@@ -5356,12 +5356,13 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
    pHRU->SetAtt(HruNAT_SOIL, hru_topsoil_h2o_mm);
    pHRU->SetAtt(HruIRRIG_SOIL, 0.); ASSERT(pHRU->m_areaIrrigated == 0);
 
-   // Finally, update the SNOW_SWE, WETNESS, H2O_MELT, and SM_DAY attributes for the IDUs in the HRU.
+   // Finally, update the SNOW_SWE, H2O_MELT, WETNESS, FLOODDEPTH, and SM_DAY attributes for the IDUs in the HRU.
    for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
    {
       int idu_poly_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
       double idu_SNOW_SWE_mm = 0.;
       double idu_WETNESS_mm = 0.;
+      double idu_FLOODDEPTH_mm = 0;
       double idu_H2O_MELT_mm = 0.;
       double idu_SM_DAY_mm = hru_topsoil_h2o_mm;
       int lulc_a = AttInt(idu_poly_ndx, LULC_A);
@@ -5374,7 +5375,10 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
 
          if (hru_standing_h2o_mm > 0.)
          { // This IDU is a wetland with standing water.
-            idu_WETNESS_mm = hru_standing_h2o_mm;
+            // Divide the standing water between WETNESS and FLOODDEPTH.
+            double idu_WETL_CAP_mm = Att(idu_poly_ndx, WETL_CAP);
+            idu_WETNESS_mm = hru_standing_h2o_mm > idu_WETL_CAP_mm ? idu_WETL_CAP_mm : hru_standing_h2o_mm;
+            idu_FLOODDEPTH_mm = hru_standing_h2o_mm > idu_WETNESS_mm ? hru_standing_h2o_mm - idu_WETNESS_mm : 0;
          }
          else
          { // This IDU is a wetland with no standing water.
@@ -5392,7 +5396,8 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
       }
 
       SetAttFloat(idu_poly_ndx, SNOW_SWE, (float)idu_SNOW_SWE_mm);
-      SetAtt(idu_poly_ndx, WETNESS, idu_WETNESS_mm); // ??? the part over WETL_CAP ought to go into FLOODDEPTH
+      SetAtt(idu_poly_ndx, WETNESS, idu_WETNESS_mm);
+      SetAtt(idu_poly_ndx, FLOODDEPTH, idu_FLOODDEPTH_mm);
       SetAtt(idu_poly_ndx, H2O_MELT, idu_H2O_MELT_mm);
       SetAtt(idu_poly_ndx, SM_DAY, idu_SM_DAY_mm);
    } // end of second loop thru IDUs
@@ -5615,6 +5620,9 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                   wetl2q_accum_m3 += idu_wetl2q_m3;
                   idu_wetl2q_cms = idu_wetl2q_m3 / SEC_PER_DAY;
                   wetness_mm = wetl_cap_mm;
+                  flooddepth_mm = standing_h2o_mm - wetness_mm;
+                  SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
+                  SetAtt(idu_poly_ndx, FLOODDEPTH, 0.);
 
                   // An HRU can can contain all or part of at most one wetland.
                   int idu_wetl_id = AttInt(idu_poly_ndx, WETL_ID);
@@ -5628,8 +5636,6 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             } // end of if (standing_h2o_mm > 0.)
 
             SetAtt(idu_poly_ndx, WETL2Q, idu_wetl2q_cms);
-            SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
-            SetAtt(idu_poly_ndx, FLOODDEPTH, 0.);
          } // end of loop thru IDUs for this HRU
          ASSERT(!pHRU->m_standingH2Oflag || hru_standing_h2o_area_m2 > 0.);
 
@@ -5882,6 +5888,7 @@ bool FlowModel::ApplyQ2WETL()
       { // Since more than one IDU may drain to a given reach, this logic may be traversed more than once for a given reach.
          int reach_ndx = pWetl->m_wetlReachNdxArray[idu_ndx_in_wetl];
          int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl];
+         ASSERT(Att(idu_poly_ndx, FLOODDEPTH) == 0);
          Reach* pReach = m_reachArray[reach_ndx];
          int comid = pReach->m_reachID;
          ASSERT(AttInt(idu_poly_ndx, COMID) == comid);
@@ -5908,34 +5915,7 @@ bool FlowModel::ApplyQ2WETL()
          reach_remaining_cms = reach_remaining_m3 / SEC_PER_DAY;
          remaining_cms_array.Add(reach_remaining_cms);
       } // end of loop thru the IDUs which make up this wetland
-/*x
-      // Return any remaining water to the reaches from which it came.
-      ASSERT(remaining_cms_array.GetSize() == num_idus_in_wetl);
-      for (int i = 0; i < num_idus_in_wetl; i++)
-      {
-         double reach_remaining_cms = remaining_cms_array[i];
-         if (reach_remaining_cms <= 0) continue;
-         double reach_remaining_m3 = reach_remaining_cms * SEC_PER_DAY;
-         int reach_ndx = pWetl->m_wetlReachNdxArray[i];
-         Reach* pReach = m_reachArray[reach_ndx];
-         pReach->AddFluxFromGlobalHandler((float)-reach_remaining_m3);
-         double flood_cms = 0.;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_CMS, flood_cms);
-         double flood_m3 = 0.;
-         if (flood_cms != 0)
-         {
-            flood_m3 = flood_cms * SEC_PER_DAY;
-         }
-         double flood_c = 0.;  m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachFLOOD_C, flood_c);
-         WaterParcel floodWP(flood_m3, flood_c);
-         // Flood water is modeled here as having the same temperature as the water in the reach. Maybe there is a better way???
-         double temp_h2o_degC = 0.; m_pReachLayer->GetData(pReach->m_polyIndex, m_colReachTEMP_H2O, temp_h2o_degC);
-         WaterParcel reach_remainingWP(reach_remaining_m3, temp_h2o_degC);
-         floodWP.MixIn(reach_remainingWP);
-         flood_cms = floodWP.m_volume_m3 / SEC_PER_DAY;
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachFLOOD_CMS, flood_cms);
-         m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachFLOOD_C, floodWP.m_temp_degC);
-      }
-x*/
+
       // Distribute any remaining water as floodwater, filling the wetland IDUs above their
       // capacity.  The excess water will drain back to the reaches in the following
       // timestep.
@@ -6020,8 +6000,9 @@ double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
 
 
 bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduPolyNdx)
-// Updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attributes WETNESS and TEMP_WETL.
+// Updates HRU attributes HruBOXSURF_M3, HruH2OSTNDGM3, and IDU attributes WETNESS, FLOODDEPTH, and TEMP_WETL.
 // Sets pHRU->m_standingH2Oflag to true when there is standing water.
+// Assumes FLOODDEPTH for the IDU is 0 on entry.
 {
    int idu_ndx = iduPolyNdx;
    double remaining_m3 = H2OtoWetl_m3;
@@ -6047,6 +6028,8 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
    // water coming from the reach.
    double to_this_idu_soil_m3 = 0.;
    double new_wetness_mm = wetness_mm;
+   ASSERT(gIDUs->Att(idu_ndx, FLOODDEPTH) == 0);
+   double new_flooddepth_mm = 0;
    if (wetness_mm < 0.)
    { // The soil can absorb more water.
       double idu_room_in_soil_mm = -wetness_mm;
@@ -6081,7 +6064,12 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
       WaterParcel standingWP(standing_h2o_m3, standing_h2o_degC);
       WaterParcel to_this_iduWP = WaterParcel(to_this_idu_standing_h2o_m3, reach_temp_degC);
       standingWP.MixIn(to_this_iduWP);
-      new_wetness_mm = (standingWP.m_volume_m3 / idu_area_m2) * 1000.; // ??? Divide it up between WETNESS and FLOODDEPTH?
+
+      // Divide up the standing water between WETNESS and FLOODDEPTH.
+      double standing_h2o_mm = 1000 * (standing_h2o_m3 / idu_area_m2);
+      double wetl_cap_mm = gIDUs->Att(idu_ndx, WETL_CAP);
+      new_wetness_mm = standing_h2o_mm > wetl_cap_mm ? wetl_cap_mm : standing_h2o_mm;
+      new_flooddepth_mm = standing_h2o_mm > new_wetness_mm ? standing_h2o_mm - new_wetness_mm : 0;
       double new_standing_h2o_degC = standingWP.WaterTemperature();
       gIDUs->SetAtt(idu_ndx, TEMP_WETL, new_standing_h2o_degC);
 
@@ -6093,7 +6081,8 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
       hru_BOXSURF_M3 += to_this_idu_standing_h2o_m3;
       pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
    }
-   gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm); // ??? Divide it up between WETNESS and FLOODDEPTH?
+   gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm); 
+   gFlowModel->SetAtt(idu_ndx, FLOODDEPTH, new_flooddepth_mm); 
 
    return(true);
 } // end of ReachH2OtoWetlandIDU()
@@ -17873,7 +17862,12 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
          idu_to_topsoil_mm = idu_topsoil_room_mm;
          idu_to_subsoil_mm = idu_total_soil_room_mm - idu_topsoil_room_mm;
          idu_surf_h2o_mm -= idu_total_soil_room_mm;
-         wetness_mm = idu_surf_h2o_mm; // ??? What if wetness_mm > WETL_CAP?
+
+         // Divide up the surface water between WETNESS and FLOODDEPTH.
+         double wetl_cap_mm = gIDUs->Att(idu_poly_ndx, WETL_CAP);
+         wetness_mm = idu_surf_h2o_mm > wetl_cap_mm ? wetl_cap_mm : idu_surf_h2o_mm;
+         double flooddepth_mm = idu_surf_h2o_mm > wetl_cap_mm ? idu_surf_h2o_mm - wetness_mm : 0;
+//x         wetness_mm = idu_surf_h2o_mm; 
          ASSERT(wetness_mm >= 0.);
       } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm) ... else
 

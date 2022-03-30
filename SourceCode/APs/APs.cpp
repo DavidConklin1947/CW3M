@@ -3747,7 +3747,6 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   gIDUs->SetAtt(tgt_idu_ndx, WETL_ID, wetl_id);
                   gIDUs->SetAtt(tgt_idu_ndx, WET_FRAC, 0.);
                   gIDUs->SetAttInt(tgt_idu_ndx, WETLONGEST, 0);
-                  gIDUs->SetAtt(tgt_idu_ndx, WETNESS, wetness_mm); // ??? the part over WETL_CAP ought to go into FLOODDEPTH.
                   gIDUs->SetAtt(tgt_idu_ndx, WETL2Q, 0.);
 
                   if (snow_m3 > 0.)
@@ -3781,6 +3780,18 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   if (wetness_mm > 0.) pHRU->m_standingH2Oflag = true;
 
                   pWetl->InitWETL_CAPifNecessary();
+
+                  // If the standing water is deeper than the capacity of the wetland, divide it between WETNESS and FLOODDEPTH.
+                  double wetl_cap_mm = gIDUs->Att(tgt_idu_ndx, WETL_CAP);
+                  double flooddepth_mm = 0;
+                  if (wetness_mm > wetl_cap_mm)
+                  {
+                     flooddepth_mm = wetness_mm - wetl_cap_mm;
+                     wetness_mm = wetl_cap_mm;
+                  }
+
+                  gIDUs->SetAtt(tgt_idu_ndx, WETNESS, wetness_mm);
+                  gIDUs->SetAtt(tgt_idu_ndx, FLOODDEPTH, flooddepth_mm);
                } // end of if (pWetl == NULL) ... else 
             } // end of logic to add this IDU to an existing wetland.
          } // end of logic for gain of a wetland
