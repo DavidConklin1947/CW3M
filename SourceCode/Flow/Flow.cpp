@@ -5869,7 +5869,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
    return TRUE;
    } // end of FlowModel::Run()
 
-
+/*X
    bool FlowModel::ApplyQ2WETL()
    { // Moves water from stream reaches to the surface water compartment.
       // Calls H2OtoWetland(), which calculates pHRU->m_standingH2Oflag and 
@@ -6039,8 +6039,8 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
       return(true);
    } // end of ApplyQ2WETL()
-
-   bool FlowModel::AltApplyQ2WETL()
+X*/
+   bool FlowModel::ApplyQ2WETL()
    { // Moves water from stream reaches to the surface water compartment, wetland by wetland.
       // Assumes FLOODDEPTH is zero on entry. 
       // Allows for the fact that a wetland may extend over more than one HRU.
@@ -6067,7 +6067,9 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             ASSERT(Att(idu_poly_ndx, FLOODDEPTH) == 0);
             float idu_elev_mean_m = AttFloat(idu_poly_ndx, ELEV_MEAN);
             double idu_wetl_cap_mm = Att(idu_poly_ndx, WETL_CAP);
-            ASSERT(((idu_wetl_cap_mm / 1000) + idu_elev_mean_m) == full_wetl_elev_m);
+            double test_val = ((idu_wetl_cap_mm / 1000) + idu_elev_mean_m) - full_wetl_elev_m;
+            if (test_val != 0)
+               ASSERT(close_enough(test_val, 0, .01, .01));
 
             int reach_ndx = pWetl->m_wetlReachNdxArray[idu_ndx_in_wetl];
             Reach* pReach = m_reachArray[reach_ndx];
@@ -6107,7 +6109,10 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             current_filling_area_m2 += idu_area_m2;
             double top_elev_m = idu_ndx_in_wetl + 1 >= num_idus_in_wetl ? full_wetl_elev_m :
                AttFloat(pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl + (int)1], ELEV_MEAN);
-            double current_filling_depth_m = top_elev_m - AttFloat(idu_poly_ndx, ELEV_MEAN);
+            double already_filled_mm = wetness_mm > 0 ? wetness_mm : 0;
+            double already_filled_m = already_filled_mm / 1000;
+            double current_filling_depth_m = max(top_elev_m - AttFloat(idu_poly_ndx, ELEV_MEAN) - already_filled_m, 0);
+            ASSERT(current_filling_depth_m >= 0);
             double current_filling_vol_m3 = vol_for_soil_m3 + current_filling_area_m2 * current_filling_depth_m;
 
             num_affected_idus++;
@@ -6162,7 +6167,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       } // end of loop thru wetlands
 
       return(true);
-   } // end of AltApplyQ2WETL()
+   } // end of ApplyQ2WETL()
 
 
 double Wetland::ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3)
@@ -6317,8 +6322,9 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
       hru_nat_soil_mm = hru_area_nat_soil_m2 > 0 ? (1000 * (hru_nat_soil_m3 / hru_area_nat_soil_m2)) : 0;
       pHRU->SetAttFloat(HruNAT_SOIL, (float)hru_nat_soil_mm);
 
-      if (idu_room_in_soil_m3 >= to_this_idu_soil_m3)
+      if (idu_room_in_soil_m3 > to_this_idu_soil_m3)
          new_wetness_mm = -(-wetness_mm - to_this_idu_soil_mm);
+      else new_wetness_mm = 0;
    } // end of if (wetness_mm < 0.)
 
    // When the soil is saturated, then any additional water becomes standing water.
@@ -6332,7 +6338,7 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
       double standing_h2o_degC = (standing_h2o_m3 > 0.) ? gIDUs->Att(idu_ndx, TEMP_WETL) : 0.;
       WaterParcel standingWP(standing_h2o_m3, standing_h2o_degC);
       WaterParcel to_this_iduWP = WaterParcel(to_this_idu_standing_h2o_m3, reach_temp_degC);
-      standingWP.MixIn(to_this_iduWP);
+      standingWP.MixIn(to_this_iduWP); standing_h2o_m3 = standingWP.m_volume_m3;
 
       // Divide up the standing water between WETNESS and FLOODDEPTH.
       double standing_h2o_mm = 1000 * (standing_h2o_m3 / idu_area_m2);
@@ -8985,7 +8991,7 @@ Wetland::Wetland(int wetlID) : m_wetlNdx(-1), m_wetlArea_m2(0.)
 
 int FlowModel::InitWetlands() // Returns the number of wetlands.
 {
-   if (WETL_ID < 0) return(0);
+   if (WETL_ID < 0) return(0); // If there isn't any WETL_ID attribute, then there aren't any wetlands.
 
    int reach_count = (int)m_reachArray.GetCount();
    int reach_array_ndx;
@@ -18113,7 +18119,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
 
       // In this IDU, how much room is there in the soil for more water to infiltrate??
       double idu_topsoil_room_mm = fc - sm_day_mm; if (idu_topsoil_room_mm < 0.) idu_topsoil_room_mm = 0.;
-      double idu_total_soil_room_mm = idu_topsoil_room_mm / (1. - frac_to_subsoil);
+      double idu_total_soil_room_mm = frac_to_subsoil >= 1 ? 0 : idu_topsoil_room_mm / (1. - frac_to_subsoil);
 
       if (idu_total_soil_room_mm > idu_surf_h2o_mm)
       { // There is more room in the soil than there is standing water.

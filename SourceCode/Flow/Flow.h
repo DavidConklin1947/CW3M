@@ -1529,7 +1529,7 @@ public:
    //void RunGlobalMethods( void );          
 
    bool ApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
-   bool AltApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
+//X   bool AltApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
    Wetland* GetWetlandFromID(int wetlID);
 
    inline double Att(int IDUindex, int col);

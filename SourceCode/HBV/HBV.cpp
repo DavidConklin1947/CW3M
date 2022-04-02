@@ -218,6 +218,8 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
             double idu_standing_h2o_m3 = (standing_h2o_mm / 1000.) * idu_area_m2;
             hru_standing_h2o_m3 += idu_standing_h2o_m3;
+            if (hru_standing_h2o_m3 > water_in_snowpack_m3)
+               ASSERT(0);
          } // end of loop thru the IDUs in this HRU
 
          water_in_snowpack_m3 -= hru_standing_h2o_m3;
