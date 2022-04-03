@@ -130,7 +130,6 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       HRU *pHRU = pFlowContext->pFlowModel->GetHRU(h);
 
       int hruLayerCount = pHRU->GetLayerCount();
-//x      double natural_area_m2 = pHRU->m_HRUeffArea_m2;
       double hru_area_m2 = pHRU->m_HRUtotArea_m2; ASSERT(hru_area_m2 > 0.);
       double non_wetl_area_m2 = pHRU->m_snowpackArea_m2;
       float CFMAX = 0.f, CFR = 0.f, Beta = 0.f, kPerc = 0.0f;

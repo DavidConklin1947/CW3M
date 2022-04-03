@@ -1464,8 +1464,6 @@ class FLOWAPI Wetland
 public:
    Wetland(int wetlID);
    ~Wetland() {  };
-   double ReachH2OtoWetland(int reachComid, double H2OtoWetl_m3); // Returns volume of water remaining when wetland is at its capacity.
-   double AltReachH2OtoWetland(int reachComid, double H2OtoWetl_m3); // Returns volume of water remaining when wetland is at its capacity.
    bool ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduPolyNdx);
    bool InitWETL_CAPifNecessary(); // Set nominal values of WETL_CAP. 
 
@@ -1529,7 +1527,6 @@ public:
    //void RunGlobalMethods( void );          
 
    bool ApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
-//X   bool AltApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
    Wetland* GetWetlandFromID(int wetlID);
 
    inline double Att(int IDUindex, int col);
