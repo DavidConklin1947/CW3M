@@ -5555,9 +5555,11 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
       start = clock();
       
+      // GMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENT GMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENT
+      m_flowContext.timing = GMT_CATCHMENT; // GMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENT GMT_CATCHMENTGMT_CATCHMENTGMT_CATCHMENT
+
       // Note: GetCatchmentDerivates() calls GlobalMethod::Run()'s for any method with (m_timing&GMT_CATCHMENT) != 0 
       // This is when HBV does its work.
-      m_flowContext.timing = GMT_CATCHMENT;
       m_hruBlock.Integrate( (double)m_currentTime, (double)m_currentTime+stepSize, GetCatchmentDerivatives, &m_flowContext );  // update HRU swc and associated state variables
 
       // At this point, HRU water compartments have been updated for precip and infiltration, but not for
@@ -5641,7 +5643,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
          if (wetl2q_accum_m3 > 0.)
          {
-            pBox_surface_h2o->AddFluxFromGlobalHandler((float)wetl2q_accum_m3, FL_STREAM_SINK);
+            ASSERT(pBox_surface_h2o->GetFluxValue() == 0);
 
             int num_wetl = (int)m_wetlArray.GetSize();
             int wetl_ndx = 0;
@@ -17792,15 +17794,15 @@ float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta)
 
 bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta, 
    double * pPrecip2WetlSurfH2O_m3, double* pWetl2TopSoil_m3, double * pWetl2SubSoil_m3, double* pWetl2Reach_m3) 
+// Updates IDU attributes WETNESS, FLOODDEPTH, and SM_DAY.
 {
    *pPrecip2WetlSurfH2O_m3 = 0.;
    *pWetl2TopSoil_m3 = 0.;
    *pWetl2SubSoil_m3 = 0.;
    *pWetl2Reach_m3 = 0.;
-   if (m_wetlandArea_m2 <= 0.) return(false);
+   if (m_wetlandArea_m2 <= 0.) 
+      return(false);
    bool ret_val = true;
-
-   *pPrecip2WetlSurfH2O_m3 = precip_mm * m_wetlandArea_m2;
 
    double hru_to_topsoil_m3 = 0.;
    double hru_to_subsoil_m3 = 0.;
@@ -17820,27 +17822,28 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       double idu_to_reach_mm = 0.;
 
       // In this IDU, how much potential surface water is there?
+      float sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
       double wetness_mm = gIDUs->Att(idu_poly_ndx, WETNESS);
       double flooddepth_mm = gIDUs->Att(idu_poly_ndx, FLOODDEPTH);
       ASSERT(wetness_mm > 0 || flooddepth_mm == 0);
+      ASSERT(flooddepth_mm == 0 || wetness_mm == gIDUs->Att(idu_poly_ndx, WETL_CAP));
       double idu_surf_h2o_mm = precip_mm + (wetness_mm > 0. ? wetness_mm : 0.) + flooddepth_mm;
       if (idu_surf_h2o_mm <= 0.)
       { // There isn't any water available in this IDU to infiltrate into the soil.
-         float sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY);
-         wetness_mm = -(fc - sm_day_mm);
+          wetness_mm = -(fc - sm_day_mm);
          if (wetness_mm > 0.)
          {
             ASSERT(close_enough(0, wetness_mm, 1e-4, 1));
             wetness_mm = 0.;
          }
          gFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
+         ASSERT(flooddepth_mm == 0);
          continue; 
       }
 
       // How will the water that drains from the surface into the soil be
       // divided between the topsoil and the subsoil?
       // frac_to_subsoil is the proportion of surface water that bypasses the topsoil bucket, and is added directly to the subsoil
-      double sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY);
       double frac_to_subsoil = GroundWaterRechargeFraction((float)sm_day_mm, (float)fc, (float)Beta);
       ASSERT(0. <= frac_to_subsoil && frac_to_subsoil <= 1.);
 
@@ -17873,10 +17876,13 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
          ASSERT(wetness_mm >= 0.);
       } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm) ... else
 
-      // Update the IDU attributes WETNESS and SM_DAY.
+      // Update the IDU attributes WETNESS, FLOODDEPTH, and SM_DAY.
+      ASSERT(wetness_mm > 0 || flooddepth_mm == 0);
+      ASSERT(flooddepth_mm == 0 || wetness_mm == gIDUs->Att(idu_poly_ndx, WETL_CAP));
       gFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
+      gFlowModel->SetAtt(idu_poly_ndx, FLOODDEPTH, flooddepth_mm);
       if (wetness_mm > 0.) m_standingH2Oflag = true;
-      sm_day_mm += idu_to_topsoil_mm;
+      sm_day_mm += (float)idu_to_topsoil_mm;
       gFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
 
       // Convert water depths to water volumes, and add to the HRU accumulators.
@@ -17893,7 +17899,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
    *pPrecip2WetlSurfH2O_m3 = (precip_mm / 1000.) * m_wetlandArea_m2;
    *pWetl2TopSoil_m3 = hru_to_topsoil_m3;
    *pWetl2SubSoil_m3 = hru_to_subsoil_m3;
-   *pWetl2Reach_m3 = hru_to_reach_m3;;
+   *pWetl2Reach_m3 = hru_to_reach_m3;
  
    return(ret_val);
 } // end of WetlSurfaceH2Ofluxes()

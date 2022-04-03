@@ -271,9 +271,11 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       double wetl_to_topsoil_m3 = 0.;
       double wetl_to_subsoil_m3 = 0.;
       double wetl_to_reach_m3 = 0.;
+      bool ret_val = true;
       if (pHRU->m_wetlandArea_m2 > 0.)
-         pHRU->WetlSurfH2Ofluxes(precip, fc, Beta, &to_wetl_surf_h2o_m3, &wetl_to_topsoil_m3, &wetl_to_subsoil_m3, &wetl_to_reach_m3);
-
+         ret_val = pHRU->WetlSurfH2Ofluxes(precip, fc, Beta, &to_wetl_surf_h2o_m3, &wetl_to_topsoil_m3, &wetl_to_subsoil_m3, &wetl_to_reach_m3);
+      if (!ret_val)
+         ASSERT(false);
       // gwIrrigated is the proportion of rain/snowmelt that bypasses the irrigated soil bucket, and is added directly to GW
       float gwIrrigated = GroundWaterRechargeFraction(irrigatedSoilWater_mm, fc, Beta); 
 
