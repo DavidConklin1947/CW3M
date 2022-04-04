@@ -2205,7 +2205,8 @@ protected:
 
    FDataObj *m_pGlobalFlowData;
    
-   static void GetCatchmentDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra );
+//x   static void GetCatchmentDerivatives(double time, double timestep, int svCount, double* derivatives, FlowContext * pFlowContext);
+   static void GetCatchmentDerivatives(double time, double timestep, int svCount, double* derivatives, void* extra);
    static void GetReservoirDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra ) ;
    //static void GetReachDerivatives( float time, float timestep, int svCount, double *derivatives, void *extra );
    static void GetTotalDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra ) ;
