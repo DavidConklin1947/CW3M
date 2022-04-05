@@ -12640,58 +12640,28 @@ void FlowModel::UpdateCatchmentFluxes( float time, float timeStep, FlowContext *
  */
 
 
-      void FlowModel::GetCatchmentDerivatives(double time, double timeStep, int svCount, double* derivatives /*out*/, void* extra)
+void FlowModel::GetCatchmentDerivatives(double time, double timeStep, int svCount, double* derivatives /*out*/, void* extra)
    {
-//x   FlowContext *pFlowContext = (FlowContext*) extra;
-   
-//x   pFlowContext->timeStep = (float) timeStep;
-//x   pFlowContext->time = (float) time;
-   
-//x   FlowModel *pModel = pFlowContext->pFlowModel;
-
-   //pModel->m_pLateralExchange->Run( pFlowContext ); // SetGlobalHruToReachExchanges(); 
-   //pModel->m_pHruVertExchange->Run( pFlowContext ); // SetGlobalHruVertFluxes();
-
-   // evap trans (if any defined)
-   //for( int i=0; i < (int) pModel->m_evapTransArray.GetSize(); i++ )
-   //   pModel->m_evapTransArray[ i ]->Run( pFlowContext );
-   //
-   //// allocations (if any defined)
-   //for( int i=0; i < (int) pModel->m_allocArray.GetSize(); i++ )
-   //   pModel->m_allocArray[ i ]->Run( pFlowContext );
-
-//x   pModel->SetGlobalExtraSVRxn();
    gFlowModel->SetGlobalExtraSVRxn();
 
-//x   GlobalMethodManager::Step(pFlowContext);
    GlobalMethodManager::Step(&gFlowModel->m_flowContext);
 
-//x   pFlowContext->svCount = gpModel->m_hruSvCount - 1;
    gFlowModel->m_flowContext.svCount = gpModel->m_hruSvCount - 1;
 
-//x   int catchmentCount = (int)pModel->m_catchmentArray.GetSize();
    int catchmentCount = (int)gFlowModel->m_catchmentArray.GetSize();
-//x   int hruLayerCount = pModel->GetHRULayerCount();
    int hruLayerCount = gFlowModel->GetHRULayerCount();
-
-//x   FlowContext flowContext( *pFlowContext );    // make a copy for openMP
       
    // iterate through catchments/hrus/hrulayers, calling fluxes as needed
    clock_t start = clock();
 
-//x   int hruCount = (int)pModel->m_hruArray.GetSize();
    int hruCount = (int)gFlowModel->m_hruArray.GetSize();
-//x #pragma omp parallel for firstprivate( flowContext )
    for ( int h=0; h < hruCount; h++ )
       {
-//x      HRU* pHRU = pModel->m_hruArray[h];
       HRU* pHRU = gFlowModel->m_hruArray[h];
-//x      flowContext.pHRU = pHRU;
 
       for ( int l=0; l < hruLayerCount; l++ )
          {
          HRULayer *pHRULayer = pHRU->GetLayer( l );
-//x         flowContext.pHRULayer = pHRULayer;
          int svIndex = pHRULayer->m_svIndex;
          derivatives[svIndex] = pHRULayer->GetFluxValue();
 
@@ -12707,10 +12677,8 @@ void FlowModel::UpdateCatchmentFluxes( float time, float timeStep, FlowContext *
          for ( int k=0; k < pHRULayer->GetFluxCount(); k++ )
             {
             Flux *pFlux = pHRULayer->GetFlux( k );
-//x            flowContext.pFlux = pFlux;
             // get the flux.  Note that this is a rate applied over a timestep
-//x            float flux = pFlux->Evaluate(pFlowContext); //pFlowContext );
-            float flux = pFlux->Evaluate(&gFlowModel->m_flowContext); //pFlowContext );
+            float flux = pFlux->Evaluate(&gFlowModel->m_flowContext); 
             int sv = pFlux->m_pStateVar->m_index;
             if ( pFlux->IsSource() )
                derivatives[ svIndex + sv ] += flux;
@@ -12738,10 +12706,8 @@ void FlowModel::UpdateCatchmentFluxes( float time, float timeStep, FlowContext *
       } // end of loop thru HRUs
    gFlowModel->ResetHRUfluxes();
 
-//x   if (pModel->m_pReachRouting->GetMethod() == GM_RKF)
    if (gFlowModel->m_pReachRouting->GetMethod() == GM_RKF)
       {
-//x      pFlowContext->timing = GMT_REACH;
       gFlowModel->m_flowContext.timing = GMT_REACH;
       GlobalMethodManager::SetTimeStep(gFlowModel->m_flowContext.timeStep);
       GlobalMethodManager::Step(&gFlowModel->m_flowContext);
