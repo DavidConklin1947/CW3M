@@ -197,13 +197,17 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       int num_idus_in_hru = (int)pHRU->m_polyIndexArray.GetSize();
 
       // Divide the surface water into melt water and standing water.
-      double hru_standing_h2o_m3 = 0.; // Assume no standing water.
-      double water_in_snowpack_m3 = pHRULayer1->m_volumeWater + pHRULayer1->GetFluxValue();
+      double idu_standing_h2o_accum_m3 = 0.; 
+      double idu_wetl2q_accum_cms = 0.;
+      double layer1_vol_and_flux_m3 = pHRULayer1->m_volumeWater - pHRULayer1->GetFluxValue(); // Believe it or not, negative HRUlayer fluxes represent water going INTO the layer.  DRC 4/6/22
       if (pHRU->m_wetlandArea_m2 > 0)
       { // There is wetland, so there might be standing water.
          for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
          {
             int idu_poly_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
+
+            idu_wetl2q_accum_cms += Att(idu_poly_ndx, WETL2Q);
+
             int lulc_a = AttInt(idu_poly_ndx, LULC_A);
             bool is_wetland = lulc_a == LULCA_WETLAND;
             if (!is_wetland) continue;
@@ -216,34 +220,26 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
 
             float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
             double idu_standing_h2o_m3 = (standing_h2o_mm / 1000.) * idu_area_m2;
-            hru_standing_h2o_m3 += idu_standing_h2o_m3;
-            if (hru_standing_h2o_m3 > water_in_snowpack_m3)
-               ASSERT(close_enough(water_in_snowpack_m3, hru_standing_h2o_m3, 1e-4, 1));
+            idu_standing_h2o_accum_m3 += idu_standing_h2o_m3;
+            if (idu_standing_h2o_accum_m3 > layer1_vol_and_flux_m3)
+               ASSERT(close_enough(idu_standing_h2o_accum_m3, layer1_vol_and_flux_m3, 1e-4, 1));
          } // end of loop thru the IDUs in this HRU
 
-         if (hru_standing_h2o_m3 > water_in_snowpack_m3)
-         {
-//x            ASSERT(close_enough(hru_standing_h2o_m3, water_in_snowpack_m3, 1e-6, 1));
-            if (!close_enough(hru_standing_h2o_m3, water_in_snowpack_m3, 1e-4, 1))
-            {
-               CString msg;
-               msg.Format("HBVdailyProcess() hru_standing_h2o_m3 = %f, pHRULayer1->m_volumeWater = %f, pHRULayer1->GetFluxValue() = %f",
-                  hru_standing_h2o_m3, pHRULayer1->m_volumeWater, pHRULayer1->GetFluxValue());
-               Report::WarningMsg(msg);
-            }
-            water_in_snowpack_m3 = 0;
-         }
-         else water_in_snowpack_m3 -= hru_standing_h2o_m3;
-/*x
-         water_in_snowpack_m3 -= hru_standing_h2o_m3;
-         if (water_in_snowpack_m3 < 0.)
-         {
-            ASSERT(close_enough(water_in_snowpack_m3, 0., 1e-6, 1));
-            water_in_snowpack_m3 = 0.;
-         }
-x*/
       } // end of if (pHRU->m_wetlandArea_m2 > 0)
-      double water_in_snowpack_mm = (water_in_snowpack_m3 / non_wetl_area_m2) * 1000.; 
+
+      double water_in_snowpack_m3 = layer1_vol_and_flux_m3 - idu_standing_h2o_accum_m3;
+      if (water_in_snowpack_m3 < 0)
+      {
+         if (!close_enough(idu_standing_h2o_accum_m3, layer1_vol_and_flux_m3, 1e-4, 1))
+         {
+            CString msg;
+            msg.Format("HBVdailyProcess() idu_standing_h2o_accum_m3 = %f, pHRULayer1->m_volumeWater = %f, pHRULayer1->GetFluxValue() = %f",
+               idu_standing_h2o_accum_m3, pHRULayer1->m_volumeWater, pHRULayer1->GetFluxValue());
+            Report::WarningMsg(msg);
+         }
+         water_in_snowpack_m3 = 0;
+      }
+      double water_in_snowpack_mm = (water_in_snowpack_m3 / non_wetl_area_m2) * 1000.;
 
       float hruIrrigatedArea = 0.0f;
       double hru_wetland_area_m2 = 0.;
