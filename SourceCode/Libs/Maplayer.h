@@ -1166,6 +1166,7 @@ protected:
       m_colDEV_VAL(-1),
       m_colECOREGION(-1),
       m_colELEV_MEAN(-1),
+      m_colET_DAY(-1),
       m_colF_THETA(-1),
       m_colFIELD_CAP(-1),
       m_colFLOODDEPTH(-1),
@@ -1228,6 +1229,8 @@ public:
 #define ECOREGION gIDUs->m_colECOREGION
    int m_colELEV_MEAN;
 #define ELEV_MEAN gIDUs->m_colELEV_MEAN
+   int m_colET_DAY;
+#define ET_DAY gIDUs->m_colET_DAY
    int m_colF_THETA;
 #define F_THETA gIDUs->m_colF_THETA
    int m_colFIELD_CAP;
@@ -1319,6 +1322,7 @@ public:
       ok = ok && CheckCol(m_colDEV_VAL, "DEV_VAL", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colECOREGION, "ECOREGION", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colELEV_MEAN, "ELEV_MEAN", TYPE_FLOAT, CC_MUST_EXIST);
+      ok = ok && CheckCol(m_colET_DAY, "ET_DAY", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colF_THETA, "F_THETA", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colFIELD_CAP, "FIELD_CAP", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colFLOODDEPTH, "FLOODDEPTH", TYPE_DOUBLE, CC_AUTOADD);

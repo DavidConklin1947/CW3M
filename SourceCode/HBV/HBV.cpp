@@ -221,12 +221,20 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
                ASSERT(close_enough(water_in_snowpack_m3, hru_standing_h2o_m3, 1e-4, 1));
          } // end of loop thru the IDUs in this HRU
 
+         if (hru_standing_h2o_m3 > water_in_snowpack_m3)
+         {
+            ASSERT(close_enough(hru_standing_h2o_m3, water_in_snowpack_m3, 1e-6, 1));
+            water_in_snowpack_m3 = 0;
+         }
+         else water_in_snowpack_m3 -= hru_standing_h2o_m3;
+/*x
          water_in_snowpack_m3 -= hru_standing_h2o_m3;
          if (water_in_snowpack_m3 < 0.)
          {
             ASSERT(close_enough(water_in_snowpack_m3, 0., 1e-6, 1));
             water_in_snowpack_m3 = 0.;
          }
+x*/
       } // end of if (pHRU->m_wetlandArea_m2 > 0)
       double water_in_snowpack_mm = (water_in_snowpack_m3 / non_wetl_area_m2) * 1000.; 
 

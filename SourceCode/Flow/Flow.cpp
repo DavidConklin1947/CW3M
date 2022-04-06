@@ -1504,6 +1504,19 @@ bool Reach::AccumWPadditions(WaterParcel incomingWP)
 } // end of AccumWPadditions();
 
 
+bool Reach::AddRunoffToReach(double runoffVol_m3)
+{
+   ASSERT(runoffVol_m3 >= 0.); // This will also catch when runoffVol_m3 is a NaN.
+   ASSERT(!isnan(m_globalHandlerFluxValue));
+
+   // For reaches, negative flux values are additions to the reach, 
+   // unlike HRUs, where negative flux values are withdrawals from the water compartment. Really! DRC 4/5/22
+   m_globalHandlerFluxValue = (float)(m_globalHandlerFluxValue - runoffVol_m3);
+   return(true);
+
+} // end of AddRunoffToReach()
+
+
 bool Reach::AccumWithdrawals(double withdrawal_volume_m3)
 {
    ASSERT(withdrawal_volume_m3 >= 0.); // This should also catch NaNs in withdrawal_volume_m3.
@@ -5591,7 +5604,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pBox_slow_gw->m_volumeWater / pHRU->m_HRUtotArea_m2));
 
          double box_snow_m3 = pBox_snow->m_volumeWater;
-         double surface_h2o_m3 = pBox_surface_h2o->m_volumeWater;
+//x         double surface_h2o_m3 = pBox_surface_h2o->m_volumeWater;
 
          // How much of the surface water is meltwater in the snowpack, and how much is standing water in wetlands?
          double hru_standing_h2o_m3 = 0.;
@@ -5658,17 +5671,17 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             pReach->AccumWPadditions(wetl2qWP);
          }
 
-         double hru_h2o_melt_m3 = surface_h2o_m3 - hru_standing_h2o_m3;
+         double hru_h2o_melt_m3 = pBox_surface_h2o->m_volumeWater - hru_standing_h2o_m3;
          if (hru_h2o_melt_m3 < 0.)
          {
-            if (surface_h2o_m3 == 0 || hru_standing_h2o_m3 == 0)
+            if (pBox_surface_h2o->m_volumeWater == 0 || hru_standing_h2o_m3 == 0)
                ASSERT(close_enough(abs(hru_h2o_melt_m3), 0, 0.001, 1.0));
             else
-            { // Meltwater, which is the difference between surface_h2o_m3 (= pBox_surface_h2o->m_volumeWater) and hru_standing_h2o_m3, 
+            { // Meltwater, which is the difference between pBox_surface_h2o->m_volumeWater and hru_standing_h2o_m3, 
                // when it is negative should be a tiny fraction of hru_standing_h2o_m3 arising from roundoff.
-               ASSERT(surface_h2o_m3 > 0);
-               double fraction = hru_h2o_melt_m3 / surface_h2o_m3;
-               ASSERT(close_enough(fraction, 0, 1e-3, 1e-3));
+               ASSERT(pBox_surface_h2o->m_volumeWater > 0);
+               double fraction = hru_h2o_melt_m3 / pBox_surface_h2o->m_volumeWater;
+               ASSERT(close_enough(fraction, 0, 1e-2, 1e-2));
             }
             hru_h2o_melt_m3 = 0.;
          }
@@ -12745,6 +12758,7 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU, double boxSurfaceH2Oadjustment_m3)
    double idu_standing_h2o_accum_m3 = 0.;
    double idu_snow_swe_accum_m3 = 0.;
    double idu_wetl2q_accum_cms = 0.; // ???
+   double idu_ET_DAY_accum_m3 = 0;
    int num_idus = (int)pHRU->m_polyIndexArray.GetSize();
    for (int i = 0; i < num_idus; i++)
    {
@@ -12759,7 +12773,10 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU, double boxSurfaceH2Oadjustment_m3)
          float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
          double idu_standing_h2o_m3 = (idu_standing_h2o_mm / 1000) * idu_area_m2;
          idu_standing_h2o_accum_m3 += idu_standing_h2o_m3;
-        
+
+         double idu_ET_DAY_mm = AttFloat(idu_poly_ndx, ET_DAY);
+         idu_ET_DAY_accum_m3 += (idu_ET_DAY_mm / 1000) * idu_area_m2;
+
          double idu_wetl2q_cms = gFlowModel->Att(idu_poly_ndx, WETL2Q); // ???
          idu_wetl2q_accum_cms += idu_wetl2q_cms; // ???
       }
@@ -12785,12 +12802,12 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU, double boxSurfaceH2Oadjustment_m3)
 
    double adjusted_box_surface_h2o_m3 = box_surface_h2o_m3 + boxSurfaceH2Oadjustment_m3;
 
-   bool is_close_enough = close_enough(hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-4, 1);
-   is_close_enough = is_close_enough && close_enough(hru_box_surf_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-4, 1.);
+   bool is_close_enough = close_enough(hru_box_surf_m3, hru_h2o_melt_m3 + hru_h2o_stndg_m3, 1e-3, 1);
+   is_close_enough = is_close_enough && close_enough(hru_box_surf_m3, idu_melt_h2o_accum_m3 + idu_standing_h2o_accum_m3, 1e-3, 1.);
    is_close_enough = is_close_enough && close_enough(hru_snow_box_m3, box_snow_m3, 1e-4, 1);
 // ???  is_close_enough = is_close_enough && close_enough(hru_box_surf_m3, adjusted_box_surface_h2o_m3, 1e-4, 1);
    is_close_enough = is_close_enough && close_enough(box_snow_m3, idu_snow_swe_accum_m3 - idu_melt_h2o_accum_m3, 1e-4, 1);
-   is_close_enough = is_close_enough && (pHRU->m_snowpackFlag == (box_snow_m3 > 0));
+   is_close_enough = is_close_enough && ((pHRU->m_snowpackFlag == (box_snow_m3 > 0)) || close_enough(box_snow_m3, 0, 1e-4, 1));
    is_close_enough = is_close_enough && (pHRU->m_standingH2Oflag == (hru_h2o_stndg_m3 > 0));
 
    if (!is_close_enough)
@@ -17862,15 +17879,22 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       sm_day_mm += (float)idu_to_topsoil_mm;
       gFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
 
-      // Convert water depths to water volumes, and add to the HRU accumulators.
+      // Convert water depths to water volumes.
       float idu_area_m2 = gIDUs->AttFloat(idu_poly_ndx, AREA);
       double idu_surf_h2o_m3 = (idu_surf_h2o_mm / 1000.) * idu_area_m2;
       double idu_to_topsoil_m3 = (idu_to_topsoil_mm / 1000.) * idu_area_m2;
       double idu_to_subsoil_m3 = (idu_to_subsoil_mm / 1000.) * idu_area_m2;
-      double idu_to_reach_m3 = (idu_to_reach_mm / 1000.) * idu_area_m2;
+      double flooddepth_m3 = (flooddepth_mm / 1000.) * idu_area_m2;
+
+      // Add to the HRU fluxes.
       hru_to_topsoil_m3 += idu_to_topsoil_m3;
       hru_to_subsoil_m3 += idu_to_subsoil_m3;
-      hru_to_reach_m3 += idu_to_reach_m3;
+      hru_to_reach_m3 += flooddepth_m3; 
+
+      // Add the flood water to the reach.
+      int comid = gIDUs->AttInt(idu_poly_ndx, COMID);
+      Reach* pReach = gFlowModel->FindReachFromID(comid);
+      pReach->AddRunoffToReach(flooddepth_m3);
    } // end of loop through IDUs
 
    *pPrecip2WetlSurfH2O_m3 = (precip_mm / 1000.) * m_wetlandArea_m2;

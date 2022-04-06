@@ -981,6 +981,7 @@ public:
    static double Evap_m_s(double tempH2O_degC, double swIn_W_m2, double lwOut_W_m2, double tempAir_degC, double ws_m_sec, double sphumidity);
 
    bool AccumWPadditions(WaterParcel incomingWP);
+   bool AddRunoffToReach(double runoffVol_m3);
    bool AccumWithdrawals(double withdrawal_volume_m3);
    bool  AddFluxFromGlobalHandler(float value);
 
@@ -2205,7 +2206,6 @@ protected:
 
    FDataObj *m_pGlobalFlowData;
    
-//x   static void GetCatchmentDerivatives(double time, double timestep, int svCount, double* derivatives, FlowContext * pFlowContext);
    static void GetCatchmentDerivatives(double time, double timestep, int svCount, double* derivatives, void* extra);
    static void GetReservoirDerivatives( double time, double timestep, int svCount, double *derivatives, void *extra ) ;
    //static void GetReachDerivatives( float time, float timestep, int svCount, double *derivatives, void *extra );
