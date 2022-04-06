@@ -631,7 +631,7 @@ public:
 
    bool AddFluxFromGlobalHandler( float value, WFAINDEX index  );  // m3/day
    bool AccumAdditions(float h2oEnteringHRUlayer_m3);
-   bool AccumWithdrawals(double h2oLeavingHRUlayer_m3);
+   bool AccumWithdrawalsFromHRUlayer(float h2oLeavingHRUlayer_m3);
 
    bool CheckForNaNs(CString callerName, bool OKflag)
       {
@@ -1528,6 +1528,7 @@ public:
    //void RunGlobalMethods( void );          
 
    bool ApplyQ2WETL(); // Move water spilling over the stream banks into the wetlands.
+   bool ApplyWETL2Q(); // Move water overflowing wetlands back to the reaches.
    Wetland* GetWetlandFromID(int wetlID);
 
    inline double Att(int IDUindex, int col);

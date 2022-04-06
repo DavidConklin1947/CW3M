@@ -5576,7 +5576,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       m_hruBlock.Integrate( (double)m_currentTime, (double)m_currentTime+stepSize, GetCatchmentDerivatives, &m_flowContext );  // update HRU swc and associated state variables
 
       // At this point, HRU water compartments have been updated for precip and infiltration, but not for
-      // flows from reaches.
+      // flows from reaches and not yet for any overflow i.e. floodwater from the wetland back to the reach.
  
       for (int hru_ndx = 0; hru_ndx < m_hruArray.GetSize(); hru_ndx++)
       {
@@ -5589,7 +5589,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          HRULayer* pBox_slow_gw = pHRU->GetLayer(BOX_SLOW_GW);
          
          pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pBox_snow->m_volumeWater / pHRU->m_HRUtotArea_m2)); 
-         pHRU->SetAtt(HruBOXSURF_M3, pBox_surface_h2o->m_volumeWater); 
+//x         pHRU->SetAtt(HruBOXSURF_M3, pBox_surface_h2o->m_volumeWater); 
 
          float hru_irrigated_area_m2 = (float)pHRU->m_areaIrrigated;
          float hru_natural_area_m2 = pHRU->m_HRUeffArea_m2 - hru_irrigated_area_m2;
@@ -5623,7 +5623,8 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             double wetness_mm = Att(idu_poly_ndx, WETNESS);
             double flooddepth_mm = Att(idu_poly_ndx, FLOODDEPTH);
             ASSERT(wetness_mm >= 0 || flooddepth_mm == 0);
-            double standing_h2o_mm = wetness_mm + flooddepth_mm;
+            double standing_h2o_mm = (wetness_mm <= 0) ? 0 : wetness_mm + flooddepth_mm;
+//x            double standing_h2o_mm = wetness_mm + flooddepth_mm; 
             if (standing_h2o_mm > 0.)
             {
                float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
@@ -5636,10 +5637,17 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                   idu_wetl2q_cms = idu_wetl2q_m3 / SEC_PER_DAY;
                   wetness_mm = wetl_cap_mm;
                   flooddepth_mm = standing_h2o_mm - wetness_mm;
+
+                  // For now (GMT_CATCHMENT), the wetl2q water is still accounted for in the IDU
+                  // attributes WETNESS and FLOOODEPTH, which should sum together to get the IDU attribute
+                  // H2OSTNDGM3 (when converted to a volume). The size of the wetl2q flux out of the IDU is
+                  // recorded in the IDU WETL2Q attribute.  The wetl2q fluxes from the IDUs are 
+                  // turned into fluxes out of BOX_SURF_H2O and into the appropriate reaches at GMT_REACH time later 
+                  // in this timestep.
                   SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
                   SetAtt(idu_poly_ndx, FLOODDEPTH, 0.);
 
-                  // An HRU can can contain all or part of at most one wetland.
+                  // An HRU can contain all or part of at most one wetland.
                   int idu_wetl_id = AttInt(idu_poly_ndx, WETL_ID);
                   if (hru_wetl_id == NON_WETLAND_TOKEN) hru_wetl_id = idu_wetl_id;
                   else ASSERT(hru_wetl_id == idu_wetl_id);
@@ -5653,7 +5661,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             SetAtt(idu_poly_ndx, WETL2Q, idu_wetl2q_cms);
          } // end of loop thru IDUs for this HRU
          ASSERT(!pHRU->m_standingH2Oflag || hru_standing_h2o_area_m2 > 0.);
-
+/*x
          if (wetl2q_accum_m3 > 0.)
          {
             ASSERT(pBox_surface_h2o->GetFluxValue() == 0);
@@ -5670,7 +5678,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             WaterParcel wetl2qWP(wetl2q_accum_m3, reach_degC);
             pReach->AccumWPadditions(wetl2qWP);
          }
-
+x*/
          double hru_h2o_melt_m3 = pBox_surface_h2o->m_volumeWater - hru_standing_h2o_m3;
          if (hru_h2o_melt_m3 < 0.)
          {
@@ -5685,8 +5693,14 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             }
             hru_h2o_melt_m3 = 0.;
          }
+
          pHRU->SetAtt(HruH2OMELT_M3, hru_h2o_melt_m3);
          pHRU->SetAtt(HruH2OSTNDGM3, hru_standing_h2o_m3);
+
+         // The water that will later today, at GMT_REACH time, flow back out of the wetlands to the reaches is
+         // still at this time (GMT_CATCHMENT) included in hru_standing_h2o_m3.
+         ASSERT(close_enough(hru_h2o_melt_m3 + hru_standing_h2o_m3, pBox_surface_h2o->m_volumeWater, 1e-6, 1));
+         pHRU->SetAtt(HruBOXSURF_M3, hru_h2o_melt_m3 + hru_standing_h2o_m3);
 
          // Update IDU attributes SM_DAY, H2O_MELT, and SNOW_SWE
          double hru_h2o_melt_area_m2 = pHRU->m_HRUtotArea_m2 - pHRU->m_wetlandArea_m2;
@@ -5769,8 +5783,10 @@ bool FlowModel::Run( EnvContext *pEnvContext )
       m_flowContext.Reset();
       
       start = clock();
-
+// GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH GMT_REACH 
       m_flowContext.timing = GMT_REACH;
+      ApplyWETL2Q(); // Move water overflowing wetlands back to the reaches.
+
       GlobalMethodManager::SetTimeStep(stepSize );
       GlobalMethodManager::Step( &m_flowContext );
 
@@ -5883,6 +5899,41 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
    return TRUE;
    } // end of FlowModel::Run()
+
+
+bool FlowModel::ApplyWETL2Q() // Per IDU attribute WETL2Q (cms), move water from wetlands to reaches.
+{
+   bool ret_val = true;
+   int num_wetl = (int)m_wetlArray.GetSize();
+   for (int wetl_ndx = 0; wetl_ndx < num_wetl; wetl_ndx++)
+   {
+      Wetland* pWetl = m_wetlArray[wetl_ndx];
+      int num_idus = pWetl->m_wetlIDUndxArray.GetSize();
+      for (int idu_ndx_in_wetl = 0; idu_ndx_in_wetl < num_idus; idu_ndx_in_wetl++)
+      {
+         int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl];
+         double idu_wetl2q_cms = Att(idu_poly_ndx, WETL2Q);
+         if (idu_wetl2q_cms > 0)
+         {
+            float idu_area_m2 = AttInt(idu_poly_ndx, AREA);
+            double idu_wetl2q_m3 = idu_wetl2q_cms * SEC_PER_DAY;
+            double idu_temp_wetl_degC = Att(idu_poly_ndx, TEMP_WETL);
+            WaterParcel idu_wetl2qWP(idu_wetl2q_m3, idu_temp_wetl_degC);
+
+            int reach_ndx = pWetl->m_wetlReachNdxArray[idu_ndx_in_wetl];
+            Reach* pReach = m_reachArray[reach_ndx];
+            pReach->AccumWPadditions(idu_wetl2qWP);
+
+            int hru_ndx = pWetl->m_wetlHRUndxArray[idu_ndx_in_wetl];
+            HRU* pHRU = m_hruArray[hru_ndx];
+            HRULayer* pBOX_SURFACE_H2O = pHRU->GetLayer(BOX_SURFACE_H2O);
+            pBOX_SURFACE_H2O->AccumWithdrawalsFromHRUlayer((float)idu_wetl2qWP.m_volume_m3);
+         } // end of if (idu_wetl2q_cms > 0)
+      } // end of loop through the IDUs in this wetland
+    } // end of loop through wetlands
+
+   return(true);
+} // end of ApplyWETL2Q()
 
 
    bool FlowModel::ApplyQ2WETL()
@@ -12815,7 +12866,7 @@ bool FlowModel::CheckSurfaceH2O(HRU * pHRU, double boxSurfaceH2Oadjustment_m3)
       CString msg; 
       msg.Format("CheckSurfaceH2O() HRU id = %d. boxSurfaceH2Oadjustment = %f. is_close_enough is false", 
          pHRU->m_id, boxSurfaceH2Oadjustment_m3); 
-      Report::LogWarning(msg);
+      Report::WarningMsg(msg);
       msg.Format("hru_box_surf_m3 = %f", hru_box_surf_m3); Report::LogMsg(msg);
       msg.Format("hru_h2o_melt_m3 = %f", hru_h2o_melt_m3); Report::LogMsg(msg);
       msg.Format("hru_h2o_stndg_m3 = %f", hru_h2o_stndg_m3); Report::LogMsg(msg);
@@ -17926,12 +17977,12 @@ bool HRULayer::AccumAdditions(float h2oEnteringHRUlayer_m3)
    return(rtn_val);
 } // end of HRULayer::AccumAdditions()
 
-/*
-bool HRULayer::AccumWithdrawals(float h2oLeavingHRUlayer_m3)
+
+bool HRULayer::AccumWithdrawalsFromHRUlayer(float h2oLeavingHRUlayer_m3)
 {
    bool rtn_val = AddFluxFromGlobalHandler(h2oLeavingHRUlayer_m3, FL_SINK);
    return(rtn_val);
-} // end of HRULayer::AccumWithdrawals()
-*/
+} // end of HRULayer::AccumWithdrawalsFromHRUlayer()
+
 
 
