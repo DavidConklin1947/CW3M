@@ -199,7 +199,8 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       // Divide the surface water into melt water and standing water.
       double idu_standing_h2o_accum_m3 = 0.; 
       double idu_wetl2q_accum_cms = 0.;
-      double layer1_vol_and_flux_m3 = pHRULayer1->m_volumeWater - pHRULayer1->GetFluxValue(); // Believe it or not, negative HRUlayer fluxes represent water going INTO the layer.  DRC 4/6/22
+      double idu_wetl2q_accum_m3 = 0.;
+      double layer1_vol_and_flux_m3 = pHRULayer1->m_volumeWater + pHRULayer1->GetFluxValue(); 
       if (pHRU->m_wetlandArea_m2 > 0)
       { // There is wetland, so there might be standing water.
          for (int idu_ndx_in_hru = 0; idu_ndx_in_hru < num_idus_in_hru; idu_ndx_in_hru++)
@@ -207,6 +208,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             int idu_poly_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
 
             idu_wetl2q_accum_cms += Att(idu_poly_ndx, WETL2Q);
+            idu_wetl2q_accum_m3 = idu_wetl2q_accum_cms * SEC_PER_DAY;
 
             int lulc_a = AttInt(idu_poly_ndx, LULC_A);
             bool is_wetland = lulc_a == LULCA_WETLAND;
@@ -221,13 +223,13 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
             double idu_standing_h2o_m3 = (standing_h2o_mm / 1000.) * idu_area_m2;
             idu_standing_h2o_accum_m3 += idu_standing_h2o_m3;
-            if (idu_standing_h2o_accum_m3 > layer1_vol_and_flux_m3)
+            if (idu_standing_h2o_accum_m3 > (layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3))
                ASSERT(close_enough(idu_standing_h2o_accum_m3, layer1_vol_and_flux_m3, 1e-4, 1));
          } // end of loop thru the IDUs in this HRU
 
       } // end of if (pHRU->m_wetlandArea_m2 > 0)
 
-      double water_in_snowpack_m3 = layer1_vol_and_flux_m3 - idu_standing_h2o_accum_m3;
+      double water_in_snowpack_m3 = (layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3) - idu_standing_h2o_accum_m3;
       if (water_in_snowpack_m3 < 0)
       {
          if (!close_enough(idu_standing_h2o_accum_m3, layer1_vol_and_flux_m3, 1e-4, 1))

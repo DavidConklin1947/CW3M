@@ -3937,13 +3937,13 @@ void FlowModel::SummarizeIDULULC()
       }
    } // end of SummarizeIDULULC
 
-bool FlowModel::InitRun( EnvContext *pEnvContext )
-   {
+bool FlowModel::InitRun(EnvContext* pEnvContext)
+{
    m_flowContext.Reset();
    m_flowContext.pFlowModel = this;
 
    m_flowContext.pEnvContext = pEnvContext;
-   m_flowContext.timing   = GMT_INITRUN;
+   m_flowContext.timing = GMT_INITRUN;
 
    m_currentEnvisionScenarioIndex = pEnvContext->scenarioIndex;
    m_projectionWKT = pEnvContext->pMapLayer->m_projection; //the Well Known Text for the maplayer projection
@@ -3956,16 +3956,16 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       Report::ErrorMsg(msg);
       return(false);
    }
-   ClimateScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+   ClimateScenario* pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
    int num_climate_files = (int)pScenario->m_climateInfoArray.GetCount();
-   for (int climate_file_ndx = 0; climate_file_ndx < num_climate_files; climate_file_ndx++) 
+   for (int climate_file_ndx = 0; climate_file_ndx < num_climate_files; climate_file_ndx++)
    {
       ClimateDataInfo* pInfo = pScenario->m_climateInfoArray[climate_file_ndx];
       ASSERT(pInfo->m_type != CDT_UNKNOWN);
       pInfo->m_pDataObj = new GeoSpatialDataObj;
       pInfo->m_pDataObj->InitLibraries();
    } // end of loop to initialize access to the netCDF climate data files
-   
+
    if (pEnvContext->m_maxDaysInYear == -1) pEnvContext->m_maxDaysInYear = pScenario->m_maxDaysInClimateYear;
 
    m_precipNdx.RemoveAll();
@@ -3986,10 +3986,10 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    }
 
 
-   m_totalWaterInputRate  = 0;
-   m_totalWaterOutputRate = 0; 
-   m_totalWaterInput      = 0;
-   m_totalWaterOutput     = 0; 
+   m_totalWaterInputRate = 0;
+   m_totalWaterOutputRate = 0;
+   m_totalWaterInput = 0;
+   m_totalWaterOutput = 0;
 
    SummarizeIDULULC();
 
@@ -4007,7 +4007,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pReachLayer->SetColDataU(m_colReachRES_SW_IN, 0);
    m_pReachLayer->SetColDataU(m_colReachRES_TEMP, 0);
    m_pReachLayer->SetColDataU(m_colReachRESAREA_HA, 0);
-   if (!InitRunReservoirs( pEnvContext )) return(false);
+   if (!InitRunReservoirs(pEnvContext)) return(false);
 
    m_pIDUlayer->SetColDataU(m_colSNOWCANOPY, 0.f);
    m_pIDUlayer->SetColDataU(m_colSM2ATM, 0);
@@ -4025,84 +4025,84 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    m_pReachLayer->SetColDataU(m_colReachADDEDVOL_C, 0);
    m_pReachLayer->SetColDataU(m_colReachADDED_Q, 0);
 
-   GlobalMethodManager::InitRun( &m_flowContext );
+   GlobalMethodManager::InitRun(&m_flowContext);
 
    m_pTotalFluxData->ClearRows();
 
    // if model outputs are in use, set up the data object
-   for ( int i=0; i < (int) m_modelOutputGroupArray.GetSize(); i++ )
-      {
-      ModelOutputGroup *pGroup = m_modelOutputGroupArray[ i ];
+   for (int i = 0; i < (int)m_modelOutputGroupArray.GetSize(); i++)
+   {
+      ModelOutputGroup* pGroup = m_modelOutputGroupArray[i];
 
-      if ( pGroup->m_pDataObj != NULL )
-         {
+      if (pGroup->m_pDataObj != NULL)
+      {
          pGroup->m_pDataObj->ClearRows();
-         pGroup->m_pDataObj->SetSize( pGroup->m_pDataObj->GetColCount(), 0 );
-         }
+         pGroup->m_pDataObj->SetSize(pGroup->m_pDataObj->GetColCount(), 0);
       }
+   }
 
-   if ( m_useRecorder && !m_estimateParameters )
-      {
-      for ( int i=0; i < (int) m_vrIDArray.GetSize(); i++ )
-         ::EnvStartVideoCapture( m_vrIDArray[ i ] );
-      }
+   if (m_useRecorder && !m_estimateParameters)
+   {
+      for (int i = 0; i < (int)m_vrIDArray.GetSize(); i++)
+         ::EnvStartVideoCapture(m_vrIDArray[i]);
+   }
 
    OpenDetailedOutputFiles();
 
    m_FlowWaterBalanceReport.ClearRows();
 
-   if ( m_estimateParameters )
-      {
+   if (m_estimateParameters)
+   {
       for (int i = 0; i < m_numberOfYears; i++)
-         {
-         ClimateScenario *pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
+      {
+         ClimateScenario* pScenario = m_scenarioArray.GetAt(m_currentFlowScenarioIndex);
          for (int j = 0; j < (int)pScenario->m_climateInfoArray.GetSize(); j++)//different climate parameters
-            {
-            ClimateDataInfo *pInfo = pScenario->m_climateInfoArray[j];
-            GeoSpatialDataObj *pObj = new GeoSpatialDataObj;
+         {
+            ClimateDataInfo* pInfo = pScenario->m_climateInfoArray[j];
+            GeoSpatialDataObj* pObj = new GeoSpatialDataObj;
             pObj->InitLibraries();
             pInfo->m_pDataObjArray.Add(pObj);
-            }
          }
+      }
 
       InitializeParameterEstimationSampleArray();
-      int initYear = pEnvContext->currentYear+1;//the value of pEnvContext lags the current year by 1????  see envmodel.cpp ln 3008 and 3050
-      for ( int i=0; i < m_numberOfRuns; i++ )
-         {  
-         UpdateMonteCarloInput(pEnvContext,i);
-         pEnvContext->run=i; 
-         pEnvContext->currentYear=initYear;
-         for (int j=0;j<m_numberOfYears;j++)
-            { 
+      int initYear = pEnvContext->currentYear + 1;//the value of pEnvContext lags the current year by 1????  see envmodel.cpp ln 3008 and 3050
+      for (int i = 0; i < m_numberOfRuns; i++)
+      {
+         UpdateMonteCarloInput(pEnvContext, i);
+         pEnvContext->run = i;
+         pEnvContext->currentYear = initYear;
+         for (int j = 0; j < m_numberOfYears; j++)
+         {
             if (j != 0)
             {
                pEnvContext->currentYear++;
             }
-            pEnvContext->yearOfRun=j;
-         
-            Run( pEnvContext );
-            }
+            pEnvContext->yearOfRun = j;
 
-         UpdateMonteCarloOutput(pEnvContext,i);
+            Run(pEnvContext);
+         }
+
+         UpdateMonteCarloOutput(pEnvContext, i);
 
          ResetDataStorageArrays(pEnvContext);
          EndRun(pEnvContext);
-         }
-      } 
+      }
+   }
 
-   m_loadClimateRunTime = 0;   
-   m_globalFlowsRunTime = 0;   
-   m_externalMethodsRunTime = 0;   
-   m_gwRunTime = 0;   
-   m_hruIntegrationRunTime = 0;   
-   m_reservoirIntegrationRunTime = 0;   
-   m_reachIntegrationRunTime = 0;   
-   m_massBalanceIntegrationRunTime = 0; 
+   m_loadClimateRunTime = 0;
+   m_globalFlowsRunTime = 0;
+   m_externalMethodsRunTime = 0;
+   m_gwRunTime = 0;
+   m_hruIntegrationRunTime = 0;
+   m_reservoirIntegrationRunTime = 0;
+   m_reachIntegrationRunTime = 0;
+   m_massBalanceIntegrationRunTime = 0;
    m_totalFluxFnRunTime = 0;
    m_reachFluxFnRunTime = 0;
    m_hruFluxFnRunTime = 0;
    m_collectDataRunTime = 0;
-   m_outputDataRunTime = 0;   
+   m_outputDataRunTime = 0;
    m_stopTime = 0;
 
    m_pIDUlayer->SetColDataU(m_colPRCP_Y_AVG, 0.);
@@ -4110,10 +4110,10 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
 
    WaterParcel totH2OinReachesWP = CalcTotH2OinReaches();
    WaterParcel totH2OinReservoirsWP = CalcTotH2OinReservoirs();
-   CString msg; 
+   CString msg;
    msg.Format("*** FlowModel::InitRun() CalcTotH2OinReaches() = %f m3, %f degC, %f MJ, CalcTotH2OinReservoirs() = %f m3, %f degC, %f MJ, CalcTotH2OinHRUs = %f m3, CalcTotH2O() = %f m3, m_totArea = %f",
-      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy()/1000.,
-      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy()/1000.,
+      totH2OinReachesWP.m_volume_m3, totH2OinReachesWP.m_temp_degC, totH2OinReachesWP.ThermalEnergy() / 1000.,
+      totH2OinReservoirsWP.m_volume_m3, totH2OinReservoirsWP.m_temp_degC, totH2OinReservoirsWP.ThermalEnergy() / 1000.,
       CalcTotH2OinHRUs(), CalcTotH2O(), m_totArea);
    Report::LogMsg(msg);
 
@@ -4143,7 +4143,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
    if (!pSAL->m_valid) m_flowContext.m_SALmode = false;
    else
-   { 
+   {
       // Initialize DumpReachInsolationData()
       // Get the path to the current user's Documents folder.
       PWSTR userPath;
@@ -4159,7 +4159,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       int errNo = fopen_s(&insolation_ofile, filename_const, "w");
       if (errNo != 0)
       {
-         CString msg; 
+         CString msg;
          msg.Format("FlowModel::InitRun() couldn't open %s. errNo = %d, %s", filename_const, errNo, strerror(errNo));
          Report::ErrorMsg(msg);
          return(false);
@@ -4177,7 +4177,7 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
       m_pReachLayer->SetColDataU(m_colReachSAL_REACH, false);
       m_pReachLayer->SetColDataU(m_colReachRADSWGIVEN, 0);
       m_pReachLayer->SetColDataU(m_colReachKCAL_GIVEN, 0);
-      Scenario * pSimulationScenario = pEnvContext->pEnvModel->GetScenario();
+      Scenario* pSimulationScenario = pEnvContext->pEnvModel->GetScenario();
 
       Shade_a_latorData* pSAL = &(pSimulationScenario->m_shadeAlatorData);
       CString SAL_energy_output_data_file_name = pSAL->m_energy_output_file_name;
@@ -4236,9 +4236,9 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
          input_path_ok = false;
       }
       int data_rows = 0;
-      if (input_path_ok) 
+      if (input_path_ok)
       { // Process the Shade-a-lator input file.
-         FDataObj * pData = new FDataObj;
+         FDataObj* pData = new FDataObj;
          data_rows = pData->ReadAscii(input_path);
 
          // How many reaches correspond to the Shade-a-lator data?
@@ -4252,13 +4252,13 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
          {
             reach_ct++;
             m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachSAL_REACH, true); // flag this reach as a Shade-a-lator reach
-            pReach = (pReach->m_reachID == pSAL->m_comid_downstream) ? 
+            pReach = (pReach->m_reachID == pSAL->m_comid_downstream) ?
                NULL : GetReachFromNode(pReach->m_pDown);
          }
          pSimulationScenario->m_shadeAlatorData.m_reachCt = reach_ct;
          CString msg;
-         msg.Format("FlowModel::InitRun() Shade-a-lator input file = %s, comid_upstream = %d, comid_downstream = %d, data_rows = %d, reach_ct = %d", 
-            input_path.GetString(), pSimulationScenario->m_shadeAlatorData.m_comid_upstream, pSimulationScenario->m_shadeAlatorData.m_comid_downstream, 
+         msg.Format("FlowModel::InitRun() Shade-a-lator input file = %s, comid_upstream = %d, comid_downstream = %d, data_rows = %d, reach_ct = %d",
+            input_path.GetString(), pSimulationScenario->m_shadeAlatorData.m_comid_upstream, pSimulationScenario->m_shadeAlatorData.m_comid_downstream,
             data_rows, reach_ct);
          Report::LogMsg(msg);
 
@@ -4269,6 +4269,32 @@ bool FlowModel::InitRun( EnvContext *pEnvContext )
    } // end of if (pSAL->m_valid)
 
    RestoreStateVariables(pEnvContext->spinupFlag);
+
+   ParamTable* pHBVparams = GetTable("HBV");
+   if (pHBVparams == NULL)
+   {
+      CString msg;
+      msg.Format("InitHRULayers() pHBVparams is NULL. This can happen when the HBV CSV file is missing or is present, but open in Excel.");
+      Report::ErrorMsg(msg);
+      return(false);
+   }
+
+   int col_fc = pHBVparams->GetFieldCol("FC");
+   for (int hru_ndx = 0; hru_ndx < m_hruArray.GetSize(); hru_ndx++)
+   {
+      HRU* pHRU = m_hruArray[hru_ndx];
+      int hbvcalib = pHRU->AttInt(HruHBVCALIB);
+      float field_cap_mm = 0.;
+      pHBVparams->Lookup(hbvcalib, col_fc, field_cap_mm);
+      pHRU->SetAttFloat(HruFIELD_CAP, field_cap_mm);
+      for (int idu_HRU_ndx = 0; idu_HRU_ndx < pHRU->m_polyIndexArray.GetSize(); idu_HRU_ndx++)
+      {
+         int idu_poly_ndx = pHRU->m_polyIndexArray[idu_HRU_ndx];
+         SetAttFloat(idu_poly_ndx, FIELD_CAP, field_cap_mm);
+      } // end of loop through the IDUs in this HRU
+   } // end of loop thru HRUs
+
+
 
    return TRUE;
    } // end of InitRun()
@@ -5725,10 +5751,15 @@ x*/
             int lulc_a = AttInt(idu_ndx, LULC_A);
             bool is_wetland = lulc_a == LULCA_WETLAND;
             if (is_wetland)
-            { // WETNESS was set earlier this day in HBV
-               double wetness = Att(idu_ndx, WETNESS); // for debugging
+            {
                SetAtt(idu_ndx, SNOW_SWE, 0);
                SetAtt(idu_ndx, H2O_MELT, 0);
+
+               //  SM_DAY = WETNESS >=0 ? FC : FC + WETNESS
+               double wetness_mm = Att(idu_ndx, WETNESS); 
+               double field_cap_mm = Att(idu_ndx, FIELD_CAP);
+               double sm_day_mm = wetness_mm >= 0 ? field_cap_mm : field_cap_mm + wetness_mm;
+ //X              SetAttFloat(idu_ndx, SM_DAY, (float)sm_day_mm);
             }
             else
             { // Not a wetland, may have a snowpack.
@@ -5908,14 +5939,14 @@ bool FlowModel::ApplyWETL2Q() // Per IDU attribute WETL2Q (cms), move water from
    for (int wetl_ndx = 0; wetl_ndx < num_wetl; wetl_ndx++)
    {
       Wetland* pWetl = m_wetlArray[wetl_ndx];
-      int num_idus = pWetl->m_wetlIDUndxArray.GetSize();
+      int num_idus = (int)pWetl->m_wetlIDUndxArray.GetSize();
       for (int idu_ndx_in_wetl = 0; idu_ndx_in_wetl < num_idus; idu_ndx_in_wetl++)
       {
          int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl];
          double idu_wetl2q_cms = Att(idu_poly_ndx, WETL2Q);
          if (idu_wetl2q_cms > 0)
          {
-            float idu_area_m2 = AttInt(idu_poly_ndx, AREA);
+            float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
             double idu_wetl2q_m3 = idu_wetl2q_cms * SEC_PER_DAY;
             double idu_temp_wetl_degC = Att(idu_poly_ndx, TEMP_WETL);
             WaterParcel idu_wetl2qWP(idu_wetl2q_m3, idu_temp_wetl_degC);
@@ -6072,7 +6103,7 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
 // Assumes FLOODDEPTH for the IDU is 0 on entry.
 {
    int idu_ndx = iduPolyNdx;
-   double remaining_m3 = H2OtoWetl_m3;
+//x   double remaining_m3 = H2OtoWetl_m3;
    Reach* pReach = gFlowModel->FindReachFromID(reachComid);
 
    ASSERT(H2OtoWetl_m3 > 0.);
@@ -17840,6 +17871,12 @@ float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta)
 bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta, 
    double * pPrecip2WetlSurfH2O_m3, double* pWetl2TopSoil_m3, double * pWetl2SubSoil_m3, double* pWetl2Reach_m3) 
 // Updates IDU attributes WETNESS, FLOODDEPTH, and SM_DAY.
+// Note that when this routine is called by HBVdailyProcess, the values from the previous day in
+// WETNESS and FLOODDEPTH still include the water represented by WETL2Q from
+// the previous day. However, the WETL2Q water has already been accumulated (as a withdrawal)
+// in the flux handler for this HRU.  So the WETL2Q water should be adjusted
+// out of yesterday's WETNESS and FLOODDEPTH before today's values of WETNESS and FLOODDEPTH
+// are calculated.
 {
    *pPrecip2WetlSurfH2O_m3 = 0.;
    *pWetl2TopSoil_m3 = 0.;
@@ -17867,11 +17904,11 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       double idu_to_reach_mm = 0.;
 
       // In this IDU, how much potential surface water is there?
-      float sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
       double wetness_mm = gIDUs->Att(idu_poly_ndx, WETNESS);
       double flooddepth_mm = gIDUs->Att(idu_poly_ndx, FLOODDEPTH);
       ASSERT(wetness_mm > 0 || flooddepth_mm == 0);
       ASSERT(flooddepth_mm == 0 || wetness_mm == gIDUs->Att(idu_poly_ndx, WETL_CAP));
+/*x
       double idu_surf_h2o_mm = precip_mm + (wetness_mm > 0. ? wetness_mm : 0.) + flooddepth_mm;
       if (idu_surf_h2o_mm <= 0.)
       { // There isn't any water available in this IDU to infiltrate into the soil.
@@ -17885,6 +17922,15 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
          ASSERT(flooddepth_mm == 0);
          continue; 
       }
+x*/
+      float idu_area_m2 = gIDUs->AttFloat(idu_poly_ndx, AREA);
+      double idu_wetl2q_yesterday_cms = gIDUs->Att(idu_poly_ndx, WETL2Q);
+      double idu_starting_surf_h2o_m3 = (((wetness_mm < 0 ? 0 : wetness_mm) + flooddepth_mm) / 1000) * idu_area_m2
+         - idu_wetl2q_yesterday_cms * SEC_PER_DAY;
+      if (idu_starting_surf_h2o_m3 <= 0) continue;
+
+      double idu_surf_h2o_mm = precip_mm + (idu_starting_surf_h2o_m3 / idu_area_m2) * 1000;
+      float sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
 
       // How will the water that drains from the surface into the soil be
       // divided between the topsoil and the subsoil?
@@ -17931,7 +17977,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       gFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
 
       // Convert water depths to water volumes.
-      float idu_area_m2 = gIDUs->AttFloat(idu_poly_ndx, AREA);
+//x      float idu_area_m2 = gIDUs->AttFloat(idu_poly_ndx, AREA);
       double idu_surf_h2o_m3 = (idu_surf_h2o_mm / 1000.) * idu_area_m2;
       double idu_to_topsoil_m3 = (idu_to_topsoil_mm / 1000.) * idu_area_m2;
       double idu_to_subsoil_m3 = (idu_to_subsoil_mm / 1000.) * idu_area_m2;
