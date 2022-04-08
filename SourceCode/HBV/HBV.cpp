@@ -168,6 +168,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          CString msg; msg.Format("*** HBVdailyProcess()1 ok = %d, h = %d, hbvcalib = %d Error getting parameter value", ok, h, hbvcalib);
          Report::ErrorMsg(msg);
          }
+
       // Get the current Day/HRU weather data and calculate terms which depend only on weather data
       float airTemp = -999.f;  pFlowContext->pFlowModel->GetTodaysHRUclimate(CDT_TMEAN, pHRU, airTemp);  // C
       float convective_melt_mm = (airTemp > tt) ? (CFMAX*(airTemp - tt)) : 0.f;
@@ -260,7 +261,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             if (lulc_a == LULCA_WETLAND) hru_wetland_area_m2 += area;
          }
       }
-      double hru_non_irrigated_area_m2 = (double)pHRU->m_HRUtotArea_m2 - (double)hruIrrigatedArea;
+      double hru_non_irrigated_area_m2 = (double)pHRU->m_HRUtotArea_m2 - (double)hruIrrigatedArea - hru_wetland_area_m2;
 
       hruIrrigatedArea = (float)(hruIrrigatedArea * pHRU->m_frc_naturl);
       hru_non_irrigated_area_m2 *= pHRU->m_frc_naturl;
@@ -283,10 +284,10 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       double to_wetl_surf_h2o_m3 = 0.;
       double wetl_to_topsoil_m3 = 0.;
       double wetl_to_subsoil_m3 = 0.;
-      double wetl_to_reach_m3 = 0.;
+//x      double wetl_to_reach_m3 = 0.;
       bool ret_val = true;
       if (pHRU->m_wetlandArea_m2 > 0.)
-         ret_val = pHRU->WetlSurfH2Ofluxes(precip, fc, Beta, &to_wetl_surf_h2o_m3, &wetl_to_topsoil_m3, &wetl_to_subsoil_m3, &wetl_to_reach_m3);
+         ret_val = pHRU->WetlSurfH2Ofluxes(precip, fc, Beta, &to_wetl_surf_h2o_m3, &wetl_to_topsoil_m3, &wetl_to_subsoil_m3);
       if (!ret_val)
          ASSERT(false);
       // gwIrrigated is the proportion of rain/snowmelt that bypasses the irrigated soil bucket, and is added directly to GW
@@ -496,7 +497,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
                   pHRULayer->AddFluxFromGlobalHandler((float)to_wetl_surf_h2o_m3, FL_TOP_SOURCE);
                   pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_topsoil_m3, FL_BOTTOM_SINK);
                   pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_subsoil_m3, FL_BOTTOM_SINK);
-                  pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_reach_m3, FL_STREAM_SINK);
+//x                  pHRULayer->AddFluxFromGlobalHandler((float)wetl_to_reach_m3, FL_STREAM_SINK);
                }
                pHRULayer->AddFluxFromGlobalHandler(hruRainThrufall_liters / 1000.0f, FL_TOP_SOURCE);     //m3/d
                if (pHRU->m_snowpackFlag)

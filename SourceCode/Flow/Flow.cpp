@@ -5636,8 +5636,9 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          double hru_standing_h2o_m3 = 0.;
          double hru_standing_h2o_area_m2 = 0.;
          int hru_wetl_id = NON_WETLAND_TOKEN; 
-         int count = (int)pHRU->m_polyIndexArray.GetSize();
          double wetl2q_accum_m3 = 0.;
+         double idu_wetl2q_yesterday_accum_m3 = 0;
+         int count = (int)pHRU->m_polyIndexArray.GetSize();
          for (int i = 0; i < count; i++)
          {
             int idu_poly_ndx = pHRU->m_polyIndexArray[i];
@@ -5645,15 +5646,19 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             if (lulc_a != LULCA_WETLAND) continue;
 
             // Update the IDU attribute WETL2Q.
+            double idu_wetl2q_yesterday_cms = Att(idu_poly_ndx, WETL2Q);
+            float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
+            double idu_wetl2q_yesterday_m3 = idu_wetl2q_yesterday_cms * SEC_PER_DAY;
+            idu_wetl2q_yesterday_accum_m3 += idu_wetl2q_yesterday_m3;
             double idu_wetl2q_cms = 0.;
             double wetness_mm = Att(idu_poly_ndx, WETNESS);
             double flooddepth_mm = Att(idu_poly_ndx, FLOODDEPTH);
-            ASSERT(wetness_mm >= 0 || flooddepth_mm == 0);
+            ASSERT(flooddepth_mm == 0);
+//x            ASSERT(wetness_mm >= 0 || flooddepth_mm == 0);
             double standing_h2o_mm = (wetness_mm <= 0) ? 0 : wetness_mm + flooddepth_mm;
 //x            double standing_h2o_mm = wetness_mm + flooddepth_mm; 
             if (standing_h2o_mm > 0.)
             {
-               float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
                double wetl_cap_mm = Att(idu_poly_ndx, WETL_CAP);
                if (standing_h2o_mm > wetl_cap_mm)
                { // Standing water in excess of WETL_CAP should flow back to the reach as WETL2Q.
@@ -5715,7 +5720,7 @@ x*/
                // when it is negative should be a tiny fraction of hru_standing_h2o_m3 arising from roundoff.
                ASSERT(pBox_surface_h2o->m_volumeWater > 0);
                double fraction = hru_h2o_melt_m3 / pBox_surface_h2o->m_volumeWater;
-               ASSERT(close_enough(fraction, 0, 1e-2, 1e-2));
+// ???               ASSERT(close_enough(fraction, 0, 1e-2, 1e-2));
             }
             hru_h2o_melt_m3 = 0.;
          }
@@ -17869,19 +17874,22 @@ float GroundWaterRechargeFraction(float waterDepth, float FC, float Beta)
 
 
 bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta, 
-   double * pPrecip2WetlSurfH2O_m3, double* pWetl2TopSoil_m3, double * pWetl2SubSoil_m3, double* pWetl2Reach_m3) 
-// Updates IDU attributes WETNESS, FLOODDEPTH, and SM_DAY.
+   double * pPrecip2WetlSurfH2O_m3, double* pWetl2TopSoil_m3, double * pWetl2SubSoil_m3) 
+// Updates IDU attributes WETNESS, FLOODDEPTH, and SM_DAY and the HRU's m_standingH2Oflag.
 // Note that when this routine is called by HBVdailyProcess, the values from the previous day in
 // WETNESS and FLOODDEPTH still include the water represented by WETL2Q from
 // the previous day. However, the WETL2Q water has already been accumulated (as a withdrawal)
 // in the flux handler for this HRU.  So the WETL2Q water should be adjusted
 // out of yesterday's WETNESS and FLOODDEPTH before today's values of WETNESS and FLOODDEPTH
 // are calculated.
+// Note also that on exit, floodwater has not yet been separated out from WETNESS, so FLOODDEPTH is 0 and WETNESS
+// can be WETL_CAP.
 {
    *pPrecip2WetlSurfH2O_m3 = 0.;
    *pWetl2TopSoil_m3 = 0.;
    *pWetl2SubSoil_m3 = 0.;
-   *pWetl2Reach_m3 = 0.;
+
+   ASSERT(m_wetlandArea_m2 > 0);
    if (m_wetlandArea_m2 <= 0.) 
       return(false);
    bool ret_val = true;
@@ -17892,9 +17900,14 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
    int idus_in_hru = (int)m_polyIndexArray.GetSize();
    m_standingH2Oflag = false;
 
+   SetAttFloat(HruFIELD_CAP, (float)fc); // ??? There are better places to put this.
+
    for (int i = 0; i < idus_in_hru; i++)
    {
       int idu_poly_ndx = m_polyIndexArray[i];
+
+      gIDUs->SetAttFloat(idu_poly_ndx, FIELD_CAP, (float)fc); // ??? There are better places to put this.
+
       int lulc_a = gIDUs->AttInt(idu_poly_ndx, LULC_A);
       bool is_wetland = lulc_a == LULCA_WETLAND;
       if (!is_wetland) continue;
@@ -17906,79 +17919,106 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       // In this IDU, how much potential surface water is there?
       double wetness_mm = gIDUs->Att(idu_poly_ndx, WETNESS);
       double flooddepth_mm = gIDUs->Att(idu_poly_ndx, FLOODDEPTH);
+      double sm_day_mm = gIDUs->Att(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
+
       ASSERT(wetness_mm > 0 || flooddepth_mm == 0);
       ASSERT(flooddepth_mm == 0 || wetness_mm == gIDUs->Att(idu_poly_ndx, WETL_CAP));
-/*x
-      double idu_surf_h2o_mm = precip_mm + (wetness_mm > 0. ? wetness_mm : 0.) + flooddepth_mm;
-      if (idu_surf_h2o_mm <= 0.)
-      { // There isn't any water available in this IDU to infiltrate into the soil.
-          wetness_mm = -(fc - sm_day_mm);
-         if (wetness_mm > 0.)
-         {
-            ASSERT(close_enough(0, wetness_mm, 1e-4, 1));
-            wetness_mm = 0.;
-         }
-         gFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
-         ASSERT(flooddepth_mm == 0);
-         continue; 
+      if ((wetness_mm >= 0) && (sm_day_mm != fc))
+      {
+         CString msg;
+         msg.Format("WetlSurfH2Ofluxes() Given fc = %f, wetness_mm = %f is inconsistent with sm_day_mm = %f", fc, wetness_mm, sm_day_mm);
+         Report::WarningMsg(msg);
+         wetness_mm = -(fc - sm_day_mm);
       }
-x*/
+
       float idu_area_m2 = gIDUs->AttFloat(idu_poly_ndx, AREA);
       double idu_wetl2q_yesterday_cms = gIDUs->Att(idu_poly_ndx, WETL2Q);
       double idu_starting_surf_h2o_m3 = (((wetness_mm < 0 ? 0 : wetness_mm) + flooddepth_mm) / 1000) * idu_area_m2
          - idu_wetl2q_yesterday_cms * SEC_PER_DAY;
-      if (idu_starting_surf_h2o_m3 <= 0) continue;
 
-      double idu_surf_h2o_mm = precip_mm + (idu_starting_surf_h2o_m3 / idu_area_m2) * 1000;
-      float sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
+      if (idu_starting_surf_h2o_m3 <= 0)
+      { // There isn't any surface water to start with.
+// ???         ASSERT(idu_wetl2q_yesterday_cms == 0); // If there isn't any surface water today, there must not have been any overflow yesterday.
 
-      // How will the water that drains from the surface into the soil be
-      // divided between the topsoil and the subsoil?
-      // frac_to_subsoil is the proportion of surface water that bypasses the topsoil bucket, and is added directly to the subsoil
-      double frac_to_subsoil = GroundWaterRechargeFraction((float)sm_day_mm, (float)fc, (float)Beta);
-      ASSERT(0. <= frac_to_subsoil && frac_to_subsoil <= 1.);
+         double available_h2o_mm = precip_mm;
 
-      // In this IDU, how much room is there in the soil for more water to infiltrate??
-      double idu_topsoil_room_mm = fc - sm_day_mm; if (idu_topsoil_room_mm < 0.) idu_topsoil_room_mm = 0.;
-      double idu_total_soil_room_mm = frac_to_subsoil >= 1 ? 0 : idu_topsoil_room_mm / (1. - frac_to_subsoil);
+        // How will the available water that be divided between the topsoil and the subsoil?
+        // frac_to_subsoil is the proportion of the available water that bypasses the topsoil bucket, and is added directly to the subsoil
+         double frac_to_subsoil = GroundWaterRechargeFraction((float)sm_day_mm, (float)fc, (float)Beta);
+         ASSERT(0. <= frac_to_subsoil && frac_to_subsoil <= 1.);
 
-      if (idu_total_soil_room_mm > idu_surf_h2o_mm)
-      { // There is more room in the soil than there is standing water.
-         // Drain all the surface water out of this IDU into the soil.
-         idu_to_topsoil_mm = idu_surf_h2o_mm * (1. - frac_to_subsoil);
-         idu_to_subsoil_mm = idu_surf_h2o_mm - idu_to_topsoil_mm;
-         idu_surf_h2o_mm = 0.;
-         idu_topsoil_room_mm -= idu_to_topsoil_mm;
-         wetness_mm = -idu_topsoil_room_mm;
-         ASSERT(wetness_mm < 0.);
-      } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm)
+         // In this IDU, how much room is there in the soil for more water to infiltrate??
+         double idu_topsoil_room_mm = fc - sm_day_mm; if (idu_topsoil_room_mm < 0.) idu_topsoil_room_mm = 0.;
+// ???         ASSERT(idu_topsoil_room_mm == -wetness_mm);
+         double idu_total_soil_room_mm = frac_to_subsoil >= 1 ? 0 : idu_topsoil_room_mm / (1. - frac_to_subsoil);
+
+         if (idu_total_soil_room_mm > available_h2o_mm)
+         { // There is more room in the soil than there is available water.
+            // Infiltrate all the available water into the soil.
+            idu_to_topsoil_mm = available_h2o_mm * (1. - frac_to_subsoil);
+            idu_to_subsoil_mm = available_h2o_mm - idu_to_topsoil_mm;
+            idu_topsoil_room_mm -= idu_to_topsoil_mm;
+            ASSERT(idu_topsoil_room_mm >= 0);
+            wetness_mm = -idu_topsoil_room_mm;
+            sm_day_mm = fc - idu_topsoil_room_mm;
+            ASSERT((sm_day_mm >= 0) && (sm_day_mm <= fc));
+         } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm)
+         else
+         { // There is enough available water to fill up the room in the soil.
+            // Infiltrate enough of the available water to saturate the soil.
+            idu_to_topsoil_mm = idu_topsoil_room_mm;
+            idu_to_subsoil_mm = idu_total_soil_room_mm - idu_topsoil_room_mm;
+            wetness_mm = available_h2o_mm - idu_total_soil_room_mm;
+            ASSERT(wetness_mm >= 0.);
+            sm_day_mm = fc;
+         } // end of if (idu_total_soil_room_mm > available_h2o_mm) ... else ...
+      }
       else
-      { // There is enough standing water to fill up the room in the soil.
-         // Drain enough surface water out of this IDU to saturate the soil.
-         idu_to_topsoil_mm = idu_topsoil_room_mm;
-         idu_to_subsoil_mm = idu_total_soil_room_mm - idu_topsoil_room_mm;
-         idu_surf_h2o_mm -= idu_total_soil_room_mm;
+      { // There is some surface water to start with.
+         double idu_surf_h2o_mm = precip_mm + (idu_starting_surf_h2o_m3 / idu_area_m2) * 1000;
+         float sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
 
-         // Divide up the surface water between WETNESS and FLOODDEPTH.
-         double wetl_cap_mm = gIDUs->Att(idu_poly_ndx, WETL_CAP);
-         wetness_mm = idu_surf_h2o_mm > wetl_cap_mm ? wetl_cap_mm : idu_surf_h2o_mm;
-         flooddepth_mm = idu_surf_h2o_mm > wetl_cap_mm ? idu_surf_h2o_mm - wetness_mm : 0;
-//x         wetness_mm = idu_surf_h2o_mm; 
-         ASSERT(wetness_mm >= 0.);
-      } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm) ... else
+         // How will the water that drains from the surface into the soil be
+         // divided between the topsoil and the subsoil?
+         // frac_to_subsoil is the proportion of surface water that bypasses the topsoil bucket, and is added directly to the subsoil
+         double frac_to_subsoil = GroundWaterRechargeFraction((float)sm_day_mm, (float)fc, (float)Beta);
+         ASSERT(0. <= frac_to_subsoil && frac_to_subsoil <= 1.);
 
-      // Update the IDU attributes WETNESS, FLOODDEPTH, and SM_DAY.
-      ASSERT(wetness_mm > 0 || flooddepth_mm == 0);
-      ASSERT(flooddepth_mm == 0 || wetness_mm == gIDUs->Att(idu_poly_ndx, WETL_CAP));
-      gFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
-      gFlowModel->SetAtt(idu_poly_ndx, FLOODDEPTH, flooddepth_mm);
-      if (wetness_mm > 0.) m_standingH2Oflag = true;
-      sm_day_mm += (float)idu_to_topsoil_mm;
-      gFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
+         // In this IDU, how much room is there in the soil for more water to infiltrate??
+         double idu_topsoil_room_mm = fc - sm_day_mm; if (idu_topsoil_room_mm < 0.) idu_topsoil_room_mm = 0.;
+         double idu_total_soil_room_mm = frac_to_subsoil >= 1 ? 0 : idu_topsoil_room_mm / (1. - frac_to_subsoil);
+
+         if (idu_total_soil_room_mm > idu_surf_h2o_mm)
+         { // There is more room in the soil than there is standing water.
+            // Drain all the surface water out of this IDU into the soil.
+            idu_to_topsoil_mm = idu_surf_h2o_mm * (1. - frac_to_subsoil);
+            idu_to_subsoil_mm = idu_surf_h2o_mm - idu_to_topsoil_mm;
+            idu_surf_h2o_mm = 0.;
+            idu_topsoil_room_mm -= idu_to_topsoil_mm;
+            wetness_mm = -idu_topsoil_room_mm;
+            ASSERT(wetness_mm < 0.);
+         } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm)
+         else
+         { // There is enough standing water to fill up the room in the soil.
+            // Drain enough surface water out of this IDU to saturate the soil.
+            idu_to_topsoil_mm = idu_topsoil_room_mm;
+            idu_to_subsoil_mm = idu_total_soil_room_mm - idu_topsoil_room_mm;
+            idu_surf_h2o_mm -= idu_total_soil_room_mm;
+
+            // Divide up the surface water between WETNESS and FLOODDEPTH.
+            double wetl_cap_mm = gIDUs->Att(idu_poly_ndx, WETL_CAP);
+//x            wetness_mm = idu_surf_h2o_mm > wetl_cap_mm ? wetl_cap_mm : idu_surf_h2o_mm;
+            wetness_mm = idu_surf_h2o_mm;
+//x            flooddepth_mm = idu_surf_h2o_mm > wetl_cap_mm ? idu_surf_h2o_mm - wetness_mm : 0;
+            ASSERT(wetness_mm >= 0.);
+         } // end of if (idu_total_soil_room_mm > idu_surf_h2o_mm) ... else
+
+         sm_day_mm += (float)idu_to_topsoil_mm;
+         gFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
+
+      } // end of if (idu_starting_surf_h2o_m3 > 0)
 
       // Convert water depths to water volumes.
-//x      float idu_area_m2 = gIDUs->AttFloat(idu_poly_ndx, AREA);
-      double idu_surf_h2o_m3 = (idu_surf_h2o_mm / 1000.) * idu_area_m2;
       double idu_to_topsoil_m3 = (idu_to_topsoil_mm / 1000.) * idu_area_m2;
       double idu_to_subsoil_m3 = (idu_to_subsoil_mm / 1000.) * idu_area_m2;
       double flooddepth_m3 = (flooddepth_mm / 1000.) * idu_area_m2;
@@ -17988,16 +18028,17 @@ x*/
       hru_to_subsoil_m3 += idu_to_subsoil_m3;
       hru_to_reach_m3 += flooddepth_m3; 
 
-      // Add the flood water to the reach.
-      int comid = gIDUs->AttInt(idu_poly_ndx, COMID);
-      Reach* pReach = gFlowModel->FindReachFromID(comid);
-      pReach->AddRunoffToReach(flooddepth_m3);
+      // Update the IDU attributes WETNESS, FLOODDEPTH, and SM_DAY.
+      gFlowModel->SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
+      if (wetness_mm > 0.) m_standingH2Oflag = true;
+      gFlowModel->SetAtt(idu_poly_ndx, FLOODDEPTH, 0);
+      gFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_mm);
+
    } // end of loop through IDUs
 
    *pPrecip2WetlSurfH2O_m3 = (precip_mm / 1000.) * m_wetlandArea_m2;
    *pWetl2TopSoil_m3 = hru_to_topsoil_m3;
    *pWetl2SubSoil_m3 = hru_to_subsoil_m3;
-   *pWetl2Reach_m3 = hru_to_reach_m3;
  
    return(ret_val);
 } // end of WetlSurfaceH2Ofluxes()
