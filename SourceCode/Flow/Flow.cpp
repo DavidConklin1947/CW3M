@@ -4274,7 +4274,7 @@ bool FlowModel::InitRun(EnvContext* pEnvContext)
    if (pHBVparams == NULL)
    {
       CString msg;
-      msg.Format("InitHRULayers() pHBVparams is NULL. This can happen when the HBV CSV file is missing or is present, but open in Excel.");
+      msg.Format("FlowModel::InitRun() pHBVparams is NULL. This can happen when the HBV CSV file is missing or is present, but open in Excel.");
       Report::ErrorMsg(msg);
       return(false);
    }
@@ -4294,10 +4294,8 @@ bool FlowModel::InitRun(EnvContext* pEnvContext)
       } // end of loop through the IDUs in this HRU
    } // end of loop thru HRUs
 
-
-
    return TRUE;
-   } // end of InitRun()
+   } // end of FlowModel::InitRun()
 
 
 bool FlowModel::EndRun( EnvContext *pEnvContext )
@@ -5615,7 +5613,6 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          HRULayer* pBox_slow_gw = pHRU->GetLayer(BOX_SLOW_GW);
          
          pHRU->SetAttFloat(HruSNOW_BOX, (float)(1000. * pBox_snow->m_volumeWater / pHRU->m_HRUtotArea_m2)); 
-//x         pHRU->SetAtt(HruBOXSURF_M3, pBox_surface_h2o->m_volumeWater); 
 
          float hru_irrigated_area_m2 = (float)pHRU->m_areaIrrigated;
          float hru_natural_area_m2 = pHRU->m_HRUeffArea_m2 - hru_irrigated_area_m2;
@@ -5630,14 +5627,13 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          pHRU->SetAttFloat(HruGW_SLOWBOX, (float)(1000. * pBox_slow_gw->m_volumeWater / pHRU->m_HRUtotArea_m2));
 
          double box_snow_m3 = pBox_snow->m_volumeWater;
-//x         double surface_h2o_m3 = pBox_surface_h2o->m_volumeWater;
 
          // How much of the surface water is meltwater in the snowpack, and how much is standing water in wetlands?
          double hru_standing_h2o_m3 = 0.;
          double hru_standing_h2o_area_m2 = 0.;
          int hru_wetl_id = NON_WETLAND_TOKEN; 
          double wetl2q_accum_m3 = 0.;
-         double idu_wetl2q_yesterday_accum_m3 = 0;
+         double idu_wetl2q_yesterday_accum_m3 = 0; // for debugging
          int count = (int)pHRU->m_polyIndexArray.GetSize();
          for (int i = 0; i < count; i++)
          {
@@ -5649,14 +5645,12 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             double idu_wetl2q_yesterday_cms = Att(idu_poly_ndx, WETL2Q);
             float idu_area_m2 = AttFloat(idu_poly_ndx, AREA);
             double idu_wetl2q_yesterday_m3 = idu_wetl2q_yesterday_cms * SEC_PER_DAY;
-            idu_wetl2q_yesterday_accum_m3 += idu_wetl2q_yesterday_m3;
+            idu_wetl2q_yesterday_accum_m3 += idu_wetl2q_yesterday_m3; // for debuggin
             double idu_wetl2q_cms = 0.;
             double wetness_mm = Att(idu_poly_ndx, WETNESS);
             double flooddepth_mm = Att(idu_poly_ndx, FLOODDEPTH);
             ASSERT(flooddepth_mm == 0);
-//x            ASSERT(wetness_mm >= 0 || flooddepth_mm == 0);
-            double standing_h2o_mm = (wetness_mm <= 0) ? 0 : wetness_mm + flooddepth_mm;
-//x            double standing_h2o_mm = wetness_mm + flooddepth_mm; 
+            double standing_h2o_mm = (wetness_mm <= 0) ? 0 : wetness_mm;
             if (standing_h2o_mm > 0.)
             {
                double wetl_cap_mm = Att(idu_poly_ndx, WETL_CAP);
@@ -5692,24 +5686,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
             SetAtt(idu_poly_ndx, WETL2Q, idu_wetl2q_cms);
          } // end of loop thru IDUs for this HRU
          ASSERT(!pHRU->m_standingH2Oflag || hru_standing_h2o_area_m2 > 0.);
-/*x
-         if (wetl2q_accum_m3 > 0.)
-         {
-            ASSERT(pBox_surface_h2o->GetFluxValue() == 0);
 
-            int num_wetl = (int)m_wetlArray.GetSize();
-            int wetl_ndx = 0;
-            while (wetl_ndx < num_wetl && m_wetlArray[wetl_ndx]->m_wetlID != hru_wetl_id) wetl_ndx++;
-            ASSERT(wetl_ndx < num_wetl);
-            Wetland* pWetl = m_wetlArray[wetl_ndx];
-            int reach_ndx = pWetl->m_wetlReachNdxArray[0];
-            Reach* pReach = m_reachArray[reach_ndx];
-            WaterParcel dischargeWP = pReach->GetReachDischargeWP();
-            double reach_degC = dischargeWP.WaterTemperature(); // This neglects the effect on the water temperature of flowing through the wetland.
-            WaterParcel wetl2qWP(wetl2q_accum_m3, reach_degC);
-            pReach->AccumWPadditions(wetl2qWP);
-         }
-x*/
          double hru_h2o_melt_m3 = pBox_surface_h2o->m_volumeWater - hru_standing_h2o_m3;
          if (hru_h2o_melt_m3 < 0.)
          {
@@ -5763,8 +5740,7 @@ x*/
                //  SM_DAY = WETNESS >=0 ? FC : FC + WETNESS
                double wetness_mm = Att(idu_ndx, WETNESS); 
                double field_cap_mm = Att(idu_ndx, FIELD_CAP);
-               double sm_day_mm = wetness_mm >= 0 ? field_cap_mm : field_cap_mm + wetness_mm;
- //X              SetAttFloat(idu_ndx, SM_DAY, (float)sm_day_mm);
+               double sm_day_mm = wetness_mm >= 0 ? field_cap_mm : field_cap_mm + wetness_mm; // ???
             }
             else
             { // Not a wetland, may have a snowpack.
@@ -6108,7 +6084,6 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
 // Assumes FLOODDEPTH for the IDU is 0 on entry.
 {
    int idu_ndx = iduPolyNdx;
-//x   double remaining_m3 = H2OtoWetl_m3;
    Reach* pReach = gFlowModel->FindReachFromID(reachComid);
 
    ASSERT(H2OtoWetl_m3 > 0.);
@@ -17976,7 +17951,6 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       else
       { // There is some surface water to start with.
          double idu_surf_h2o_mm = precip_mm + (idu_starting_surf_h2o_m3 / idu_area_m2) * 1000;
-         float sm_day_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
 
          // How will the water that drains from the surface into the soil be
          // divided between the topsoil and the subsoil?

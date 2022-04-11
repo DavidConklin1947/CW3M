@@ -803,7 +803,6 @@ public:
    void SetAtt(int col, double attValue);
    void SetAttInt(int col, int attValue);
    void SetAttFloat(int col, float attValue);
-//x   bool WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta, double* pPrecip2WetlSurfH2O_m3, double* pWetl2TopSoil_m3, double* pWetl2SubSoil_m3, double* pWetl2Reach_m3);
    bool WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta, double* pPrecip2WetlSurfH2O_m3, double* pWetl2TopSoil_m3, double* pWetl2SubSoil_m3);
  }; // end of class HRU
 
