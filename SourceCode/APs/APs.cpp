@@ -3777,10 +3777,8 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                         pHRULayer->AddFluxFromGlobalHandler(-(float)change_in_topsoil_h2o_m3, FL_BOTTOM_SINK);
                   }
 
-                  if (wetness_mm > 0.) pHRU->m_standingH2Oflag = true;
-
                   pWetl->InitWETL_CAPifNecessary();
-
+/*
                   // If the standing water is deeper than the capacity of the wetland, divide it between WETNESS and FLOODDEPTH.
                   double wetl_cap_mm = gIDUs->Att(tgt_idu_ndx, WETL_CAP);
                   double flooddepth_mm = 0;
@@ -3789,9 +3787,10 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                      flooddepth_mm = wetness_mm - wetl_cap_mm;
                      wetness_mm = wetl_cap_mm;
                   }
-
+x*/
                   gIDUs->SetAtt(tgt_idu_ndx, WETNESS, wetness_mm);
-                  gIDUs->SetAtt(tgt_idu_ndx, FLOODDEPTH, flooddepth_mm);
+                  if (wetness_mm > 0.) pHRU->m_standingH2Oflag = true;
+                  gIDUs->SetAtt(tgt_idu_ndx, FLOODDEPTH, 0); // If there is flooding, ApplyWETL2Q() will set FLOODDEPTH appropriately.
                } // end of if (pWetl == NULL) ... else 
             } // end of logic to add this IDU to an existing wetland.
          } // end of logic for gain of a wetland

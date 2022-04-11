@@ -5412,10 +5412,11 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
 
          if (hru_standing_h2o_mm > 0.)
          { // This IDU is a wetland with standing water.
-            // Divide the standing water between WETNESS and FLOODDEPTH.
-            double idu_WETL_CAP_mm = Att(idu_poly_ndx, WETL_CAP);
-            idu_WETNESS_mm = hru_standing_h2o_mm > idu_WETL_CAP_mm ? idu_WETL_CAP_mm : hru_standing_h2o_mm;
-            idu_FLOODDEPTH_mm = hru_standing_h2o_mm > idu_WETNESS_mm ? hru_standing_h2o_mm - idu_WETNESS_mm : 0;
+//x            // Divide the standing water between WETNESS and FLOODDEPTH.
+//x            double idu_WETL_CAP_mm = Att(idu_poly_ndx, WETL_CAP);
+//x            idu_WETNESS_mm = hru_standing_h2o_mm > idu_WETL_CAP_mm ? idu_WETL_CAP_mm : hru_standing_h2o_mm;
+            idu_WETNESS_mm = hru_standing_h2o_mm;;
+            idu_FLOODDEPTH_mm = 0; // If there is flooding, it will be recognized in ApplyWETL2Q().
          }
          else
          { // This IDU is a wetland with no standing water.
@@ -5423,6 +5424,7 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
             // Field capacity here is a surrogate for water content at saturation.
             float field_capacity_mm = AttFloat(idu_poly_ndx, FIELD_CAP);
             idu_WETNESS_mm = -(field_capacity_mm - hru_topsoil_h2o_mm); if (idu_WETNESS_mm > 0.) idu_WETNESS_mm = 0.;
+            idu_FLOODDEPTH_mm = 0;
          }
       }
       else
@@ -5664,10 +5666,10 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                   flooddepth_mm = standing_h2o_mm - wetness_mm;
 
                   // For now (GMT_CATCHMENT), the wetl2q water is still accounted for in the IDU
-                  // attributes WETNESS and FLOOODEPTH, which should sum together to get the IDU attribute
-                  // H2OSTNDGM3 (when converted to a volume). The size of the wetl2q flux out of the IDU is
+                  // attribute WETNESS, which should be the same as the IDU attribute
+                  // H2OSTNDGM3 (when converted to a volume). When WETNESS > WETL_CAP, the size of the wetl2q flux out of the IDU is
                   // recorded in the IDU WETL2Q attribute.  The wetl2q fluxes from the IDUs are 
-                  // turned into fluxes out of BOX_SURF_H2O and into the appropriate reaches at GMT_REACH time later 
+                  // turned into fluxes out of BOX_SURF_H2O and into the appropriate reaches by ApplyWETL2Q() at GMT_REACH time later 
                   // in this timestep.
                   SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
                   SetAtt(idu_poly_ndx, FLOODDEPTH, 0.);
@@ -6144,11 +6146,12 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
       WaterParcel to_this_iduWP = WaterParcel(to_this_idu_standing_h2o_m3, reach_temp_degC);
       standingWP.MixIn(to_this_iduWP); standing_h2o_m3 = standingWP.m_volume_m3;
 
-      // Divide up the standing water between WETNESS and FLOODDEPTH.
+//X      // Divide up the standing water between WETNESS and FLOODDEPTH.
       double standing_h2o_mm = 1000 * (standing_h2o_m3 / idu_area_m2);
-      double wetl_cap_mm = gIDUs->Att(idu_ndx, WETL_CAP);
-      new_wetness_mm = standing_h2o_mm > wetl_cap_mm ? wetl_cap_mm : standing_h2o_mm;
-      new_flooddepth_mm = standing_h2o_mm > new_wetness_mm ? standing_h2o_mm - new_wetness_mm : 0;
+//X      double wetl_cap_mm = gIDUs->Att(idu_ndx, WETL_CAP);
+//x      new_wetness_mm = standing_h2o_mm > wetl_cap_mm ? wetl_cap_mm : standing_h2o_mm;
+      new_wetness_mm = standing_h2o_mm;
+//x      new_flooddepth_mm = standing_h2o_mm > new_wetness_mm ? standing_h2o_mm - new_wetness_mm : 0;
       double new_standing_h2o_degC = standingWP.WaterTemperature();
       gIDUs->SetAtt(idu_ndx, TEMP_WETL, new_standing_h2o_degC);
 
@@ -6161,7 +6164,7 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
       pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
    }
    gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm); 
-   gFlowModel->SetAtt(idu_ndx, FLOODDEPTH, new_flooddepth_mm); 
+//x   gFlowModel->SetAtt(idu_ndx, FLOODDEPTH, new_flooddepth_mm); 
 
    return(true);
 } // end of ReachH2OtoWetlandIDU()
