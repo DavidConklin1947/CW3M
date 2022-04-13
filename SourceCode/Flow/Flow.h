@@ -1869,7 +1869,6 @@ public:
 
    int m_colWETNESS;
    int m_colWETL_CAP;
-   int m_colWETL2Q;
    int m_colWETL_ID;
    int m_colCOMID;
 

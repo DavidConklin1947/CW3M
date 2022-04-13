@@ -3677,7 +3677,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
             gIDUs->SetAtt(tgt_idu_ndx, WET_FRAC, 0.);
             gIDUs->SetAttInt(tgt_idu_ndx, WETLONGEST, 0);
             gIDUs->SetAtt(tgt_idu_ndx, WETNESS, NON_WETLAND_WETNESS_TOKEN);
-            gIDUs->SetAtt(tgt_idu_ndx, WETL2Q, 0.);
+            gIDUs->SetAtt(tgt_idu_ndx, WETL2Q_CMS, 0.);
 
             // Are there any IDUs left in this wetland?
             if (pWetl->m_wetlIDUndxArray.GetSize() <= 0)
@@ -3747,7 +3747,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   gIDUs->SetAtt(tgt_idu_ndx, WETL_ID, wetl_id);
                   gIDUs->SetAtt(tgt_idu_ndx, WET_FRAC, 0.);
                   gIDUs->SetAttInt(tgt_idu_ndx, WETLONGEST, 0);
-                  gIDUs->SetAtt(tgt_idu_ndx, WETL2Q, 0.);
+                  gIDUs->SetAtt(tgt_idu_ndx, WETL2Q_CMS, 0.);
 
                   if (snow_m3 > 0.)
                   { // What was in the snow compartment gets put into the surface water or topsoil compartments.
@@ -3778,16 +3778,7 @@ bool APs::RunPrescribedLULCs(EnvContext* pContext)
                   }
 
                   pWetl->InitWETL_CAPifNecessary();
-/*
-                  // If the standing water is deeper than the capacity of the wetland, divide it between WETNESS and FLOODDEPTH.
-                  double wetl_cap_mm = gIDUs->Att(tgt_idu_ndx, WETL_CAP);
-                  double flooddepth_mm = 0;
-                  if (wetness_mm > wetl_cap_mm)
-                  {
-                     flooddepth_mm = wetness_mm - wetl_cap_mm;
-                     wetness_mm = wetl_cap_mm;
-                  }
-x*/
+
                   gIDUs->SetAtt(tgt_idu_ndx, WETNESS, wetness_mm);
                   if (wetness_mm > 0.) pHRU->m_standingH2Oflag = true;
                   gIDUs->SetAtt(tgt_idu_ndx, FLOODDEPTH, 0); // If there is flooding, ApplyWETL2Q() will set FLOODDEPTH appropriately.

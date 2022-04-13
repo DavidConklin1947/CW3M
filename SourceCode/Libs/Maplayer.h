@@ -1182,6 +1182,7 @@ protected:
       m_colLULC_B(-1),
       m_colMAXSNOW(-1),
       m_colPVT(-1), 
+      m_colQ2WETL_MM(-1),
       m_colRAD_SW(-1), 
       m_colRPA(-1),
       m_colSM_DAY(-1),
@@ -1202,7 +1203,7 @@ protected:
       m_colWETL_CAP(-1), 
       m_colWETL_ID(-1),
       m_colWETL_VOL(-1),
-      m_colWETL2Q(-1), 
+      m_colWETL2Q_CMS(-1), 
       m_colWETLONGEST(-1),
       m_colWETNESS(-1),
       m_colWINDSPEED(-1)
@@ -1261,6 +1262,8 @@ public:
 #define MAXSNOW gIDUs->m_colMAXSNOW
    int m_colPVT;
 #define PVT gIDUs->m_colPVT
+   int m_colQ2WETL_MM;
+#define Q2WETL_MM gIDUs->m_colQ2WETL_MM
    int m_colRAD_SW;
 #define RAD_SW gIDUs->m_colRAD_SW
    int m_colRPA;
@@ -1301,8 +1304,8 @@ public:
 #define WETL_ID gIDUs->m_colWETL_ID
    int m_colWETL_VOL;
 #define WETL_VOL gIDUs->m_colWETL_VOL
-   int m_colWETL2Q;
-#define WETL2Q gIDUs->m_colWETL2Q
+   int m_colWETL2Q_CMS;
+#define WETL2Q_CMS gIDUs->m_colWETL2Q_CMS
    int m_colWETLONGEST;
 #define WETLONGEST gIDUs->m_colWETLONGEST
    int m_colWETNESS;
@@ -1338,6 +1341,7 @@ public:
       ok = ok && CheckCol(m_colLULC_B, "LULC_B", TYPE_INT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colMAXSNOW, "MAXSNOW", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colPVT, "PVT", TYPE_INT, CC_AUTOADD);
+      ok = ok && CheckCol(m_colQ2WETL_MM, "Q2WETL_MM", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colRAD_SW, "RAD_SW", TYPE_FLOAT, CC_AUTOADD);
       ok = ok && CheckCol(m_colRPA, "RPA", TYPE_INT, CC_MUST_EXIST);
       ok = ok && CheckCol(m_colSM_DAY, "SM_DAY", TYPE_FLOAT, CC_AUTOADD);
@@ -1358,7 +1362,7 @@ public:
       ok = ok && CheckCol(m_colWETL_CAP, "WETL_CAP", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_ID, "WETL_ID", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETL_VOL, "WETL_VOL", TYPE_DOUBLE, CC_AUTOADD);
-      ok = ok && CheckCol(m_colWETL2Q, "WETL2Q", TYPE_DOUBLE, CC_AUTOADD);
+      ok = ok && CheckCol(m_colWETL2Q_CMS, "WETL2Q_CMS", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETLONGEST, "WETLONGEST", TYPE_INT, CC_AUTOADD);
       ok = ok && CheckCol(m_colWETNESS, "WETNESS", TYPE_DOUBLE, CC_AUTOADD);
       ok = ok && CheckCol(m_colWINDSPEED, "WINDSPEED", TYPE_FLOAT, CC_AUTOADD);

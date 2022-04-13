@@ -208,7 +208,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
          {
             int idu_poly_ndx = pHRU->m_polyIndexArray[idu_ndx_in_hru];
 
-            idu_wetl2q_accum_cms += Att(idu_poly_ndx, WETL2Q);
+            idu_wetl2q_accum_cms += Att(idu_poly_ndx, WETL2Q_CMS);
             idu_wetl2q_accum_m3 = idu_wetl2q_accum_cms * SEC_PER_DAY;
 
             int lulc_a = AttInt(idu_poly_ndx, LULC_A);
