@@ -4951,16 +4951,8 @@ bool FlowModel::InitializeSpinup() // Initialize all the state variables from de
 
          if (l <= BOX_MELT)
          { // Aboveground soil water compartments: Layer[0] is Snow and Layer[1] is meltwater in snowpack and standing water in a wetland
+            // Snow, meltwater, and standing water all initialize to zero for spinup.
             pBox->m_volumeWater = 0.f;
-            if (gpModel->m_initWaterContent.GetSize() == hruLayerCount) //water content for each layer was specified
-               pBox->m_volumeWater = atof(gpModel->m_initWaterContent[l]) * pHRU->m_HRUeffArea_m2;
-            if (l == BOX_SURFACE_H2O && pHRU->m_wetlandArea_m2 > 0.)
-            { // Special case for the surface water compartment.  Wetlands initialize at field capacity.
-               double wetland_frac = pHRU->m_wetlandArea_m2 / pHRU->m_HRUeffArea_m2;
-               double unadjusted_vol_mm = (pBox->m_volumeWater / pHRU->m_HRUeffArea_m2) * 1000.;
-               double adjusted_vol_mm = wetland_frac * field_cap_mm + (1. - wetland_frac) * unadjusted_vol_mm;
-               pBox->m_volumeWater = (adjusted_vol_mm / 1000.) * pHRU->m_HRUeffArea_m2;
-            }
          }
          else if (l == BOX_IRRIG_SOIL) pBox->m_volumeWater = 0.;
          else
@@ -4996,13 +4988,13 @@ bool FlowModel::InitializeSpinup() // Initialize all the state variables from de
          SetAttFloat(idu_poly_ndx, FIELD_CAP, field_cap_mm);
          SetAtt(idu_poly_ndx, SNOW_SWE, 0.);
          SetAtt(idu_poly_ndx, H2O_MELT, 0.);
+         SetAttInt(idu_poly_ndx, IRRIGATION, 0);
+         SetAttFloat(idu_poly_ndx, SM_DAY, (float)nat_soil_h2o_mm);
 
          int lulc_a = AttInt(idu_poly_ndx, LULC_A);
          bool is_wetland = lulc_a == LULCA_WETLAND;
-         SetAtt(idu_poly_ndx, WETNESS, is_wetland ? 0. : NON_WETLAND_WETNESS_TOKEN);
-
-         SetAttInt(idu_poly_ndx, IRRIGATION, 0);
-         SetAttFloat(idu_poly_ndx, SM_DAY, (float)nat_soil_h2o_mm);
+         double wetness_mm = is_wetland ? (nat_soil_h2o_mm - field_cap_mm) : NON_WETLAND_WETNESS_TOKEN;
+         SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
       } // end of loop through the IDUs in this HRU
 
    } // end of loop through HRUs
@@ -7449,8 +7441,10 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
          double area_ac = pHRU->m_HRUtotArea_m2 / M2_PER_ACRE;
          m_pHRUlayer->SetData(hru_row, col_hruAREA_AC, area_ac);
 
-         int hbvcalib = pHRU->AttInt(HruHBVCALIB);
-// We should only need these next few lines temporarily 4/18/21
+         int hbvcalib = 0;
+         VData hbvcalib_Vdata;
+
+ // We should only need these next few lines temporarily 4/18/21
          int hru_comid = pHRU->AttInt(HruCOMID);
          Reach* pReach = gFlowModel->FindReachFromID(hru_comid);
          hbvcalib = pReach->AttInt(ReachHBVCALIB);
@@ -7465,10 +7459,12 @@ bool FlowModel::InitHRULayers(EnvContext* pEnvContext)
             Report::ErrorMsg(msg);
             return(false);
          }
-
+         hbvcalib = pHRU->AttInt(HruHBVCALIB);
+         hbvcalib_Vdata = hbvcalib;
+         if (pHBVparams->m_type == DOT_FLOAT) hbvcalib_Vdata.ChangeType(TYPE_FLOAT);
          int col_fc = pHBVparams->GetFieldCol("FC");
          float field_cap_mm = 0.;
-         pHBVparams->Lookup(hbvcalib, col_fc, field_cap_mm);
+         pHBVparams->Lookup(hbvcalib_Vdata, col_fc, field_cap_mm);
          pHRU->SetAttFloat(HruFIELD_CAP, field_cap_mm);
 
          if (use_attribute_values)
