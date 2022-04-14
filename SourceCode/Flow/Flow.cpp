@@ -6148,6 +6148,10 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
       pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
    }
    gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm); 
+   float field_cap_mm = gIDUs->AttFloat(idu_ndx, FIELD_CAP);
+   float new_sm_day_mm = (new_wetness_mm >= 0) ? field_cap_mm : (float)(field_cap_mm + new_wetness_mm);
+   ASSERT(new_sm_day_mm >= 0);
+   gIDUs->SetAttFloat(idu_ndx, SM_DAY, new_sm_day_mm);
 
    return(true);
 } // end of ReachH2OtoWetlandIDU()
@@ -17922,8 +17926,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       float et_day_yesterday_mm = gIDUs->AttFloat(idu_poly_ndx, ET_DAY);
 
       double starting_surf_h2o_mm = (wetness_yesterday_mm < 0 ? 0 : wetness_yesterday_mm)
-         + flooddepth_yesterday_mm + q2wetl_yesterday_mm
-         - wetl2q_yesterday_mm - et_day_yesterday_mm
+         + flooddepth_yesterday_mm
          + precip_mm + snowmelt_mm;
 
       double idu_surf_h2o_mm = -1;
@@ -17986,7 +17989,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
             idu_to_topsoil_mm = starting_surf_h2o_mm * (1. - frac_to_subsoil);
             idu_to_subsoil_mm = starting_surf_h2o_mm - idu_to_topsoil_mm;
             idu_topsoil_room_mm -= idu_to_topsoil_mm;
-            new_wetness_mm = wetness_yesterday_mm - idu_topsoil_room_mm;
+            new_wetness_mm = -idu_topsoil_room_mm;
             ASSERT(new_wetness_mm < 0.);
          } // end of if (idu_total_soil_room_mm > starting_surf_h2o_mm)
          else
@@ -18001,7 +18004,6 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
          } // end of if (idu_total_soil_room_mm > starting_surf_h2o_mm) ... else ...
 
          new_sm_day_mm = sm_day_yesterday_mm + idu_to_topsoil_mm;
-         gFlowModel->SetAttFloat(idu_poly_ndx, SM_DAY, (float)new_sm_day_mm); 
 
       } // end of if (idu_starting_surf_h2o_m3 > 0)
 
