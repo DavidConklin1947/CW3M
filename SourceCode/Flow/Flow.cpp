@@ -5428,7 +5428,7 @@ bool FlowModel::FixHRUwaterBalance(HRU* pHRU)
       SetAtt(idu_poly_ndx, WETNESS, idu_WETNESS_mm);
       SetAtt(idu_poly_ndx, FLOODDEPTH, idu_FLOODDEPTH_mm);
       SetAtt(idu_poly_ndx, H2O_MELT, idu_H2O_MELT_mm);
-      SetAtt(idu_poly_ndx, SM_DAY, idu_SM_DAY_mm);
+      SetAttFloat(idu_poly_ndx, SM_DAY, (float)idu_SM_DAY_mm);
    } // end of second loop thru IDUs
 
    return(true);
@@ -5707,16 +5707,8 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          for (int i = 0; i < count; i++)
          { 
             int idu_ndx = pHRU->m_polyIndexArray[i];
-            float idu_area_m2 = -1; m_pIDUlayer->GetData(idu_ndx, m_colAREA, idu_area_m2);
-            int idu_irrigation = -1; m_pIDUlayer->GetData(idu_ndx, m_colIRRIGATION, idu_irrigation);
-            int layer = (idu_irrigation == 1) ? BOX_IRRIG_SOIL : BOX_NAT_SOIL;
-            float effective_hru_area_m2 = idu_irrigation == 1 ? hru_irrigated_area_m2 : hru_natural_area_m2;
-            ASSERT(effective_hru_area_m2 > 0);
-            float idu_frac_of_hru = idu_area_m2 / effective_hru_area_m2; 
-            if (idu_frac_of_hru > 1.) { ASSERT(close_enough(idu_frac_of_hru, 1., 1e-6)); idu_frac_of_hru = 1.; }
-            float sm_day_mm = (float)(pHRU->GetLayer(layer)->m_volumeWater * idu_frac_of_hru / idu_area_m2) * MM_PER_M;
-            m_pIDUlayer->SetDataU(idu_ndx, m_colSM_DAY, sm_day_mm);
 
+            float sm_day_mm = -1;
             int lulc_a = AttInt(idu_ndx, LULC_A);
             bool is_wetland = lulc_a == LULCA_WETLAND;
             if (is_wetland)
@@ -5727,13 +5719,23 @@ bool FlowModel::Run( EnvContext *pEnvContext )
                //  SM_DAY = WETNESS >=0 ? FC : FC + WETNESS
                double wetness_mm = Att(idu_ndx, WETNESS); 
                double field_cap_mm = Att(idu_ndx, FIELD_CAP);
-               double sm_day_mm = wetness_mm >= 0 ? field_cap_mm : field_cap_mm + wetness_mm; // ???
+               sm_day_mm = (float)(wetness_mm >= 0 ? field_cap_mm : field_cap_mm + wetness_mm); 
             }
             else
             { // Not a wetland, may have a snowpack.
                SetAtt(idu_ndx, SNOW_SWE, snow_swe_for_non_wetland_idus_mm);
                SetAtt(idu_ndx, H2O_MELT, hru_h2o_melt_mm);
+
+               float idu_area_m2 = -1; m_pIDUlayer->GetData(idu_ndx, m_colAREA, idu_area_m2);
+               int idu_irrigation = -1; m_pIDUlayer->GetData(idu_ndx, m_colIRRIGATION, idu_irrigation);
+               int layer = (idu_irrigation == 1) ? BOX_IRRIG_SOIL : BOX_NAT_SOIL;
+               float effective_hru_area_m2 = idu_irrigation == 1 ? hru_irrigated_area_m2 : hru_natural_area_m2;
+               ASSERT(effective_hru_area_m2 > 0);
+               float idu_frac_of_hru = idu_area_m2 / effective_hru_area_m2;
+               if (idu_frac_of_hru > 1.) { ASSERT(close_enough(idu_frac_of_hru, 1., 1e-6)); idu_frac_of_hru = 1.; }
+               sm_day_mm = (float)(pHRU->GetLayer(layer)->m_volumeWater * idu_frac_of_hru / idu_area_m2) * MM_PER_M;
             }
+            m_pIDUlayer->SetDataU(idu_ndx, m_colSM_DAY, sm_day_mm);
          } // end of loop thru the IDUs contained in this HRU
 
          if (!CheckSurfaceH2O(pHRU, 0.))
@@ -7642,7 +7644,7 @@ void FlowModel::SetAttributesFromHRUmemberData(HRU* pHRU)
       SetAtt(idu_poly_ndx, SNOW_SWE, hru_snowpack_mmswe + hru_surface_h2o_mm);
       SetAtt(idu_poly_ndx, H2O_MELT, h2o_melt_mm);
       SetAtt(idu_poly_ndx, WETNESS, wetness_mm);
-      SetAtt(idu_poly_ndx, SM_DAY, hru_topsoil_h2o_mm);
+      SetAttFloat(idu_poly_ndx, SM_DAY, (float)hru_topsoil_h2o_mm);
    } // end of loop thru IDUs in this HRU
    ASSERT(close_enough(hru_area_m2, idu_area_accum_m2, 0.0001));
 
@@ -17923,7 +17925,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       ASSERT(wetness_yesterday_mm > 0 || flooddepth_yesterday_mm == 0);
       ASSERT(flooddepth_yesterday_mm == 0 || wetness_yesterday_mm == gIDUs->Att(idu_poly_ndx, WETL_CAP));
 
-      double sm_day_yesterday_mm = gIDUs->Att(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
+      double sm_day_yesterday_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
       if ((wetness_yesterday_mm >= 0) && (sm_day_yesterday_mm != fc))
       {
          CString msg;
@@ -17931,10 +17933,8 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
             m_id, fc, wetness_yesterday_mm, sm_day_yesterday_mm);
          Report::LogWarning(msg);
          HRULayer* pBox_nat_soil = this->GetLayer(BOX_NAT_SOIL);
-         sm_day_yesterday_mm = (pBox_nat_soil->m_volumeWater / (m_HRUtotArea_m2 * m_frc_naturl)) * 1000.;
+         sm_day_yesterday_mm = fc;
          gIDUs->SetAttFloat(idu_poly_ndx, SM_DAY, (float)sm_day_yesterday_mm);
-         wetness_yesterday_mm = -(fc - sm_day_yesterday_mm);
-         gIDUs->SetAtt(idu_poly_ndx, WETNESS, wetness_yesterday_mm);
          msg.Format("Setting wetness_yesterday_mm = %f, sm_day_yesterday_mm = %f", wetness_yesterday_mm, sm_day_yesterday_mm);
          Report::LogMsg(msg);
       }
