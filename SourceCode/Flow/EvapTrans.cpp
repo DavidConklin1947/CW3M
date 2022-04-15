@@ -1129,7 +1129,8 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
 
       if (etMethod == ETEquation::WETLAND_ET)
       { // standing water or exposed soil
-         float soil_H2O_mm = pHRU->AttFloat(HruNAT_SOIL);
+//X         float soil_H2O_mm = pHRU->AttFloat(HruNAT_SOIL);
+         float soil_H2O_mm = gIDUs->Att(idu, SM_DAY);
          double pet_mm = 0., aet_mm = 0.;
          m_ETEq.WetlandET(idu, soil_H2O_mm, fc, wp, &pet_mm, &aet_mm);
          maxET = (float)pet_mm;

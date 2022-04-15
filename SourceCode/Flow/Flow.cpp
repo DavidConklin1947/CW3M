@@ -17873,7 +17873,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
 // out of yesterday's WETNESS and FLOODDEPTH before today's values of WETNESS and FLOODDEPTH
 // are calculated.
 // Note also that on exit, floodwater has not yet been separated out from WETNESS, so FLOODDEPTH is 0 and WETNESS
-// can be WETL_CAP.
+// can be > WETL_CAP.
 {
    *pPrecip2WetlSurfH2O_m3 = 0.;
    *pWetl2TopSoil_m3 = 0.;
@@ -17947,6 +17947,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       float et_day_yesterday_mm = gIDUs->AttFloat(idu_poly_ndx, ET_DAY);
 
       double starting_surf_h2o_mm = (wetness_yesterday_mm < 0 ? 0 : wetness_yesterday_mm)
+         - wetl2q_yesterday_mm
          + flooddepth_yesterday_mm
          + precip_mm + snowmelt_mm;
 
@@ -18049,7 +18050,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
    *pWetl2SubSoil_m3 = hru_to_subsoil_m3;
  
    return(ret_val);
-} // end of WetlSurfaceH2Ofluxes()
+} // end of WetlSurfH2Ofluxes()
 
 
 Wetland* FlowModel::GetWetlandFromID(int wetlID)
