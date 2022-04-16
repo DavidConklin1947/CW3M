@@ -671,6 +671,11 @@ float GroundWaterRechargeFraction(float waterDepth, float FC,  float Beta )
    {
    float value=0.0f;
    float lossFraction = (pow((waterDepth/FC),Beta));
+   if (isnan(lossFraction))
+   {
+      ASSERT(0);
+      lossFraction = 0;
+   }
    if (lossFraction > 1.0f)
       lossFraction=1.0f;
    return lossFraction;

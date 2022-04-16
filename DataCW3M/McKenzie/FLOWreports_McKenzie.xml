@@ -174,15 +174,26 @@
       <output name="idu 32345 WET_LENGTH" query="IDU_ID=32345" value="WET_LENGTH" type="sum" domain="idu" />
       <output name="hru 1939 PRECIP (mm)" query="HRU_ID=1939" value="PRECIP" type="sum" domain="hru" />
       <output name="idu 32345 WETNESS (mm)" query="IDU_ID=32345" value="WETNESS" type="areaWtMean" domain="idu" />
+      <output name="idu 32345 FLOODDEPTH (mm)" query="IDU_ID=32345" value="FLOODDEPTH" type="areaWtMean" domain="idu" />
       <output name="idu 32345 SM_DAY (mm)" query="IDU_ID=32345" value="SM_DAY" type="areaWtMean" domain="idu" />
       <output name="reach 23772753 Q_DISCHARG (cms) out to downstream" query="COMID=23772753" value="Q_DISCHARG" type="sum" domain="reach" />
       <output name="reach 23772767 Q_DISCHARG (cms) in from upstream" query="COMID=23772767" value="Q_DISCHARG" type="sum" domain="reach" />
       <output name="reaches 23772753-65 Q2WETL (cms)" query="23772752&lt;COMID and COMID&lt;23772766" value="Q2WETL" type="sum" domain="reach" />
-      <output name="total WETL2Q (cms)" query="WETL_ID=15" value="WETL2Q" type="sum" domain="idu" />
+      <output name="total WETL2Q (cms)" query="WETL_ID=15" value="WETL2Q_CMS" type="sum" domain="idu" />
       <output name="idu 32345 TEMP (degC)" query="IDU_ID=32345" value="TEMP" type="areaWtMean" domain="idu" />
       <output name="idu 32345 TEMP_WETL (degC)" query="IDU_ID=32345" value="TEMP_WETL" type="areaWtMean" domain="idu" />
       <output name="reach 23772753 TEMP_H2O (degC) out to downstream" query="COMID=23772753" value="TEMP_H2O" type="sum" domain="reach" />
       <output name="reach 23772767 TEMP_H2O (degC) in from upstream" query="COMID=23772767" value="TEMP_H2O" type="sum" domain="reach" />
+      <output name="HRU 1928 irrigation applied (m3)" query="HRU_ID=1928" value="AREA*IRRALLO_D/1000" type="areaWtMean" domain="idu" />
+      <output name="idu 32345 WETNESS - WETL_CAP" query="IDU_ID=32345" value="WETNESS - WETL_CAP" type="sum" domain="idu" />
+      <output name="HRU 1928 SNOW_BOX (mm SWE)" query="HRU_ID=1928" value="SNOW_BOX" type="areaWtMean" domain="hru" />
+      <output name="HRU 1928 BOXSURF_M3 (m3)" query="HRU_ID=1928" value="BOXSURF_M3" type="areaWtMean" domain="hru" />
+      <output name="HRU 1928 H2OMELT_M3 (m3)" query="HRU_ID=1928" value="H2OMELT_M3" type="areaWtMean" domain="hru" />
+      <output name="HRU 1928 H2OSTNDGM3 (m3)" query="HRU_ID=1928" value="H2OSTNDGM3" type="areaWtMean" domain="hru" />
+      <output name="HRU 1928 NAT_SOIL (mm)" query="HRU_ID=1928" value="NAT_SOIL" type="areaWtMean" domain="hru" />
+      <output name="HRU 1928 IRRIG_SOIL (mm)" query="HRU_ID=1928" value="IRRIG_SOIL" type="areaWtMean" domain="hru" />
+      <output name="HRU 1928 GW_FASTBOX (mm)" query="HRU_ID=1928" value="GW_FASTBOX" type="areaWtMean" domain="hru" />
+      <output name="HRU 1928 GW_SLOWBOX (mm)" query="HRU_ID=1928" value="GW_SLOWBOX" type="areaWtMean" domain="hru" />
     </output_group>
 
     <output_group name="FLOW Wetland 17 analysis" interval="daily" >

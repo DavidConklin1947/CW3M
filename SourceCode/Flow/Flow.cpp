@@ -6119,8 +6119,6 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
    // water coming from the reach.
    double to_this_idu_soil_m3 = 0.;
    double new_wetness_mm = wetness_mm;
-   ASSERT(gIDUs->Att(idu_ndx, FLOODDEPTH) == 0);
-   double new_flooddepth_mm = 0;
    if (wetness_mm < 0.)
    { // The soil can absorb more water.
       double idu_room_in_soil_mm = -wetness_mm;
@@ -6170,7 +6168,18 @@ bool Wetland::ReachH2OtoWetlandIDU(int reachComid, double H2OtoWetl_m3, int iduP
       hru_BOXSURF_M3 += to_this_idu_standing_h2o_m3;
       pHRU->SetAtt(HruBOXSURF_M3, hru_BOXSURF_M3);
    }
-   gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm); 
+
+   ASSERT(gIDUs->Att(idu_ndx, FLOODDEPTH) == 0);
+   double new_flooddepth_mm = 0;
+   double wetl_cap_mm = gIDUs->Att(idu_ndx, WETL_CAP);
+   if (new_wetness_mm > wetl_cap_mm)
+   {
+      new_flooddepth_mm = new_wetness_mm - wetl_cap_mm;
+      new_wetness_mm = wetl_cap_mm;
+   }
+   gFlowModel->SetAtt(idu_ndx, WETNESS, new_wetness_mm);
+   gFlowModel->SetAtt(idu_ndx, FLOODDEPTH, new_flooddepth_mm);
+
    float field_cap_mm = gIDUs->AttFloat(idu_ndx, FIELD_CAP);
    float new_sm_day_mm = (new_wetness_mm >= 0) ? field_cap_mm : (float)(field_cap_mm + new_wetness_mm);
    ASSERT(new_sm_day_mm >= 0);
@@ -12786,6 +12795,7 @@ void FlowModel::GetCatchmentDerivatives(double time, double timeStep, int svCoun
             }
          else if (pHRULayer->m_volumeWater < 0)
             {
+            ASSERT(pHRULayer->m_volumeWater > -1);
             float nominal_minimum_mm;
             if (pHRULayer->m_layer == BOX_SNOW || pHRULayer->m_layer == BOX_MELT) nominal_minimum_mm = 0.f;
             else nominal_minimum_mm = (float)(NOMINAL_MINIMUM_SOIL_WATER_CONTENT * pHRULayer->m_soilThickness_m);
@@ -17894,6 +17904,12 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
 
    SetAttFloat(HruFIELD_CAP, (float)fc); // ??? There are better places to put this.
 
+   HRULayer* pBox_nat_soil= GetLayer(BOX_NAT_SOIL);
+   double hru_nat_soil_m3 = pBox_nat_soil->m_volumeWater;
+   double hru_nat_soil_m2 = m_HRUtotArea_m2 - m_areaIrrigated;
+   ASSERT(hru_nat_soil_m2 > 0);
+   double hru_nat_soil_mm = 1000 * hru_nat_soil_m3 / hru_nat_soil_m2;
+
    for (int i = 0; i < idus_in_hru; i++)
    {
       int idu_poly_ndx = m_polyIndexArray[i];
@@ -17925,7 +17941,7 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
       ASSERT(wetness_yesterday_mm > 0 || flooddepth_yesterday_mm == 0);
       ASSERT(flooddepth_yesterday_mm == 0 || wetness_yesterday_mm == gIDUs->Att(idu_poly_ndx, WETL_CAP));
 
-      double sm_day_yesterday_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // This is the water in the NAT_SOIL compartment for this IDU as of yesterday.
+      double sm_day_yesterday_mm = gIDUs->AttFloat(idu_poly_ndx, SM_DAY); // SM_DAY is an estimate, but hru_nat_soil_mm is what we'll use to calculate infiltration.
       if ((wetness_yesterday_mm >= 0) && (sm_day_yesterday_mm != fc))
       {
          CString msg;
@@ -17962,12 +17978,12 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
 
         // How will the available water that be divided between the topsoil and the subsoil?
         // frac_to_subsoil is the proportion of the available water that bypasses the topsoil bucket, and is added directly to the subsoil
-         double frac_to_subsoil = GroundWaterRechargeFraction((float)sm_day_yesterday_mm, (float)fc, (float)Beta);
+         double frac_to_subsoil = GroundWaterRechargeFraction((float)hru_nat_soil_mm, (float)fc, (float)Beta);
          ASSERT(0. <= frac_to_subsoil && frac_to_subsoil <= 1.);
 
          // In this IDU, how much room is there in the soil for more water to infiltrate??
-         double idu_topsoil_room_mm = fc - sm_day_yesterday_mm; if (idu_topsoil_room_mm < 0.) idu_topsoil_room_mm = 0.;
-// ???         ASSERT(idu_topsoil_room_mm == -wetness_mm);
+         double idu_topsoil_room_mm = fc - hru_nat_soil_mm;
+         ASSERT(idu_topsoil_room_mm >= 0);
          double idu_total_soil_room_mm = frac_to_subsoil >= 1 ? 0 : idu_topsoil_room_mm / (1. - frac_to_subsoil);
 
          if (idu_total_soil_room_mm > available_h2o_mm)
@@ -17998,11 +18014,11 @@ bool HRU::WetlSurfH2Ofluxes(double precip_mm, double fc, double Beta,
          // How will the water that drains from the surface into the soil be
          // divided between the topsoil and the subsoil?
          // frac_to_subsoil is the proportion of surface water that bypasses the topsoil bucket, and is added directly to the subsoil
-         double frac_to_subsoil = GroundWaterRechargeFraction((float)sm_day_yesterday_mm, (float)fc, (float)Beta);
+         double frac_to_subsoil = GroundWaterRechargeFraction((float)hru_nat_soil_mm, (float)fc, (float)Beta);
          ASSERT(0. <= frac_to_subsoil && frac_to_subsoil <= 1.);
 
          // In this IDU, how much room is there in the soil for more water to infiltrate??
-         double idu_topsoil_room_mm = fc - sm_day_yesterday_mm; if (idu_topsoil_room_mm < 0.) idu_topsoil_room_mm = 0.;
+         double idu_topsoil_room_mm = fc - hru_nat_soil_mm; if (idu_topsoil_room_mm < 0.) idu_topsoil_room_mm = 0.;
          double idu_total_soil_room_mm = frac_to_subsoil >= 1 ? 0 : idu_topsoil_room_mm / (1. - frac_to_subsoil);
 
          if (idu_total_soil_room_mm > starting_surf_h2o_mm)
