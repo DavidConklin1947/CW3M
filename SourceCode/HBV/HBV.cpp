@@ -225,7 +225,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             double idu_standing_h2o_m3 = (standing_h2o_mm / 1000.) * idu_area_m2;
             idu_standing_h2o_accum_m3 += idu_standing_h2o_m3;
             if (idu_standing_h2o_accum_m3 > (layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3))
-               ASSERT(close_enough(idu_standing_h2o_accum_m3, layer1_vol_and_flux_m3, 1e-4, 1));
+               ASSERT(close_enough(idu_standing_h2o_accum_m3, (layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3), 1e-4, 1));
          } // end of loop thru the IDUs in this HRU
 
       } // end of if (pHRU->m_wetlandArea_m2 > 0)
@@ -238,7 +238,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             CString msg;
             msg.Format("HBVdailyProcess() pHRU->m_id = %d, idu_standing_h2o_accum_m3 = %f, pHRULayer1->m_volumeWater = %f, pHRULayer1->GetFluxValue() = %f",
                pHRU->m_id, idu_standing_h2o_accum_m3, pHRULayer1->m_volumeWater, pHRULayer1->GetFluxValue());
-            Report::WarningMsg(msg);
+            Report::LogWarning(msg);
          }
          water_in_snowpack_m3 = 0;
       }

@@ -5694,7 +5694,7 @@ bool FlowModel::Run( EnvContext *pEnvContext )
 
          // The water that will later today, at GMT_REACH time, flow back out of the wetlands to the reaches is
          // still at this time (GMT_CATCHMENT) included in hru_standing_h2o_m3.
-         ASSERT(close_enough(hru_h2o_melt_m3 + hru_standing_h2o_m3, pBox_surface_h2o->m_volumeWater, 1e-6, 1));
+         ASSERT(close_enough(hru_h2o_melt_m3 + hru_standing_h2o_m3, pBox_surface_h2o->m_volumeWater, 1e-4, 1));
          pHRU->SetAtt(HruBOXSURF_M3, hru_h2o_melt_m3 + hru_standing_h2o_m3);
 
          // Update IDU attributes SM_DAY, H2O_MELT, and SNOW_SWE
@@ -12795,7 +12795,7 @@ void FlowModel::GetCatchmentDerivatives(double time, double timeStep, int svCoun
             }
          else if (pHRULayer->m_volumeWater < 0)
             {
-            ASSERT(pHRULayer->m_volumeWater > -1);
+            ASSERT(pHRULayer->m_volumeWater > -10);
             float nominal_minimum_mm;
             if (pHRULayer->m_layer == BOX_SNOW || pHRULayer->m_layer == BOX_MELT) nominal_minimum_mm = 0.f;
             else nominal_minimum_mm = (float)(NOMINAL_MINIMUM_SOIL_WATER_CONTENT * pHRULayer->m_soilThickness_m);
