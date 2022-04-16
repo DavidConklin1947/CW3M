@@ -233,12 +233,12 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       double water_in_snowpack_m3 = (layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3) - idu_standing_h2o_accum_m3;
       if (water_in_snowpack_m3 < 0)
       {
-         if (!close_enough(idu_standing_h2o_accum_m3, layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3, 1e-4, 1))
+         if (!close_enough(idu_standing_h2o_accum_m3, layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3, 1e-3, 1))
          {
             CString msg;
             msg.Format("HBVdailyProcess() pHRU->m_id = %d, idu_standing_h2o_accum_m3 = %f, pHRULayer1->m_volumeWater = %f, pHRULayer1->GetFluxValue() = %f",
                pHRU->m_id, idu_standing_h2o_accum_m3, pHRULayer1->m_volumeWater, pHRULayer1->GetFluxValue());
-            Report::LogWarning(msg);
+            Report::WarningMsg(msg);
          }
          water_in_snowpack_m3 = 0;
       }
