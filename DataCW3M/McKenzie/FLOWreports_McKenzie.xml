@@ -93,7 +93,7 @@
       <output name="reach 23772737 Q_CAP (cms)" query="COMID=23772737" value="Q_CAP" type="sum" domain="reach" />
       <output name="reach 23772737 Q_DISCHARG (cms)" query="COMID=23772737" value="Q_DISCHARG" type="sum" domain="reach" />
       <output name="reach 23772737 Q2WETL (cms)" query="COMID=23772737" value="Q2WETL" type="sum" domain="reach" />
-      <output name="wetland 10 WETL2Q (cms)" query="WETL_ID=10" value="WETL2Q" type="sum" domain="idu" />
+      <output name="wetland 10 WETL2Q_CMS (cms)" query="WETL_ID=10" value="WETL2Q_CMS" type="sum" domain="idu" />
       <output name="wetl 10 standing water (m3)" query="WETL_ID=10 AND WETNESS>0" value="WETNESS*AREA/1000" type="sum" domain="idu" />
       <output name="wetl 10 WETNESS" query="WETL_ID=10" value="WETNESS" type="areaWtMean" domain="idu" />
       <output name="wetland 10 ET (mm per day)" query="WETL_ID=10" value="ET_DAY" type="areaWtMean" domain="idu" />
@@ -115,9 +115,9 @@
       <output name="idu 33807 WETNESS (mm)" query="IDU_ID=33807" value="WETNESS" type="areaWtMean" domain="idu" />
       <output name="idu 33806 WETNESS (mm)" query="IDU_ID=33806" value="WETNESS" type="areaWtMean" domain="idu" />
       <output name="idu 33827 WETNESS (mm)" query="IDU_ID=33827" value="WETNESS" type="areaWtMean" domain="idu" />
-      <output name="idu 33807 WETL2Q (cms)" query="IDU_ID=33807" value="WETL2Q" type="areaWtMean" domain="idu" />
-      <output name="idu 33806 WETL2Q (cms)" query="IDU_ID=33806" value="WETL2Q" type="areaWtMean" domain="idu" />
-      <output name="idu 33827 WETL2Q (cms)" query="IDU_ID=33827" value="WETL2Q" type="areaWtMean" domain="idu" />
+      <output name="idu 33807 WETL2Q_CMS (cms)" query="IDU_ID=33807" value="WETL2Q_CMS" type="areaWtMean" domain="idu" />
+      <output name="idu 33806 WETL2Q_CMS (cms)" query="IDU_ID=33806" value="WETL2Q_CMS" type="areaWtMean" domain="idu" />
+      <output name="idu 33827 WETL2Q_CMS (cms)" query="IDU_ID=33827" value="WETL2Q_CMS" type="areaWtMean" domain="idu" />
       <output name="idu 33807 LULC_A" query="IDU_ID=33807" value="LULC_A" type="areaWtMean" domain="idu" />
       <output name="idu 33807 LULC_B" query="IDU_ID=33807" value="LULC_B" type="areaWtMean" domain="idu" />
       <output name="idu 33807 LULC_C" query="IDU_ID=33807" value="VEGCLASS" type="areaWtMean" domain="idu" />
@@ -167,7 +167,7 @@
       <output name="reach 23772743 Q_DISCHARG (cms)" query="COMID=23772743" value="Q_DISCHARG" type="sum" domain="reach" />
       <output name="reach 23772745 Q_CAP (cms)" query="COMID=23772745" value="Q_CAP" type="sum" domain="reach" />
       <output name="idu 33803 WETL_CAP (mm)" query="IDU_ID=33803" value="WETL_CAP" type="areaWtMean" domain="idu" />
-      <output name="idu 33803 WETL2Q (cms)" query="IDU_ID=33803" value="WETL2Q" type="areaWtMean" domain="idu" />
+      <output name="idu 33803 WETL2Q_CMS (cms)" query="IDU_ID=33803" value="WETL2Q_CMS" type="areaWtMean" domain="idu" />
     </output_group>
 
     <output_group name="FLOW Wetland 15 analysis" daily="y" monthly="y" yearly="y" >
@@ -179,7 +179,7 @@
       <output name="reach 23772753 Q_DISCHARG (cms) out to downstream" query="COMID=23772753" value="Q_DISCHARG" type="sum" domain="reach" />
       <output name="reach 23772767 Q_DISCHARG (cms) in from upstream" query="COMID=23772767" value="Q_DISCHARG" type="sum" domain="reach" />
       <output name="reaches 23772753-65 Q2WETL (cms)" query="23772752&lt;COMID and COMID&lt;23772766" value="Q2WETL" type="sum" domain="reach" />
-      <output name="total WETL2Q (cms)" query="WETL_ID=15" value="WETL2Q_CMS" type="sum" domain="idu" />
+      <output name="total WETL2Q_CMS (cms)" query="WETL_ID=15" value="WETL2Q_CMS" type="sum" domain="idu" />
       <output name="idu 32345 TEMP (degC)" query="IDU_ID=32345" value="TEMP" type="areaWtMean" domain="idu" />
       <output name="idu 32345 TEMP_WETL (degC)" query="IDU_ID=32345" value="TEMP_WETL" type="areaWtMean" domain="idu" />
       <output name="reach 23772753 TEMP_H2O (degC) out to downstream" query="COMID=23772753" value="TEMP_H2O" type="sum" domain="reach" />
@@ -219,7 +219,7 @@
       <output name="reach 23774413 Q2WETL (cms)" query="COMID=23774413" value="Q2WETL" type="sum" domain="reach" />
       <output name="reach 23774413 Q_CAP (cms)" query="COMID=23774413" value="Q_CAP" type="sum" domain="reach" />
       <output name="idu 31325 WETL_CAP (mm)" query="IDU_ID=31325" value="WETL_CAP" type="areaWtMean" domain="idu" />
-      <output name="idu 31325 WETL2Q (cms)" query="IDU_ID=31325" value="WETL2Q" type="areaWtMean" domain="idu" />
+      <output name="idu 31325 WETL2Q_CMS (cms)" query="IDU_ID=31325" value="WETL2Q_CMS" type="areaWtMean" domain="idu" />
     </output_group>
     
     <output_group name="FLOW Mohawk25 water budget" interval="yearly" >
@@ -329,9 +329,9 @@
       <output name="From upstream 23772739 Q_DISCHARG m3" query="COMID=23772739" value="Q_DISCHARG*86400" type="sum" domain="reach" />
       <output name="lateral inflow IN_RUNOFF m3" query="COMID=23772737" value="IN_RUNOFF*86400" type="sum" domain="reach" />
       <output name="Reach FLOOD m3" query="COMID=23772737" value="FLOOD_CMS*86400" type="sum" domain="reach" />
-      <output name="WETL2Q m3" query="COMID=23772737" value="WETL2Q*86400" type="sum" domain="idu" />
+      <output name="WETL2Q_CMS m3" query="COMID=23772737" value="WETL2Q_CMS*86400" type="sum" domain="idu" />
       <output name="water from springs m3" query="COMID=23772737" value="SPRING_CMS*86400" type="sum" domain="reach" />
-      <output name="water into reach 23772737 except WETL2Q and from upstream (m3)" query="COMID=23772737" value="86400*(IN_RUNOFF+FLOOD_CMS+SPRING_CMS+ADDED_Q)+ADDED_VOL" type="sum" domain="reach" />
+      <output name="water into reach 23772737 except WETL2Q_CMS and from upstream (m3)" query="COMID=23772737" value="86400*(IN_RUNOFF+FLOOD_CMS+SPRING_CMS+ADDED_Q)+ADDED_VOL" type="sum" domain="reach" />
       <output name="To downstream from 23772737 Q_DISCHARG m3" query="COMID=23772737" value="86400*Q_DISCHARG" type="sum" domain="reach" />
       <output name="OUT_LATERL m3" query="COMID=23772737" value="OUT_LATERL*86400" type="sum" domain="reach" />
       <output name="Q2WETL m3" query="COMID=23772737" value="Q2WETL*86400" type="sum" domain="reach" />
@@ -340,7 +340,7 @@
       <output name="OUT_MUNI (m3 H2O)" query="COMID=23772737" value="OUT_MUNI*86400" type="sum" domain="reach" />
       <output name="OUT_IRRIG (m3 H2O)" query="COMID=23772737" value="OUT_IRRIG*86400" type="sum" domain="reach" />
       <output name="water out of reach 23772737 m3" query="COMID=23772737" value="86400*(Q_DISCHARG+OUT_LATERL+Q2WETL+OUT_MUNI+OUT_IRRIG)+EVAP_MM*AREA_H2O/1000" type="sum" domain="reach" />
-      <output name="surface water out of wetland except FLOOD and infiltration m3" query="WETL_ID=10" value="86400*WETL2Q+ET_DAY*AREA/1000" type="sum" domain="idu" />
+      <output name="surface water out of wetland except FLOOD and infiltration m3" query="WETL_ID=10" value="86400*WETL2Q_CMS+ET_DAY*AREA/1000" type="sum" domain="idu" />
       <output name="PRECIP (mm H2O) average daily precipitation" query="HRU_ID=2033" value="PRECIP" type="areaWtMean" domain="hru" />
       <output name="TEMP (degC) average daily temperature" query="WETL_ID=10" value="TEMP" type="areaWtMean" domain="idu" />
       <output name="ADDED_VOL m3" query="COMID=23772737" value="ADDED_VOL" type="sum" domain="reach" />
@@ -404,8 +404,8 @@
       <output in_use="1" name="TMIN (degC) average diurnal min temp" query="1" value="TMIN" type="areaWtMean" domain="idu" />
       <output name="Q2WETL m3" query="1" value="Q2WETL*86400" type="sum" domain="reach" />
       <output name="Q2WETL MJ" query="1" value="TEMP_H2O*Q2WETL*86400*998.2*4.187/1000" type="sum" domain="reach" />
-      <output name="WETL2Q m3" query="1" value="WETL2Q*86400" type="sum" domain="idu" />
-      <output name="WETL2Q MJ" query="1" value="TEMP_WETL*WETL2Q*86400*998.2*4.187/1000" type="sum" domain="idu" />
+      <output name="WETL2Q_CMS m3" query="1" value="WETL2Q_CMS*86400" type="sum" domain="idu" />
+      <output name="WETL2Q_CMS MJ" query="1" value="TEMP_WETL*WETL2Q_CMS*86400*998.2*4.187/1000" type="sum" domain="idu" />
       <output name="OUT_LATERL m3" query="1" value="OUT_LATERL*86400" type="sum" domain="reach" />
       <output name="OUT_LATERL MJ" query="1" value="TEMP_H2O*OUT_LATERL*86400*998.2*4.187/1000" type="sum" domain="reach" />
       <output name="Reach FLOOD m3" query="1" value="FLOOD_CMS*86400" type="sum" domain="reach" />

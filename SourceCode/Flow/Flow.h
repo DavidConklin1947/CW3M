@@ -115,6 +115,7 @@ using namespace std;
 #define ReachDEPTH_MIN gFlowModel->m_colReachDEPTH_MIN
 #define ReachDIRECTION gFlowModel->m_colReachDIRECTION
 #define ReachHBVCALIB gFlowModel->m_colReachHBVCALIB
+#define ReachIN_RUNOFF gFlowModel->m_colReachIN_RUNOFF
 #define ReachQ_CAP gFlowModel->m_colReachQ_CAP
 #define ReachQSPILL_FRC gFlowModel->m_colReachQSPILL_FRC
 #define ReachQ2WETL gFlowModel->m_colReachQ2WETL

@@ -8610,17 +8610,34 @@ bool FlowModel::WriteDataToMap(EnvContext *pEnvContext )
             }
          }
 
-         // It is not necessary to separate out flood water from normal runoff because at this point
-         // the flood water is in m_globalHandlerFluxValue.  It hasn't gotten to pNode->m_runoffWP yet
-         // because ApplyQ2WETL() runs after ReachRouting::Step().
-
          double reach_in_runoff_cms = reach_in_runoffWP.m_volume_m3 / SEC_PER_DAY;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOFF, reach_in_runoff_cms);
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachIN_RUNOF_C, reach_in_runoffWP.WaterTemperature());
          double reach_out_lateral_cms = reach_out_lateral_m3 / SEC_PER_DAY;
          m_pReachLayer->SetDataU(pReach->m_polyIndex, m_colReachOUT_LATERL, reach_out_lateral_cms);
       }
-   }
+   } // end of loop through reaches
+
+   // Remove WETL2Q from IN_RUNOFF.
+   for (int wetl_ndx = 0; wetl_ndx < m_wetlArray.GetSize(); wetl_ndx++)
+   {
+      Wetland* pWetl = m_wetlArray[wetl_ndx];
+      for (int idu_ndx_in_wetl = 0; idu_ndx_in_wetl < pWetl->m_wetlIDUndxArray.GetSize(); idu_ndx_in_wetl++)
+      {
+         int idu_poly_ndx = pWetl->m_wetlIDUndxArray[idu_ndx_in_wetl];
+         double wetl2q_cms = gIDUs->Att(idu_poly_ndx, WETL2Q_CMS);
+         ASSERT(wetl2q_cms >= 0);
+         if (wetl2q_cms > 0)
+         {
+            int reach_ndx = pWetl->m_wetlReachNdxArray[idu_ndx_in_wetl];
+            Reach* pReach = m_reachArray[reach_ndx];
+            double in_runoff_cms = pReach->Att(ReachIN_RUNOFF);
+            ASSERT(in_runoff_cms >= wetl2q_cms);
+            in_runoff_cms -= wetl2q_cms;
+            pReach->SetAtt(ReachIN_RUNOFF, in_runoff_cms);
+         } // end of if (wetlq_cms > 0)
+      } // end of loop thru IDUs in wetland
+   } // end of loop through wetlands
 
    for (MapLayer::Iterator idu = m_pCatchmentLayer->Begin(); idu < m_pCatchmentLayer->End(); idu++)
    {
