@@ -107,3 +107,28 @@ void ApplySubstituteStrings(CString& str, PtrArray<SubstituteString> substitutes
    }
 } // end of ApplySubstituteStrings()
 
+
+bool close_enough(double x, double y, double allowable_relative_diff, double allowable_near_zero)
+{
+   if (x == 0 && y == 0) return(true);
+
+   double abs_x = fabs(x);
+   double abs_y = fabs(y);
+
+   double divisor = abs_x > abs_y ? abs_x : abs_y;
+   double abs_relative_diff = fabs((x - y) / divisor);
+   if (abs_relative_diff <= allowable_relative_diff) return(true);
+   if (abs_x <= allowable_near_zero && abs_y <= allowable_near_zero) return(true);
+   return(false);
+} // end of close_enough(x, y, rel, abs)
+
+
+bool close_enough_to_zero(double x, double allowable_near_zero) // returns true iff abs(x) <= abs(allowable_near_zero)
+{
+   ASSERT(allowable_near_zero >= 0);
+   if (abs(x) <= abs(allowable_near_zero))
+      return(true);
+   else
+      return(false);
+} // end of close_enough_to_zero()
+

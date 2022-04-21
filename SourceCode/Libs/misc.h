@@ -117,6 +117,9 @@ void LIBSAPI GetTileParams( int count, int &rows, CArray<int,int> &colArray );
 int  LIBSAPI CleanFileName(LPCTSTR filename);
 int  LIBSAPI Tokenize( const TCHAR* str, const TCHAR* delimiters, CStringArray &tokens);
 void LIBSAPI ApplySubstituteStrings(CString& str, PtrArray<SubstituteString> substitutes);
+bool LIBSAPI close_enough(double x, double y, double allowable_relative_diff, double allowable_near_zero = 0);
+bool LIBSAPI close_enough_to_zero(double x, double allowable_near_zero); // returns true iff abs(x) <= abs(allowable_near_zero)
+
 
 #ifdef __cplusplus
 }

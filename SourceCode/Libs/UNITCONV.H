@@ -104,32 +104,4 @@ const float PI         = 3.1415927f;
 #define RISERUN_PER_DEGREE( r ) ((r/200.0f)*90)
 #define PERCENT_PER_DEGREE( r ) ((r/100.0f)*90)       // NON-decimal percent
 
-
-inline bool close_enough(double x, double y, double allowable_relative_diff)
-{
-   if (x == 0 && y == 0) return(true);
-
-   double abs_x = fabs(x);
-   double abs_y = fabs(y);
-
-   double divisor = abs_x > abs_y ? abs_x : abs_y;
-   double abs_relative_diff = fabs((x - y) / divisor);
-   return(abs_relative_diff <= allowable_relative_diff);
-} // end of close_enough(x, y, relative)
-
-
-inline bool close_enough(double x, double y, double allowable_relative_diff, double allowable_near_zero)
-{
-   if (x == 0 && y == 0) return(true);
-
-   double abs_x = fabs(x);
-   double abs_y = fabs(y);
-
-   double divisor = abs_x > abs_y ? abs_x : abs_y;
-   double abs_relative_diff = fabs((x - y) / divisor);
-   if (abs_relative_diff <= allowable_relative_diff) return(true);
-   if (abs_x <= allowable_near_zero && abs_y <= allowable_near_zero) return(true);
-   return(false);
-} // end of close_enough(x, y, rel, abs)
-
 #endif

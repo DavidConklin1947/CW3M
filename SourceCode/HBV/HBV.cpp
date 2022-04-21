@@ -10,7 +10,7 @@
 #include <UNITCONV.H>
 #include <omp.h>
 #include <math.h>
-#include <UNITCONV.H>
+#include <misc.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -233,11 +233,12 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
       double water_in_snowpack_m3 = (layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3) - idu_standing_h2o_accum_m3;
       if (water_in_snowpack_m3 < 0)
       {
-         if (!close_enough(idu_standing_h2o_accum_m3, layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3, 1e-3, 10))
+         if (!(close_enough((layer1_vol_and_flux_m3 + idu_wetl2q_accum_m3), idu_standing_h2o_accum_m3, 1e-3) ||
+            close_enough_to_zero(water_in_snowpack_m3, 10)))
          {
             CString msg;
-            msg.Format("HBVdailyProcess() pHRU->m_id = %d, idu_standing_h2o_accum_m3 = %f, pHRULayer1->m_volumeWater = %f, pHRULayer1->GetFluxValue() = %f",
-               pHRU->m_id, idu_standing_h2o_accum_m3, pHRULayer1->m_volumeWater, pHRULayer1->GetFluxValue());
+            msg.Format("HBVdailyProcess() pHRU->m_id = %d, idu_standing_h2o_accum_m3 = %f, water_in_snowpack_m3 = %f, pHRULayer1->m_volumeWater = %f, pHRULayer1->GetFluxValue() = %f, idu_wetl2q_accum_m3 = %f",
+               pHRU->m_id, idu_standing_h2o_accum_m3, water_in_snowpack_m3, pHRULayer1->m_volumeWater, pHRULayer1->GetFluxValue(), idu_wetl2q_accum_m3);
             Report::WarningMsg(msg);
          }
          water_in_snowpack_m3 = 0;
