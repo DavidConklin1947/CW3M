@@ -2,7 +2,7 @@
 #include "libs.h"
 #include "Report.h"
 
-#define NOMINAL_MAX_WATER_TEMP_DEGC 50 /* water temperatures greater than this in the natural environment are unrealistic (except maybe for hot springs) */
+#define NOMINAL_MAX_WATER_TEMP_DEGC 55 /* water temperatures greater than this in the natural environment are unrealistic (except maybe for hot springs) */
 
 class LIBSAPI WaterParcel
 {

@@ -7723,8 +7723,7 @@ bool FlowModel::CheckHRUwaterBalance(HRU* pHRU)
    
    bool rtnval = close_enough(hru_area_m2, idu_area_accum_m2, 0.0001, 0.01)
       && close_enough(snow_swe_accum_m3 - melt_h2o_accum_m3, hru_snowpack_m3swe, 0.0001, 0.01)
-      && close_enough(surface_h2o_accum_m3, hru_surface_h2o_m3, 0.0001, 0.01)
-      && close_enough(sm_day_accum_m3, hru_topsoil_h2o_m3, 0.0001, 0.01);
+      && close_enough(surface_h2o_accum_m3, hru_surface_h2o_m3, 0.0001, 0.01);
    ASSERT(rtnval);
    rtnval = rtnval && CheckSurfaceH2O(pHRU, 0.);
 
