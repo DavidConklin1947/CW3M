@@ -932,7 +932,11 @@ void ETEquation::WetlandET(int idu, float soilH2O_mm, float fc_mm, float wp_mm, 
    if (wetness_mm > 0)
    { // Calculate evaporation from standing water.
       double idu_h2o_m3 = idu_area_m2 * (wetness_mm / 1000.);
-      WaterParcel standing_h2oWP(idu_h2o_m3, m_dailyMeanTemperature);
+
+      // If the air temp is below zero, ice might be forming, but that is ignored here.
+      double standing_h2o_temp_degC = max(m_dailyMeanTemperature, DEFAULT_MIN_SKIN_TEMP_DEGC);
+
+      WaterParcel standing_h2oWP(idu_h2o_m3, standing_h2o_temp_degC);
       double cloudiness_frac = ReachRouting::Cloudiness(m_solarRadiation, gFlowModel->m_flowContext.dayOfYear);
       double evap_kJ = 0., SW_kJ = 0., LW_kJ = 0.;
       WaterParcel netWP = ReachRouting::ApplyEnergyFluxes(standing_h2oWP, idu_area_m2, net_SW_W_m2,

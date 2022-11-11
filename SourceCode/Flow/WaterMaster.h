@@ -16,6 +16,8 @@
 
 using namespace std;
 
+#define FIRST_ARTIFICIAL_WATERRIGHTID 1000000
+
 enum WR_SPECIALCODE {
    WRSC_NONE = 0, WRSC_NEWINSTREAM = 1, WRSC_MUNIBACKUP = 2, WRSC_NOT_NEWINSTREAM_ONLY = 4,
    WRSC_OBSOLETE = 8, // no longer used in simulations 
