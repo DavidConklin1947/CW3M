@@ -5,9 +5,11 @@ import csv
 import sys
 
 FIRST_NEW_IDU_ID = 164892
+HBVCALIB_BLU = 9
 
 def main():
     parser = argparse.ArgumentParser(prog = 'project', description="CW3M Utility")
+    parser.add_argument('-b', "--basin", help='HBVCALIB value of watershed of interest', type=int, default=HBVCALIB_BLU)
     parser.add_argument('-d', "--do", help='do idu_id | lulc | wr', type=str, default="")
     parser.add_argument('-i', "--idu", help="base name of the IDU shapefile", type=str, default="")
     parser.add_argument('-l', "--lulc", help="name of the LULC XML file", type=str, default="")
@@ -15,16 +17,17 @@ def main():
     parser.add_argument('-n', "--next_id", help="the next unused idu_id value", type=int, default=FIRST_NEW_IDU_ID)
     args = parser.parse_args()
     args_dict = vars(args)
-#    print("args =", args)
-#    print("vars(args) =", vars(args))
-
-    
+   
     what_to_do = ((args_dict["do"]).lower())
     print("what_to_do =", what_to_do)
     if len(what_to_do) <= 0:
         result = do_help()
     else:
-        match (what_to_do[0]):
+        match what_to_do[0]:
+            case 'b': # 'basin'
+                base_name = args_dict["idu"]
+                hbvcalib = args_dict["basin"]
+                result = do_extract_basin(base_name, hbvcalib)
             case 'i': # 'idu'
                 base_name = args_dict["idu"]
                 first_new_idu_id = args_dict["next_id"]
@@ -45,17 +48,14 @@ def main():
 def do_help():
     print("\nCW3M Utility")
     print("command line arguments are:")
-    print("--do idu_id | lulc | wr")
+    print("--basin hbvcalib")
+    print("--do basin | idu_id | lulc | wr")
     print("--idu IDU_layer")
     print("--lulc LULC_spec")
+    print("--next_id next_idu_id_value")
     print("--wr POD_file")
-    return("")
+    return ""
 
-
-#IDU_layer_file = wget("C:/CW3M.git/trunk/DataCW3M/McKenzie/IDU_McKenzie.shp")
-# IDU_layer_file = "C:/CW3M.git/trunk/DataCW3M/McKenzie/Richey/IDU_McKenzie.shp"
-#https://app.box.com/s/dvk17jy1ukbllk8tjxqot1r60kms8lgk
-#https://app.box.com/shared/static/dvk17jy1ukbllk8tjxqot1r60kms8lgk.shp
 
 def do_idu(base_name, first_new_idu_id):
     IDU_layer = shapefile.Reader(base_name)
@@ -101,6 +101,7 @@ def do_idu(base_name, first_new_idu_id):
 
     print("\nLooking for duplicate IDU_IDs now. This can take a while...")
     num_duplicates = 0
+    num_duplicates_in_BLU = 0
     next_new_idu_id = first_new_idu_id
     for i in range(num_idus - 1):
         idu_i = IDU_layer.record(i)
@@ -111,16 +112,19 @@ def do_idu(base_name, first_new_idu_id):
         except IndexError:
             pass
         idu_id_i = idu_i.IDU_ID
+        hbvcalib_i = idu_i.HBVCALIB
         dup_found = False
         j = i + 1
         while j < num_idus:
             idu_j = IDU_layer.record(j)
             idu_id_j = idu_j.IDU_ID
             if idu_id_i != idu_id_j:
-                if not dup_found and i % 100 == 0:
+                if not dup_found and i % 2000 == 0:
                     print(i)
                 break
             num_duplicates += 1
+            if hbvcalib_i == HBVCALIB_BLU:
+                num_duplicates_in_BLU += 1
             if j == i + 1:
                 idu_i.IDU_ID = next_new_idu_id
                 print(i, "IDU_ID has been changed from", idu_id_i, " to", idu_i.IDU_ID)
@@ -136,6 +140,7 @@ def do_idu(base_name, first_new_idu_id):
     print("num_idus is", num_idus, "in", base_name)
     print("num_non_neg_fid_wetlan is", num_non_neg_fid_wetlan)
     print("num_duplicates =", num_duplicates)
+    print("num_duplicate_in_BLU =", num_duplicates_in_BLU)
 
     if num_duplicates <= 0:
         print("No duplicates, so no new file will be created.")
@@ -153,6 +158,35 @@ def do_idu(base_name, first_new_idu_id):
             i += 1
         print(f"{i} records processed. Closing now.")
         writer.close()
+
+    return "Successful."
+
+
+def do_extract_basin(base_name, hbvcalib):
+    IDU_layer = shapefile.Reader(base_name)
+    num_idus = len(IDU_layer)
+    if num_idus <= 0:
+        return "There are no IDUs."
+    print("num_idus is", num_idus, "in", base_name)
+
+    new_shapefile_loc = "NewFiles/" + base_name
+    print(f"new shapefile is {new_shapefile_loc}")
+
+    print("\nExtracting the basin of interest now. This can take a while...")
+    num_idus_in_basin = 0
+    writer = shapefile.Writer(new_shapefile_loc)
+    writer.fields = IDU_layer.fields[1:]
+    i = 0
+    for shaperec in IDU_layer.iterShapeRecords():
+        if shaperec.record['AREA'] > 0 and shaperec.record['HBVCALIB'] == hbvcalib:
+            writer.record(*shaperec.record)
+            writer.shape(shaperec.shape)
+            num_idus_in_basin += 1
+        if i % 2000 == 0:
+            print(f"working on record {i} now")
+        i += 1
+    print(f"{i} records processed. New file has {num_idus_in_basin}. Closing now.")
+    writer.close()
 
     return "Successful."
 
