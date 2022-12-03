@@ -123,8 +123,6 @@ def do_idu(base_name, first_new_idu_id):
                     print(i)
                 break
             num_duplicates += 1
-            if hbvcalib_i == HBVCALIB_BLU:
-                num_duplicates_in_BLU += 1
             if j == i + 1:
                 idu_i.IDU_ID = next_new_idu_id
                 print(i, "IDU_ID has been changed from", idu_id_i, " to", idu_i.IDU_ID)
@@ -140,7 +138,6 @@ def do_idu(base_name, first_new_idu_id):
     print("num_idus is", num_idus, "in", base_name)
     print("num_non_neg_fid_wetlan is", num_non_neg_fid_wetlan)
     print("num_duplicates =", num_duplicates)
-    print("num_duplicate_in_BLU =", num_duplicates_in_BLU)
 
     if num_duplicates <= 0:
         print("No duplicates, so no new file will be created.")
@@ -169,10 +166,10 @@ def do_extract_basin(base_name, hbvcalib):
         return "There are no IDUs."
     print("num_idus is", num_idus, "in", base_name)
 
-    new_shapefile_loc = "NewFiles/" + base_name
+    new_shapefile_loc = "NewFiles/" + "extract_from_" + base_name
     print(f"new shapefile is {new_shapefile_loc}")
 
-    print("\nExtracting the basin of interest now. This can take a while...")
+    print(f"\nExtracting the basin of interest now. HBVCALIB = {hbvcalib}. This can take a while...")
     num_idus_in_basin = 0
     writer = shapefile.Writer(new_shapefile_loc)
     writer.fields = IDU_layer.fields[1:]

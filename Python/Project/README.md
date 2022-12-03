@@ -16,6 +16,8 @@ For this program, at least initially, the Python programmer and the user are the
 To start the program, type "python project.py" at the command line. Invoking the program without arguments will cause it to display usage information.  Input data files are assumed to be located in the current directory. New data files created by the program are placed in a subdirectory "NewFiles" of the current directory.
 
 ##### Command line flags
+"--basin" specifies the HBVCALIB value of a basin of interest
+
 "--do" specifies the function to be performed
 
 "--idu" identifies the IDU shapefile
@@ -26,7 +28,12 @@ To start the program, type "python project.py" at the command line. Invoking the
 
 "--next_id" sets the value of FIRST_NEW_IDU_ID
 
-##### --do idu_id | lulc | wr
+##### --basin hbvcalib_value
+hbvcalib_value = the value of the HBVCALIB attribute for the basin to be extracted
+
+##### --do basin | idu_id | lulc | wr
+"--do basin" tells the program to extract the shapefile records for a particular watershed, using the HBVCALIB value specified with the --basin flag
+
 "--do idu_id" tells the program to check the IDU layer for duplicate IDU_ID values and replace them with unique values. This function requires the IDU shapefile to be specified with the --idu flag. The IDU layer is modified in place.
 
 "--do lulc" tells the program to check the LULC_A, LULC_B, and VEGCLASS attribute values in the IDU layer for consistency with the LULC specification, and make repairs to the extent possible. This function requires both the IDU shapefile and the LULC XML file to be specified, with the --idu and --lulc flags. The IDU layer is modified in place. The LULC file is not modified.
