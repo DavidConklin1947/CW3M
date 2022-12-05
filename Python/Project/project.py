@@ -186,16 +186,67 @@ def do_lulc(base_name, lulc_file_name): # Return the number of IDUs for which LU
     return 0
 
 
-def do_wr(pods_file_name): # Return the number of data records in the new POD file.
-    file = open(pods_file_name)
-    reader = csv.reader(file)
-    count = 0
-    for _ in reader:
-        count += 1
+def do_wr(new_file_name): # Return the number of data records in the merged POD file.
+    # "old file" = the original POD file, named "wr_pods.csv", located in the current folder
+    # "new file" = the new POD file before processing for compatibility with CW3M, located in the current folder
+    # "merged file" = the POD file with data from both old and new files, processed for compatibility with CW3M
+    # The merged file is located in ./NewFiles and has the name wr_pods.csv.
+    # Start a merged POD file in the NewFiles folder.
+    # Copy the column headers from the old file to the merged file.
+    # Add UGB and CW3M_YEAR column headers.
 
-    count -= 1 # Don't count the header record.
-    print(f"There are {count} data rows in {pods_file_name}")
-    return count
+    # water right use codes
+    WRU_IRRIGATION=16
+    WRU_MUNICIPAL=1024
+    WRU_INSTREAM=2048
+
+    # water right permit codes
+    WRP_SURFACE=2
+    WRP_GROUNDWATER=4
+
+    old_file = open("wr_pods.csv")
+    old_reader = csv.DictReader(old_file)
+    next(old_reader) # This call initializes old_reader.fieldnames
+    old_header = old_reader.fieldnames
+    print("from old_file:", old_header)
+
+    new_file = open(new_file_name)
+    new_reader = csv.DictReader(new_file)
+    next(new_reader) # This call initializes new_reader.fieldnames
+    new_header = new_reader.fieldnames
+    print("from new_file:", new_header)
+
+    header = old_header
+    OID_column = ""
+    for column in new_header:
+        if column.count("OID_") > 0:
+            OID_column = column
+            continue
+        if not column in old_header:
+            header.append(column)
+    if not "UGB" in header:
+        header.append("UGB")
+    if not "CW3M_YEAR" in header:
+        header.append("CW3M_YEAR")
+    print("for merged_file:", header)
+
+    merged_file = open("NewFiles/wr_pods.csv", 'w', newline='')
+    merged_writer = csv.DictWriter(merged_file, header)
+
+    new_count = 0
+    for row in new_reader:
+        merged_row = row
+        if OID_column != "":
+            del merged_row[OID_column]
+        if row["USECODE"] != WRU_MUNICIPAL:
+            merged_writer.writerow(merged_row)
+        else:
+            merged_writer.writerow(merged_row)
+        new_count += 1
+
+    new_count -= 1 # Don't count the header record.
+    print(f"There are {new_count} data rows in {new_file_name}")
+    return new_count
 
 
 if __name__ == "__main__":

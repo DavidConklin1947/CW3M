@@ -1,6 +1,6 @@
 # CW3M Utility
-12/3/22
-#### Video Demo: <URL HERE>
+12/4/22
+#### Video Demo: https://youtu.be/p2inQOZ7e1g
 #### Description
 CW3M is a watershed simulation model written in C++ which uses ESRI shapefiles to represent the land and stream network in a spatially explicit way. This Python program allows the user/programmer to analyze and modify the large shapefiles used by CW3M. CW3M also uses CSV and XML files; this program is intended to be a framework to which more functions may be added from time to time which analyze and modify these other CW3M data files.
 
