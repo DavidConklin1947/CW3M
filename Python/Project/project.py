@@ -206,45 +206,45 @@ def do_wr(new_file_name): # Return the number of data records in the merged POD 
 
     old_file = open("wr_pods.csv")
     old_reader = csv.DictReader(old_file)
-    next(old_reader) # This call initializes old_reader.fieldnames
-    old_header = old_reader.fieldnames
+    first_old_row = next(old_reader) # This call initializes old_reader.fieldnames
+    old_header = list(first_old_row)
     print("from old_file:", old_header)
+    print("first_old_row:", first_old_row)
+    old_reader = csv.DictReader(old_file) # Rewind.
 
     new_file = open(new_file_name)
     new_reader = csv.DictReader(new_file)
-    next(new_reader) # This call initializes new_reader.fieldnames
+    first_new_row = next(new_reader) # This call initializes new_reader.fieldnames
     new_header = new_reader.fieldnames
     print("from new_file:", new_header)
+    print("first_new_row:", first_new_row)
+    new_reader = csv.DictReader(new_file) # Rewind.
+
+    assert(old_header == new_header)
 
     header = old_header
-    OID_column = ""
-    for column in new_header:
-        if column.count("OID_") > 0:
-            OID_column = column
-            continue
-        if not column in old_header:
-            header.append(column)
     if not "UGB" in header:
         header.append("UGB")
     if not "CW3M_YEAR" in header:
         header.append("CW3M_YEAR")
     print("for merged_file:", header)
 
-    merged_file = open("NewFiles/wr_pods.csv", 'w', newline='')
-    merged_writer = csv.DictWriter(merged_file, header)
+    merged_file = open("NewFiles/merged_file.csv", 'w', newline='')
+    print("just before csv.writer() call:", header)
+    merged_writer = csv.writer(merged_file)
+    merged_writer.writerow(header)
 
     new_count = 0
     for row in new_reader:
         merged_row = row
-        if OID_column != "":
-            del merged_row[OID_column]
-        if row["USECODE"] != WRU_MUNICIPAL:
-            merged_writer.writerow(merged_row)
-        else:
-            merged_writer.writerow(merged_row)
+        if new_count == 0:
+            print("first_merged_row:", merged_row)
+#        if merged_row['USECODE'] != WRU_MUNICIPAL:
+#            merged_writer.writerow(values(merged_row))
+#        else:
+        merged_writer.writerow(merged_row.values())
         new_count += 1
 
-    new_count -= 1 # Don't count the header record.
     print(f"There are {new_count} data rows in {new_file_name}")
     return new_count
 
