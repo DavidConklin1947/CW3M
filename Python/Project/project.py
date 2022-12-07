@@ -204,47 +204,104 @@ def do_wr(new_file_name): # Return the number of data records in the merged POD 
     WRP_SURFACE=2
     WRP_GROUNDWATER=4
 
+    FIRST_ARTIFICIAL_WATERRIGHTID=1000000
+
     old_file = open("wr_pods.csv")
-    old_reader = csv.DictReader(old_file)
-    first_old_row = next(old_reader) # This call initializes old_reader.fieldnames
-    old_header = list(first_old_row)
-    print("from old_file:", old_header)
-    print("first_old_row:", first_old_row)
-    old_reader = csv.DictReader(old_file) # Rewind.
+    old_reader = csv.reader(old_file) 
+    old_header_list = next(old_reader) 
+    print("old_header_list:", old_header_list)
 
     new_file = open(new_file_name)
-    new_reader = csv.DictReader(new_file)
-    first_new_row = next(new_reader) # This call initializes new_reader.fieldnames
-    new_header = new_reader.fieldnames
-    print("from new_file:", new_header)
-    print("first_new_row:", first_new_row)
-    new_reader = csv.DictReader(new_file) # Rewind.
+    new_reader = csv.reader(new_file)
+    new_header_list = next(new_reader) # This call initializes new_reader.fieldnames
+    print("new_header_list:", new_header_list)
 
-    assert(old_header == new_header)
+    if old_header_list != new_header_list:
+        print(f"old_header_list = {old_header_list}")
+        print("new_header_list =", new_header_list)
 
-    header = old_header
-    if not "UGB" in header:
-        header.append("UGB")
-    if not "CW3M_YEAR" in header:
-        header.append("CW3M_YEAR")
-    print("for merged_file:", header)
+    header_list = old_header_list
+    if not "UGB" in header_list:
+        header_list.append("UGB")
+    if not "CW3M_YEAR" in header_list:
+        header_list.append("CW3M_YEAR")
+    print("header_list for merged_file:", header_list)
 
     merged_file = open("NewFiles/merged_file.csv", 'w', newline='')
-    print("just before csv.writer() call:", header)
+    print("just before csv.writer() call:", header_list)
     merged_writer = csv.writer(merged_file)
-    merged_writer.writerow(header)
+    merged_writer.writerow(header_list)
 
     new_count = 0
-    for row in new_reader:
-        merged_row = row
-        if new_count == 0:
-            print("first_merged_row:", merged_row)
-#        if merged_row['USECODE'] != WRU_MUNICIPAL:
-#            merged_writer.writerow(values(merged_row))
-#        else:
-        merged_writer.writerow(merged_row.values())
+    merged_muni = {} # Create an empty dictionary of municipal-use water rights, keyed by their water right IDs.
+    # Note that these dictionary entries will be lists, because some water right IDs have more than
+    # one point-of-diversion.
+    year_ndx = header_list.index("YEAR")
+    usecode_ndx = header_list.index("USECODE")
+    waterrightid_ndx = header_list.index("WATERRIGHTID")
+    while merged_row_list:= next(new_reader, False):
+        merged_row_list.append("0") # UGB
+        merged_row_list.append(merged_row_list[year_ndx]) # CW3M_YEAR
+        # if this is not a municipal use water right, just copy it into the merged file.
+        if int(merged_row_list[usecode_ndx]) != WRU_MUNICIPAL:
+            merged_writer.writerow(merged_row_list)
+        else: # If it is a muni wr, then
+            waterrightid_str = merged_row_list[waterrightid_ndx]
+            if waterrightid_str not in merged_muni:
+                merged_muni[waterrightid_str] = [merged_row_list] 
+            else:
+                (merged_muni[waterrightid_str]).append(merged_row_list)
         new_count += 1
+   
+    # Now process the muni water rights.
+    # If there are corresponding water right IDs in the old file, copy their UGB and 
+    # priority year data into the new UGB and CW3M_YEAR fields.
+    # Copy all the old artificial muni water right records to the new muni dictionary.
+    print("Beginning to merge old and new water rights now...")
+    pouid_ndx = header_list.index("POUID")
+    ugb_ndx = header_list.index("UGB")
+    cw3m_year_ndx = header_list.index("CW3M_YEAR")
+    for row in old_reader:
+        old_waterrightid_str = row[waterrightid_ndx]
+        old_waterrightid_int = int(old_waterrightid_str)
+        if old_waterrightid_str in merged_muni:
+            if not (int(row[usecode_ndx]) == WRU_MUNICIPAL):
+                print("old_waterrightid_str =", old_waterrightid_str, " row[usecode_ndx] =", row[usecode_ndx])
+            pouid = int(row[pouid_ndx])
+            if (pouid < 0):
+                ugb = -pouid
+                pod_list = merged_muni[old_waterrightid_str]
+                merged_pod_list = []
+                for pod_record in pod_list:
+                    merged_pod_record = pod_record
+                    merged_pod_record[ugb_ndx] = ugb
+                    cw3m_year = row[year_ndx]
+                    merged_pod_record[cw3m_year_ndx] = cw3m_year
+                    merged_pod_list.append(merged_pod_record)
+                merged_muni[old_waterrightid_str] = merged_pod_list
+        elif old_waterrightid_int >= FIRST_ARTIFICIAL_WATERRIGHTID:
+            # Copy the artificial water rights to the merged list and fix the UGB and CW3M_YEAR columns.
+            # ??? What about the artificial water rights that are not for municipal use? Do they have associated POU records?
+            merged_pod_record = row
+            pouid = int(merged_pod_record[pouid_ndx])
+            if (pouid < 0):
+                ugb = -pouid
+            else:
+                ugb = 0
+            merged_pod_record.append(ugb) 
+            merged_pod_record.append(merged_pod_record[year_ndx])
+            merged_writer.writerow(merged_pod_record) 
 
+    # Now add the merged muni water rights back into the merged_file.
+    print("merged_muni:")
+    merged_muni_keys = merged_muni.keys()
+    for key in merged_muni_keys:
+        wr_id_list = merged_muni[key]
+        print("wr_id:", key)
+        for row in wr_id_list:
+            print("  ", row)
+            merged_writer.writerow(row)
+ 
     print(f"There are {new_count} data rows in {new_file_name}")
     return new_count
 
