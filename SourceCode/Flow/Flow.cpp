@@ -5678,14 +5678,33 @@ bool FlowModel::Run( EnvContext *pEnvContext )
          if (hru_h2o_melt_m3 < 0.)
          {
             if (pBox_surface_h2o->m_volumeWater == 0 || hru_standing_h2o_m3 == 0)
-               ASSERT(close_enough(abs(hru_h2o_melt_m3), 0, 0.001, 1.0));
+            {
+               if (!(close_enough(abs(hru_h2o_melt_m3), 0, 0.001, 1.0)))
+//               ASSERT(close_enough(abs(hru_h2o_melt_m3), 0, 0.001, 1.0));
+               {
+               CString msg;
+               msg.Format("FlowModel::Run() For pHRU->m_id = %d, hru_h2o_melt_m3 = %f when "
+                  "pBox_surface_h2o->m_volumeWater is %f and hru_standing_h2o_m3 is %f",
+                  pHRU->m_id, hru_h2o_melt_m3, pBox_surface_h2o->m_volumeWater, hru_standing_h2o_m3);
+               Report::LogWarning(msg);
+               }
+            }
             else
             { // Meltwater, which is the difference between pBox_surface_h2o->m_volumeWater and hru_standing_h2o_m3, 
                // when it is negative should be a tiny fraction of hru_standing_h2o_m3 arising from roundoff.
-               ASSERT(pBox_surface_h2o->m_volumeWater > 0);
+               if (!(pBox_surface_h2o->m_volumeWater > 0))
+ //              ASSERT(pBox_surface_h2o->m_volumeWater > 0);
+               {
+                  CString msg;
+                  msg.Format("FlowModel::Run() For pHRU->m_id = %d, hru_h2o_melt_m3 = %f when "
+                     "pBox_surface_h2o->m_volumeWater is %f and hru_standing_h2o_m3 is %f",
+                     pHRU->m_id, hru_h2o_melt_m3, pBox_surface_h2o->m_volumeWater, hru_standing_h2o_m3);
+                  Report::LogWarning(msg);
+               }
                double fraction = hru_h2o_melt_m3 / pBox_surface_h2o->m_volumeWater;
 // ???               ASSERT(close_enough(fraction, 0, 1e-2, 1e-2));
             }
+
             hru_h2o_melt_m3 = 0.;
          }
 

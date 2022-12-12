@@ -1815,10 +1815,10 @@ bool AltWaterMaster::Step(FlowContext *pFlowContext)
 
 		// Get POUID (aka Place of Use) for current Permit
 		int pouID = pRight->m_pouID;
-      if (pRight->m_useCode == WRU_MUNICIPAL && pouID < 0)
-         { // Interpret the pouID as -UGB
-         int uga = -pouID;
-         if (uga > MAX_UGA_NDX) continue;
+      if (pRight->m_useCode == WRU_MUNICIPAL) 
+         { 
+         int uga = pRight->m_wr_ugb;
+         if (uga <= 0 || uga > MAX_UGA_NDX) continue;
 /*
          if (pFlowContext->dayOfYear == 0)
             {
@@ -4333,11 +4333,13 @@ int AltWaterMaster::LoadWRDatabase(FlowContext *pFlowContext)
 	m_colYcoord = m_podDb.GetCol("y");
 	m_colPodID = m_podDb.GetCol("PODID");
 	m_colPDPouID = m_podDb.GetCol("POUID");
+   m_colPDugb = m_podDb.GetCol("UGB");
 	m_colPermitCode = m_podDb.GetCol("PERMITCODE");
 	m_colPodRate = m_podDb.GetCol("PODRATE");
 	m_colUseCode = m_podDb.GetCol("USECODE");
 	m_colPriorDoy = m_podDb.GetCol("PRIORITYDOY");
 	m_colPriorYr = m_podDb.GetCol("YEAR");
+   m_colPDcw3m_year = m_podDb.GetCol("CW3M_YEAR");
 	m_colBeginDoy = m_podDb.GetCol("BEGINDOY");
 	m_colEndDoy = m_podDb.GetCol("ENDDOY");
 	m_colReachComid = m_podDb.GetCol("REACHCOMID");
@@ -4384,13 +4386,21 @@ int AltWaterMaster::LoadWRDatabase(FlowContext *pFlowContext)
 		pRight->m_yCoord = m_podDb.GetAsDouble(m_colYcoord, i_rec);
 		pRight->m_podID = m_podDb.GetAsInt(m_colPodID, i_rec);
 		pRight->m_pouID = m_podDb.GetAsInt(m_colPDPouID, i_rec);
+
+      if (m_colPDugb >= 0) pRight->m_wr_ugb = m_podDb.GetAsInt(m_colPDugb, i_rec);
+      else if (pRight->m_pouID < 0) pRight->m_wr_ugb = -pRight->m_pouID;
+      else pRight->m_wr_ugb = 0;
+
 		pRight->m_appCode = -99; // m_podDb.GetAsInt(m_colAppCode, i_rec); 
 		pRight->m_permitCode = (WR_PERMIT)m_podDb.GetAsInt(m_colPermitCode, i_rec);
 		pRight->m_podRate_cfs = podRate_cfs; // cubic feet per second
 		pRight->m_useCode = (WR_USE)m_podDb.GetAsInt(m_colUseCode, i_rec);
 		pRight->m_supp = -99; // m_podDb.GetAsInt(m_colSupp, i_rec); 
 		pRight->m_priorDoy = m_podDb.GetAsInt(m_colPriorDoy, i_rec);
-		pRight->m_priorYr = m_podDb.GetAsInt(m_colPriorYr, i_rec);
+
+      if (m_colPDcw3m_year >= 0) pRight->m_priorYr = m_podDb.GetAsInt(m_colPDcw3m_year, i_rec);
+      else pRight->m_priorYr = m_podDb.GetAsInt(m_colPriorYr, i_rec);
+
 		pRight->m_beginDoy = m_podDb.GetAsInt(m_colBeginDoy, i_rec);
 		pRight->m_endDoy = m_podDb.GetAsInt(m_colEndDoy, i_rec);
       if (pRight->m_useCode == WRU_IRRIGATION)

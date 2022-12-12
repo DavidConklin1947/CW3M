@@ -380,11 +380,13 @@ protected:
 	int   m_colYcoord;        // WR UTM zone y coordinate (m)
 	int   m_colPodID;         // WR column number POD ID input data file
 	int   m_colPDPouID;       // WR column number POU ID in POD input data file
+	int   m_colPDugb;         // WR column number UGB in POD input data file
 	int   m_colPermitCode;    // WR Permit Code http://www.oregon.gov/owrd/pages/wr/wrisuse.aspx
 	int   m_colPodRate;       // WR point of diversion max rate (m3/sec)
 	int   m_colUseCode;       // WR Use Code http://www.oregon.gov/owrd/pages/wr/wrisuse.aspx
 	int   m_colPriorDoy;      // WR priority date day of year
 	int   m_colPriorYr;       // WR priority date year
+	int   m_colPDcw3m_year;   // WR column number CW3M_YEAR in POD input data file
 	int   m_colBeginDoy;      // WR seasonal begin day of year
 	int   m_colEndDoy;        // WR seasonal end day year
 	int   m_colPouRate;       // WR point of use max rate (m3/sec)

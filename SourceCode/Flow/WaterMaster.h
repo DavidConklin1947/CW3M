@@ -199,6 +199,7 @@ public:
 	double       m_yCoord;           // UTM zone y coordinate (m)
 	int          m_podID;            // Water wright ID or SnapID in POD input data file
 	int          m_pouID;            // Water wright ID or SnapID in POD input data file
+	int			 m_wr_ugb;           // For municipal water rights, the UGB which gets the water; 0 for muni rights not serving a UGA.
 	int          m_appCode;          // WR Application code http://www.oregon.gov/owrd/pages/wr/wrisuse.aspx
 	WR_PERMIT    m_permitCode;       // WR Permit Code http://www.oregon.gov/owrd/pages/wr/wrisuse.aspx
 	float        m_podRate_cfs;      // WR point of diversion rate (cfs, i.e. cubic feet per second)
@@ -206,7 +207,8 @@ public:
 	WR_USE       m_useCode;          // Use Code http://www.oregon.gov/owrd/pages/wr/wrisuse.aspx
 	int          m_supp;             // supplemental code 0-Primary 1-Supplemental
 	int          m_priorDoy;         // WR priority date day of year
-	int          m_priorYr;          // WR priority date year
+	int          m_priorYr;          // WR priority date year per OWRD
+	int          m_cw3m_year;        // WR priority year used by CW3M
 	int          m_beginDoy;         // WR seasonal begin day of year
 	int          m_endDoy;           // WR season end day year
 	float        m_pouRate;          // WR point of use max rate (m3/sec)

@@ -237,7 +237,7 @@ float HBV::HBVdailyProcess(FlowContext *pFlowContext)
             close_enough_to_zero(water_in_snowpack_m3, 10)))
          {
             CString msg;
-            msg.Format("HBVdailyProcess() pHRU->m_id = %d, idu_standing_h2o_accum_m3 = %f, water_in_snowpack_m3 = %f, pHRULayer1->m_volumeWater = %f, pHRULayer1->GetFluxValue() = %f, idu_wetl2q_accum_m3 = %f",
+            msg.Format("HBVdailyProcess()2 pHRU->m_id = %d, idu_standing_h2o_accum_m3 = %f, water_in_snowpack_m3 = %f, pHRULayer1->m_volumeWater = %f, pHRULayer1->GetFluxValue() = %f, idu_wetl2q_accum_m3 = %f",
                pHRU->m_id, idu_standing_h2o_accum_m3, water_in_snowpack_m3, pHRULayer1->m_volumeWater, pHRULayer1->GetFluxValue(), idu_wetl2q_accum_m3);
             Report::WarningMsg(msg);
          }
@@ -563,7 +563,7 @@ x*/
             && !close_enough(pHRULayer->m_volumeWater, -(pHRULayer->GetFluxValue()), 1e-4, 1.))
          {
             CString msg;
-            msg.Format("HBVdailyProcess() pHRU->m_d = %d, pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f, m_volumeWater = %f, GetFluxValue() = %f", 
+            msg.Format("HBVdailyProcess()7 pHRU->m_id = %d, pHRULayer->m_layer = %d, trial_ending_layer_m3 = %f, m_volumeWater = %f, GetFluxValue() = %f", 
                pHRU->m_id, pHRULayer->m_layer, trial_ending_layer_m3, pHRULayer->m_volumeWater, pHRULayer->GetFluxValue());
             Report::WarningMsg(msg);
          }

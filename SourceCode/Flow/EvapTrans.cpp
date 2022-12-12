@@ -1129,12 +1129,10 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
 
       if (etMethod == ETEquation::WETLAND_ET)
       { // standing water or exposed soil
-         float soil_H2O_mm = gIDUs->AttFloat(idu, SM_DAY);
          double pet_mm = 0., aet_mm = 0.;
-         m_ETEq.WetlandET(idu, soil_H2O_mm, fc, wp, &pet_mm, &aet_mm);
+         m_ETEq.WetlandET(idu, fc, wp, &pet_mm, &aet_mm);
          maxET = (float)pet_mm;
          aet = (float)aet_mm;
-         idu_soilwater_est_end_mm = soilwater_mm = soil_H2O_mm;
          unsmoothed_irr_req = smoothed_irr_req = 0.f;
       } // end of if (etMethod == ETEquation::WETLAND_ET )
       else
@@ -1383,10 +1381,10 @@ void EvapTrans::GetHruET( FlowContext *pFlowContext, HRU *pHRU, int hruIndex )
             irr_state = IRR_NOT_STARTED_OR_OFF_SEASON;
          } // end of if (might be irrigating) ... else ... 
 
-      gFlowModel->SetAttFloat(idu, F_THETA, fTheta);
-      gFlowModel->SetAttFloat(idu, VPD_SCALAR, vpd_scalar);
+         gFlowModel->SetAttFloat(idu, F_THETA, fTheta);
+         gFlowModel->SetAttFloat(idu, VPD_SCALAR, vpd_scalar);
 
-   } // end if (wetland) else ...
+      } // end if (wetland) else ...
 
       // output daily values
       pIDUlayer->m_readOnly = false;

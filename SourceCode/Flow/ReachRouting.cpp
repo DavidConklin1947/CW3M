@@ -554,11 +554,11 @@ WaterParcel ReachRouting::ApplyEnergyFluxes(WaterParcel origWP, double H2Oarea_m
       // oversimplifies, and doesn't work under some conditions.
       // At cold temperatures, there won't be much evaporation anyway, so we'll just ignore it.
       evap_code = 2;
-      CString msg;
-      msg.Format("ApplyEnergyFluxes()1 Evaporate all the water. evap_kJ = %f, rtnWP.ThermalEnergy() = %f rtnWP.m_temp_degC = %f, evap_m3 = %f, "
-         "rtnWP.m_volume_m3 = %f, airTemp_degC = %f, evap_code = %d",
-         evap_kJ, rtnWP.ThermalEnergy(), rtnWP.m_temp_degC, evap_m3, rtnWP.m_volume_m3, airTemp_degC, evap_code);
-      Report::LogMsg(msg);
+//      CString msg;
+//      msg.Format("ApplyEnergyFluxes()1 Evaporate all the water. evap_kJ = %f, rtnWP.ThermalEnergy() = %f rtnWP.m_temp_degC = %f, evap_m3 = %f, "
+//         "rtnWP.m_volume_m3 = %f, airTemp_degC = %f, evap_code = %d",
+//         evap_kJ, rtnWP.ThermalEnergy(), rtnWP.m_temp_degC, evap_m3, rtnWP.m_volume_m3, airTemp_degC, evap_code);
+//      Report::LogMsg(msg);
       evap_kJ = origWP.ThermalEnergy();
       evap_m3 = origWP.m_volume_m3;
       rtnWP = WaterParcel(0, 0);
