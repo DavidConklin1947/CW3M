@@ -208,6 +208,7 @@ class ETEquation
      double PenmanMonteith(int iduNdx, double rh_pct, float lai);
      double ActualET(int iduNdx, double pet_mm, double HRUnatSoilBox_mm, double vpd, float fc_mm, float wp_mm);
    public:
-      void WetlandET(int idu, float fc_mm, float wp_mm, double * pPET_mm, double * pAET_mm);
+      void WetlandET(int idu, float fc_mm, float wp_mm, 
+         double * pPET_mm, double * pAET_mm, float * idu_soilwater_est_end_mm);
 
    };

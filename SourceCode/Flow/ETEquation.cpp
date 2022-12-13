@@ -914,7 +914,8 @@ float ETEquation::Fao56()
    }
 
 
-void ETEquation::WetlandET(int idu, float fc_mm, float wp_mm, double * pPET_mm, double * pAET_mm)
+void ETEquation::WetlandET(int idu, float fc_mm, float wp_mm, 
+   double * pPET_mm, double * pAET_mm, float *p_idu_soilwater_est_end_mm)
 {
    double idu_area_m2 = gIDUs->Att(idu, AREA);
    float lai = gIDUs->AttFloat(idu, LAI);
@@ -944,12 +945,14 @@ void ETEquation::WetlandET(int idu, float fc_mm, float wp_mm, double * pPET_mm, 
          evap_m3, evap_kJ, SW_kJ, LW_kJ);
       pet_mm = (evap_m3 / idu_area_m2) * 1000;
       aet_mm = (wetness_mm > pet_mm) ? pet_mm : wetness_mm;
+      *p_idu_soilwater_est_end_mm = fc_mm;
    } // end of if (wetness_mm > 0) standing water
    else
    { // No standing water --> calculate ET using Penman-Monteith equation
       float soilH2O_mm = fc_mm + wetness_mm; // wetness is the negative of the amount needed to bring the soil to field capacity 
       pet_mm = PenmanMonteith(idu, rh_pct, lai);
       aet_mm = ActualET(idu, pet_mm, soilH2O_mm, vpd, fc_mm, wp_mm);
+      *p_idu_soilwater_est_end_mm = soilH2O_mm - aet_mm;
    } // end of if (wetness_mm > 0) else ... no standing water
 
    GlobalMethod::m_iduIrrRequestArray[idu] += (float)aet_mm;
